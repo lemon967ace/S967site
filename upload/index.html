@@ -107,6 +107,7 @@
     }
 
     .preview {
+      position: relative;
       aspect-ratio: 1;
       overflow: hidden;
       border: 1px solid var(--border);
@@ -119,7 +120,29 @@
       object-fit: cover;
       display: block;
     }
+    
+    .preview-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.68);
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+    }
 
+.preview-remove:hover {
+  background: rgba(0, 0, 0, 0.85);
+}
     .action {
       width: 100%;
       margin-top: 18px;
