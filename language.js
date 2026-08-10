@@ -250,6 +250,52 @@ function initializeLanguage() {
         );
       }
     );
+  const picker =
+  document.querySelector(
+    "[data-language-picker]"
+  );
+
+const button =
+  document.querySelector(
+    "[data-language-button]"
+  );
+
+if (picker && button) {
+  button.addEventListener(
+    "click",
+    () => {
+      const isOpen =
+        picker.classList.toggle(
+          "is-open"
+        );
+
+      button.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+      );
+    }
+  );
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (
+        !picker.contains(
+          event.target
+        )
+      ) {
+        picker.classList.remove(
+          "is-open"
+        );
+
+        button.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+      }
+    }
+  );
+}
 }
 
 
