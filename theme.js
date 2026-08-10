@@ -2,6 +2,12 @@
   const STORAGE_KEY = 's967-theme';
   const VALID = new Set(['system', 'light', 'dark']);
 
+  const ICONS = {
+    system: '◐',
+    light: '☀',
+    dark: '☾'
+  };
+
   function getSavedTheme() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -11,6 +17,12 @@
     }
   }
 
+  function saveTheme(theme) {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {}
+  }
+
   function applyTheme(theme) {
     if (theme === 'light' || theme === 'dark') {
       document.documentElement.dataset.theme = theme;
@@ -18,33 +30,71 @@
       document.documentElement.removeAttribute('data-theme');
     }
 
-    document.querySelectorAll('[data-theme-select]').forEach((select) => {
-      select.value = theme;
+    document.querySelectorAll('[data-theme-button]').forEach((button) => {
+      button.textContent = ICONS[theme] || ICONS.system;
+      button.setAttribute('aria-label', `Theme: ${theme}`);
+      button.setAttribute('title', `Theme: ${theme}`);
+    });
+
+    document.querySelectorAll('[data-theme-choice]').forEach((choice) => {
+      const active = choice.dataset.themeChoice === theme;
+      choice.setAttribute('aria-checked', active ? 'true' : 'false');
     });
   }
 
-  function saveTheme(theme) {
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // The theme still works for the current page if storage is unavailable.
-    }
+  function closeAllMenus(except = null) {
+    document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+      if (picker !== except) {
+        picker.classList.remove('is-open');
+        const button = picker.querySelector('[data-theme-button]');
+        if (button) button.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initPicker(picker) {
+    const button = picker.querySelector('[data-theme-button]');
+    const menu = picker.querySelector('[data-theme-menu]');
+
+    if (!button || !menu) return;
+
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      const willOpen = !picker.classList.contains('is-open');
+      closeAllMenus(picker);
+
+      picker.classList.toggle('is-open', willOpen);
+      button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    picker.querySelectorAll('[data-theme-choice]').forEach((choice) => {
+      choice.addEventListener('click', () => {
+        const theme = VALID.has(choice.dataset.themeChoice)
+          ? choice.dataset.themeChoice
+          : 'system';
+
+        saveTheme(theme);
+        applyTheme(theme);
+
+        picker.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+      });
+    });
   }
 
   function init() {
     const initial = getSavedTheme();
     applyTheme(initial);
 
-    document.querySelectorAll('[data-theme-select]').forEach((select) => {
-      select.addEventListener('change', () => {
-        const theme = VALID.has(select.value) ? select.value : 'system';
-        saveTheme(theme);
-        applyTheme(theme);
-      });
+    document.querySelectorAll('[data-theme-picker]').forEach(initPicker);
+
+    document.addEventListener('click', () => closeAllMenus());
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
     });
 
-    // When System is selected, CSS automatically follows OS changes.
-    // This listener only keeps the control semantically in sync.
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const onSystemChange = () => {
       if (getSavedTheme() === 'system') {
