@@ -177,6 +177,58 @@
       text-decoration: none;
       font-size: 0.9rem;
     }
+    .upload-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.upload-image {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-hover);
+}
+
+.upload-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+
+.badge-blocked {
+  color: #d75555;
+}
+
+.badge-active {
+  color: var(--muted);
+}
+
+.same-ip {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.same-ip button {
+  margin-left: 6px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+}
   </style>
 </head>
 
@@ -328,7 +380,10 @@
   <script>
     const ADMIN_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
-
+    
+    const SUPABASE_PUBLIC_STORAGE_BASE =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
+    
     const loginPanel =
       document.getElementById(
         "loginPanel"
@@ -560,257 +615,299 @@
         date.toLocaleString();
     }
 
+function getPublicImageUrl(path) {
+  return (
+    SUPABASE_PUBLIC_STORAGE_BASE +
+    path
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/")
+  );
+}
 
+
+function getSameIpUploads(ipHash) {
+  return (
+    currentData?.uploads?.filter(
+      (item) =>
+        item.ip_hash === ipHash
+    ) ?? []
+  );
+}
+
+
+function createImageGrid(item) {
+  const grid =
+    document.createElement("div");
+
+  grid.className =
+    "upload-images";
+
+  for (
+    const path
+    of (item.storage_paths || [])
+  ) {
+    const link =
+      document.createElement("a");
+
+    link.className =
+      "upload-image";
+
+    link.href =
+      getPublicImageUrl(path);
+
+    link.target =
+      "_blank";
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const img =
+      document.createElement("img");
+
+    img.src =
+      getPublicImageUrl(path);
+
+    img.alt =
+      "Uploaded image";
+
+    img.loading =
+      "lazy";
+
+
+    img.addEventListener(
+      "error",
+      () => {
+        link.remove();
+      }
+    );
+
+
+    link.appendChild(img);
+    grid.appendChild(link);
+  }
+
+  return grid;
+}
+    
     function renderUploads() {
-      uploads.innerHTML = "";
+  uploads.innerHTML = "";
 
-      const list =
-        currentData?.uploads ??
-        [];
+  const list =
+    currentData?.uploads ?? [];
 
-      if (
-        list.length === 0
-      ) {
-        uploads.textContent =
-          "No uploads found.";
+  if (list.length === 0) {
+    uploads.textContent =
+      "No uploads found.";
 
-        return;
-      }
+    return;
+  }
 
-      for (
-        const item
-        of list
-      ) {
-        const container =
-          document.createElement(
-            "div"
-          );
+  for (const item of list) {
+    const container =
+      document.createElement("div");
 
-        container.className =
-          "upload";
+    container.className =
+      "upload";
 
 
-        const meta =
-          document.createElement(
-            "div"
-          );
+    const meta =
+      document.createElement("div");
 
-        meta.className =
-          "upload-meta";
+    meta.className =
+      "upload-meta";
 
 
-        const reference =
-          document.createElement(
-            "strong"
-          );
+    const reference =
+      document.createElement("strong");
 
-        reference.textContent =
-          item.reference_code ||
-          "Unknown";
+    reference.textContent =
+      item.reference_code ||
+      "Unknown";
 
-        meta.appendChild(
-          reference
-        );
+    meta.appendChild(reference);
 
-        meta.appendChild(
-          document.createElement(
-            "br"
-          )
-        );
+    meta.appendChild(
+      document.createElement("br")
+    );
 
 
-        const created =
-          new Date(
-            item.created_at
-          );
+    const created =
+      new Date(item.created_at);
 
-        meta.append(
-          created.toLocaleString()
-        );
+    meta.append(
+      created.toLocaleString()
+    );
 
-        meta.appendChild(
-          document.createElement(
-            "br"
-          )
-        );
+    meta.appendChild(
+      document.createElement("br")
+    );
 
-        meta.append(
-          `${item.file_count} image(s)`
-        );
+    meta.append(
+      `${item.file_count} image(s)`
+    );
 
 
-        const paths =
-          document.createElement(
-            "div"
-          );
+    const block =
+      getBlockInfo(item.ip_hash);
 
-        paths.className =
-          "paths";
+    const activeBlock =
+      isActiveBlock(block);
 
 
-        for (
-          const path
-          of (
-            item.storage_paths ||
-            []
-          )
-        ) {
-          const pathElement =
-            document.createElement(
-              "span"
-            );
+    const badge =
+      document.createElement("div");
 
-          pathElement.className =
-            "path";
+    badge.className =
+      "badge " +
+      (
+        activeBlock
+          ? "badge-blocked"
+          : "badge-active"
+      );
 
-          pathElement.textContent =
-            path;
-
-          paths.appendChild(
-            pathElement
-          );
-        }
-
-
-        const block =
-          getBlockInfo(
-            item.ip_hash
-          );
-
-        const activeBlock =
-          isActiveBlock(
-            block
-          );
-
-
-        const blockText =
-          document.createElement(
-            "div"
-          );
-
-        blockText.className =
-          "blocked danger";
-
-        blockText.textContent =
-          formatBlock(
-            block
-          );
-
-
-        const actions =
-          document.createElement(
-            "div"
-          );
-
-        actions.className =
-          "upload-actions";
-
-
-        const block7 =
-          document.createElement(
-            "button"
-          );
-
-        block7.type =
-          "button";
-
-        block7.textContent =
-          "Block 7 days";
-
-        block7.addEventListener(
-          "click",
-          () =>
-            runIpAction(
-              "block_ip_7d",
-              item.ip_hash
-            )
-        );
-
-
-        const blockForever =
-          document.createElement(
-            "button"
-          );
-
-        blockForever.type =
-          "button";
-
-        blockForever.textContent =
-          "Block indefinitely";
-
-        blockForever.addEventListener(
-          "click",
-          () =>
-            runIpAction(
-              "block_ip_forever",
-              item.ip_hash
-            )
-        );
-
-
-        const unblock =
-          document.createElement(
-            "button"
-          );
-
-        unblock.type =
-          "button";
-
-        unblock.textContent =
-          "Unblock";
-
-        unblock.disabled =
-          !activeBlock;
-
-        unblock.addEventListener(
-          "click",
-          () =>
-            runIpAction(
-              "unblock_ip",
-              item.ip_hash
-            )
-        );
-
-
-        actions.appendChild(
-          block7
-        );
-
-        actions.appendChild(
-          blockForever
-        );
-
-        actions.appendChild(
-          unblock
-        );
-
-
-        container.appendChild(
-          meta
-        );
-
-        container.appendChild(
-          paths
-        );
-
-        if (
-          blockText.textContent
-        ) {
-          container.appendChild(
-            blockText
-          );
-        }
-
-        container.appendChild(
-          actions
-        );
-
-        uploads.appendChild(
-          container
-        );
-      }
+    if (activeBlock) {
+      badge.textContent =
+        formatBlock(block);
+    } else {
+      badge.textContent =
+        "Not blocked";
     }
 
+
+    const imageGrid =
+      createImageGrid(item);
+
+
+    const sameIpUploads =
+      getSameIpUploads(item.ip_hash);
+
+    const sameIp =
+      document.createElement("div");
+
+    sameIp.className =
+      "same-ip";
+
+    sameIp.textContent =
+      `Same uploader: ${sameIpUploads.length} recent upload event(s)`;
+
+
+    if (sameIpUploads.length > 1) {
+      const filterButton =
+        document.createElement("button");
+
+      filterButton.type =
+        "button";
+
+      filterButton.textContent =
+        "Show only this uploader";
+
+      filterButton.addEventListener(
+        "click",
+        () => {
+          renderOnlyIp(
+            item.ip_hash
+          );
+        }
+      );
+
+      sameIp.appendChild(
+        filterButton
+      );
+    }
+
+
+    const actions =
+      document.createElement("div");
+
+    actions.className =
+      "upload-actions";
+
+
+    const block7 =
+      document.createElement("button");
+
+    block7.type =
+      "button";
+
+    block7.textContent =
+      "Block 7 days";
+
+    block7.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "block_ip_7d",
+          item.ip_hash
+        )
+    );
+
+
+    const blockForever =
+      document.createElement("button");
+
+    blockForever.type =
+      "button";
+
+    blockForever.textContent =
+      "Block indefinitely";
+
+    blockForever.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "block_ip_forever",
+          item.ip_hash
+        )
+    );
+
+
+    const unblock =
+      document.createElement("button");
+
+    unblock.type =
+      "button";
+
+    unblock.textContent =
+      "Unblock";
+
+    unblock.disabled =
+      !activeBlock;
+
+    unblock.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "unblock_ip",
+          item.ip_hash
+        )
+    );
+
+
+    actions.appendChild(block7);
+    actions.appendChild(
+      blockForever
+    );
+    actions.appendChild(unblock);
+
+
+    container.appendChild(meta);
+    container.appendChild(badge);
+    container.appendChild(
+      imageGrid
+    );
+    container.appendChild(
+      sameIp
+    );
+    container.appendChild(actions);
+
+    uploads.appendChild(
+      container
+    );
+  }
+}
+    
 
     async function loadAdminData() {
       setStatus(
@@ -835,7 +932,46 @@
       );
     }
 
+function renderOnlyIp(ipHash) {
+  const original =
+    currentData.uploads;
 
+  currentData.uploads =
+    original.filter(
+      (item) =>
+        item.ip_hash === ipHash
+    );
+
+  renderUploads();
+
+  currentData.uploads =
+    original;
+
+
+  const reset =
+    document.createElement(
+      "button"
+    );
+
+  reset.type =
+    "button";
+
+  reset.textContent =
+    "Show all uploads";
+
+  reset.style.marginTop =
+    "14px";
+
+  reset.addEventListener(
+    "click",
+    () => {
+      renderUploads();
+    }
+  );
+
+  uploads.appendChild(reset);
+}
+    
     async function runIpAction(
       action,
       ipHash
