@@ -29,13 +29,34 @@
 <script src="/theme.js" defer></script>
 </head>
 <body>
-  <div class="theme-picker">
-  <select data-theme-select aria-label="Theme">
-    <option value="system">System</option>
-    <option value="light">Light</option>
-    <option value="dark">Dark</option>
-  </select>
+  <div class="theme-picker" data-theme-picker>
+  <button
+    class="theme-button"
+    type="button"
+    data-theme-button
+    aria-label="Theme"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >◐</button>
+
+  <div class="theme-menu" data-theme-menu role="menu">
+    <button type="button" data-theme-choice="system" role="menuitemradio">
+      <span class="theme-choice-icon">◐</span>
+      <span>System</span>
+    </button>
+
+    <button type="button" data-theme-choice="light" role="menuitemradio">
+      <span class="theme-choice-icon">☀</span>
+      <span>Light</span>
+    </button>
+
+    <button type="button" data-theme-choice="dark" role="menuitemradio">
+      <span class="theme-choice-icon">☾</span>
+      <span>Dark</span>
+    </button>
+  </div>
 </div>
+
   <main>
     <h1 class="server">S967</h1>
     <p class="headline">Different Languages. One Server.</p>
