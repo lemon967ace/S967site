@@ -208,72 +208,97 @@
 
     <div class="theme-menu" data-theme-menu role="menu">
       <button type="button" data-theme-choice="system" role="menuitemradio">
-        <span class="theme-choice-icon">◐</span><span>System</span>
-      </button>
-      <button type="button" data-theme-choice="light" role="menuitemradio">
-        <span class="theme-choice-icon">☀</span><span>Light</span>
-      </button>
-      <button type="button" data-theme-choice="dark" role="menuitemradio">
-        <span class="theme-choice-icon">☾</span><span>Dark</span>
-      </button>
+  <span class="theme-choice-icon">◐</span>
+  <span data-i18n="themeSystem">System</span>
+</button>
+
+<button type="button" data-theme-choice="light" role="menuitemradio">
+  <span class="theme-choice-icon">☀</span>
+  <span data-i18n="themeLight">Light</span>
+</button>
+
+<button type="button" data-theme-choice="dark" role="menuitemradio">
+  <span class="theme-choice-icon">☾</span>
+  <span data-i18n="themeDark">Dark</span>
+</button>
     </div>
   </div>
 
   <main>
-    <div class="eyebrow">S967</div>
-    <h1>Image Upload</h1>
+  <div class="eyebrow">S967</div>
 
-    <p class="lead">
-      Upload screenshots.<br>
-      PNG, JPG, JPEG · max 5 MB each · up to 3 images.
+  <h1 data-i18n="uploadTitle">
+    Image Upload
+  </h1>
+
+  <p class="lead" data-i18n-html="uploadLead">
+    Upload screenshots.<br>
+    PNG, JPG, JPEG · max 5 MB each · up to 3 images.
+  </p>
+
+  <section id="uploadPanel" class="panel">
+    <p class="small" data-i18n-html="uploadNotice">
+      <strong>Uploaded images are public and may be viewed by anyone.</strong><br>
+      Please do not upload personal or sensitive information.<br>
+      Older images may be removed periodically.<br>
+      <strong>By uploading images, you acknowledge and agree that they will be publicly accessible.</strong>
     </p>
 
-    <section id="uploadPanel" class="panel">
-      <p class="small">
-  <strong>Uploaded images are public and may be viewed by anyone.</strong><br>
-  Please do not upload personal or sensitive information.<br>
-  Older images may be removed periodically.<br>
-  <strong>By uploading images, you acknowledge and agree that they will be publicly accessible.</strong>
-</p>
- 
-      <label class="file-label" for="images">
-        Choose up to 3 images
-      </label>
+    <label
+      class="file-label"
+      for="images"
+      data-i18n="chooseImages"
+    >
+      Choose up to 3 images
+    </label>
 
-      <input
-        id="images"
-        type="file"
-        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-        multiple
-      >
+    <input
+      id="images"
+      type="file"
+      accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+      multiple
+    >
 
-      <div id="previews" class="previews"></div>
+    <div id="previews" class="previews"></div>
 
-      <button
-        id="uploadButton"
-        class="action"
-        type="button"
-        disabled
-      >
-        Upload Images
-      </button>
+    <button
+      id="uploadButton"
+      class="action"
+      type="button"
+      disabled
+      data-i18n="uploadImages"
+    >
+      Upload Images
+    </button>
 
-      <div id="uploadStatus" class="status"></div>
+    <div id="uploadStatus" class="status"></div>
 
-      <p class="small">
-        Limit: up to 8 images per 24 hours from the same network.
-      </p>
-    </section>
+    <p class="small" data-i18n="uploadLimit">
+      Limit: up to 8 images per 24 hours from the same network.
+    </p>
+  </section>
 
-    <section id="successPanel" class="panel hidden">
-      <div class="success-code">Upload complete</div>
-      <p class="small">
-        Your images have been received successfully.
-      </p>
-    </section>
+  <section id="successPanel" class="panel hidden">
+    <div
+      class="success-code"
+      data-i18n="uploadComplete"
+    >
+      Upload complete
+    </div>
 
-    <a class="back" href="/">← Back to Home</a>
-  </main>
+    <p class="small" data-i18n="uploadSuccess">
+      Your images have been received successfully.
+    </p>
+  </section>
+
+  <a
+    class="back"
+    href="/"
+    data-i18n="backHome"
+  >
+    ← Back to Home
+  </a>
+</main>
 <script>
   // Put your deployed upload-image Function URL here.
   const UPLOAD_IMAGE_URL =
