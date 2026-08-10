@@ -8,8 +8,6 @@ const S967_LANGUAGES = {
 const S967_LANGUAGE_STORAGE_KEY =
   "s967-language";
 
-const S967_TRANSLATIONS = {
- const S967_TRANSLATIONS = {
  const S967_TRANSLATIONS = {
   en: {
     language: "Language",
