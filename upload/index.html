@@ -1,130 +1,761 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<meta name="referrer" content="no-referrer">
-<title>Image Upload · S967</title>
-<link rel="stylesheet" href="/theme.css">
-<script src="/theme.js" defer></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%}
-body{min-height:100vh;padding:36px 20px;display:grid;place-items:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
-main{width:min(620px,100%);text-align:center}.eyebrow{margin-bottom:12px;font-size:.82rem;text-transform:uppercase;letter-spacing:.12em}
-h1{margin:0;font-size:clamp(2.4rem,9vw,4.3rem);line-height:1;letter-spacing:-.045em}
-.lead{max-width:500px;margin:20px auto 0;color:var(--muted);line-height:1.65}
-.panel{margin-top:30px;padding:22px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(14px);text-align:left}
-.panel h2{margin:0 0 10px;font-size:1.05rem}.small{color:var(--muted);font-size:.88rem;line-height:1.55}
-.turnstile-wrap{min-height:70px;margin-top:18px;display:flex;justify-content:center;align-items:center}
-.action{width:100%;margin-top:18px;padding:13px 18px;border:1px solid var(--border);border-radius:11px;background:var(--surface-hover);color:var(--text);font:inherit;font-weight:700;cursor:pointer}
-.action:disabled{opacity:.45;cursor:not-allowed}
-.file-label{display:block;margin-top:16px;padding:24px 18px;border:1px dashed var(--border-hover);border-radius:14px;text-align:center;cursor:pointer}
-input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.previews{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
-.preview{aspect-ratio:1;overflow:hidden;border:1px solid var(--border);border-radius:10px}.preview img{width:100%;height:100%;object-fit:cover}
-.status{margin-top:15px;min-height:1.4em;color:var(--muted);font-size:.9rem;text-align:center}.error{color:#c94c4c}
-.code{margin:18px 0 8px;font-size:clamp(1.35rem,6vw,2rem);font-weight:800;letter-spacing:.05em;word-break:break-all}
-.copy{margin-top:10px;padding:9px 13px;border:1px solid var(--border);border-radius:9px;background:transparent;color:var(--text);cursor:pointer}
-.hidden{display:none!important}.back{display:inline-block;margin-top:28px;text-decoration:none;font-size:.9rem}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="S967 secure image upload">
+  <title>Image Upload · S967</title>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js" defer></script>
+
+  <!-- Cloudflare Turnstile: implicit rendering -->
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+  ></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px;
+      display: grid;
+      place-items: center;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width: min(620px, 100%);
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 9vw, 4.3rem);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .lead {
+      max-width: 500px;
+      margin: 20px auto 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .panel {
+      margin-top: 30px;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      text-align: left;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .turnstile-wrap {
+      min-height: 75px;
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .action {
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px 18px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .file-label {
+      display: block;
+      margin-top: 16px;
+      padding: 24px 18px;
+      border: 1px dashed var(--border-hover);
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .file-label:hover {
+      background: var(--surface-hover);
+    }
+
+    input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .previews {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .preview {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .status {
+      margin-top: 15px;
+      min-height: 1.4em;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .error {
+      color: #c94c4c;
+    }
+
+    .success-code {
+      margin: 18px 0 8px;
+      font-size: clamp(1.35rem, 6vw, 2rem);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      word-break: break-all;
+    }
+
+    .copy {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 28px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
+
 <body>
-<div class="theme-picker" data-theme-picker>
-<button class="theme-button" type="button" data-theme-button aria-label="Theme" aria-haspopup="true" aria-expanded="false">◐</button>
-<div class="theme-menu" data-theme-menu role="menu">
-<button type="button" data-theme-choice="system" role="menuitemradio"><span class="theme-choice-icon">◐</span><span>System</span></button>
-<button type="button" data-theme-choice="light" role="menuitemradio"><span class="theme-choice-icon">☀</span><span>Light</span></button>
-<button type="button" data-theme-choice="dark" role="menuitemradio"><span class="theme-choice-icon">☾</span><span>Dark</span></button>
-</div></div>
+  <div class="theme-picker" data-theme-picker>
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >◐</button>
 
-<main>
-<div class="eyebrow">S967</div><h1>Image Upload</h1>
-<p class="lead">Upload screenshots related to your inquiry.<br>PNG, JPG, JPEG · max 5 MB each · up to 3 images.</p>
+    <div class="theme-menu" data-theme-menu role="menu">
+      <button type="button" data-theme-choice="system" role="menuitemradio">
+        <span class="theme-choice-icon">◐</span>
+        <span>System</span>
+      </button>
 
-<section id="denied" class="panel hidden"><h2>Upload link unavailable</h2><p class="small">Please open the image upload link provided in the Microsoft Form.</p></section>
+      <button type="button" data-theme-choice="light" role="menuitemradio">
+        <span class="theme-choice-icon">☀</span>
+        <span>Light</span>
+      </button>
 
-<section id="verify" class="panel hidden">
-<h2>Verification</h2><p class="small">Complete the verification below to continue.</p>
-<div class="turnstile-wrap"><div id="turnstile"></div></div>
-<button id="continue" class="action" disabled>Continue</button><div id="vstatus" class="status"></div>
-</section>
+      <button type="button" data-theme-choice="dark" role="menuitemradio">
+        <span class="theme-choice-icon">☾</span>
+        <span>Dark</span>
+      </button>
+    </div>
+  </div>
 
-<section id="upload" class="panel hidden">
-<h2>Select images</h2><p class="small">This upload session is valid for 10 minutes and can be used once.</p>
-<label class="file-label" for="images">Choose up to 3 images</label>
-<input id="images" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" multiple>
-<div id="previews" class="previews"></div>
-<button id="send" class="action" disabled>Upload Images</button><div id="ustatus" class="status"></div>
-</section>
+  <main>
+    <div class="eyebrow">S967</div>
 
-<section id="success" class="panel hidden">
-<h2>Upload complete</h2>
-<p class="small">Enter this code in the <strong>Image Upload Code</strong> field in the Microsoft Form.</p>
-<div id="code" class="code"></div><button id="copy" class="copy">Copy code</button><div id="cstatus" class="status"></div>
-</section>
-<a class="back" href="/">← Back to S967</a>
-</main>
+    <h1>Image Upload</h1>
 
-<script>
-const CREATE_TOKEN_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/create-upload-token";
-const UPLOAD_IMAGE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/rapid-service";
-const TURNSTILE_SITE_KEY="0x4AAAAAAEMBVVDNUwOKwt8o";
+    <p class="lead">
+      Upload screenshots related to your inquiry.<br>
+      PNG, JPG, and JPEG only · up to 5 MB each · maximum 3 images.
+    </p>
 
-const q=new URLSearchParams(location.search),access=q.get("access")||"";
-if(access)history.replaceState({},"",location.pathname);
-const $=id=>document.getElementById(id);
-let captcha="",token="",files=[];
-function err(el,msg){el.textContent=msg;el.classList.add("error")}
-function clear(el){el.textContent="";el.classList.remove("error")}
+    <section id="deniedPanel" class="panel hidden">
+      <h2>Upload link unavailable</h2>
+      <p class="small">
+        Please open the image upload link provided in the Microsoft Form.
+      </p>
+    </section>
 
-function start(){
- if(!access){$("denied").classList.remove("hidden");return}
- $("verify").classList.remove("hidden");
- const go=()=>{
-  if(!window.turnstile){setTimeout(go,100);return}
-  turnstile.render("#turnstile",{sitekey:TURNSTILE_SITE_KEY,
-   callback:t=>{captcha=t;$("continue").disabled=false;clear($("vstatus"))},
-   "expired-callback":()=>{captcha="";$("continue").disabled=true;err($("vstatus"),"Verification expired.")},
-   "error-callback":()=>{captcha="";$("continue").disabled=true;err($("vstatus"),"Verification failed.")}
-  });
- };go();
-}
+    <section id="verifyPanel" class="panel hidden">
+      <h2>Verification</h2>
 
-$("continue").onclick=async()=>{
- if(!captcha)return;$("continue").disabled=true;clear($("vstatus"));$("vstatus").textContent="Creating secure upload session…";
- try{
-  const r=await fetch(CREATE_TOKEN_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({access,turnstileToken:captcha})});
-  const x=await r.json().catch(()=>({}));if(!r.ok||!x.token)throw Error(x.error||"Could not create upload session.");
-  token=x.token;$("verify").classList.add("hidden");$("upload").classList.remove("hidden");
- }catch(e){err($("vstatus"),e.message);captcha="";turnstile.reset("#turnstile")}
-};
+      <p class="small">
+        Complete the verification below to continue.
+      </p>
 
-$("images").onchange=()=>{
- clear($("ustatus"));$("previews").innerHTML="";const a=Array.from($("images").files||[]);
- if(a.length>3){$("images").value="";$("send").disabled=true;return err($("ustatus"),"You can select up to 3 images.")}
- for(const f of a){
-  if(!["image/png","image/jpeg"].includes(f.type)||f.size>5*1024*1024){
-   $("images").value="";$("send").disabled=true;return err($("ustatus"),"Only PNG/JPG/JPEG up to 5 MB each are allowed.");
-  }
- }
- files=a;$("send").disabled=!files.length;
- files.forEach(f=>{const d=document.createElement("div"),i=document.createElement("img"),u=URL.createObjectURL(f);d.className="preview";i.src=u;i.onload=()=>URL.revokeObjectURL(u);d.append(i);$("previews").append(d)})
-};
+      <div class="turnstile-wrap">
+        <div
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAAEMBVVDNUwOKwt8o"
+          data-callback="onTurnstileSuccess"
+          data-expired-callback="onTurnstileExpired"
+          data-error-callback="onTurnstileError"
+        ></div>
+      </div>
 
-$("send").onclick=async()=>{
- if(!token||!files.length)return;$("send").disabled=true;$("images").disabled=true;clear($("ustatus"));$("ustatus").textContent="Uploading…";
- const fd=new FormData();fd.append("token",token);files.forEach(f=>fd.append("files",f));
- try{
-  const r=await fetch(UPLOAD_IMAGE_URL,{method:"POST",body:fd}),x=await r.json().catch(()=>({}));
-  if(!r.ok||!x.referenceCode)throw Error(x.error||"Upload failed.");
-  token="";$("upload").classList.add("hidden");$("success").classList.remove("hidden");$("code").textContent=x.referenceCode;
- }catch(e){err($("ustatus"),e.message+" If retrying fails, reopen the upload link from the form.")}
- finally{$("images").disabled=false;if(token)$("send").disabled=false}
-};
+      <button
+        id="continueButton"
+        class="action"
+        type="button"
+        disabled
+      >
+        Continue
+      </button>
 
-$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("code").textContent.trim());$("cstatus").textContent="Copied."}catch{$("cstatus").textContent="Please copy the code manually."}};
-start();
-</script>
-</body></html>
+      <div id="verifyStatus" class="status"></div>
+    </section>
+
+    <section id="uploadPanel" class="panel hidden">
+      <h2>Select images</h2>
+
+      <p class="small">
+        This upload session is valid for 10 minutes and can be used once.
+      </p>
+
+      <label class="file-label" for="images">
+        Choose up to 3 images
+      </label>
+
+      <input
+        id="images"
+        type="file"
+        accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+        multiple
+      >
+
+      <div id="previews" class="previews"></div>
+
+      <button
+        id="uploadButton"
+        class="action"
+        type="button"
+        disabled
+      >
+        Upload Images
+      </button>
+
+      <div id="uploadStatus" class="status"></div>
+    </section>
+
+    <section id="successPanel" class="panel hidden">
+      <h2>Upload complete</h2>
+
+      <p class="small">
+        Enter this code in the
+        <strong>Image Upload Code</strong>
+        field in the Microsoft Form so your images can be matched to your inquiry.
+      </p>
+
+      <div id="referenceCode" class="success-code"></div>
+
+      <button
+        id="copyButton"
+        class="copy"
+        type="button"
+      >
+        Copy code
+      </button>
+
+      <div id="copyStatus" class="status"></div>
+    </section>
+
+    <a class="back" href="/">← Back to S967</a>
+  </main>
+
+  <script>
+    // ============================================================
+    // KEEP YOUR ACTUAL FUNCTION URLS HERE
+    // ============================================================
+
+    const CREATE_TOKEN_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/create-upload-token";
+
+    const UPLOAD_IMAGE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/rapid-service";
+
+    // ============================================================
+
+    const params =
+      new URLSearchParams(window.location.search);
+
+    const access =
+      params.get("access") || "";
+
+    // Hide ?access=... from the visible URL immediately after reading it.
+    if (access) {
+      history.replaceState(
+        {},
+        "",
+        window.location.pathname
+      );
+    }
+
+    const deniedPanel =
+      document.getElementById("deniedPanel");
+
+    const verifyPanel =
+      document.getElementById("verifyPanel");
+
+    const uploadPanel =
+      document.getElementById("uploadPanel");
+
+    const successPanel =
+      document.getElementById("successPanel");
+
+    const continueButton =
+      document.getElementById("continueButton");
+
+    const verifyStatus =
+      document.getElementById("verifyStatus");
+
+    const imagesInput =
+      document.getElementById("images");
+
+    const previews =
+      document.getElementById("previews");
+
+    const uploadButton =
+      document.getElementById("uploadButton");
+
+    const uploadStatus =
+      document.getElementById("uploadStatus");
+
+    const referenceCode =
+      document.getElementById("referenceCode");
+
+    const copyButton =
+      document.getElementById("copyButton");
+
+    const copyStatus =
+      document.getElementById("copyStatus");
+
+    let turnstileToken = "";
+    let uploadToken = "";
+    let selectedFiles = [];
+
+    function showError(element, message) {
+      element.textContent = message;
+      element.classList.add("error");
+    }
+
+    function clearStatus(element) {
+      element.textContent = "";
+      element.classList.remove("error");
+    }
+
+    // These names are referenced directly by the Turnstile HTML above.
+    window.onTurnstileSuccess = function (token) {
+      turnstileToken = token;
+      continueButton.disabled = false;
+      clearStatus(verifyStatus);
+    };
+
+    window.onTurnstileExpired = function () {
+      turnstileToken = "";
+      continueButton.disabled = true;
+
+      showError(
+        verifyStatus,
+        "Verification expired. Please verify again."
+      );
+    };
+
+    window.onTurnstileError = function () {
+      turnstileToken = "";
+      continueButton.disabled = true;
+
+      showError(
+        verifyStatus,
+        "Verification could not be completed."
+      );
+    };
+
+    if (!access) {
+      deniedPanel.classList.remove("hidden");
+    } else {
+      verifyPanel.classList.remove("hidden");
+    }
+
+    continueButton.addEventListener(
+      "click",
+      async () => {
+        if (!turnstileToken) {
+          return;
+        }
+
+        continueButton.disabled = true;
+
+        clearStatus(verifyStatus);
+
+        verifyStatus.textContent =
+          "Creating secure upload session…";
+
+        try {
+          const response =
+            await fetch(
+              CREATE_TOKEN_URL,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+                body: JSON.stringify({
+                  access,
+                  turnstileToken,
+                }),
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          if (
+            !response.ok ||
+            !result.success ||
+            !result.token
+          ) {
+            throw new Error(
+              result.error ||
+              "Could not create upload session."
+            );
+          }
+
+          uploadToken =
+            result.token;
+
+          verifyPanel.classList.add(
+            "hidden"
+          );
+
+          uploadPanel.classList.remove(
+            "hidden"
+          );
+        } catch (error) {
+          showError(
+            verifyStatus,
+            error.message ||
+            "Could not create upload session."
+          );
+
+          // Turnstile tokens are single-use.
+          turnstileToken = "";
+
+          if (window.turnstile) {
+            window.turnstile.reset();
+          }
+        }
+      }
+    );
+
+    imagesInput.addEventListener(
+      "change",
+      () => {
+        clearStatus(uploadStatus);
+
+        previews.innerHTML = "";
+
+        const files =
+          Array.from(
+            imagesInput.files || []
+          );
+
+        if (files.length > 3) {
+          selectedFiles = [];
+
+          imagesInput.value = "";
+
+          uploadButton.disabled = true;
+
+          showError(
+            uploadStatus,
+            "You can select up to 3 images."
+          );
+
+          return;
+        }
+
+        const allowedTypes =
+          new Set([
+            "image/png",
+            "image/jpeg",
+          ]);
+
+        for (const file of files) {
+          if (
+            !allowedTypes.has(file.type)
+          ) {
+            selectedFiles = [];
+
+            imagesInput.value = "";
+
+            uploadButton.disabled = true;
+
+            showError(
+              uploadStatus,
+              "Only PNG, JPG, and JPEG images are allowed."
+            );
+
+            return;
+          }
+
+          if (
+            file.size >
+            5 * 1024 * 1024
+          ) {
+            selectedFiles = [];
+
+            imagesInput.value = "";
+
+            uploadButton.disabled = true;
+
+            showError(
+              uploadStatus,
+              "Each image must be 5 MB or smaller."
+            );
+
+            return;
+          }
+        }
+
+        selectedFiles =
+          files;
+
+        uploadButton.disabled =
+          selectedFiles.length === 0;
+
+        for (const file of selectedFiles) {
+          const wrapper =
+            document.createElement("div");
+
+          wrapper.className =
+            "preview";
+
+          const image =
+            document.createElement("img");
+
+          image.alt =
+            "Selected image preview";
+
+          const objectUrl =
+            URL.createObjectURL(file);
+
+          image.src =
+            objectUrl;
+
+          image.onload =
+            () =>
+              URL.revokeObjectURL(
+                objectUrl
+              );
+
+          wrapper.appendChild(image);
+
+          previews.appendChild(wrapper);
+        }
+      }
+    );
+
+    uploadButton.addEventListener(
+      "click",
+      async () => {
+        if (
+          !uploadToken ||
+          selectedFiles.length < 1
+        ) {
+          return;
+        }
+
+        uploadButton.disabled = true;
+
+        imagesInput.disabled = true;
+
+        clearStatus(uploadStatus);
+
+        uploadStatus.textContent =
+          "Uploading…";
+
+        const form =
+          new FormData();
+
+        form.append(
+          "token",
+          uploadToken
+        );
+
+        for (
+          const file
+          of selectedFiles
+        ) {
+          form.append(
+            "files",
+            file
+          );
+        }
+
+        try {
+          const response =
+            await fetch(
+              UPLOAD_IMAGE_URL,
+              {
+                method: "POST",
+                body: form,
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          if (
+            !response.ok ||
+            !result.success ||
+            !result.referenceCode
+          ) {
+            throw new Error(
+              result.error ||
+              "Upload failed."
+            );
+          }
+
+          uploadToken = "";
+          selectedFiles = [];
+
+          uploadPanel.classList.add(
+            "hidden"
+          );
+
+          successPanel.classList.remove(
+            "hidden"
+          );
+
+          referenceCode.textContent =
+            result.referenceCode;
+        } catch (error) {
+          showError(
+            uploadStatus,
+            (
+              error.message ||
+              "Upload failed."
+            ) +
+            " If retrying does not work, reopen the upload link from the form."
+          );
+        } finally {
+          imagesInput.disabled = false;
+
+          if (uploadToken) {
+            uploadButton.disabled = false;
+          }
+        }
+      }
+    );
+
+    copyButton.addEventListener(
+      "click",
+      async () => {
+        const code =
+          referenceCode
+            .textContent
+            .trim();
+
+        if (!code) {
+          return;
+        }
+
+        try {
+          await navigator
+            .clipboard
+            .writeText(code);
+
+          copyStatus.textContent =
+            "Copied.";
+        } catch {
+          copyStatus.textContent =
+            "Please copy the code manually.";
+        }
+      }
+    );
+  </script>
+</body>
+</html>
