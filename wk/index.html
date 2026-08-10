@@ -1,1 +1,211 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="0; url=https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__rTeNqlUQUdBWERKVDNRNVVBUEJQVTAzVTVTMEgyOS4u"><link rel="canonical" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__rTeNqlUQUdBWERKVDNRNVVBUEJQVTAzVTVTMEgyOS4u"><title>Redirecting…</title><script>window.location.replace("https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__rTeNqlUQUdBWERKVDNRNVVBUEJQVTAzVTVTMEgyOS4u");</script></head><body><p>Redirecting… <a href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__rTeNqlUQUdBWERKVDNRNVVBUEJQVTAzVTVTMEgyOS4u">Continue</a></p></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="S967 WK Application">
+  <title>WK Application · S967</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      background:
+        radial-gradient(circle at 50% 15%, rgba(255,255,255,0.08), transparent 34%),
+        linear-gradient(145deg, #111318 0%, #171a21 50%, #0e1014 100%);
+      color: #f3f4f6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    main {
+      width: min(620px, 100%);
+      text-align: center;
+    }
+
+    .eyebrow {
+      color: #777f8d;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 10vw, 4.6rem);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .status {
+      margin-top: 28px;
+      font-size: clamp(1.15rem, 4vw, 1.45rem);
+      font-weight: 650;
+    }
+
+    .detail {
+      margin: 12px auto 0;
+      max-width: 500px;
+      color: #aeb4bf;
+      line-height: 1.6;
+    }
+
+    .button {
+      display: inline-block;
+      min-width: 210px;
+      margin-top: 34px;
+      padding: 15px 26px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      color: #f7f7f8;
+      background: rgba(255,255,255,0.08);
+      text-decoration: none;
+      font-weight: 650;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.13);
+      border-color: rgba(255,255,255,0.32);
+    }
+
+    .back {
+      display: block;
+      margin-top: 34px;
+      color: #727987;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .back:hover {
+      color: #aeb4bf;
+    }
+
+    .schedule {
+      margin-top: 28px;
+      color: #626875;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <div class="eyebrow">S967</div>
+    <h1>WK Application</h1>
+
+    <div id="status" class="status"></div>
+    <div id="detail" class="detail"></div>
+    <div id="action"></div>
+
+    <div class="schedule">
+      Application window: Saturday 09:00 – Thursday 09:00 (KST)<br>
+      Opens every two weeks.
+    </div>
+
+    <a class="back" href="/">← Back to S967</a>
+  </main>
+
+  <script>
+    // ============================================================
+    // EDIT THIS WHEN THE WK FORM CHANGES
+    // ============================================================
+    const FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAO__rTeNqlUQUdBWERKVDNRNVVBUEJQVTAzVTVTMEgyOS4u";
+
+    // ============================================================
+    // SCHEDULE SETTINGS
+    // First opening: 2026-08-15 09:00 KST
+    // Opens every 14 days.
+    // Each application window lasts 5 days:
+    // Saturday 09:00 KST → Thursday 09:00 KST.
+    // ============================================================
+    const FIRST_OPEN_KST = '2026-08-15T09:00:00+09:00';
+    const CYCLE_DAYS = 14;
+    const OPEN_DAYS = 5;
+
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const cycleMs = CYCLE_DAYS * DAY_MS;
+    const openMs = OPEN_DAYS * DAY_MS;
+
+    function getApplicationState() {
+      const now = Date.now();
+      const firstOpen = new Date(FIRST_OPEN_KST).getTime();
+
+      if (now < firstOpen) {
+        return {
+          isOpen: false,
+          nextOpen: firstOpen
+        };
+      }
+
+      const elapsed = now - firstOpen;
+      const cycleIndex = Math.floor(elapsed / cycleMs);
+      const cycleStart = firstOpen + cycleIndex * cycleMs;
+      const cycleEnd = cycleStart + openMs;
+
+      if (now >= cycleStart && now < cycleEnd) {
+        return {
+          isOpen: true,
+          closeAt: cycleEnd
+        };
+      }
+
+      return {
+        isOpen: false,
+        nextOpen: cycleStart + cycleMs
+      };
+    }
+
+    function formatKST(timestamp) {
+      return new Intl.DateTimeFormat('en', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(new Date(timestamp)) + ' KST';
+    }
+
+    function render() {
+      const state = getApplicationState();
+      const status = document.getElementById('status');
+      const detail = document.getElementById('detail');
+      const action = document.getElementById('action');
+
+      if (state.isOpen) {
+        status.textContent = 'Applications are currently open.';
+        detail.textContent = 'Applications close ' + formatKST(state.closeAt) + '.';
+        action.innerHTML =
+          '<a class="button" href="' + FORM_URL.replace(/"/g, '&quot;') + '">Apply Now</a>';
+      } else {
+        status.textContent = 'Applications are currently closed.';
+        detail.textContent =
+          'The application period is not open at this time. Next opening: ' +
+          formatKST(state.nextOpen) + '.';
+        action.innerHTML = '';
+      }
+    }
+
+    render();
+
+    // Refresh automatically if someone leaves the page open across 09:00 KST.
+    setInterval(render, 60 * 1000);
+  </script>
+</body>
+</html>
