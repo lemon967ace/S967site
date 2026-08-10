@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Upload Admin · S967</title>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js" defer></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width: min(1000px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input {
+      min-width: 240px;
+      flex: 1;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    button {
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--border-hover);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .danger {
+      color: #d75555;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 1.4em;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      color: #d75555;
+    }
+
+    .upload {
+      margin-top: 14px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .upload:first-child {
+      margin-top: 0;
+    }
+
+    .upload-meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .paths {
+      margin-top: 8px;
+    }
+
+    .path {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .blocked {
+      margin-top: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 26px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="theme-picker" data-theme-picker>
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >◐</button>
+
+    <div class="theme-menu" data-theme-menu role="menu">
+      <button type="button" data-theme-choice="system" role="menuitemradio">
+        <span class="theme-choice-icon">◐</span>
+        <span>System</span>
+      </button>
+
+      <button type="button" data-theme-choice="light" role="menuitemradio">
+        <span class="theme-choice-icon">☀</span>
+        <span>Light</span>
+      </button>
+
+      <button type="button" data-theme-choice="dark" role="menuitemradio">
+        <span class="theme-choice-icon">☾</span>
+        <span>Dark</span>
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <div class="eyebrow">S967</div>
+    <h1>Upload Admin</h1>
+
+    <section id="loginPanel" class="panel">
+      <h2>Administrator Login</h2>
+
+      <div class="row">
+        <input
+          id="adminSecret"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Admin password"
+        >
+
+        <button
+          id="loginButton"
+          type="button"
+        >
+          Login
+        </button>
+      </div>
+
+      <div
+        id="loginStatus"
+        class="status"
+      ></div>
+    </section>
+
+    <div
+      id="adminArea"
+      class="hidden"
+    >
+      <section class="panel">
+        <h2>Upload Control</h2>
+
+        <p
+          id="pauseStatus"
+          class="small"
+        ></p>
+
+        <div class="row">
+          <button
+            type="button"
+            data-pause-hours="1"
+          >
+            Pause 1 hour
+          </button>
+
+          <button
+            type="button"
+            data-pause-hours="6"
+          >
+            Pause 6 hours
+          </button>
+
+          <button
+            type="button"
+            data-pause-hours="24"
+          >
+            Pause 24 hours
+          </button>
+
+          <button
+            type="button"
+            data-pause-hours="72"
+          >
+            Pause 3 days
+          </button>
+
+          <button
+            id="resumeButton"
+            type="button"
+          >
+            Resume now
+          </button>
+        </div>
+
+        <div
+          id="controlStatus"
+          class="status"
+        ></div>
+      </section>
+
+      <section class="panel">
+        <div class="row">
+          <h2 style="margin: 0;">
+            Recent Uploads
+          </h2>
+
+          <button
+            id="refreshButton"
+            type="button"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <p class="small">
+          Up to 100 recent upload events are shown.
+        </p>
+
+        <div id="uploads"></div>
+
+        <div
+          id="uploadsStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+    <a class="back" href="/">
+      ← Back to S967
+    </a>
+  </main>
+
+  <script>
+    const ADMIN_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
+
+    const loginPanel =
+      document.getElementById(
+        "loginPanel"
+      );
+
+    const adminArea =
+      document.getElementById(
+        "adminArea"
+      );
+
+    const adminSecretInput =
+      document.getElementById(
+        "adminSecret"
+      );
+
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
+
+    const loginStatus =
+      document.getElementById(
+        "loginStatus"
+      );
+
+    const pauseStatus =
+      document.getElementById(
+        "pauseStatus"
+      );
+
+    const controlStatus =
+      document.getElementById(
+        "controlStatus"
+      );
+
+    const uploads =
+      document.getElementById(
+        "uploads"
+      );
+
+    const uploadsStatus =
+      document.getElementById(
+        "uploadsStatus"
+      );
+
+    const refreshButton =
+      document.getElementById(
+        "refreshButton"
+      );
+
+    const resumeButton =
+      document.getElementById(
+        "resumeButton"
+      );
+
+    let adminSecret = "";
+    let currentData = null;
+
+
+    function setStatus(
+      element,
+      message,
+      isError = false
+    ) {
+      element.textContent =
+        message;
+
+      element.classList.toggle(
+        "error",
+        isError
+      );
+    }
+
+
+    async function apiRequest(
+      method,
+      body = null
+    ) {
+      const options = {
+        method,
+
+        headers: {
+          "x-admin-secret":
+            adminSecret,
+        },
+      };
+
+      if (body !== null) {
+        options.headers[
+          "Content-Type"
+        ] =
+          "application/json";
+
+        options.body =
+          JSON.stringify(
+            body
+          );
+      }
+
+      const response =
+        await fetch(
+          ADMIN_API_URL,
+          options
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          "Request failed."
+        );
+      }
+
+      return result;
+    }
+
+
+    function getBlockInfo(
+      ipHash
+    ) {
+      if (
+        !currentData ||
+        !Array.isArray(
+          currentData.blocked
+        )
+      ) {
+        return null;
+      }
+
+      return (
+        currentData.blocked.find(
+          (entry) =>
+            entry.ip_hash ===
+            ipHash
+        ) || null
+      );
+    }
+
+
+    function isActiveBlock(
+      block
+    ) {
+      if (!block) {
+        return false;
+      }
+
+      if (
+        !block.blocked_until
+      ) {
+        return true;
+      }
+
+      return (
+        new Date(
+          block.blocked_until
+        ).getTime() >
+        Date.now()
+      );
+    }
+
+
+    function formatBlock(
+      block
+    ) {
+      if (!block) {
+        return "";
+      }
+
+      if (
+        !block.blocked_until
+      ) {
+        return "Blocked indefinitely";
+      }
+
+      const until =
+        new Date(
+          block.blocked_until
+        );
+
+      if (
+        until.getTime() <=
+        Date.now()
+      ) {
+        return "";
+      }
+
+      return (
+        "Blocked until " +
+        until.toLocaleString()
+      );
+    }
+
+
+    function renderControl() {
+      const pausedUntil =
+        currentData?.control
+          ?.paused_until;
+
+      if (!pausedUntil) {
+        pauseStatus.textContent =
+          "Uploads are active.";
+
+        return;
+      }
+
+      const date =
+        new Date(
+          pausedUntil
+        );
+
+      if (
+        date.getTime() <=
+        Date.now()
+      ) {
+        pauseStatus.textContent =
+          "Uploads are active.";
+
+        return;
+      }
+
+      pauseStatus.textContent =
+        "Uploads paused until " +
+        date.toLocaleString();
+    }
+
+
+    function renderUploads() {
+      uploads.innerHTML = "";
+
+      const list =
+        currentData?.uploads ??
+        [];
+
+      if (
+        list.length === 0
+      ) {
+        uploads.textContent =
+          "No uploads found.";
+
+        return;
+      }
+
+      for (
+        const item
+        of list
+      ) {
+        const container =
+          document.createElement(
+            "div"
+          );
+
+        container.className =
+          "upload";
+
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+        meta.className =
+          "upload-meta";
+
+
+        const reference =
+          document.createElement(
+            "strong"
+          );
+
+        reference.textContent =
+          item.reference_code ||
+          "Unknown";
+
+        meta.appendChild(
+          reference
+        );
+
+        meta.appendChild(
+          document.createElement(
+            "br"
+          )
+        );
+
+
+        const created =
+          new Date(
+            item.created_at
+          );
+
+        meta.append(
+          created.toLocaleString()
+        );
+
+        meta.appendChild(
+          document.createElement(
+            "br"
+          )
+        );
+
+        meta.append(
+          `${item.file_count} image(s)`
+        );
+
+
+        const paths =
+          document.createElement(
+            "div"
+          );
+
+        paths.className =
+          "paths";
+
+
+        for (
+          const path
+          of (
+            item.storage_paths ||
+            []
+          )
+        ) {
+          const pathElement =
+            document.createElement(
+              "span"
+            );
+
+          pathElement.className =
+            "path";
+
+          pathElement.textContent =
+            path;
+
+          paths.appendChild(
+            pathElement
+          );
+        }
+
+
+        const block =
+          getBlockInfo(
+            item.ip_hash
+          );
+
+        const activeBlock =
+          isActiveBlock(
+            block
+          );
+
+
+        const blockText =
+          document.createElement(
+            "div"
+          );
+
+        blockText.className =
+          "blocked danger";
+
+        blockText.textContent =
+          formatBlock(
+            block
+          );
+
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+        actions.className =
+          "upload-actions";
+
+
+        const block7 =
+          document.createElement(
+            "button"
+          );
+
+        block7.type =
+          "button";
+
+        block7.textContent =
+          "Block 7 days";
+
+        block7.addEventListener(
+          "click",
+          () =>
+            runIpAction(
+              "block_ip_7d",
+              item.ip_hash
+            )
+        );
+
+
+        const blockForever =
+          document.createElement(
+            "button"
+          );
+
+        blockForever.type =
+          "button";
+
+        blockForever.textContent =
+          "Block indefinitely";
+
+        blockForever.addEventListener(
+          "click",
+          () =>
+            runIpAction(
+              "block_ip_forever",
+              item.ip_hash
+            )
+        );
+
+
+        const unblock =
+          document.createElement(
+            "button"
+          );
+
+        unblock.type =
+          "button";
+
+        unblock.textContent =
+          "Unblock";
+
+        unblock.disabled =
+          !activeBlock;
+
+        unblock.addEventListener(
+          "click",
+          () =>
+            runIpAction(
+              "unblock_ip",
+              item.ip_hash
+            )
+        );
+
+
+        actions.appendChild(
+          block7
+        );
+
+        actions.appendChild(
+          blockForever
+        );
+
+        actions.appendChild(
+          unblock
+        );
+
+
+        container.appendChild(
+          meta
+        );
+
+        container.appendChild(
+          paths
+        );
+
+        if (
+          blockText.textContent
+        ) {
+          container.appendChild(
+            blockText
+          );
+        }
+
+        container.appendChild(
+          actions
+        );
+
+        uploads.appendChild(
+          container
+        );
+      }
+    }
+
+
+    async function loadAdminData() {
+      setStatus(
+        uploadsStatus,
+        "Loading…"
+      );
+
+      const result =
+        await apiRequest(
+          "GET"
+        );
+
+      currentData =
+        result;
+
+      renderControl();
+      renderUploads();
+
+      setStatus(
+        uploadsStatus,
+        ""
+      );
+    }
+
+
+    async function runIpAction(
+      action,
+      ipHash
+    ) {
+      const message =
+        action ===
+        "block_ip_7d"
+          ? "Block this uploader for 7 days?"
+          : action ===
+            "block_ip_forever"
+            ? "Block this uploader indefinitely?"
+            : "Unblock this uploader?";
+
+      if (
+        !confirm(message)
+      ) {
+        return;
+      }
+
+      try {
+        setStatus(
+          uploadsStatus,
+          "Updating…"
+        );
+
+        await apiRequest(
+          "POST",
+          {
+            action,
+            ipHash,
+          }
+        );
+
+        await loadAdminData();
+      } catch (error) {
+        setStatus(
+          uploadsStatus,
+          error.message ||
+          "Update failed.",
+          true
+        );
+      }
+    }
+
+
+    loginButton.addEventListener(
+      "click",
+      async () => {
+        const value =
+          adminSecretInput
+            .value
+            .trim();
+
+        if (!value) {
+          setStatus(
+            loginStatus,
+            "Enter the administrator password.",
+            true
+          );
+
+          return;
+        }
+
+        adminSecret =
+          value;
+
+        loginButton.disabled =
+          true;
+
+        setStatus(
+          loginStatus,
+          "Checking…"
+        );
+
+        try {
+          await loadAdminData();
+
+          adminSecretInput.value =
+            "";
+
+          loginPanel.classList.add(
+            "hidden"
+          );
+
+          adminArea.classList.remove(
+            "hidden"
+          );
+        } catch (error) {
+          adminSecret = "";
+
+          setStatus(
+            loginStatus,
+            error.message ||
+            "Login failed.",
+            true
+          );
+        } finally {
+          loginButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    adminSecretInput
+      .addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key ===
+            "Enter"
+          ) {
+            loginButton.click();
+          }
+        }
+      );
+
+
+    refreshButton.addEventListener(
+      "click",
+      async () => {
+        try {
+          await loadAdminData();
+        } catch (error) {
+          setStatus(
+            uploadsStatus,
+            error.message ||
+            "Refresh failed.",
+            true
+          );
+        }
+      }
+    );
+
+
+    document
+      .querySelectorAll(
+        "[data-pause-hours]"
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            async () => {
+              const hours =
+                Number(
+                  button.dataset
+                    .pauseHours
+                );
+
+              if (
+                !confirm(
+                  `Pause all image uploads for ${hours} hour(s)?`
+                )
+              ) {
+                return;
+              }
+
+              try {
+                setStatus(
+                  controlStatus,
+                  "Updating…"
+                );
+
+                await apiRequest(
+                  "POST",
+                  {
+                    action:
+                      "pause_uploads",
+                    hours,
+                  }
+                );
+
+                await loadAdminData();
+
+                setStatus(
+                  controlStatus,
+                  "Upload pause updated."
+                );
+              } catch (error) {
+                setStatus(
+                  controlStatus,
+                  error.message ||
+                  "Update failed.",
+                  true
+                );
+              }
+            }
+          );
+        }
+      );
+
+
+    resumeButton.addEventListener(
+      "click",
+      async () => {
+        if (
+          !confirm(
+            "Resume image uploads now?"
+          )
+        ) {
+          return;
+        }
+
+        try {
+          setStatus(
+            controlStatus,
+            "Updating…"
+          );
+
+          await apiRequest(
+            "POST",
+            {
+              action:
+                "resume_uploads",
+            }
+          );
+
+          await loadAdminData();
+
+          setStatus(
+            controlStatus,
+            "Uploads resumed."
+          );
+        } catch (error) {
+          setStatus(
+            controlStatus,
+            error.message ||
+            "Update failed.",
+            true
+          );
+        }
+      }
+    );
+  </script>
+</body>
+</html>
