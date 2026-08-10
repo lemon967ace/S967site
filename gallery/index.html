@@ -309,41 +309,52 @@
         "noopener noreferrer";
 
       const img =
-        document.createElement("img");
+  document.createElement("img");
 
-      img.src =
-        image.url;
+img.alt =
+  "Community upload";
 
-      img.alt =
-        "Community upload";
+img.loading =
+  "lazy";
 
-      img.loading =
-        "lazy";
+card.style.display =
+  "none";
 
-      img.addEventListener(
-        "error",
-        () => {
-          card.remove();
-        }
-      );
+img.addEventListener(
+  "load",
+  () => {
+    card.style.display =
+      "";
+  }
+);
 
-      link.appendChild(img);
+img.addEventListener(
+  "error",
+  () => {
+    card.remove();
+  }
+);
 
-      const meta =
-        document.createElement("div");
+img.src =
+  image.url;
 
-      meta.className =
-        "meta";
+link.appendChild(img);
 
-      meta.textContent =
-        formatDate(createdAt);
+const meta =
+  document.createElement("div");
 
-      card.appendChild(link);
-      card.appendChild(meta);
+meta.className =
+  "meta";
 
-      return card;
+meta.textContent =
+  formatDate(createdAt);
+
+card.appendChild(link);
+card.appendChild(meta);
+
+return card;
     }
-
+    
     async function loadGallery() {
       refreshButton.disabled =
         true;
