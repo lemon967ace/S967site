@@ -185,6 +185,20 @@
       }).format(new Date(timestamp)) + ' KST';
     }
 
+    function formatTimeLeft(timestamp) {
+  const diff = Math.max(0, timestamp - Date.now());
+
+  const totalHours = Math.floor(diff / (60 * 60 * 1000));
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  if (days > 0) {
+    return `${days} day${days !== 1 ? 's' : ''} ${hours} hr${hours !== 1 ? 's' : ''}`;
+  }
+
+  return `${hours} hr${hours !== 1 ? 's' : ''}`;
+}
+    
     function render() {
       const state = getApplicationState();
       const status = document.getElementById('status');
@@ -193,13 +207,14 @@
 
       if (state.isOpen) {
         status.textContent = 'Applications are currently open.';
-        detail.textContent = 'Applications close ' + formatKST(state.closeAt) + '.';
+        detail.textContent =
+  formatTimeLeft(state.closeAt) + ' left until applications close.';
         action.innerHTML =
           '<a class="button" href="' + FORM_URL.replace(/"/g, '&quot;') + '">Apply Now</a>';
       } else {
         status.textContent = 'Applications are currently closed.';
         detail.textContent =
-          'The application period is not open at this time. Next opening: ' +
+   formatTimeLeft(state.nextOpen) + ' left until applications open.';
           formatKST(state.nextOpen) + '.';
         action.innerHTML = '';
       }
