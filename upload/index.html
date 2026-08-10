@@ -273,267 +273,366 @@
 
     <a class="back" href="/">← Back to S967</a>
   </main>
+<script>
+  // Put your deployed upload-image Function URL here.
+  const UPLOAD_IMAGE_URL =
+    "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/rapid-service";
 
-  <script>
-    // Put your deployed upload-image Function URL here.
-    const UPLOAD_IMAGE_URL =
-      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/rapid-service";
+  const imagesInput =
+    document.getElementById("images");
 
-    const imagesInput =
-      document.getElementById("images");
+  const previews =
+    document.getElementById("previews");
 
-    const previews =
-      document.getElementById("previews");
+  const uploadButton =
+    document.getElementById("uploadButton");
 
-    const uploadButton =
-      document.getElementById("uploadButton");
+  const uploadStatus =
+    document.getElementById("uploadStatus");
 
-    const uploadStatus =
-      document.getElementById("uploadStatus");
+  const uploadPanel =
+    document.getElementById("uploadPanel");
 
-    const uploadPanel =
-      document.getElementById("uploadPanel");
+  const successPanel =
+    document.getElementById("successPanel");
 
-    const successPanel =
-      document.getElementById("successPanel");
+  let selectedFiles = [];
 
-    let selectedFiles = [];
 
-    function showError(
-      element,
-      message
-    ) {
-      element.textContent =
-        message;
+  function showError(
+    element,
+    message
+  ) {
+    element.textContent =
+      message;
 
-      element.classList.add(
-        "error"
-      );
-    }
+    element.classList.add(
+      "error"
+    );
+  }
 
-    function clearStatus(
-      element
-    ) {
-      element.textContent = "";
 
-      element.classList.remove(
-        "error"
-      );
-    }
+  function clearStatus(
+    element
+  ) {
+    element.textContent = "";
 
-    imagesInput.addEventListener(
-      "change",
-      () => {
-        clearStatus(
-          uploadStatus
+    element.classList.remove(
+      "error"
+    );
+  }
+
+
+  function renderPreviews() {
+    previews.innerHTML = "";
+
+    selectedFiles.forEach(
+      (file, index) => {
+        const wrapper =
+          document.createElement(
+            "div"
+          );
+
+        wrapper.className =
+          "preview";
+
+
+        const image =
+          document.createElement(
+            "img"
+          );
+
+        const objectUrl =
+          URL.createObjectURL(
+            file
+          );
+
+        image.src =
+          objectUrl;
+
+        image.alt =
+          file.name;
+
+        image.onload =
+          () => {
+            URL.revokeObjectURL(
+              objectUrl
+            );
+          };
+
+
+        const removeButton =
+          document.createElement(
+            "button"
+          );
+
+        removeButton.type =
+          "button";
+
+        removeButton.className =
+          "preview-remove";
+
+        removeButton.textContent =
+          "×";
+
+        removeButton.setAttribute(
+          "aria-label",
+          `Remove ${file.name}`
         );
+
+
+        removeButton.addEventListener(
+          "click",
+          () => {
+            selectedFiles.splice(
+              index,
+              1
+            );
+
+            imagesInput.value = "";
+
+            clearStatus(
+              uploadStatus
+            );
+
+            renderPreviews();
+          }
+        );
+
+
+        wrapper.appendChild(
+          image
+        );
+
+        wrapper.appendChild(
+          removeButton
+        );
+
+        previews.appendChild(
+          wrapper
+        );
+      }
+    );
+
+
+    uploadButton.disabled =
+      selectedFiles.length === 0;
+  }
+
+
+  function isSameFile(
+    first,
+    second
+  ) {
+    return (
+      first.name === second.name &&
+      first.size === second.size &&
+      first.lastModified === second.lastModified
+    );
+  }
+
+
+  imagesInput.addEventListener(
+    "change",
+    () => {
+      clearStatus(
+        uploadStatus
+      );
+
+      const newFiles =
+        Array.from(
+          imagesInput.files || []
+        );
+
+      if (
+        newFiles.length === 0
+      ) {
+        return;
+      }
+
+
+      const allowedTypes =
+        new Set([
+          "image/png",
+          "image/jpeg",
+        ]);
+
+
+      for (
+        const file
+        of newFiles
+      ) {
+        if (
+          !allowedTypes.has(
+            file.type
+          )
+        ) {
+          imagesInput.value = "";
+
+          showError(
+            uploadStatus,
+            "Only PNG, JPG, and JPEG images are allowed."
+          );
+
+          return;
+        }
+
+
+        if (
+          file.size <= 0 ||
+          file.size >
+            5 * 1024 * 1024
+        ) {
+          imagesInput.value = "";
+
+          showError(
+            uploadStatus,
+            "Each image must be 5 MB or smaller."
+          );
+
+          return;
+        }
+      }
+
+
+      const filesToAdd =
+        newFiles.filter(
+          (newFile) =>
+            !selectedFiles.some(
+              (selectedFile) =>
+                isSameFile(
+                  newFile,
+                  selectedFile
+                )
+            )
+        );
+
+
+      if (
+        selectedFiles.length +
+          filesToAdd.length >
+        3
+      ) {
+        imagesInput.value = "";
+
+        showError(
+          uploadStatus,
+          "You can select up to 3 images."
+        );
+
+        return;
+      }
+
+
+      selectedFiles.push(
+        ...filesToAdd
+      );
+
+      imagesInput.value = "";
+
+      renderPreviews();
+    }
+  );
+
+
+  uploadButton.addEventListener(
+    "click",
+    async () => {
+      if (
+        selectedFiles.length < 1
+      ) {
+        return;
+      }
+
+
+      uploadButton.disabled =
+        true;
+
+      imagesInput.disabled =
+        true;
+
+      clearStatus(
+        uploadStatus
+      );
+
+      uploadStatus.textContent =
+        "Uploading…";
+
+
+      const form =
+        new FormData();
+
+      for (
+        const file
+        of selectedFiles
+      ) {
+        form.append(
+          "files",
+          file
+        );
+      }
+
+
+      try {
+        const response =
+          await fetch(
+            UPLOAD_IMAGE_URL,
+            {
+              method: "POST",
+              body: form,
+            }
+          );
+
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+
+        if (
+          !response.ok ||
+          !result.success
+        ) {
+          throw new Error(
+            result.error ||
+            "Upload failed."
+          );
+        }
+
+
+        selectedFiles = [];
+
+        imagesInput.value = "";
 
         previews.innerHTML = "";
 
-        const files =
-          Array.from(
-            imagesInput.files || []
-          );
 
-        if (
-          files.length > 3
-        ) {
-          selectedFiles = [];
-
-          imagesInput.value = "";
-
-          uploadButton.disabled =
-            true;
-
-          showError(
-            uploadStatus,
-            "You can select up to 3 images."
-          );
-
-          return;
-        }
-
-        const allowedTypes =
-          new Set([
-            "image/png",
-            "image/jpeg",
-          ]);
-
-        for (
-          const file
-          of files
-        ) {
-          if (
-            !allowedTypes.has(
-              file.type
-            )
-          ) {
-            selectedFiles = [];
-
-            imagesInput.value = "";
-
-            uploadButton.disabled =
-              true;
-
-            showError(
-              uploadStatus,
-              "Only PNG, JPG, and JPEG images are allowed."
-            );
-
-            return;
-          }
-
-          if (
-            file.size >
-            5 * 1024 * 1024
-          ) {
-            selectedFiles = [];
-
-            imagesInput.value = "";
-
-            uploadButton.disabled =
-              true;
-
-            showError(
-              uploadStatus,
-              "Each image must be 5 MB or smaller."
-            );
-
-            return;
-          }
-        }
-
-        selectedFiles = files;
-
-        uploadButton.disabled =
-          selectedFiles.length === 0;
-
-        for (
-          const file
-          of selectedFiles
-        ) {
-          const wrapper =
-            document.createElement(
-              "div"
-            );
-
-          wrapper.className =
-            "preview";
-
-          const image =
-            document.createElement(
-              "img"
-            );
-
-          const objectUrl =
-            URL.createObjectURL(
-              file
-            );
-
-          image.src =
-            objectUrl;
-
-          image.onload =
-            () =>
-              URL.revokeObjectURL(
-                objectUrl
-              );
-
-          wrapper.appendChild(
-            image
-          );
-
-          previews.appendChild(
-            wrapper
-          );
-        }
-      }
-    );
-
-    uploadButton.addEventListener(
-      "click",
-      async () => {
-        if (
-          selectedFiles.length < 1
-        ) {
-          return;
-        }
-
-        uploadButton.disabled =
-          true;
-
-        imagesInput.disabled =
-          true;
-
-        clearStatus(
-          uploadStatus
+        uploadPanel.classList.add(
+          "hidden"
         );
 
-        uploadStatus.textContent =
-          "Uploading…";
+        successPanel.classList.remove(
+          "hidden"
+        );
+      } catch (error) {
+        showError(
+          uploadStatus,
+          error.message ||
+          "Upload failed."
+        );
 
-        const form =
-          new FormData();
-
-        for (
-          const file
-          of selectedFiles
-        ) {
-          form.append(
-            "files",
-            file
-          );
-        }
-
-        try {
-          const response =
-            await fetch(
-              UPLOAD_IMAGE_URL,
-              {
-                method: "POST",
-                body: form,
-              }
-            );
-
-          const result =
-            await response
-              .json()
-              .catch(() => ({}));
-
-          if (
-            !response.ok ||
-            !result.success
-          ) {
-            throw new Error(
-              result.error ||
-              "Upload failed."
-            );
-          }
-
-          uploadPanel.classList.add(
-            "hidden"
-          );
-
-          successPanel.classList.remove(
-            "hidden"
-          );
-
-          selectedFiles = [];
-        } catch (error) {
-          showError(
-            uploadStatus,
-            error.message ||
-            "Upload failed."
-          );
-
-          uploadButton.disabled =
-            false;
-        } finally {
-          imagesInput.disabled =
-            false;
-        }
+        uploadButton.disabled =
+          false;
+      } finally {
+        imagesInput.disabled =
+          false;
       }
-    );
-  </script>
+    }
+  );
+</script>
+ 
 </body>
 </html>
