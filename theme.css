@@ -202,10 +202,6 @@ footer,
   background: var(--surface);
 }
 
-.theme-menu button[aria-checked="true"] {
-  font-weight: 700;
-}
-
 .theme-menu .theme-choice-icon {
   width: 18px;
   text-align: center;
