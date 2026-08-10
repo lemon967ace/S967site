@@ -25,8 +25,17 @@
     footer { margin-top:54px; color:#626875; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
     @media (max-width:480px) { .buttons { flex-direction:column; } .button { width:100%; } }
   </style>
+  <link rel="stylesheet" href="/theme.css">
+<script src="/theme.js" defer></script>
 </head>
 <body>
+  <div class="theme-picker">
+  <select data-theme-select aria-label="Theme">
+    <option value="system">System</option>
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+  </select>
+</div>
   <main>
     <h1 class="server">S967</h1>
     <p class="headline">Different Languages. One Server.</p>
