@@ -497,7 +497,7 @@
 
           showError(
             uploadStatus,
-            "Only PNG, JPG, and JPEG images are allowed."
+           getTranslation("onlyImagesAllowed")
           );
 
           return;
@@ -513,7 +513,7 @@
 
           showError(
             uploadStatus,
-            "Each image must be 5 MB or smaller."
+            getTranslation("imageTooLarge")
           );
 
           return;
@@ -543,7 +543,7 @@
 
         showError(
           uploadStatus,
-          "You can select up to 3 images."
+         getTranslation("tooManyImages")
         );
 
         return;
@@ -581,8 +581,9 @@
         uploadStatus
       );
 
-      uploadStatus.textContent =
-        "Uploading…";
+
+       uploadStatus.textContent =
+  getTranslation("uploading");
 
 
       const form =
@@ -624,7 +625,7 @@
         ) {
           throw new Error(
             result.error ||
-            "Upload failed."
+            getTranslation("uploadFailed")
           );
         }
 
@@ -647,7 +648,7 @@
         showError(
           uploadStatus,
           error.message ||
-          "Upload failed."
+          getTranslation("uploadFailed")
         );
 
         uploadButton.disabled =
