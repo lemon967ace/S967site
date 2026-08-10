@@ -4,27 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="referrer" content="no-referrer">
-  <meta name="description" content="S967 secure image upload">
+  <meta name="description" content="S967 image upload">
   <title>Image Upload · S967</title>
 
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js" defer></script>
 
-  <!-- Cloudflare Turnstile: implicit rendering -->
-  <script
-    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-    async
-    defer
-  ></script>
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       min-height: 100%;
     }
@@ -82,46 +71,14 @@
       text-align: left;
     }
 
-    .panel h2 {
-      margin: 0 0 10px;
-      font-size: 1.05rem;
-    }
-
     .small {
       color: var(--muted);
       font-size: 0.88rem;
       line-height: 1.55;
     }
 
-    .turnstile-wrap {
-      min-height: 75px;
-      margin-top: 18px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .action {
-      width: 100%;
-      margin-top: 18px;
-      padding: 13px 18px;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      background: var(--surface-hover);
-      color: var(--text);
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .action:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
     .file-label {
       display: block;
-      margin-top: 16px;
       padding: 24px 18px;
       border: 1px dashed var(--border-hover);
       border-radius: 14px;
@@ -159,8 +116,26 @@
     .preview img {
       width: 100%;
       height: 100%;
-      display: block;
       object-fit: cover;
+      display: block;
+    }
+
+    .action {
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px 18px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .action:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
     .status {
@@ -181,18 +156,6 @@
       font-weight: 800;
       letter-spacing: 0.05em;
       word-break: break-all;
-    }
-
-    .copy {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 9px 13px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: transparent;
-      color: var(--text);
-      cursor: pointer;
-      font: inherit;
     }
 
     .hidden {
@@ -221,75 +184,27 @@
 
     <div class="theme-menu" data-theme-menu role="menu">
       <button type="button" data-theme-choice="system" role="menuitemradio">
-        <span class="theme-choice-icon">◐</span>
-        <span>System</span>
+        <span class="theme-choice-icon">◐</span><span>System</span>
       </button>
-
       <button type="button" data-theme-choice="light" role="menuitemradio">
-        <span class="theme-choice-icon">☀</span>
-        <span>Light</span>
+        <span class="theme-choice-icon">☀</span><span>Light</span>
       </button>
-
       <button type="button" data-theme-choice="dark" role="menuitemradio">
-        <span class="theme-choice-icon">☾</span>
-        <span>Dark</span>
+        <span class="theme-choice-icon">☾</span><span>Dark</span>
       </button>
     </div>
   </div>
 
   <main>
     <div class="eyebrow">S967</div>
-
     <h1>Image Upload</h1>
 
     <p class="lead">
-      Upload screenshots related to your inquiry.<br>
-      PNG, JPG, and JPEG only · up to 5 MB each · maximum 3 images.
+      Upload screenshots.<br>
+      PNG, JPG, JPEG · max 5 MB each · up to 3 images.
     </p>
 
-    <section id="deniedPanel" class="panel hidden">
-      <h2>Upload link unavailable</h2>
-      <p class="small">
-        Please open the image upload link provided in the Microsoft Form.
-      </p>
-    </section>
-
-    <section id="verifyPanel" class="panel hidden">
-      <h2>Verification</h2>
-
-      <p class="small">
-        Complete the verification below to continue.
-      </p>
-
-      <div class="turnstile-wrap">
-        <div
-          class="cf-turnstile"
-          data-sitekey="0x4AAAAAAEMBVVDNUwOKwt8o"
-          data-callback="onTurnstileSuccess"
-          data-expired-callback="onTurnstileExpired"
-          data-error-callback="onTurnstileError"
-        ></div>
-      </div>
-
-      <button
-        id="continueButton"
-        class="action"
-        type="button"
-        disabled
-      >
-        Continue
-      </button>
-
-      <div id="verifyStatus" class="status"></div>
-    </section>
-
-    <section id="uploadPanel" class="panel hidden">
-      <h2>Select images</h2>
-
-      <p class="small">
-        This upload session is valid for 10 minutes and can be used once.
-      </p>
-
+    <section id="uploadPanel" class="panel">
       <label class="file-label" for="images">
         Choose up to 3 images
       </label>
@@ -313,105 +228,26 @@
       </button>
 
       <div id="uploadStatus" class="status"></div>
+
+      <p class="small">
+        Limit: up to 10 images per 24 hours from the same network.
+      </p>
     </section>
 
     <section id="successPanel" class="panel hidden">
-      <h2>Upload complete</h2>
-
+      <div class="success-code">Upload complete</div>
       <p class="small">
-        Enter this code in the
-        <strong>Image Upload Code</strong>
-        field in the Microsoft Form so your images can be matched to your inquiry.
+        Your images have been received successfully.
       </p>
-
-      <div id="referenceCode" class="success-code"></div>
-
-      <button
-        id="copyButton"
-        class="copy"
-        type="button"
-      >
-        Copy code
-      </button>
-
-      <div id="copyStatus" class="status"></div>
     </section>
 
     <a class="back" href="/">← Back to S967</a>
   </main>
 
   <script>
-    // ============================================================
-    // KEEP YOUR ACTUAL FUNCTION URLS HERE
-    // ============================================================
-
-    const CREATE_TOKEN_URL =
-      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/create-upload-token";
-
+    // Put your deployed upload-image Function URL here.
     const UPLOAD_IMAGE_URL =
-      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/rapid-service";
-
-    // ============================================================
-
-    const ACCESS_SESSION_KEY =
-      "s967-upload-access";
-
-    const params =
-      new URLSearchParams(window.location.search);
-
-    const accessFromUrl =
-      params.get("access") || "";
-
-    let access = "";
-
-    if (accessFromUrl) {
-      // Remember the Forms access value only for this browser tab/session.
-      // sessionStorage disappears when the tab/session is closed.
-      try {
-        sessionStorage.setItem(
-          ACCESS_SESSION_KEY,
-          accessFromUrl
-        );
-      } catch {}
-
-      access = accessFromUrl;
-
-      // Remove ?access=... from the visible URL/history after reading it.
-      history.replaceState(
-        {},
-        "",
-        window.location.pathname
-      );
-    } else {
-      // Allow refresh in the same tab without exposing the access value
-      // in the address bar.
-      try {
-        access =
-          sessionStorage.getItem(
-            ACCESS_SESSION_KEY
-          ) || "";
-      } catch {
-        access = "";
-      }
-    }
-
-    const deniedPanel =
-      document.getElementById("deniedPanel");
-
-    const verifyPanel =
-      document.getElementById("verifyPanel");
-
-    const uploadPanel =
-      document.getElementById("uploadPanel");
-
-    const successPanel =
-      document.getElementById("successPanel");
-
-    const continueButton =
-      document.getElementById("continueButton");
-
-    const verifyStatus =
-      document.getElementById("verifyStatus");
+      "PASTE_UPLOAD_IMAGE_FUNCTION_URL_HERE";
 
     const imagesInput =
       document.getElementById("images");
@@ -425,140 +261,42 @@
     const uploadStatus =
       document.getElementById("uploadStatus");
 
-    const referenceCode =
-      document.getElementById("referenceCode");
+    const uploadPanel =
+      document.getElementById("uploadPanel");
 
-    const copyButton =
-      document.getElementById("copyButton");
+    const successPanel =
+      document.getElementById("successPanel");
 
-    const copyStatus =
-      document.getElementById("copyStatus");
-
-    let turnstileToken = "";
-    let uploadToken = "";
     let selectedFiles = [];
 
-    function showError(element, message) {
-      element.textContent = message;
-      element.classList.add("error");
+    function showError(
+      element,
+      message
+    ) {
+      element.textContent =
+        message;
+
+      element.classList.add(
+        "error"
+      );
     }
 
-    function clearStatus(element) {
+    function clearStatus(
+      element
+    ) {
       element.textContent = "";
-      element.classList.remove("error");
-    }
 
-    // These names are referenced directly by the Turnstile HTML above.
-    window.onTurnstileSuccess = function (token) {
-      turnstileToken = token;
-      continueButton.disabled = false;
-      clearStatus(verifyStatus);
-    };
-
-    window.onTurnstileExpired = function () {
-      turnstileToken = "";
-      continueButton.disabled = true;
-
-      showError(
-        verifyStatus,
-        "Verification expired. Please verify again."
+      element.classList.remove(
+        "error"
       );
-    };
-
-    window.onTurnstileError = function () {
-      turnstileToken = "";
-      continueButton.disabled = true;
-
-      showError(
-        verifyStatus,
-        "Verification could not be completed."
-      );
-    };
-
-    if (!access) {
-      deniedPanel.classList.remove("hidden");
-    } else {
-      verifyPanel.classList.remove("hidden");
     }
-
-    continueButton.addEventListener(
-      "click",
-      async () => {
-        if (!turnstileToken) {
-          return;
-        }
-
-        continueButton.disabled = true;
-
-        clearStatus(verifyStatus);
-
-        verifyStatus.textContent =
-          "Creating secure upload session…";
-
-        try {
-          const response =
-            await fetch(
-              CREATE_TOKEN_URL,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-                body: JSON.stringify({
-                  access,
-                  turnstileToken,
-                }),
-              }
-            );
-
-          const result =
-            await response
-              .json()
-              .catch(() => ({}));
-
-          if (
-            !response.ok ||
-            !result.success ||
-            !result.token
-          ) {
-            throw new Error(
-              result.error ||
-              "Could not create upload session."
-            );
-          }
-
-          uploadToken =
-            result.token;
-
-          verifyPanel.classList.add(
-            "hidden"
-          );
-
-          uploadPanel.classList.remove(
-            "hidden"
-          );
-        } catch (error) {
-          showError(
-            verifyStatus,
-            error.message ||
-            "Could not create upload session."
-          );
-
-          // Turnstile tokens are single-use.
-          turnstileToken = "";
-
-          if (window.turnstile) {
-            window.turnstile.reset();
-          }
-        }
-      }
-    );
 
     imagesInput.addEventListener(
       "change",
       () => {
-        clearStatus(uploadStatus);
+        clearStatus(
+          uploadStatus
+        );
 
         previews.innerHTML = "";
 
@@ -567,12 +305,15 @@
             imagesInput.files || []
           );
 
-        if (files.length > 3) {
+        if (
+          files.length > 3
+        ) {
           selectedFiles = [];
 
           imagesInput.value = "";
 
-          uploadButton.disabled = true;
+          uploadButton.disabled =
+            true;
 
           showError(
             uploadStatus,
@@ -588,15 +329,21 @@
             "image/jpeg",
           ]);
 
-        for (const file of files) {
+        for (
+          const file
+          of files
+        ) {
           if (
-            !allowedTypes.has(file.type)
+            !allowedTypes.has(
+              file.type
+            )
           ) {
             selectedFiles = [];
 
             imagesInput.value = "";
 
-            uploadButton.disabled = true;
+            uploadButton.disabled =
+              true;
 
             showError(
               uploadStatus,
@@ -614,7 +361,8 @@
 
             imagesInput.value = "";
 
-            uploadButton.disabled = true;
+            uploadButton.disabled =
+              true;
 
             showError(
               uploadStatus,
@@ -625,27 +373,32 @@
           }
         }
 
-        selectedFiles =
-          files;
+        selectedFiles = files;
 
         uploadButton.disabled =
           selectedFiles.length === 0;
 
-        for (const file of selectedFiles) {
+        for (
+          const file
+          of selectedFiles
+        ) {
           const wrapper =
-            document.createElement("div");
+            document.createElement(
+              "div"
+            );
 
           wrapper.className =
             "preview";
 
           const image =
-            document.createElement("img");
-
-          image.alt =
-            "Selected image preview";
+            document.createElement(
+              "img"
+            );
 
           const objectUrl =
-            URL.createObjectURL(file);
+            URL.createObjectURL(
+              file
+            );
 
           image.src =
             objectUrl;
@@ -656,9 +409,13 @@
                 objectUrl
               );
 
-          wrapper.appendChild(image);
+          wrapper.appendChild(
+            image
+          );
 
-          previews.appendChild(wrapper);
+          previews.appendChild(
+            wrapper
+          );
         }
       }
     );
@@ -667,28 +424,26 @@
       "click",
       async () => {
         if (
-          !uploadToken ||
           selectedFiles.length < 1
         ) {
           return;
         }
 
-        uploadButton.disabled = true;
+        uploadButton.disabled =
+          true;
 
-        imagesInput.disabled = true;
+        imagesInput.disabled =
+          true;
 
-        clearStatus(uploadStatus);
+        clearStatus(
+          uploadStatus
+        );
 
         uploadStatus.textContent =
           "Uploading…";
 
         const form =
           new FormData();
-
-        form.append(
-          "token",
-          uploadToken
-        );
 
         for (
           const file
@@ -717,17 +472,13 @@
 
           if (
             !response.ok ||
-            !result.success ||
-            !result.referenceCode
+            !result.success
           ) {
             throw new Error(
               result.error ||
               "Upload failed."
             );
           }
-
-          uploadToken = "";
-          selectedFiles = [];
 
           uploadPanel.classList.add(
             "hidden"
@@ -737,49 +488,19 @@
             "hidden"
           );
 
-          referenceCode.textContent =
-            result.referenceCode;
+          selectedFiles = [];
         } catch (error) {
           showError(
             uploadStatus,
-            (
-              error.message ||
-              "Upload failed."
-            ) +
-            " If retrying does not work, reopen the upload link from the form."
+            error.message ||
+            "Upload failed."
           );
+
+          uploadButton.disabled =
+            false;
         } finally {
-          imagesInput.disabled = false;
-
-          if (uploadToken) {
-            uploadButton.disabled = false;
-          }
-        }
-      }
-    );
-
-    copyButton.addEventListener(
-      "click",
-      async () => {
-        const code =
-          referenceCode
-            .textContent
-            .trim();
-
-        if (!code) {
-          return;
-        }
-
-        try {
-          await navigator
-            .clipboard
-            .writeText(code);
-
-          copyStatus.textContent =
-            "Copied.";
-        } catch {
-          copyStatus.textContent =
-            "Please copy the code manually.";
+          imagesInput.disabled =
+            false;
         }
       }
     );
