@@ -353,19 +353,46 @@
 
     // ============================================================
 
+    const ACCESS_SESSION_KEY =
+      "s967-upload-access";
+
     const params =
       new URLSearchParams(window.location.search);
 
-    const access =
+    const accessFromUrl =
       params.get("access") || "";
 
-    // Hide ?access=... from the visible URL immediately after reading it.
-    if (access) {
+    let access = "";
+
+    if (accessFromUrl) {
+      // Remember the Forms access value only for this browser tab/session.
+      // sessionStorage disappears when the tab/session is closed.
+      try {
+        sessionStorage.setItem(
+          ACCESS_SESSION_KEY,
+          accessFromUrl
+        );
+      } catch {}
+
+      access = accessFromUrl;
+
+      // Remove ?access=... from the visible URL/history after reading it.
       history.replaceState(
         {},
         "",
         window.location.pathname
       );
+    } else {
+      // Allow refresh in the same tab without exposing the access value
+      // in the address bar.
+      try {
+        access =
+          sessionStorage.getItem(
+            ACCESS_SESSION_KEY
+          ) || "";
+      } catch {
+        access = "";
+      }
     }
 
     const deniedPanel =
