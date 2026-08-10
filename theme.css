@@ -184,6 +184,7 @@ footer,
 
 .theme-menu button {
   width: 100%;
+  flex-wrap: wrap;
   display: flex;
   align-items: center;
   gap: 9px;
