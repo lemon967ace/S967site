@@ -246,6 +246,24 @@ function initializeLanguage() {
               button.dataset
                 .languageChoice
             );
+            const picker =
+  document.querySelector(
+    "[data-language-picker]"
+  );
+
+const menuButton =
+  document.querySelector(
+    "[data-language-button]"
+  );
+
+picker?.classList.remove(
+  "is-open"
+);
+
+menuButton?.setAttribute(
+  "aria-expanded",
+  "false"
+);
           }
         );
       }
