@@ -41,6 +41,48 @@ const S967_LANGUAGE_STORAGE_KEY =
 
     themeDark:
       "Dark",
+
+uploadTitle:
+  "Image Upload",
+
+uploadLead:
+  "Upload screenshots.<br>PNG, JPG, JPEG · max 5 MB each · up to 3 images.",
+
+uploadNotice:
+  "<strong>Uploaded images are public and may be viewed by anyone.</strong><br>Please do not upload personal or sensitive information.<br>Older images may be removed periodically.<br><strong>By uploading images, you acknowledge and agree that they will be publicly accessible.</strong>",
+
+chooseImages:
+  "Choose up to 3 images",
+
+uploadImages:
+  "Upload Images",
+
+uploadLimit:
+  "Limit: up to 8 images per 24 hours from the same network.",
+
+uploadComplete:
+  "Upload complete",
+
+uploadSuccess:
+  "Your images have been received successfully.",
+
+backHome:
+  "← Back to Home",
+
+onlyImagesAllowed:
+  "Only PNG, JPG, and JPEG images are allowed.",
+
+imageTooLarge:
+  "Each image must be 5 MB or smaller.",
+
+tooManyImages:
+  "You can select up to 3 images.",
+
+uploading:
+  "Uploading…",
+
+uploadFailed:
+  "Upload failed.",
   },
 
   ko: {
@@ -75,6 +117,48 @@ const S967_LANGUAGE_STORAGE_KEY =
 
     themeDark:
       "다크",
+    
+uploadTitle:
+  "이미지 업로드",
+
+uploadLead:
+  "스크린샷을 업로드하세요.<br>PNG, JPG, JPEG · 이미지당 최대 5 MB · 최대 3장",
+
+uploadNotice:
+  "<strong>업로드된 이미지는 공개되며 누구나 볼 수 있습니다.</strong><br>개인정보나 민감한 정보가 포함된 이미지는 업로드하지 마세요.<br>오래된 이미지는 주기적으로 삭제될 수 있습니다.<br><strong>이미지를 업로드하면 해당 이미지가 공개적으로 열람되는 것에 동의한 것으로 간주됩니다.</strong>",
+
+chooseImages:
+  "이미지 최대 3장 선택",
+
+uploadImages:
+  "이미지 업로드",
+
+uploadLimit:
+  "제한: 동일 네트워크에서 24시간당 최대 8장까지 업로드할 수 있습니다.",
+
+uploadComplete:
+  "업로드 완료",
+
+uploadSuccess:
+  "이미지가 정상적으로 접수되었습니다.",
+
+backHome:
+  "← 홈으로 돌아가기",
+
+onlyImagesAllowed:
+  "PNG, JPG, JPEG 이미지만 업로드할 수 있습니다.",
+
+imageTooLarge:
+  "각 이미지는 5 MB 이하여야 합니다.",
+
+tooManyImages:
+  "이미지는 최대 3장까지 선택할 수 있습니다.",
+
+uploading:
+  "업로드 중…",
+
+uploadFailed:
+  "업로드에 실패했습니다.",
   },
 
   ja: {
@@ -109,6 +193,48 @@ const S967_LANGUAGE_STORAGE_KEY =
 
     themeDark:
       "ダーク",
+
+uploadTitle:
+  "画像アップロード",
+
+uploadLead:
+  "スクリーンショットをアップロードしてください。<br>PNG, JPG, JPEG · 1枚につき最大5 MB · 最大3枚",
+
+uploadNotice:
+  "<strong>アップロードされた画像は公開され、誰でも閲覧できます。</strong><br>個人情報や機密情報を含む画像はアップロードしないでください。<br>古い画像は定期的に削除される場合があります。<br><strong>画像をアップロードすることで、その画像が一般公開されることに同意したものとみなされます。</strong>",
+
+chooseImages:
+  "画像を最大3枚選択",
+
+uploadImages:
+  "画像をアップロード",
+
+uploadLimit:
+  "制限：同一ネットワークから24時間につき最大8枚までアップロードできます。",
+
+uploadComplete:
+  "アップロード完了",
+
+uploadSuccess:
+  "画像を正常に受け付けました。",
+
+backHome:
+  "← ホームに戻る",
+
+onlyImagesAllowed:
+  "PNG、JPG、JPEG画像のみアップロードできます。",
+
+imageTooLarge:
+  "各画像は5 MB以下にしてください。",
+
+tooManyImages:
+  "画像は最大3枚まで選択できます。",
+
+uploading:
+  "アップロード中…",
+
+uploadFailed:
+  "アップロードに失敗しました。",
   },
 
   ru: {
@@ -143,6 +269,48 @@ const S967_LANGUAGE_STORAGE_KEY =
 
     themeDark:
       "Тёмная",
+   
+uploadTitle:
+  "Загрузка изображений",
+
+uploadLead:
+  "Загрузите скриншоты.<br>PNG, JPG, JPEG · до 5 МБ на файл · не более 3 изображений",
+
+uploadNotice:
+  "<strong>Загруженные изображения являются общедоступными и могут быть просмотрены любым пользователем.</strong><br>Не загружайте изображения, содержащие личную или конфиденциальную информацию.<br>Старые изображения могут периодически удаляться.<br><strong>Загружая изображения, вы подтверждаете своё согласие на их публичную доступность.</strong>",
+
+chooseImages:
+  "Выбрать до 3 изображений",
+
+uploadImages:
+  "Загрузить изображения",
+
+uploadLimit:
+  "Ограничение: до 8 изображений за 24 часа из одной сети.",
+
+uploadComplete:
+  "Загрузка завершена",
+
+uploadSuccess:
+  "Изображения успешно получены.",
+
+backHome:
+  "← На главную",
+
+onlyImagesAllowed:
+  "Разрешены только изображения PNG, JPG и JPEG.",
+
+imageTooLarge:
+  "Размер каждого изображения не должен превышать 5 МБ.",
+
+tooManyImages:
+  "Можно выбрать не более 3 изображений.",
+
+uploading:
+  "Загрузка…",
+
+uploadFailed:
+  "Не удалось загрузить изображения.",
   },
 };
 
@@ -232,6 +400,20 @@ function applyLanguage(language) {
           key,
           language
         );
+      document
+  .querySelectorAll(
+    "[data-i18n-html]"
+  )
+  .forEach((element) => {
+    const key =
+      element.dataset.i18nHtml;
+
+    element.innerHTML =
+      getTranslation(
+        key,
+        language
+      );
+  });
     });
 
   document
