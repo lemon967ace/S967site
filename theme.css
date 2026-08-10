@@ -1,235 +1,117 @@
-/* S967 shared theme
-   Default: follows the device/system theme.
-   Explicit choices are applied with html[data-theme="light|dark"].
-*/
+(() => {
+  const STORAGE_KEY = 's967-theme';
+  const VALID = new Set(['system', 'light', 'dark']);
 
-:root {
-  color-scheme: light dark;
+  const ICONS = {
+    system: '◐',
+    light: '☀',
+    dark: '☾'
+  };
 
-  --page-bg:
-    radial-gradient(circle at 50% 15%, rgba(0, 0, 0, 0.035), transparent 34%),
-    linear-gradient(145deg, #f8f9fb 0%, #eef1f5 50%, #f7f8fa 100%);
-  --text: #17191e;
-  --muted: #68707d;
-  --subtle: #9299a4;
-
-  --surface: rgba(255, 255, 255, 0.74);
-  --surface-hover: rgba(255, 255, 255, 0.96);
-  --border: rgba(20, 24, 32, 0.14);
-  --border-hover: rgba(20, 24, 32, 0.28);
-
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
-  --menu-shadow: 0 16px 42px rgba(0, 0, 0, 0.16);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --page-bg:
-      radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.08), transparent 34%),
-      linear-gradient(145deg, #111318 0%, #171a21 50%, #0e1014 100%);
-    --text: #f3f4f6;
-    --muted: #aeb4bf;
-    --subtle: #626875;
-
-    --surface: rgba(255, 255, 255, 0.07);
-    --surface-hover: rgba(255, 255, 255, 0.12);
-    --border: rgba(255, 255, 255, 0.18);
-    --border-hover: rgba(255, 255, 255, 0.32);
-
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-    --menu-shadow: 0 18px 44px rgba(0, 0, 0, 0.40);
-  }
-}
-
-html[data-theme="light"] {
-  color-scheme: light;
-
-  --page-bg:
-    radial-gradient(circle at 50% 15%, rgba(0, 0, 0, 0.035), transparent 34%),
-    linear-gradient(145deg, #f8f9fb 0%, #eef1f5 50%, #f7f8fa 100%);
-  --text: #17191e;
-  --muted: #68707d;
-  --subtle: #9299a4;
-
-  --surface: rgba(255, 255, 255, 0.74);
-  --surface-hover: rgba(255, 255, 255, 0.96);
-  --border: rgba(20, 24, 32, 0.14);
-  --border-hover: rgba(20, 24, 32, 0.28);
-
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
-  --menu-shadow: 0 16px 42px rgba(0, 0, 0, 0.16);
-}
-
-html[data-theme="dark"] {
-  color-scheme: dark;
-
-  --page-bg:
-    radial-gradient(circle at 50% 15%, rgba(255, 255, 255, 0.08), transparent 34%),
-    linear-gradient(145deg, #111318 0%, #171a21 50%, #0e1014 100%);
-  --text: #f3f4f6;
-  --muted: #aeb4bf;
-  --subtle: #626875;
-
-  --surface: rgba(255, 255, 255, 0.07);
-  --surface-hover: rgba(255, 255, 255, 0.12);
-  --border: rgba(255, 255, 255, 0.18);
-  --border-hover: rgba(255, 255, 255, 0.32);
-
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-  --menu-shadow: 0 18px 44px rgba(0, 0, 0, 0.40);
-}
-
-/* Existing S967 pages */
-body {
-  background: var(--page-bg) !important;
-  color: var(--text) !important;
-}
-
-.tagline,
-.detail {
-  color: var(--muted) !important;
-}
-
-footer,
-.schedule,
-.back,
-.eyebrow {
-  color: var(--subtle) !important;
-}
-
-.back:hover {
-  color: var(--muted) !important;
-}
-
-.button {
-  color: var(--text) !important;
-  background: var(--surface) !important;
-  border-color: var(--border) !important;
-}
-
-.button:hover {
-  background: var(--surface-hover) !important;
-  border-color: var(--border-hover) !important;
-}
-
-/* Theme control */
-.theme-picker {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 1000;
-}
-
-.theme-button {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  cursor: pointer;
-  font: inherit;
-  font-size: 19px;
-  line-height: 1;
-  transition:
-    transform 160ms ease,
-    background 160ms ease,
-    border-color 160ms ease;
-}
-
-.theme-button:hover {
-  transform: translateY(-1px);
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
-.theme-button:active {
-  transform: translateY(0) scale(0.97);
-}
-
-.theme-menu {
-  position: absolute;
-  right: 0;
-  bottom: 54px;
-  min-width: 148px;
-  padding: 7px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface-hover);
-  box-shadow: var(--menu-shadow);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(8px) scale(0.98);
-  transform-origin: bottom right;
-  transition:
-    opacity 140ms ease,
-    visibility 140ms ease,
-    transform 140ms ease;
-}
-
-.theme-picker.is-open .theme-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0) scale(1);
-}
-
-.theme-menu button {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 10px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  font-size: 0.86rem;
-}
-
-.theme-menu button:hover {
-  background: var(--surface);
-}
-
-.theme-menu button[aria-checked="true"] {
-  font-weight: 700;
-}
-
-.theme-menu .theme-choice-icon {
-  width: 18px;
-  text-align: center;
-  opacity: 0.82;
-}
-
-.theme-button:focus-visible,
-.theme-menu button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-}
-
-@media (max-width: 480px) {
-  .theme-picker {
-    right: 14px;
-    bottom: 14px;
+  function getSavedTheme() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return VALID.has(saved) ? saved : 'system';
+    } catch {
+      return 'system';
+    }
   }
 
-  .theme-button {
-    width: 42px;
-    height: 42px;
+  function saveTheme(theme) {
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {}
   }
 
-  .theme-menu {
-    bottom: 52px;
+  function applyTheme(theme) {
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.dataset.theme = theme;
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+
+    document.querySelectorAll('[data-theme-button]').forEach((button) => {
+      button.textContent = ICONS[theme] || ICONS.system;
+      button.setAttribute('aria-label', `Theme: ${theme}`);
+      button.setAttribute('title', `Theme: ${theme}`);
+    });
+
+    document.querySelectorAll('[data-theme-choice]').forEach((choice) => {
+      const active = choice.dataset.themeChoice === theme;
+      choice.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
   }
-}
+
+  function closeAllMenus(except = null) {
+    document.querySelectorAll('[data-theme-picker]').forEach((picker) => {
+      if (picker !== except) {
+        picker.classList.remove('is-open');
+        const button = picker.querySelector('[data-theme-button]');
+        if (button) button.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initPicker(picker) {
+    const button = picker.querySelector('[data-theme-button]');
+    const menu = picker.querySelector('[data-theme-menu]');
+
+    if (!button || !menu) return;
+
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+
+      const willOpen = !picker.classList.contains('is-open');
+      closeAllMenus(picker);
+
+      picker.classList.toggle('is-open', willOpen);
+      button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    picker.querySelectorAll('[data-theme-choice]').forEach((choice) => {
+      choice.addEventListener('click', () => {
+        const theme = VALID.has(choice.dataset.themeChoice)
+          ? choice.dataset.themeChoice
+          : 'system';
+
+        saveTheme(theme);
+        applyTheme(theme);
+
+        picker.classList.remove('is-open');
+        button.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  function init() {
+    const initial = getSavedTheme();
+    applyTheme(initial);
+
+    document.querySelectorAll('[data-theme-picker]').forEach(initPicker);
+
+    document.addEventListener('click', () => closeAllMenus());
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllMenus();
+    });
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onSystemChange = () => {
+      if (getSavedTheme() === 'system') {
+        applyTheme('system');
+      }
+    };
+
+    if (media.addEventListener) {
+      media.addEventListener('change', onSystemChange);
+    } else if (media.addListener) {
+      media.addListener(onSystemChange);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
