@@ -816,7 +816,6 @@
       <button
         id="manualEmailSendButton"
         type="button"
-        disabled
       >
         Excel 이메일 발송
       </button>
@@ -856,6 +855,9 @@
   <script>
     const ADMIN_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
+
+    const WK_EXPORT_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-export-email";
     
     const WK_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
@@ -1157,6 +1159,48 @@ async function wkApiRequest(
     throw new Error(
       result.error ||
       "WK request failed."
+    );
+  }
+
+  return result;
+}
+
+    async function wkExportEmailRequest(
+  type
+) {
+  const response =
+    await fetch(
+      WK_EXPORT_EMAIL_API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "x-admin-secret":
+            adminSecret,
+        },
+
+        body:
+          JSON.stringify({
+            type,
+          }),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.errors?.join("\n") ||
+      "Email export failed."
     );
   }
 
@@ -3316,6 +3360,72 @@ wkTabs.forEach((button) => {
         );
       } finally {
         emailAutoSendButton.disabled =
+          false;
+      }
+    }
+  );
+    manualEmailSendButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const activeRecipients =
+        (
+          wkData.email_recipients ??
+          []
+        ).filter(
+          (item) =>
+            item.active === true
+        );
+
+      if (
+        activeRecipients.length === 0
+      ) {
+        setStatus(
+          manualEmailSendStatus,
+          "활성화된 이메일 수신자가 없습니다.",
+          true
+        );
+
+        return;
+      }
+
+      if (
+        !confirm(
+          `현재 WK 회차 결과를 활성 수신자 ${activeRecipients.length}명에게 이메일로 발송할까요?`
+        )
+      ) {
+        return;
+      }
+
+      manualEmailSendButton.disabled =
+        true;
+
+      setStatus(
+        manualEmailSendStatus,
+        "Excel 생성 및 이메일 발송 중…"
+      );
+
+      try {
+        const result =
+          await wkExportEmailRequest(
+            "manual"
+          );
+
+        await loadWkData();
+
+        setStatus(
+          manualEmailSendStatus,
+          `발송 완료 · 신청 ${result.application_count ?? 0}명 · 수신자 ${result.recipient_count ?? 0}명`
+        );
+      } catch (error) {
+        setStatus(
+          manualEmailSendStatus,
+          error.message ||
+            "이메일 발송에 실패했습니다.",
+          true
+        );
+      } finally {
+        manualEmailSendButton.disabled =
           false;
       }
     }
