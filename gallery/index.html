@@ -648,13 +648,72 @@ meta.textContent =
           데이터가 정상적으로 왔으면
           로딩 문구를 숨기고 갤러리를 표시한다.
         */
-        status.style.display =
-          "none";
+       gallery.classList.remove(
+  "hidden"
+);
 
-        gallery.classList.remove(
-          "hidden"
-        );
+const images =
+  Array.from(
+    gallery.querySelectorAll(
+      "img"
+    )
+  );
 
+await Promise.allSettled(
+  images.map(
+    (img) =>
+      new Promise(
+        (resolve) => {
+          if (img.complete) {
+            resolve();
+            return;
+          }
+
+          img.addEventListener(
+            "load",
+            resolve,
+            {
+              once: true,
+            }
+          );
+
+          img.addEventListener(
+            "error",
+            resolve,
+            {
+              once: true,
+            }
+          );
+        }
+      )
+  )
+);
+
+const visibleCards =
+  gallery.querySelectorAll(
+    ".card:not([style*='display: none'])"
+  );
+
+if (
+  visibleCards.length === 0
+) {
+  gallery.classList.add(
+    "hidden"
+  );
+
+  status.style.display =
+    "";
+
+  status.textContent =
+    getTranslation(
+      "galleryEmpty"
+    );
+
+  return;
+}
+
+status.style.display =
+  "none";
       } catch (error) {
         status.style.display =
           "";
