@@ -677,8 +677,28 @@ meta.textContent =
       loadGallery
     );
 
+window.addEventListener(
+  "s967languagechange",
+  () => {
+    document
+      .querySelectorAll(
+        ".meta[data-created-at]"
+      )
+      .forEach((meta) => {
+        meta.textContent =
+          formatDate(
+            meta.dataset.createdAt
+          );
+      });
+  }
+);
 
+window.addEventListener(
+  "DOMContentLoaded",
+  () => {
     loadGallery();
+  }
+);
   </script>
 
 </body>
