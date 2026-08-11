@@ -229,6 +229,102 @@
   padding: 5px 8px;
   font-size: 0.78rem;
 }
+    
+    .admin-tabs,
+.wk-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.admin-tab,
+.wk-tab {
+  background: transparent;
+}
+
+.admin-tab.is-active,
+.wk-tab.is-active {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.admin-section,
+.wk-section {
+  display: none;
+}
+
+.admin-section.is-active,
+.wk-section.is-active {
+  display: block;
+}
+
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.manage-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-hover);
+}
+
+.drag-handle {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+
+  color: var(--muted);
+  font-size: 1.1rem;
+
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.manage-name {
+  min-width: 0;
+  flex: 1;
+
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.manage-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.manage-actions button {
+  padding: 7px 9px;
+  font-size: 0.82rem;
+}
+
+.item-inactive {
+  opacity: 0.55;
+}
+
+.add-row {
+  margin-top: 14px;
+}
   </style>
 </head>
 
@@ -291,10 +387,33 @@
     </section>
 
     <div
-      id="adminArea"
-      class="hidden"
+  id="adminArea"
+  class="hidden"
+>
+  <div class="admin-tabs">
+    <button
+      type="button"
+      class="admin-tab is-active"
+      data-admin-tab="uploads"
     >
-      <section class="panel">
+      Image Upload
+    </button>
+
+    <button
+      type="button"
+      class="admin-tab"
+      data-admin-tab="wk"
+    >
+      WK Application
+    </button>
+  </div>
+
+
+  <div
+    id="uploadAdminSection"
+    class="admin-section is-active"
+    data-admin-section="uploads"
+  >
         <h2>Upload Control</h2>
 
         <p
@@ -344,7 +463,164 @@
           class="status"
         ></div>
       </section>
+      </div>
 
+        <div
+    id="wkAdminSection"
+    class="admin-section"
+    data-admin-section="wk"
+  >
+    <div class="wk-tabs">
+      <button
+        type="button"
+        class="wk-tab is-active"
+        data-wk-tab="applications"
+      >
+        Applications
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="tiers"
+      >
+        Tier
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="alliances"
+      >
+        Alliance
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="settings"
+      >
+        Settings
+      </button>
+    </div>
+
+
+    <div
+      class="wk-section is-active"
+      data-wk-section="applications"
+    >
+      <section class="panel">
+        <h2>WK Applications</h2>
+
+        <p class="small">
+          WK applications will be shown here.
+        </p>
+
+        <div id="wkApplications"></div>
+
+        <div
+          id="wkApplicationsStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="tiers"
+    >
+      <section class="panel">
+        <h2>Tier Management</h2>
+
+        <p class="small">
+          Drag items to change their order.
+          Inactive items are hidden from the public application form.
+        </p>
+
+        <div
+          id="tierList"
+          class="manage-list"
+        ></div>
+
+        <div class="row add-row">
+          <input
+            id="newTierName"
+            type="text"
+            placeholder="New tier"
+          >
+
+          <button
+            id="addTierButton"
+            type="button"
+          >
+            + Add Tier
+          </button>
+        </div>
+
+        <div
+          id="tierStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="alliances"
+    >
+      <section class="panel">
+        <h2>Alliance Management</h2>
+
+        <p class="small">
+          Drag items to change their order.
+          Alliance names are case-sensitive.
+        </p>
+
+        <div
+          id="allianceList"
+          class="manage-list"
+        ></div>
+
+        <div class="row add-row">
+          <input
+            id="newAllianceName"
+            type="text"
+            placeholder="New alliance"
+          >
+
+          <button
+            id="addAllianceButton"
+            type="button"
+          >
+            + Add Alliance
+          </button>
+        </div>
+
+        <div
+          id="allianceStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="settings"
+    >
+      <section class="panel">
+        <h2>WK Settings</h2>
+
+        <p class="small">
+          Application availability and other WK settings
+          will be managed here.
+        </p>
+      </section>
+    </div>
+  </div>
+      
       <section class="panel">
         <div class="row">
           <h2 style="margin: 0;">
@@ -438,6 +714,67 @@
       document.getElementById(
         "resumeButton"
       );
+
+    const adminTabs =
+  document.querySelectorAll(
+    "[data-admin-tab]"
+  );
+
+const adminSections =
+  document.querySelectorAll(
+    "[data-admin-section]"
+  );
+
+const wkTabs =
+  document.querySelectorAll(
+    "[data-wk-tab]"
+  );
+
+const wkSections =
+  document.querySelectorAll(
+    "[data-wk-section]"
+  );
+
+
+const tierList =
+  document.getElementById(
+    "tierList"
+  );
+
+const allianceList =
+  document.getElementById(
+    "allianceList"
+  );
+
+const newTierName =
+  document.getElementById(
+    "newTierName"
+  );
+
+const newAllianceName =
+  document.getElementById(
+    "newAllianceName"
+  );
+
+const addTierButton =
+  document.getElementById(
+    "addTierButton"
+  );
+
+const addAllianceButton =
+  document.getElementById(
+    "addAllianceButton"
+  );
+
+const tierStatus =
+  document.getElementById(
+    "tierStatus"
+  );
+
+const allianceStatus =
+  document.getElementById(
+    "allianceStatus"
+  );
 
     let adminSecret = "";
     let currentData = null;
@@ -1206,6 +1543,64 @@ function renderOnlyIp(ipHash) {
         }
       }
     );
+    adminTabs.forEach((button) => {
+  button.addEventListener(
+    "click",
+    () => {
+      const target =
+        button.dataset.adminTab;
+
+      adminTabs.forEach(
+        (item) => {
+          item.classList.toggle(
+            "is-active",
+            item === button
+          );
+        }
+      );
+
+      adminSections.forEach(
+        (section) => {
+          section.classList.toggle(
+            "is-active",
+            section.dataset
+              .adminSection === target
+          );
+        }
+      );
+    }
+  );
+});
+
+
+wkTabs.forEach((button) => {
+  button.addEventListener(
+    "click",
+    () => {
+      const target =
+        button.dataset.wkTab;
+
+      wkTabs.forEach(
+        (item) => {
+          item.classList.toggle(
+            "is-active",
+            item === button
+          );
+        }
+      );
+
+      wkSections.forEach(
+        (section) => {
+          section.classList.toggle(
+            "is-active",
+            section.dataset
+              .wkSection === target
+          );
+        }
+      );
+    }
+  );
+});
   </script>
 </body>
 </html>
