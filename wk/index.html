@@ -1950,6 +1950,93 @@ updateApplicationSchedule();
       }
     }
 
+    const languagePicker =
+  document.querySelector(
+    "[data-language-picker]"
+  );
+
+const languageButton =
+  document.querySelector(
+    "[data-language-button]"
+  );
+
+const languageMenu =
+  document.querySelector(
+    "[data-language-menu]"
+  );
+
+languageButton?.addEventListener(
+  "click",
+  () => {
+    const isOpen =
+      languagePicker.classList.toggle(
+        "is-open"
+      );
+
+    languageButton.setAttribute(
+      "aria-expanded",
+      String(isOpen)
+    );
+  }
+);
+
+languageMenu
+  ?.querySelectorAll(
+    "[data-language-choice]"
+  )
+  .forEach((button) => {
+    const choice =
+      button.dataset.languageChoice;
+
+    button.classList.toggle(
+      "is-active",
+      choice === language
+    );
+
+    button.addEventListener(
+      "click",
+      () => {
+        if (
+          choice === language
+        ) {
+          languagePicker.classList.remove(
+            "is-open"
+          );
+
+          return;
+        }
+
+        if (
+          typeof setLanguage ===
+          "function"
+        ) {
+          setLanguage(choice);
+          location.reload();
+        }
+      }
+    );
+  });
+
+document.addEventListener(
+  "click",
+  (event) => {
+    if (
+      !languagePicker?.contains(
+        event.target
+      )
+    ) {
+      languagePicker?.classList.remove(
+        "is-open"
+      );
+
+      languageButton?.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+    }
+  }
+);
+    
 function formatNumberInput(
   input
 ) {
