@@ -1397,6 +1397,24 @@ function updateApplicationSchedule() {
       "scheduleDetail"
     );
 
+  if (serverAvailability === null) {
+  applicationPanel.classList.add(
+    "hidden"
+  );
+
+  scheduleBox.classList.remove(
+    "hidden"
+  );
+
+  scheduleStatus.textContent =
+    "";
+
+  scheduleDetail.textContent =
+    "";
+
+  return;
+}
+  
   let state =
     automaticState;
 
