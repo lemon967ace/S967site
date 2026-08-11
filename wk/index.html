@@ -1257,10 +1257,16 @@ hours:
       },
     };
     
-    const text =
-      TEXT[language] ??
-      TEXT.en;
+   let language =
+  typeof getCurrentLanguage ===
+    "function"
+    ? getCurrentLanguage()
+    : "en";
 
+let text =
+  TEXT[language] ??
+  TEXT.en;
+    
     let serverAvailability = null;
     
 // ============================================================
@@ -1770,7 +1776,76 @@ rallySize.placeholder =
       );
     }
 
+function updateRadioGroupLabels() {
+  document
+    .querySelectorAll(
+      'input[name="troop_type"]'
+    )
+    .forEach((input) => {
+      const span =
+        input.parentElement
+          ?.querySelector("span");
 
+      if (span) {
+        span.textContent =
+          text.troopTypes[
+            input.value
+          ] ?? input.value;
+      }
+    });
+
+  document
+    .querySelectorAll(
+      'input[name="realtime_response"]'
+    )
+    .forEach((input) => {
+      const span =
+        input.parentElement
+          ?.querySelector("span");
+
+      if (span) {
+        span.textContent =
+          text.realtimeOptions[
+            input.value
+          ] ?? input.value;
+      }
+    });
+
+  document
+    .querySelectorAll(
+      'input[name="captain_role"]'
+    )
+    .forEach((input) => {
+      const span =
+        input.parentElement
+          ?.querySelector("span");
+
+      if (span) {
+        span.textContent =
+          text.captainRoles[
+            input.value
+          ] ?? input.value;
+      }
+    });
+
+  document
+    .querySelectorAll(
+      'input[name="participation_time"]'
+    )
+    .forEach((input) => {
+      const span =
+        input.parentElement
+          ?.querySelector("span");
+
+      if (span) {
+        span.textContent =
+          text.participationTimes[
+            input.value
+          ] ?? input.value;
+      }
+    });
+}
+    
     async function loadOptions() {
       const response =
         await fetch(
