@@ -175,6 +175,9 @@ inquiryRequiredError:
 
 inquirySubmitError:
   "Failed to submit your inquiry.",
+
+    inquiryClosed:
+    "We are not accepting inquiries at this time.",
   },
 
   ko: {
@@ -344,6 +347,10 @@ inquiryRequiredError:
 
 inquirySubmitError:
   "문의 제출에 실패했습니다.",
+
+    inquiryClosed:
+    "현재 문의를 받지 않고 있습니다.",
+
   },
 
   ja: {
@@ -513,6 +520,9 @@ inquiryRequiredError:
 
 inquirySubmitError:
   "お問い合わせの送信に失敗しました。",
+
+    inquiryClosed:
+    "現在、お問い合わせの受付を停止しています。",
   },
 
   ru: {
@@ -682,6 +692,9 @@ inquiryRequiredError:
 
 inquirySubmitError:
   "Не удалось отправить обращение.",
+
+      inquiryClosed:
+    "В настоящее время мы не принимаем обращения.",
   },
 };
 
