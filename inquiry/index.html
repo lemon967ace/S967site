@@ -2,11 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
   <meta
     name="description"
-    content="S967 Inquiry Form"
+    content="S967 Inquiry"
   >
 
   <title>S967 Inquiry</title>
@@ -39,7 +48,11 @@
 
     body {
       min-height: 100vh;
-      padding: 32px 20px 60px;
+
+      padding:
+        32px
+        20px
+        60px;
 
       background:
         radial-gradient(
@@ -72,27 +85,31 @@
     }
 
     .page-header {
+      margin-bottom: 30px;
       text-align: center;
-      margin-bottom: 34px;
     }
 
-    .page-title {
+    .eyebrow {
+      margin-bottom: 10px;
+      color: #777e8b;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
       margin: 0;
-      font-size: clamp(
-        2rem,
-        7vw,
-        3.2rem
-      );
+
+      font-size:
+        clamp(
+          2rem,
+          7vw,
+          3rem
+        );
 
       line-height: 1.1;
       letter-spacing: -.03em;
-    }
-
-    .page-subtitle {
-      margin: 12px 0 0;
-      color: #aeb4bf;
-      font-size: 1rem;
-      line-height: 1.6;
     }
 
     .panel {
@@ -112,59 +129,33 @@
     }
 
     .field {
-      margin-bottom: 28px;
+      margin-bottom: 36px;
     }
 
-    .field:last-child {
+    .field:last-of-type {
       margin-bottom: 0;
     }
 
-    .field-label {
+    .question {
       display: block;
 
-      margin-bottom: 10px;
+      margin:
+        0
+        0
+        12px;
 
       font-size: 1rem;
       font-weight: 700;
+      line-height: 1.55;
+    }
 
-      line-height: 1.5;
+    .question-number {
+      margin-right: 5px;
     }
 
     .required {
       margin-left: 4px;
       color: #ff8b8b;
-    }
-
-    .optional {
-      margin-left: 5px;
-      color: #aeb4bf;
-      font-weight: 500;
-    }
-
-    .field-help {
-      margin:
-        -2px
-        0
-        12px;
-
-      color: #aeb4bf;
-
-      font-size: .9rem;
-      line-height: 1.55;
-    }
-
-    .warning {
-      margin:
-        10px
-        0
-        0;
-
-      color: #c9ced7;
-
-      font-size: .86rem;
-      line-height: 1.5;
-
-      font-weight: 600;
     }
 
     .radio-list {
@@ -175,7 +166,7 @@
     .radio-option {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 11px;
 
       min-height: 48px;
 
@@ -208,18 +199,20 @@
     }
 
     .radio-option input {
-      margin: 0;
-
       width: 18px;
       height: 18px;
-
-      accent-color:
-        currentColor;
+      margin: 0;
+      flex: 0 0 auto;
+      accent-color: currentColor;
     }
 
     textarea,
     input[type="text"] {
       width: 100%;
+
+      padding:
+        13px
+        14px;
 
       border:
         1px solid
@@ -227,9 +220,7 @@
 
       border-radius: 10px;
 
-      padding:
-        13px
-        14px;
+      outline: none;
 
       background:
         rgba(0,0,0,.18);
@@ -237,8 +228,6 @@
       color: #f3f4f6;
 
       font: inherit;
-
-      outline: none;
 
       transition:
         border-color 150ms ease,
@@ -251,6 +240,12 @@
       line-height: 1.55;
     }
 
+    textarea::placeholder,
+    input::placeholder {
+      color: #858c98;
+      opacity: 1;
+    }
+
     textarea:focus,
     input[type="text"]:focus {
       border-color:
@@ -260,11 +255,27 @@
         rgba(0,0,0,.25);
     }
 
-    .actions {
-      margin-top: 30px;
+    .contact-methods {
+      margin-bottom: 14px;
+    }
 
+    .example {
+      margin:
+        14px
+        0
+        10px;
+
+      color: #aeb4bf;
+
+      font-size: .88rem;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .actions {
       display: flex;
       justify-content: center;
+      margin-top: 32px;
     }
 
     .submit-button {
@@ -308,15 +319,15 @@
     }
 
     .submit-button:disabled {
-      cursor: default;
       opacity: .55;
+      cursor: default;
       transform: none;
     }
 
     .status {
-      margin-top: 18px;
-
       min-height: 1.4em;
+
+      margin-top: 18px;
 
       text-align: center;
 
@@ -340,9 +351,7 @@
       color: #d2d6dd;
     }
 
-    @media (
-      max-width: 520px
-    ) {
+    @media (max-width: 520px) {
       body {
         padding:
           24px
@@ -445,15 +454,11 @@
         data-theme-choice="system"
         role="menuitemradio"
       >
-        <span
-          class="theme-choice-icon"
-        >
+        <span class="theme-choice-icon">
           ◐
         </span>
 
-        <span
-          data-i18n="themeSystem"
-        >
+        <span data-i18n="themeSystem">
           System
         </span>
       </button>
@@ -463,15 +468,11 @@
         data-theme-choice="light"
         role="menuitemradio"
       >
-        <span
-          class="theme-choice-icon"
-        >
+        <span class="theme-choice-icon">
           ☀
         </span>
 
-        <span
-          data-i18n="themeLight"
-        >
+        <span data-i18n="themeLight">
           Light
         </span>
       </button>
@@ -481,15 +482,11 @@
         data-theme-choice="dark"
         role="menuitemradio"
       >
-        <span
-          class="theme-choice-icon"
-        >
+        <span class="theme-choice-icon">
           ☾
         </span>
 
-        <span
-          data-i18n="themeDark"
-        >
+        <span data-i18n="themeDark">
           Dark
         </span>
       </button>
@@ -499,22 +496,14 @@
 
   <main>
 
-    <header
-      class="page-header"
-    >
-      <h1
-        class="page-title"
-        id="pageTitle"
-      >
-        Inquiry
-      </h1>
+    <header class="page-header">
+      <div class="eyebrow">
+        S967
+      </div>
 
-      <p
-        class="page-subtitle"
-        id="pageSubtitle"
-      >
-        Please fill out the form below.
-      </p>
+      <h1 data-i18n="inquiryFormTitle">
+        Greetings!
+      </h1>
     </header>
 
 
@@ -524,29 +513,29 @@
       novalidate
     >
 
-      <section
-        class="field"
-      >
-        <div
-          class="field-label"
-          id="categoryLabel"
-        >
-          What brings you here?
+      <!-- 1 -->
+      <section class="field">
+
+        <div class="question">
+          <span class="question-number">
+            1.
+          </span>
+
           <span
-            class="required"
+            data-i18n="inquiryCategoryQuestion"
           >
+            What brings you here?
+          </span>
+
+          <span class="required">
             *
           </span>
         </div>
 
-        <div
-          class="radio-list"
-          id="categoryOptions"
-        >
 
-          <label
-            class="radio-option"
-          >
+        <div class="radio-list">
+
+          <label class="radio-option">
             <input
               type="radio"
               name="category"
@@ -555,16 +544,14 @@
             >
 
             <span
-              data-category-label="suggestion"
+              data-i18n="inquiryCategorySuggestion"
             >
               Suggestion
             </span>
           </label>
 
 
-          <label
-            class="radio-option"
-          >
+          <label class="radio-option">
             <input
               type="radio"
               name="category"
@@ -573,16 +560,14 @@
             >
 
             <span
-              data-category-label="report"
+              data-i18n="inquiryCategoryReport"
             >
               Report
             </span>
           </label>
 
 
-          <label
-            class="radio-option"
-          >
+          <label class="radio-option">
             <input
               type="radio"
               name="category"
@@ -591,17 +576,14 @@
             >
 
             <span
-              data-category-label="inquiry"
+              data-i18n="inquiryCategoryInquiry"
             >
-              Inquiry
-              (including immigration)
+              Inquiry (including immigration)
             </span>
           </label>
 
 
-          <label
-            class="radio-option"
-          >
+          <label class="radio-option">
             <input
               type="radio"
               name="category"
@@ -610,16 +592,14 @@
             >
 
             <span
-              data-category-label="tile_issue"
+              data-i18n="inquiryCategoryTileIssue"
             >
               Tile Issue
             </span>
           </label>
 
 
-          <label
-            class="radio-option"
-          >
+          <label class="radio-option">
             <input
               type="radio"
               name="category"
@@ -628,7 +608,7 @@
             >
 
             <span
-              data-category-label="other"
+              data-i18n="inquiryCategoryOther"
             >
               Other
             </span>
@@ -638,100 +618,197 @@
       </section>
 
 
-      <section
-        class="field"
-      >
+      <!-- 2 -->
+      <section class="field">
+
         <label
-          class="field-label"
+          class="question"
           for="details"
-          id="detailsLabel"
         >
-          Please enter the details.
+          <span class="question-number">
+            2.
+          </span>
+
           <span
-            class="required"
+            data-i18n="inquiryDetailsQuestion"
           >
+            Please enter the details.
+          </span>
+
+          <span class="required">
             *
           </span>
         </label>
-
-        <p
-          class="field-help"
-          id="detailsHelp"
-        >
-          For Tile Issues, please include
-          the coordinates in the details.
-        </p>
 
         <textarea
           id="details"
           name="details"
           required
           maxlength="10000"
+          data-i18n-placeholder="inquiryDetailsPlaceholder"
+          placeholder="For Tile Issues, please include the coordinates in the details."
         ></textarea>
+
       </section>
 
 
-      <section
-        class="field"
-      >
-        <label
-          class="field-label"
-          for="contact"
-          id="contactLabel"
-        >
-          If you would like a reply from us,
-          please provide your contact method
-          with your contact information.
-          <span
-            class="optional"
-          >
-            (Optional)
+      <!-- 3 -->
+      <section class="field">
+
+        <div class="question">
+          <span class="question-number">
+            3.
           </span>
-        </label>
+
+          <span
+            data-i18n="inquiryContactQuestion"
+          >
+            (Optional) If you would like a reply from us, please provide your contact method with your contact information. (Optional)
+          </span>
+        </div>
+
+
+        <div
+          class="radio-list contact-methods"
+        >
+
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="contact_method"
+              value="in_game_name"
+            >
+
+            <span
+              data-i18n="inquiryContactGame"
+            >
+              In-game name
+            </span>
+          </label>
+
+
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="contact_method"
+              value="discord"
+            >
+
+            <span
+              data-i18n="inquiryContactDiscord"
+            >
+              Discord
+            </span>
+          </label>
+
+
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="contact_method"
+              value="telegram"
+            >
+
+            <span
+              data-i18n="inquiryContactTelegram"
+            >
+              Telegram
+            </span>
+          </label>
+
+
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="contact_method"
+              value="kakao_open_profile"
+            >
+
+            <span
+              data-i18n="inquiryContactKakao"
+            >
+              Kakao Open Profile
+            </span>
+          </label>
+
+
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="contact_method"
+              value="email"
+            >
+
+            <span
+              data-i18n="inquiryContactEmail"
+            >
+              Email
+            </span>
+          </label>
+
+          <label class="radio-option">
+  <input
+    type="radio"
+    name="contact_method"
+    value="line"
+  >
+
+  <span
+    data-i18n="inquiryContactLine"
+  >
+    LINE
+  </span>
+</label>
+
+
+<label class="radio-option">
+  <input
+    type="radio"
+    name="contact_method"
+    value="other"
+  >
+
+  <span
+    data-i18n="inquiryContactOther"
+  >
+    Other
+  </span>
+</label>
+          
+        </div>
+
 
         <p
-          class="field-help"
-          id="contactExample"
+          class="example"
+          data-i18n="inquiryContactExample"
         >
-          Example:
-          In-game name:
-          ᴬᶜᴱ⍣⃝ 레몬 /
-          Discord: username /
-          Telegram: @username /
-          Kakao Open Profile: link /
-          Email: address
+          Example: In-game name: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: link / Email: address
         </p>
+
 
         <input
           id="contact"
           name="contact"
           type="text"
           maxlength="1000"
+          data-i18n-placeholder="inquiryContactPlaceholder"
+          placeholder="Enter your contact information."
         >
 
-        <p
-          class="warning"
-          id="contactWarning"
-        >
-          If the information is incorrect,
-          you may not receive a reply.
-          Please specify the type of
-          contact method.
-        </p>
       </section>
 
 
-      <div
-        class="actions"
-      >
+      <div class="actions">
         <button
           id="submitButton"
           class="submit-button"
           type="submit"
+          data-i18n="inquirySubmit"
         >
           Submit
         </button>
       </div>
+
 
       <div
         id="formStatus"
@@ -745,7 +822,7 @@
     <a
       class="back"
       href="/"
-      id="backLink"
+      data-i18n="backHome"
     >
       ← Back to Home
     </a>
@@ -754,468 +831,132 @@
 
 
   <script>
-    const inquiryTranslations = {
-
-      en: {
-        pageTitle:
-          "Inquiry",
-
-        pageSubtitle:
-          "Please fill out the form below.",
-
-        categoryLabel:
-          "What brings you here?",
-
-        categories: {
-          suggestion:
-            "Suggestion",
-
-          report:
-            "Report",
-
-          inquiry:
-            "Inquiry (including immigration)",
-
-          tile_issue:
-            "Tile Issue",
-
-          other:
-            "Other",
-        },
-
-        detailsLabel:
-          "Please enter the details.",
-
-        detailsHelp:
-          "For Tile Issues, please include the coordinates in the details.",
-
-        contactLabel:
-          "If you would like a reply from us, please provide your contact method with your contact information.",
-
-        optional:
-          "(Optional)",
-
-        contactExample:
-          "Example: In-game name: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: link / Email: address",
-
-        contactWarning:
-          "If the information is incorrect, you may not receive a reply. Please specify the type of contact method.",
-
-        submit:
-          "Submit",
-
-        back:
-          "← Back to Home",
-
-        requiredMessage:
-          "Please complete all required fields.",
-      },
-
-
-      ko: {
-        pageTitle:
-          "문의",
-
-        pageSubtitle:
-          "아래 양식을 작성해주세요.",
-
-        categoryLabel:
-          "어떤 이유로 찾아오셨나요?",
-
-        categories: {
-          suggestion:
-            "건의",
-
-          report:
-            "신고",
-
-          inquiry:
-            "문의 (이민 포함)",
-
-          tile_issue:
-            "채집지 문제",
-
-          other:
-            "기타",
-        },
-
-        detailsLabel:
-          "내용을 입력해주세요.",
-
-        detailsHelp:
-          "채집지 문제의 경우, 내용에 좌표를 포함해주세요.",
-
-        contactLabel:
-          "답신을 원하시는 경우, 연락 가능한 수단과 연락처를 함께 입력해주세요.",
-
-        optional:
-          "(선택)",
-
-        contactExample:
-          "예: 게임 닉네임: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: 링크 / Email: 주소",
-
-        contactWarning:
-          "부정확한 경우 답신을 받지 못할 수 있습니다. 반드시 연락처의 종류를 명시해주세요.",
-
-        submit:
-          "제출",
-
-        back:
-          "← 홈으로 돌아가기",
-
-        requiredMessage:
-          "필수 항목을 모두 입력해주세요.",
-      },
-
-
-      ja: {
-        pageTitle:
-          "お問い合わせ",
-
-        pageSubtitle:
-          "以下のフォームにご入力ください。",
-
-        categoryLabel:
-          "どのような理由でこちらに来られましたか？",
-
-        categories: {
-          suggestion:
-            "提案・要望",
-
-          report:
-            "通報",
-
-          inquiry:
-            "お問い合わせ（移民を含む）",
-
-          tile_issue:
-            "タイルの問題",
-
-          other:
-            "その他",
-        },
-
-        detailsLabel:
-          "内容をご入力ください。",
-
-        detailsHelp:
-          "タイルの問題の場合は、内容に座標を含めてください。",
-
-        contactLabel:
-          "こちらからの返信をご希望の場合は、連絡可能な方法・連絡先をご入力ください。",
-
-        optional:
-          "（任意）",
-
-        contactExample:
-          "例：ゲーム内ニックネーム: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: リンク / Email: アドレス",
-
-        contactWarning:
-          "情報が正確でない場合、返信を受け取れない可能性があります。連絡手段の種類を必ず明記してください。",
-
-        submit:
-          "送信",
-
-        back:
-          "← ホームに戻る",
-
-        requiredMessage:
-          "必須項目をすべて入力してください。",
-      },
-
-
-      ru: {
-        pageTitle:
-          "Обращение",
-
-        pageSubtitle:
-          "Пожалуйста, заполните форму ниже.",
-
-        categoryLabel:
-          "Что привело вас сюда?",
-
-        categories: {
-          suggestion:
-            "Предложение",
-
-          report:
-            "Сообщение о нарушении",
-
-          inquiry:
-            "Вопросы (включая иммиграцию)",
-
-          tile_issue:
-            "Проблема с местом сбора",
-
-          other:
-            "Другое",
-        },
-
-        detailsLabel:
-          "Пожалуйста, опишите подробности.",
-
-        detailsHelp:
-          "Если проблема связана с местом сбора, укажите координаты в описании.",
-
-        contactLabel:
-          "Если вы хотите получить от нас ответ, укажите удобный способ связи и контактные данные.",
-
-        optional:
-          "(Необязательно)",
-
-        contactExample:
-          "Например: Игровой ник: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: ссылка / Email: адрес",
-
-        contactWarning:
-          "Если информация указана неверно, вы можете не получить ответ. Обязательно укажите способ связи.",
-
-        submit:
-          "Отправить",
-
-        back:
-          "← Вернуться на главную",
-
-        requiredMessage:
-          "Пожалуйста, заполните все обязательные поля.",
-      },
-    };
-
-
-    function getCurrentLanguage() {
-      const stored =
-        localStorage.getItem(
-          "s967-language",
+    const inquiryForm =
+      document.getElementById(
+        "inquiryForm"
+      );
+
+    const detailsInput =
+      document.getElementById(
+        "details"
+      );
+
+    const contactInput =
+      document.getElementById(
+        "contact"
+      );
+
+    const formStatus =
+      document.getElementById(
+        "formStatus"
+      );
+
+
+    inquiryForm.addEventListener(
+      "submit",
+      (event) => {
+        event.preventDefault();
+
+
+        const category =
+          document.querySelector(
+            'input[name="category"]:checked'
+          );
+
+
+        const contactMethod =
+          document.querySelector(
+            'input[name="contact_method"]:checked'
+          );
+
+
+        const details =
+          detailsInput
+            .value
+            .trim();
+
+
+        if (
+          !category ||
+          !details
+        ) {
+          formStatus.textContent =
+            getTranslation(
+              "inquiryRequiredError"
+            );
+
+          return;
+        }
+
+
+        const contact =
+  contactInput
+    .value
+    .trim();
+
+
+if (
+  (
+    contact &&
+    !contactMethod
+  ) ||
+  (
+    contactMethod &&
+    !contact
+  )
+) {
+  formStatus.textContent =
+    getTranslation(
+      "inquiryContactPairError"
+    );
+
+  return;
+}
+        
+        const submission = {
+          language:
+            getCurrentLanguage(),
+
+          category:
+            category.value,
+
+          details,
+
+          contact_method:
+            contactMethod
+              ? contactMethod.value
+              : null,
+
+          contact,
+        };
+
+
+        /*
+          다음 단계에서
+          inquiry-submit Edge Function 호출
+        */
+
+        console.log(
+          submission
         );
 
-      if (
-        stored &&
-        inquiryTranslations[stored]
-      ) {
-        return stored;
+        formStatus.textContent =
+          "OK";
       }
-
-      return "en";
-    }
-
-
-    function applyInquiryLanguage(
-      language,
-    ) {
-      const t =
-        inquiryTranslations[
-          language
-        ] ??
-        inquiryTranslations.en;
-
-
-      document.documentElement.lang =
-        language;
-
-
-      document.getElementById(
-        "pageTitle",
-      ).textContent =
-        t.pageTitle;
-
-
-      document.getElementById(
-        "pageSubtitle",
-      ).textContent =
-        t.pageSubtitle;
-
-
-      document.getElementById(
-        "categoryLabel",
-      ).innerHTML =
-        `${t.categoryLabel}<span class="required">*</span>`;
-
-
-      document
-        .querySelectorAll(
-          "[data-category-label]",
-        )
-        .forEach(
-          (
-            element,
-          ) => {
-            const key =
-              element.dataset
-                .categoryLabel;
-
-            element.textContent =
-              t.categories[key];
-          },
-        );
-
-
-      document.getElementById(
-        "detailsLabel",
-      ).innerHTML =
-        `${t.detailsLabel}<span class="required">*</span>`;
-
-
-      document.getElementById(
-        "detailsHelp",
-      ).textContent =
-        t.detailsHelp;
-
-
-      document.getElementById(
-        "contactLabel",
-      ).innerHTML =
-        `${t.contactLabel}<span class="optional">${t.optional}</span>`;
-
-
-      document.getElementById(
-        "contactExample",
-      ).textContent =
-        t.contactExample;
-
-
-      document.getElementById(
-        "contactWarning",
-      ).textContent =
-        t.contactWarning;
-
-
-      document.getElementById(
-        "submitButton",
-      ).textContent =
-        t.submit;
-
-
-      document.getElementById(
-        "backLink",
-      ).textContent =
-        t.back;
-    }
-
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => {
-        applyInquiryLanguage(
-          getCurrentLanguage(),
-        );
-      },
     );
 
 
     window.addEventListener(
       "s967languagechange",
-      (
-        event,
-      ) => {
-        const language =
-          event.detail
-            ?.language ??
-          getCurrentLanguage();
-
-        applyInquiryLanguage(
-          language,
-        );
-      },
+      () => {
+        if (
+          formStatus.textContent
+        ) {
+          formStatus.textContent =
+            "";
+        }
+      }
     );
-
-
-    document
-      .getElementById(
-        "inquiryForm",
-      )
-      .addEventListener(
-        "submit",
-        (
-          event,
-        ) => {
-          event.preventDefault();
-
-
-          const language =
-            getCurrentLanguage();
-
-          const t =
-            inquiryTranslations[
-              language
-            ] ??
-            inquiryTranslations.en;
-
-
-          const category =
-            document.querySelector(
-              'input[name="category"]:checked',
-            );
-
-          const details =
-            document
-              .getElementById(
-                "details",
-              )
-              .value
-              .trim();
-
-
-          const status =
-            document.getElementById(
-              "formStatus",
-            );
-
-
-          if (
-            !category ||
-            !details
-          ) {
-            status.textContent =
-              t.requiredMessage;
-
-            return;
-          }
-
-
-          /*
-            다음 단계에서 여기에
-            Supabase inquiry-submit
-            호출을 연결합니다.
-
-            제출 데이터 구조:
-
-            {
-              language,
-              category:
-                category.value,
-              details,
-              contact:
-                document
-                  .getElementById(
-                    "contact",
-                  )
-                  .value
-                  .trim()
-            }
-          */
-
-
-          console.log({
-            language,
-
-            category:
-              category.value,
-
-            details,
-
-            contact:
-              document
-                .getElementById(
-                  "contact",
-                )
-                .value
-                .trim(),
-          });
-
-
-          status.textContent =
-            "OK";
-        },
-      );
   </script>
 
 </body>
