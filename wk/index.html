@@ -24,23 +24,68 @@
   ></script>
 
   <style>
-    .language-switcher {
+    .top-pickers {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 1000;
+
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 16px;
+  gap: 8px;
 }
 
-.language-switcher button {
-  padding: 7px 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
+.language-picker {
+  position: relative;
 }
 
-.language-switcher button.is-active {
-  border-color: var(--text);
-  box-shadow:
-    inset 0 0 0 1px var(--text);
+.language-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+
+  min-width: 140px;
+  padding: 6px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  display: none;
+}
+
+.language-picker.is-open
+.language-menu {
+  display: block;
+}
+
+.language-menu button {
+  width: 100%;
+  padding: 9px 10px;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+}
+
+.language-menu button:hover {
+  background: var(--surface-hover);
+}
+
+.language-menu button.is-active::before {
+  content: "✓ ";
 }
     * {
       box-sizing: border-box;
@@ -284,6 +329,59 @@
     >
       <span class="theme-choice-icon">☾</span>
       <span>Dark</span>
+    </button>
+  </div>
+</div>
+  <div
+  class="language-picker"
+  data-language-picker
+>
+  <button
+    class="language-button"
+    type="button"
+    data-language-button
+    aria-label="Language"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
+    🌐
+  </button>
+
+  <div
+    class="language-menu"
+    data-language-menu
+    role="menu"
+  >
+    <button
+      type="button"
+      data-language-choice="ko"
+      role="menuitemradio"
+    >
+      한국어
+    </button>
+
+    <button
+      type="button"
+      data-language-choice="en"
+      role="menuitemradio"
+    >
+      English
+    </button>
+
+    <button
+      type="button"
+      data-language-choice="ja"
+      role="menuitemradio"
+    >
+      日本語
+    </button>
+
+    <button
+      type="button"
+      data-language-choice="ru"
+      role="menuitemradio"
+    >
+      Русский
     </button>
   </div>
 </div>
