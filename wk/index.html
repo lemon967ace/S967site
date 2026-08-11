@@ -1861,6 +1861,24 @@ function updateRadioGroupLabels() {
       }
     });
 }
+
+    window.addEventListener(
+  "s967languagechange",
+  (event) => {
+    language =
+      event.detail?.language ??
+      getCurrentLanguage();
+
+    text =
+      TEXT[language] ??
+      TEXT.en;
+
+    setStaticText();
+    updateRadioGroupLabels();
+    updateParticipationState();
+    updateApplicationSchedule();
+  }
+);
     
     async function loadOptions() {
       const response =
