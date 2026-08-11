@@ -180,75 +180,81 @@
     >◐</button>
 
     <div
-      class="theme-menu"
-      data-theme-menu
-      role="menu"
-    >
-      <button
-        type="button"
-        data-theme-choice="system"
-        role="menuitemradio"
-      >
-        <span class="theme-choice-icon">◐</span>
-        <span>System</span>
-      </button>
+  class="theme-menu"
+  data-theme-menu
+  role="menu"
+>
+  <button
+    type="button"
+    data-theme-choice="system"
+    role="menuitemradio"
+  >
+    <span class="theme-choice-icon">◐</span>
+    <span data-i18n="themeSystem">System</span>
+  </button>
 
-      <button
-        type="button"
-        data-theme-choice="light"
-        role="menuitemradio"
-      >
-        <span class="theme-choice-icon">☀</span>
-        <span>Light</span>
-      </button>
+  <button
+    type="button"
+    data-theme-choice="light"
+    role="menuitemradio"
+  >
+    <span class="theme-choice-icon">☀</span>
+    <span data-i18n="themeLight">Light</span>
+  </button>
 
-      <button
-        type="button"
-        data-theme-choice="dark"
-        role="menuitemradio"
-      >
-        <span class="theme-choice-icon">☾</span>
-        <span>Dark</span>
-      </button>
-    </div>
+  <button
+    type="button"
+    data-theme-choice="dark"
+    role="menuitemradio"
+  >
+    <span class="theme-choice-icon">☾</span>
+    <span data-i18n="themeDark">Dark</span>
+  </button>
+</div>
   </div>
 
   <main>
     <div class="eyebrow">S967</div>
     <h1>Image Gallery</h1>
 
-    <p class="lead">
-      Images uploaded by the community.
-    </p>
+    <p
+  class="lead"
+  data-i18n="galleryLead"
+>
+  Images uploaded by the community.
+</p>
 
-    <div class="toolbar">
-      <button
-        id="refreshButton"
-        class="refresh"
-        type="button"
-      >
-        Refresh
-      </button>
-    </div>
+<div class="toolbar">
+  <button
+    id="refreshButton"
+    class="refresh"
+    type="button"
+    data-i18n="refresh"
+  >
+    Refresh
+  </button>
+</div>
 
-    <div
-      id="status"
-      class="status"
-    >
-      Loading images…
-    </div>
+<div
+  id="status"
+  class="status"
+  data-i18n="loadingImages"
+>
+  Loading images…
+</div>
 
-    <div
-      id="gallery"
-      class="gallery hidden"
-    ></div>
+<div
+  id="gallery"
+  class="gallery hidden"
+></div>
 
-    <a
-      class="back"
-      href="/"
-    >
-      ← Back to Home
-    </a>
+<a
+  class="back"
+  href="/"
+  data-i18n="backHome"
+>
+  ← Back to Home
+</a>
   </main>
 
   <script>
