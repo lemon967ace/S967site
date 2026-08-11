@@ -231,7 +231,8 @@
 }
     
     .admin-tabs,
-.wk-tabs {
+.wk-tabs,
+.group-buy-tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -239,23 +240,27 @@
 }
 
 .admin-tab,
-.wk-tab {
+.wk-tab,
+.group-buy-tab {
   background: transparent;
 }
 
 .admin-tab.is-active,
-.wk-tab.is-active {
+.wk-tab.is-active,
+.group-buy-tab.is-active {
   background: var(--surface-hover);
   border-color: var(--border-hover);
 }
 
 .admin-section,
-.wk-section {
+.wk-section,
+.group-buy-section {
   display: none;
 }
 
 .admin-section.is-active,
-.wk-section.is-active {
+.wk-section.is-active,
+.group-buy-section.is-active {
   display: block;
 }
 
@@ -367,6 +372,131 @@
   content: "✓ ";
   font-weight: 800;
 }
+
+
+    /* ========================================================
+       GROUP BUY ADMIN
+       ======================================================== */
+
+    select,
+    input[type="datetime-local"],
+    input[type="number"],
+    input[type="email"] {
+      min-width: 180px;
+      flex: 1;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .group-buy-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(280px, 1fr)
+        );
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .group-buy-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-hover);
+    }
+
+    .group-buy-card-title {
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .group-buy-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .group-buy-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .group-buy-actions button {
+      padding: 7px 9px;
+      font-size: 0.82rem;
+    }
+
+    .group-buy-form-row {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(180px, 1fr)
+        );
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .group-buy-form-row input,
+    .group-buy-form-row select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .group-buy-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 4px;
+      font-size: 0.9rem;
+    }
+
+    .group-buy-checkbox input {
+      min-width: auto;
+      flex: 0 0 auto;
+    }
+
+    .application-card {
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-hover);
+    }
+
+    .application-items {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .section-divider {
+      margin: 24px 0;
+      border: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .group-buy-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .group-buy-form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -455,6 +585,14 @@
   data-admin-tab="inquiry"
 >
   문의
+</button>
+
+<button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="groupbuy"
+>
+  공동구매
 </button>
   </div>
 
@@ -854,8 +992,6 @@
 
 </div>
 
-</div>
-
 <div
   id="inquiryAdminSection"
   class="admin-section"
@@ -895,35 +1031,6 @@
       >
         + 수신자 추가
       </button>
-      <section class="panel">
-  <h2>문의 접수 상태</h2>
-
-  <p class="small">
-    문의창을 닫으면 새로운 문의를 제출할 수 없습니다.
-  </p>
-
-  <div class="row">
-    <button
-      id="inquiryOpenButton"
-      type="button"
-    >
-      문의창 열기
-    </button>
-
-    <button
-      id="inquiryCloseButton"
-      type="button"
-      class="danger"
-    >
-      문의창 닫기
-    </button>
-  </div>
-
-  <div
-    id="inquiryOpenStatus"
-    class="status"
-  ></div>
-</section>
     </div>
 
     <div
@@ -931,8 +1038,318 @@
       class="status"
     ></div>
   </section>
+
+  <section class="panel">
+    <h2>문의 접수 상태</h2>
+
+    <p class="small">
+      문의창을 닫으면 새로운 문의를 제출할 수 없습니다.
+    </p>
+
+    <div class="row">
+      <button
+        id="inquiryOpenButton"
+        type="button"
+      >
+        문의창 열기
+      </button>
+
+      <button
+        id="inquiryCloseButton"
+        type="button"
+        class="danger"
+      >
+        문의창 닫기
+      </button>
+    </div>
+
+    <div
+      id="inquiryOpenStatus"
+      class="status"
+    ></div>
+  </section>
 </div>
-  
+
+
+<div
+  id="groupBuyAdminSection"
+  class="admin-section"
+  data-admin-section="groupbuy"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        공동구매 회차 관리
+      </h2>
+
+      <button
+        id="groupBuyRefreshButton"
+        type="button"
+      >
+        새로고침
+      </button>
+    </div>
+
+    <p class="small">
+      모집 시작/종료 시간은 한국시간(KST) 기준입니다.
+      활성 회차의 모집기간은 서로 겹칠 수 없습니다.
+    </p>
+
+    <div
+      id="groupBuyEventList"
+      class="group-buy-grid"
+    ></div>
+
+    <hr class="section-divider">
+
+    <strong>새 회차 추가</strong>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyEventTitle"
+        type="text"
+        placeholder="회차명 / 이벤트명"
+      >
+
+      <input
+        id="newGroupBuyStartAt"
+        type="datetime-local"
+        aria-label="모집 시작"
+      >
+
+      <input
+        id="newGroupBuyEndAt"
+        type="datetime-local"
+        aria-label="모집 종료"
+      >
+    </div>
+
+    <div class="row add-row">
+      <label class="group-buy-checkbox">
+        <input
+          id="newGroupBuyEventActive"
+          type="checkbox"
+          checked
+        >
+        Active
+      </label>
+
+      <button
+        id="addGroupBuyEventButton"
+        type="button"
+      >
+        + 회차 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyEventStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>관리할 회차 선택</h2>
+
+    <div class="row">
+      <select
+        id="groupBuyEventSelect"
+      >
+        <option value="">
+          회차를 선택하세요
+        </option>
+      </select>
+    </div>
+
+    <div
+      id="groupBuySelectedEventInfo"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+
+    <div
+      id="groupBuyDetailStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>연맹 관리</h2>
+
+    <p class="small">
+      Active 연맹만 공개 신청폼에 표시됩니다.
+      과거 신청에 사용된 연맹은 삭제할 수 없으며 Inactive로 변경해야 합니다.
+    </p>
+
+    <div
+      id="groupBuyAllianceList"
+      class="manage-list"
+    ></div>
+
+    <div class="row add-row">
+      <input
+        id="newGroupBuyAllianceName"
+        type="text"
+        placeholder="새 연맹"
+      >
+
+      <button
+        id="addGroupBuyAllianceButton"
+        type="button"
+      >
+        + 연맹 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyAllianceStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>구매 항목 관리</h2>
+
+    <p class="small">
+      상품은 선택한 회차에 귀속됩니다.
+      각 상품마다 1인 최대 신청 수량을 설정할 수 있습니다.
+      Active 상품만 공개 신청폼에 표시됩니다.
+    </p>
+
+    <div
+      id="groupBuyItemList"
+      class="manage-list"
+    ></div>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyItemName"
+        type="text"
+        placeholder="새 구매 항목"
+      >
+
+      <input
+        id="newGroupBuyItemMaxQuantity"
+        type="number"
+        min="1"
+        step="1"
+        value="1"
+        placeholder="최대 수량"
+      >
+    </div>
+
+    <div class="row add-row">
+      <button
+        id="addGroupBuyItemButton"
+        type="button"
+      >
+        + 구매 항목 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyItemStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        신청 내역
+      </h2>
+
+      <span
+        id="groupBuyApplicationCount"
+        class="small"
+      ></span>
+    </div>
+
+    <p class="small">
+      동일 회차 + 동일 연맹 + 동일 닉네임으로 다시 제출하면
+      새 신청이 아니라 기존 신청이 수정됩니다.
+    </p>
+
+    <div
+      id="groupBuyApplicationList"
+    ></div>
+
+    <div
+      id="groupBuyApplicationStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>Excel 이메일 수신자</h2>
+
+    <p class="small">
+      공동구매 모집 종료 10분 후 생성되는 Excel을 받을 수신자를 관리합니다.
+      Active 수신자에게만 발송됩니다.
+    </p>
+
+    <div
+      id="groupBuyEmailRecipientList"
+      class="manage-list"
+    ></div>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyEmailNickname"
+        type="text"
+        placeholder="별명"
+      >
+
+      <input
+        id="newGroupBuyEmailAddress"
+        type="email"
+        placeholder="Email address"
+      >
+    </div>
+
+    <div class="row add-row">
+      <button
+        id="addGroupBuyEmailRecipientButton"
+        type="button"
+      >
+        + 수신자 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyEmailRecipientStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>자동 Excel 발송 상태</h2>
+
+    <p class="small">
+      각 회차의 모집 종료 10분 후 자동 발송 기능은
+      별도의 Scheduled Edge Function에서 처리합니다.
+      여기에는 그 발송 기록이 표시됩니다.
+    </p>
+
+    <div
+      id="groupBuyExportHistory"
+      class="manage-list"
+    ></div>
+
+    <div
+      id="groupBuyExportStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+
     <a class="back" href="/">
       ← Back to Home
     </a>
@@ -950,6 +1367,9 @@
 
     const INQUIRY_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/inquiry-admin";
+
+    const GROUP_BUY_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-admin";
     
     const SUPABASE_PUBLIC_STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
@@ -1085,20 +1505,6 @@ const applicationModeStatus =
     "inquiryEmailRecipientList"
   );
 
-    const inquiryOpenButton =
-  document.getElementById(
-    "inquiryOpenButton"
-  );
-
-const inquiryCloseButton =
-  document.getElementById(
-    "inquiryCloseButton"
-  );
-
-const inquiryOpenStatus =
-  document.getElementById(
-    "inquiryOpenStatus"
-  );
 const newInquiryEmailNickname =
   document.getElementById(
     "newInquiryEmailNickname"
@@ -1119,6 +1525,21 @@ const inquiryEmailRecipientStatus =
     "inquiryEmailRecipientStatus"
   );
 
+const inquiryOpenButton =
+  document.getElementById(
+    "inquiryOpenButton"
+  );
+
+const inquiryCloseButton =
+  document.getElementById(
+    "inquiryCloseButton"
+  );
+
+const inquiryOpenStatus =
+  document.getElementById(
+    "inquiryOpenStatus"
+  );
+
 let inquiryData = {
   settings: {
     inquiry_open: true,
@@ -1126,23 +1547,175 @@ let inquiryData = {
 
   email_recipients: [],
 };
-    function renderInquiryOpenStatus() {
-  const isOpen =
-    inquiryData?.settings
-      ?.inquiry_open !== false;
 
-  inquiryOpenStatus.textContent =
-    isOpen
-      ? "현재 문의를 받고 있습니다."
-      : "현재 문의창이 닫혀 있습니다.";
 
-  inquiryOpenButton.disabled =
-    isOpen;
+const groupBuyRefreshButton =
+  document.getElementById(
+    "groupBuyRefreshButton"
+  );
 
-  inquiryCloseButton.disabled =
-    !isOpen;
-}
-    
+const groupBuyEventList =
+  document.getElementById(
+    "groupBuyEventList"
+  );
+
+const groupBuyEventStatus =
+  document.getElementById(
+    "groupBuyEventStatus"
+  );
+
+const newGroupBuyEventTitle =
+  document.getElementById(
+    "newGroupBuyEventTitle"
+  );
+
+const newGroupBuyStartAt =
+  document.getElementById(
+    "newGroupBuyStartAt"
+  );
+
+const newGroupBuyEndAt =
+  document.getElementById(
+    "newGroupBuyEndAt"
+  );
+
+const newGroupBuyEventActive =
+  document.getElementById(
+    "newGroupBuyEventActive"
+  );
+
+const addGroupBuyEventButton =
+  document.getElementById(
+    "addGroupBuyEventButton"
+  );
+
+const groupBuyEventSelect =
+  document.getElementById(
+    "groupBuyEventSelect"
+  );
+
+const groupBuySelectedEventInfo =
+  document.getElementById(
+    "groupBuySelectedEventInfo"
+  );
+
+const groupBuyDetailStatus =
+  document.getElementById(
+    "groupBuyDetailStatus"
+  );
+
+const groupBuyAllianceList =
+  document.getElementById(
+    "groupBuyAllianceList"
+  );
+
+const newGroupBuyAllianceName =
+  document.getElementById(
+    "newGroupBuyAllianceName"
+  );
+
+const addGroupBuyAllianceButton =
+  document.getElementById(
+    "addGroupBuyAllianceButton"
+  );
+
+const groupBuyAllianceStatus =
+  document.getElementById(
+    "groupBuyAllianceStatus"
+  );
+
+const groupBuyItemList =
+  document.getElementById(
+    "groupBuyItemList"
+  );
+
+const newGroupBuyItemName =
+  document.getElementById(
+    "newGroupBuyItemName"
+  );
+
+const newGroupBuyItemMaxQuantity =
+  document.getElementById(
+    "newGroupBuyItemMaxQuantity"
+  );
+
+const addGroupBuyItemButton =
+  document.getElementById(
+    "addGroupBuyItemButton"
+  );
+
+const groupBuyItemStatus =
+  document.getElementById(
+    "groupBuyItemStatus"
+  );
+
+const groupBuyApplicationList =
+  document.getElementById(
+    "groupBuyApplicationList"
+  );
+
+const groupBuyApplicationCount =
+  document.getElementById(
+    "groupBuyApplicationCount"
+  );
+
+const groupBuyApplicationStatus =
+  document.getElementById(
+    "groupBuyApplicationStatus"
+  );
+
+const groupBuyEmailRecipientList =
+  document.getElementById(
+    "groupBuyEmailRecipientList"
+  );
+
+const newGroupBuyEmailNickname =
+  document.getElementById(
+    "newGroupBuyEmailNickname"
+  );
+
+const newGroupBuyEmailAddress =
+  document.getElementById(
+    "newGroupBuyEmailAddress"
+  );
+
+const addGroupBuyEmailRecipientButton =
+  document.getElementById(
+    "addGroupBuyEmailRecipientButton"
+  );
+
+const groupBuyEmailRecipientStatus =
+  document.getElementById(
+    "groupBuyEmailRecipientStatus"
+  );
+
+const groupBuyExportHistory =
+  document.getElementById(
+    "groupBuyExportHistory"
+  );
+
+const groupBuyExportStatus =
+  document.getElementById(
+    "groupBuyExportStatus"
+  );
+
+
+let groupBuyData = {
+  events: [],
+  alliances: [],
+  email_recipients: [],
+  export_logs: [],
+};
+
+let groupBuyDetail = {
+  event: null,
+  items: [],
+  applications: [],
+};
+
+let selectedGroupBuyEventId =
+  null;
+
     const emailRecipientList =
   document.getElementById(
     "emailRecipientList"
@@ -1269,6 +1842,54 @@ async function apiRequest(
 
   return result;
 }
+
+async function inquiryApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      INQUIRY_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Inquiry admin request failed."
+    );
+  }
+
+  return result;
+}
     
 async function wkApiRequest(
   method,
@@ -1363,6 +1984,82 @@ async function wkApiRequest(
 
   return result;
 }
+
+    function renderInquiryOpenStatus() {
+  const isOpen =
+    inquiryData?.settings
+      ?.inquiry_open !== false;
+
+  inquiryOpenStatus.textContent =
+    isOpen
+      ? "현재 문의를 받고 있습니다."
+      : "현재 문의창이 닫혀 있습니다.";
+
+  inquiryOpenButton.disabled =
+    isOpen;
+
+  inquiryCloseButton.disabled =
+    !isOpen;
+}
+
+
+
+async function groupBuyApiRequest(
+  method,
+  body = null,
+  query = ""
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      GROUP_BUY_ADMIN_API_URL +
+        query,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    const error =
+      new Error(
+        result.error ||
+          "Group Buy admin request failed."
+      );
+
+    error.payload =
+      result;
+
+    throw error;
+  }
+
+  return result;
+}
+
 
     function renderInquiryEmailRecipients() {
   inquiryEmailRecipientList.innerHTML =
@@ -2492,6 +3189,2008 @@ renderEmailExportHistory();
   }
 }
     
+
+function formatKstDateTime(
+  value
+) {
+  if (!value) {
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(
+    "ko-KR",
+    {
+      timeZone:
+        "Asia/Seoul",
+
+      year:
+        "numeric",
+
+      month:
+        "2-digit",
+
+      day:
+        "2-digit",
+
+      hour:
+        "2-digit",
+
+      minute:
+        "2-digit",
+
+      hour12:
+        false,
+    }
+  ).format(date) +
+    " KST";
+}
+
+
+function isoToKstInput(
+  value
+) {
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const formatter =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Seoul",
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        hour12:
+          false,
+      }
+    );
+
+  const parts =
+    Object.fromEntries(
+      formatter
+        .formatToParts(date)
+        .filter(
+          (part) =>
+            part.type !==
+            "literal"
+        )
+        .map(
+          (part) => [
+            part.type,
+            part.value,
+          ]
+        )
+    );
+
+  return (
+    `${parts.year}-` +
+    `${parts.month}-` +
+    `${parts.day}T` +
+    `${parts.hour}:` +
+    `${parts.minute}`
+  );
+}
+
+
+function kstInputToIso(
+  value
+) {
+  const text =
+    String(
+      value ?? ""
+    ).trim();
+
+  if (!text) {
+    return "";
+  }
+
+  const date =
+    new Date(
+      `${text}:00+09:00`
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return date.toISOString();
+}
+
+
+function getGroupBuyEventState(
+  event
+) {
+  if (!event?.active) {
+    return "Inactive";
+  }
+
+  const now =
+    Date.now();
+
+  const start =
+    new Date(
+      event.start_at
+    ).getTime();
+
+  const end =
+    new Date(
+      event.end_at
+    ).getTime();
+
+  if (now < start) {
+    return "모집 전";
+  }
+
+  if (
+    now >= start &&
+    now < end
+  ) {
+    return "모집 중";
+  }
+
+  return "종료";
+}
+
+
+function createGroupBuyActionButton(
+  text,
+  handler,
+  danger = false
+) {
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.type =
+    "button";
+
+  button.textContent =
+    text;
+
+  if (danger) {
+    button.classList.add(
+      "danger"
+    );
+  }
+
+  button.addEventListener(
+    "click",
+    handler
+  );
+
+  return button;
+}
+
+
+function renderGroupBuyEventSelect() {
+  const previous =
+    selectedGroupBuyEventId;
+
+  groupBuyEventSelect.innerHTML =
+    "";
+
+  const placeholder =
+    document.createElement(
+      "option"
+    );
+
+  placeholder.value =
+    "";
+
+  placeholder.textContent =
+    "회차를 선택하세요";
+
+  groupBuyEventSelect.appendChild(
+    placeholder
+  );
+
+  for (
+    const event
+    of (
+      groupBuyData.events ??
+      []
+    )
+  ) {
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      String(
+        event.id
+      );
+
+    option.textContent =
+      `${event.title} · ${getGroupBuyEventState(event)}`;
+
+    groupBuyEventSelect.appendChild(
+      option
+    );
+  }
+
+  if (
+    previous &&
+    (
+      groupBuyData.events ??
+      []
+    ).some(
+      (event) =>
+        Number(
+          event.id
+        ) ===
+        Number(previous)
+    )
+  ) {
+    groupBuyEventSelect.value =
+      String(previous);
+  }
+}
+
+
+function renderGroupBuyEvents() {
+  groupBuyEventList.innerHTML =
+    "";
+
+  const events =
+    Array.isArray(
+      groupBuyData.events
+    )
+      ? groupBuyData.events
+      : [];
+
+  if (
+    events.length ===
+    0
+  ) {
+    groupBuyEventList.innerHTML =
+      '<div class="small">등록된 공동구매 회차가 없습니다.</div>';
+
+    renderGroupBuyEventSelect();
+
+    return;
+  }
+
+  for (
+    const event
+    of events
+  ) {
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "group-buy-card";
+
+    if (!event.active) {
+      card.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "group-buy-card-title";
+
+    title.textContent =
+      event.title;
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "group-buy-meta";
+
+    meta.textContent =
+      `${getGroupBuyEventState(event)} · ` +
+      `${formatKstDateTime(event.start_at)} → ` +
+      `${formatKstDateTime(event.end_at)}` +
+      (
+        event.export_email_sent_at
+          ? ` · Excel 발송 ${formatKstDateTime(event.export_email_sent_at)}`
+          : ""
+      );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "group-buy-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "관리",
+        async () => {
+          selectedGroupBuyEventId =
+            Number(
+              event.id
+            );
+
+          groupBuyEventSelect.value =
+            String(
+              event.id
+            );
+
+          await loadGroupBuyDetail(
+            selectedGroupBuyEventId
+          );
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        event.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            setStatus(
+              groupBuyEventStatus,
+              "변경 중…"
+            );
+
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                active:
+                  !event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "변경했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const titleValue =
+            prompt(
+              "회차명:",
+              event.title
+            );
+
+          if (
+            titleValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startValue =
+            prompt(
+              "모집 시작 (KST, YYYY-MM-DDTHH:MM):",
+              isoToKstInput(
+                event.start_at
+              )
+            );
+
+          if (
+            startValue ===
+            null
+          ) {
+            return;
+          }
+
+          const endValue =
+            prompt(
+              "모집 종료 (KST, YYYY-MM-DDTHH:MM):",
+              isoToKstInput(
+                event.end_at
+              )
+            );
+
+          if (
+            endValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startAt =
+            kstInputToIso(
+              startValue
+            );
+
+          const endAt =
+            kstInputToIso(
+              endValue
+            );
+
+          if (
+            !titleValue.trim() ||
+            !startAt ||
+            !endAt
+          ) {
+            setStatus(
+              groupBuyEventStatus,
+              "회차명과 모집기간을 정확히 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                title:
+                  titleValue.trim(),
+
+                start_at:
+                  startAt,
+
+                end_at:
+                  endAt,
+
+                active:
+                  event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${event.title} 회차를 삭제할까요?\n신청 기록이 있는 회차는 삭제되지 않습니다.`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_event",
+
+                id:
+                  event.id,
+              }
+            );
+
+            if (
+              Number(
+                selectedGroupBuyEventId
+              ) ===
+              Number(
+                event.id
+              )
+            ) {
+              selectedGroupBuyEventId =
+                null;
+
+              groupBuyDetail = {
+                event: null,
+                items: [],
+                applications: [],
+              };
+            }
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ===
+                "EVENT_IN_USE"
+                ? "신청 기록이 있는 회차는 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      actions
+    );
+
+    groupBuyEventList.appendChild(
+      card
+    );
+  }
+
+  renderGroupBuyEventSelect();
+}
+
+
+function renderGroupBuyAlliances() {
+  groupBuyAllianceList.innerHTML =
+    "";
+
+  const alliances =
+    Array.isArray(
+      groupBuyData.alliances
+    )
+      ? groupBuyData.alliances
+      : [];
+
+  if (
+    alliances.length ===
+    0
+  ) {
+    groupBuyAllianceList.innerHTML =
+      '<div class="small">등록된 연맹이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const alliance
+    of alliances
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!alliance.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      alliance.name;
+
+    const note =
+      document.createElement(
+        "div"
+      );
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      `순서 ${alliance.display_order ?? 0}`;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      note
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        alliance.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_alliance",
+
+                id:
+                  alliance.id,
+
+                name:
+                  alliance.name,
+
+                active:
+                  !alliance.active,
+
+                display_order:
+                  alliance.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const newName =
+            prompt(
+              "연맹명:",
+              alliance.name
+            );
+
+          if (
+            newName ===
+            null
+          ) {
+            return;
+          }
+
+          const nameValue =
+            newName.trim();
+
+          if (!nameValue) {
+            setStatus(
+              groupBuyAllianceStatus,
+              "연맹명을 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_alliance",
+
+                id:
+                  alliance.id,
+
+                name:
+                  nameValue,
+
+                active:
+                  alliance.active,
+
+                display_order:
+                  alliance.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyAllianceStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${alliance.name} 연맹을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_alliance",
+
+                id:
+                  alliance.id,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyAllianceStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ===
+                "ALLIANCE_IN_USE"
+                ? "과거 신청에 사용된 연맹은 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyAllianceList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyItems() {
+  groupBuyItemList.innerHTML =
+    "";
+
+  const items =
+    Array.isArray(
+      groupBuyDetail.items
+    )
+      ? groupBuyDetail.items
+      : [];
+
+  if (
+    !selectedGroupBuyEventId
+  ) {
+    groupBuyItemList.innerHTML =
+      '<div class="small">먼저 관리할 회차를 선택하세요.</div>';
+
+    addGroupBuyItemButton.disabled =
+      true;
+
+    return;
+  }
+
+  addGroupBuyItemButton.disabled =
+    false;
+
+  if (
+    items.length ===
+    0
+  ) {
+    groupBuyItemList.innerHTML =
+      '<div class="small">이 회차에 등록된 구매 항목이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const item
+    of items
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!item.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      item.name;
+
+    const note =
+      document.createElement(
+        "div"
+      );
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      `1인 최대 ${item.max_quantity}개 · 순서 ${item.display_order ?? 0}`;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      note
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        item.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  item.name,
+
+                max_quantity:
+                  item.max_quantity,
+
+                active:
+                  !item.active,
+
+                display_order:
+                  item.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const newName =
+            prompt(
+              "구매 항목명:",
+              item.name
+            );
+
+          if (
+            newName ===
+            null
+          ) {
+            return;
+          }
+
+          const quantityValue =
+            prompt(
+              "1인 최대 수량:",
+              String(
+                item.max_quantity
+              )
+            );
+
+          if (
+            quantityValue ===
+            null
+          ) {
+            return;
+          }
+
+          const maxQuantity =
+            Number(
+              quantityValue
+            );
+
+          if (
+            !newName.trim() ||
+            !Number.isSafeInteger(
+              maxQuantity
+            ) ||
+            maxQuantity < 1
+          ) {
+            setStatus(
+              groupBuyItemStatus,
+              "상품명과 최대 수량을 정확히 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  newName.trim(),
+
+                max_quantity:
+                  maxQuantity,
+
+                active:
+                  item.active,
+
+                display_order:
+                  item.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyItemStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${item.name} 항목을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_item",
+
+                id:
+                  item.id,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyItemStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ===
+                "ITEM_IN_USE"
+                ? "신청에 사용된 상품은 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyItemList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyApplications() {
+  groupBuyApplicationList.innerHTML =
+    "";
+
+  const applications =
+    Array.isArray(
+      groupBuyDetail.applications
+    )
+      ? groupBuyDetail.applications
+      : [];
+
+  groupBuyApplicationCount.textContent =
+    selectedGroupBuyEventId
+      ? `${applications.length}명`
+      : "";
+
+  if (
+    !selectedGroupBuyEventId
+  ) {
+    groupBuyApplicationList.innerHTML =
+      '<div class="small">먼저 관리할 회차를 선택하세요.</div>';
+
+    return;
+  }
+
+  if (
+    applications.length ===
+    0
+  ) {
+    groupBuyApplicationList.innerHTML =
+      '<div class="small">신청 내역이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const application
+    of applications
+  ) {
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "application-card";
+
+    const allianceName =
+      application
+        .group_buy_alliances
+        ?.name ??
+      `Alliance #${application.alliance_id}`;
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `${allianceName} · ${application.player_name}`;
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "manage-note";
+
+    meta.textContent =
+      `최초 신청 ${formatKstDateTime(application.created_at)} · ` +
+      `최종 수정 ${formatKstDateTime(application.updated_at)}`;
+
+    const items =
+      document.createElement(
+        "div"
+      );
+
+    items.className =
+      "application-items";
+
+    const itemRows =
+      Array.isArray(
+        application
+          .group_buy_application_items
+      )
+        ? application
+            .group_buy_application_items
+        : [];
+
+    items.textContent =
+      itemRows.length > 0
+        ? itemRows
+            .map(
+              (row) => {
+                const name =
+                  row
+                    .group_buy_items
+                    ?.name ??
+                  `Item #${row.item_id}`;
+
+                return (
+                  `${name} × ${row.quantity}`
+                );
+              }
+            )
+            .join(" / ")
+        : "선택 상품 없음";
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "group-buy-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "신청 삭제",
+        async () => {
+          if (
+            !confirm(
+              `${allianceName} / ${application.player_name} 신청을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_application",
+
+                id:
+                  application.id,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyApplicationStatus,
+              "신청을 삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyApplicationStatus,
+              error.message ||
+                "삭제에 실패했습니다.",
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      items
+    );
+
+    card.appendChild(
+      actions
+    );
+
+    groupBuyApplicationList.appendChild(
+      card
+    );
+  }
+}
+
+
+function renderGroupBuyEmailRecipients() {
+  groupBuyEmailRecipientList.innerHTML =
+    "";
+
+  const recipients =
+    Array.isArray(
+      groupBuyData.email_recipients
+    )
+      ? groupBuyData.email_recipients
+      : [];
+
+  if (
+    recipients.length ===
+    0
+  ) {
+    groupBuyEmailRecipientList.innerHTML =
+      '<div class="small">등록된 수신자가 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const recipient
+    of recipients
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!recipient.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      recipient.nickname;
+
+    const email =
+      document.createElement(
+        "div"
+      );
+
+    email.className =
+      "manage-note";
+
+    email.textContent =
+      recipient.email;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      email
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        recipient.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  recipient.nickname,
+
+                email:
+                  recipient.email,
+
+                active:
+                  !recipient.active,
+
+                display_order:
+                  recipient.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const nickname =
+            prompt(
+              "별명:",
+              recipient.nickname
+            );
+
+          if (
+            nickname ===
+            null
+          ) {
+            return;
+          }
+
+          const emailValue =
+            prompt(
+              "이메일:",
+              recipient.email
+            );
+
+          if (
+            emailValue ===
+            null
+          ) {
+            return;
+          }
+
+          if (
+            !nickname.trim() ||
+            !emailValue.trim()
+          ) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "별명과 이메일을 모두 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  nickname.trim(),
+
+                email:
+                  emailValue.trim(),
+
+                active:
+                  recipient.active,
+
+                display_order:
+                  recipient.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${recipient.email} 수신자를 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_email_recipient",
+
+                id:
+                  recipient.id,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "삭제에 실패했습니다.",
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyEmailRecipientList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyExportHistory() {
+  groupBuyExportHistory.innerHTML =
+    "";
+
+  const logs =
+    Array.isArray(
+      groupBuyData.export_logs
+    )
+      ? groupBuyData.export_logs
+      : [];
+
+  if (
+    logs.length ===
+    0
+  ) {
+    groupBuyExportHistory.innerHTML =
+      '<div class="small">아직 발송 기록이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const log
+    of logs.slice(
+      0,
+      20
+    )
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `Event #${log.event_id} · ${log.status}`;
+
+    const detail =
+      document.createElement(
+        "div"
+      );
+
+    detail.className =
+      "manage-note";
+
+    detail.textContent =
+      `${formatKstDateTime(log.started_at)} · ` +
+      `수신 ${log.recipient_count ?? 0} · ` +
+      `성공 ${log.success_count ?? 0} · ` +
+      `실패 ${log.failure_count ?? 0}`;
+
+    content.appendChild(
+      title
+    );
+
+    content.appendChild(
+      detail
+    );
+
+    if (
+      log.error_message
+    ) {
+      const error =
+        document.createElement(
+          "div"
+        );
+
+      error.className =
+        "manage-note danger";
+
+      error.textContent =
+        log.error_message;
+
+      content.appendChild(
+        error
+      );
+    }
+
+    row.appendChild(
+      content
+    );
+
+    groupBuyExportHistory.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuySelectedEvent() {
+  if (
+    !groupBuyDetail.event
+  ) {
+    groupBuySelectedEventInfo.textContent =
+      "";
+
+    return;
+  }
+
+  const event =
+    groupBuyDetail.event;
+
+  groupBuySelectedEventInfo.textContent =
+    `${event.title} · ${getGroupBuyEventState(event)} · ` +
+    `${formatKstDateTime(event.start_at)} → ` +
+    `${formatKstDateTime(event.end_at)}`;
+}
+
+
+function renderGroupBuyAll() {
+  renderGroupBuyEvents();
+  renderGroupBuyAlliances();
+  renderGroupBuyItems();
+  renderGroupBuyApplications();
+  renderGroupBuyEmailRecipients();
+  renderGroupBuyExportHistory();
+  renderGroupBuySelectedEvent();
+}
+
+
+async function loadGroupBuyDetail(
+  eventId
+) {
+  const id =
+    Number(
+      eventId
+    );
+
+  if (
+    !Number.isSafeInteger(id) ||
+    id <= 0
+  ) {
+    selectedGroupBuyEventId =
+      null;
+
+    groupBuyDetail = {
+      event: null,
+      items: [],
+      applications: [],
+    };
+
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+    renderGroupBuySelectedEvent();
+
+    return;
+  }
+
+  selectedGroupBuyEventId =
+    id;
+
+  groupBuyEventSelect.value =
+    String(id);
+
+  setStatus(
+    groupBuyDetailStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await groupBuyApiRequest(
+        "GET",
+        null,
+        `?event_id=${encodeURIComponent(id)}`
+      );
+
+    groupBuyDetail = {
+      event:
+        result.event ??
+        null,
+
+      items:
+        result.items ??
+        [],
+
+      applications:
+        result.applications ??
+        [],
+    };
+
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+    renderGroupBuySelectedEvent();
+
+    setStatus(
+      groupBuyDetailStatus,
+      ""
+    );
+  } catch (error) {
+    setStatus(
+      groupBuyDetailStatus,
+      error.message ||
+        "회차 상세정보를 불러오지 못했습니다.",
+      true
+    );
+  }
+}
+
+
+async function loadGroupBuyData() {
+  setStatus(
+    groupBuyEventStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    groupBuyAllianceStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    groupBuyEmailRecipientStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await groupBuyApiRequest(
+        "GET"
+      );
+
+    groupBuyData = {
+      events:
+        result.events ??
+        [],
+
+      alliances:
+        result.alliances ??
+        [],
+
+      email_recipients:
+        result.email_recipients ??
+        [],
+
+      export_logs:
+        result.export_logs ??
+        [],
+    };
+
+    if (
+      selectedGroupBuyEventId &&
+      !groupBuyData.events.some(
+        (event) =>
+          Number(
+            event.id
+          ) ===
+          Number(
+            selectedGroupBuyEventId
+          )
+      )
+    ) {
+      selectedGroupBuyEventId =
+        null;
+    }
+
+    if (
+      !selectedGroupBuyEventId &&
+      groupBuyData.events.length >
+        0
+    ) {
+      selectedGroupBuyEventId =
+        Number(
+          groupBuyData
+            .events[0]
+            .id
+        );
+    }
+
+    renderGroupBuyEvents();
+    renderGroupBuyAlliances();
+    renderGroupBuyEmailRecipients();
+    renderGroupBuyExportHistory();
+
+    if (
+      selectedGroupBuyEventId
+    ) {
+      await loadGroupBuyDetail(
+        selectedGroupBuyEventId
+      );
+    } else {
+      groupBuyDetail = {
+        event: null,
+        items: [],
+        applications: [],
+      };
+
+      renderGroupBuyItems();
+      renderGroupBuyApplications();
+      renderGroupBuySelectedEvent();
+    }
+
+    setStatus(
+      groupBuyEventStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyAllianceStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyEmailRecipientStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyExportStatus,
+      ""
+    );
+  } catch (error) {
+    const message =
+      error.message ||
+      "공동구매 관리 데이터를 불러오지 못했습니다.";
+
+    setStatus(
+      groupBuyEventStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      groupBuyAllianceStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      groupBuyEmailRecipientStatus,
+      message,
+      true
+    );
+  }
+}
+
+
     function getBlockInfo(
       ipHash
     ) {
@@ -3667,6 +6366,13 @@ function renderOnlyIp(ipHash) {
 ) {
   loadInquiryData();
 }
+
+      if (
+  target ===
+  "groupbuy"
+) {
+  loadGroupBuyData();
+}
       
       
       adminTabs.forEach(
@@ -4163,78 +6869,496 @@ wkTabs.forEach((button) => {
       }
     }
   );
-    inquiryOpenButton.addEventListener(
-  "click",
-  async () => {
-    try {
-      await inquiryApiRequest(
-        "POST",
-        {
-          action:
-            "update_inquiry_open",
 
-          inquiry_open:
-            true,
-        }
-      );
 
-      await loadInquiryData();
+/* ============================================================
+   INQUIRY OPEN / CLOSE
+   ============================================================ */
 
-      setStatus(
-        inquiryOpenStatus,
-        "문의창을 열었습니다."
-      );
-    } catch (error) {
-      setStatus(
-        inquiryOpenStatus,
-        error.message ||
-          "변경하지 못했습니다.",
-        true
+inquiryOpenButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "update_inquiry_open",
+
+            inquiry_open:
+              true,
+          }
+        );
+
+        await loadInquiryData();
+
+        setStatus(
+          inquiryOpenStatus,
+          "문의창을 열었습니다."
+        );
+      } catch (error) {
+        setStatus(
+          inquiryOpenStatus,
+          error.message ||
+            "변경하지 못했습니다.",
+          true
+        );
+      }
+    }
+  );
+
+
+inquiryCloseButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !confirm(
+          "문의창을 닫을까요?\n새로운 문의 제출이 차단됩니다."
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "update_inquiry_open",
+
+            inquiry_open:
+              false,
+          }
+        );
+
+        await loadInquiryData();
+
+        setStatus(
+          inquiryOpenStatus,
+          "문의창을 닫았습니다."
+        );
+      } catch (error) {
+        setStatus(
+          inquiryOpenStatus,
+          error.message ||
+            "변경하지 못했습니다.",
+          true
+        );
+      }
+    }
+  );
+
+
+/* ============================================================
+   GROUP BUY ADMIN EVENTS
+   ============================================================ */
+
+groupBuyRefreshButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      await loadGroupBuyData();
+    }
+  );
+
+
+groupBuyEventSelect
+  ?.addEventListener(
+    "change",
+    async () => {
+      const id =
+        Number(
+          groupBuyEventSelect.value
+        );
+
+      if (
+        !Number.isSafeInteger(id) ||
+        id <= 0
+      ) {
+        selectedGroupBuyEventId =
+          null;
+
+        groupBuyDetail = {
+          event: null,
+          items: [],
+          applications: [],
+        };
+
+        renderGroupBuyItems();
+        renderGroupBuyApplications();
+        renderGroupBuySelectedEvent();
+
+        return;
+      }
+
+      await loadGroupBuyDetail(
+        id
       );
     }
-  }
-);
+  );
 
 
-inquiryCloseButton.addEventListener(
-  "click",
-  async () => {
-    if (
-      !confirm(
-        "문의창을 닫을까요?\n새로운 문의 제출이 차단됩니다."
-      )
-    ) {
-      return;
-    }
+addGroupBuyEventButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const title =
+        newGroupBuyEventTitle
+          .value
+          .trim();
 
-    try {
-      await inquiryApiRequest(
-        "POST",
-        {
-          action:
-            "update_inquiry_open",
+      const startAt =
+        kstInputToIso(
+          newGroupBuyStartAt
+            .value
+        );
 
-          inquiry_open:
-            false,
-        }
-      );
+      const endAt =
+        kstInputToIso(
+          newGroupBuyEndAt
+            .value
+        );
 
-      await loadInquiryData();
+      if (
+        !title ||
+        !startAt ||
+        !endAt
+      ) {
+        setStatus(
+          groupBuyEventStatus,
+          "회차명, 시작일시, 종료일시를 모두 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyEventButton.disabled =
+        true;
 
       setStatus(
-        inquiryOpenStatus,
-        "문의창을 닫았습니다."
+        groupBuyEventStatus,
+        "추가 중…"
       );
-    } catch (error) {
-      setStatus(
-        inquiryOpenStatus,
-        error.message ||
-          "변경하지 못했습니다.",
-        true
-      );
+
+      try {
+        const result =
+          await groupBuyApiRequest(
+            "POST",
+            {
+              action:
+                "create_event",
+
+              title,
+
+              start_at:
+                startAt,
+
+              end_at:
+                endAt,
+
+              active:
+                newGroupBuyEventActive
+                  .checked,
+            }
+          );
+
+        selectedGroupBuyEventId =
+          Number(
+            result.event?.id
+          ) || null;
+
+        newGroupBuyEventTitle.value =
+          "";
+
+        newGroupBuyStartAt.value =
+          "";
+
+        newGroupBuyEndAt.value =
+          "";
+
+        newGroupBuyEventActive.checked =
+          true;
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyEventStatus,
+          "회차를 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyEventStatus,
+          error.message ===
+            "EVENT_PERIOD_OVERLAP"
+            ? "다른 Active 공동구매 회차와 모집기간이 겹칩니다."
+            : (
+                error.message ||
+                "회차 추가에 실패했습니다."
+              ),
+          true
+        );
+      } finally {
+        addGroupBuyEventButton.disabled =
+          false;
+      }
     }
-  }
-);
+  );
+
+
+addGroupBuyAllianceButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const name =
+        newGroupBuyAllianceName
+          .value
+          .trim();
+
+      if (!name) {
+        setStatus(
+          groupBuyAllianceStatus,
+          "연맹명을 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyAllianceButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_alliance",
+
+            name,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyData
+                  .alliances
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyAllianceName.value =
+          "";
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyAllianceStatus,
+          "연맹을 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyAllianceStatus,
+          error.message ||
+            "연맹 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyAllianceButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+addGroupBuyItemButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !selectedGroupBuyEventId
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          "먼저 회차를 선택하세요.",
+          true
+        );
+
+        return;
+      }
+
+      const name =
+        newGroupBuyItemName
+          .value
+          .trim();
+
+      const maxQuantity =
+        Number(
+          newGroupBuyItemMaxQuantity
+            .value
+        );
+
+      if (
+        !name ||
+        !Number.isSafeInteger(
+          maxQuantity
+        ) ||
+        maxQuantity < 1
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          "상품명과 1 이상의 최대 수량을 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyItemButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_item",
+
+            event_id:
+              selectedGroupBuyEventId,
+
+            name,
+
+            max_quantity:
+              maxQuantity,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyDetail
+                  .items
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyItemName.value =
+          "";
+
+        newGroupBuyItemMaxQuantity.value =
+          "1";
+
+        await loadGroupBuyDetail(
+          selectedGroupBuyEventId
+        );
+
+        setStatus(
+          groupBuyItemStatus,
+          "구매 항목을 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyItemStatus,
+          error.message ||
+            "구매 항목 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyItemButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+addGroupBuyEmailRecipientButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const nickname =
+        newGroupBuyEmailNickname
+          .value
+          .trim();
+
+      const email =
+        newGroupBuyEmailAddress
+          .value
+          .trim();
+
+      if (
+        !nickname ||
+        !email
+      ) {
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          "별명과 이메일을 모두 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyEmailRecipientButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_email_recipient",
+
+            nickname,
+
+            email,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyData
+                  .email_recipients
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyEmailNickname.value =
+          "";
+
+        newGroupBuyEmailAddress.value =
+          "";
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          "수신자를 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          error.message ||
+            "수신자 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyEmailRecipientButton.disabled =
+          false;
+      }
+    }
+  );
+
   </script>
 </body>
 </html>
