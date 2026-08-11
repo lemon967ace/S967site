@@ -859,7 +859,53 @@
       document.getElementById(
         "formStatus"
       );
+async function checkInquiryAvailability() {
+  try {
+    const response =
+      await fetch(
+        INQUIRY_API_URL,
+        {
+          method: "GET",
+        }
+      );
 
+    const result =
+      await response
+        .json()
+        .catch(
+          () => ({})
+        );
+
+    if (!response.ok) {
+      throw new Error(
+        result.error ||
+        "Failed to check inquiry availability."
+      );
+    }
+
+    if (
+      result.accepting ===
+      false
+    ) {
+      alert(
+        getTranslation(
+          "inquiryClosed"
+        )
+      );
+
+      window.location.href =
+        "/";
+    }
+  } catch (error) {
+    console.error(
+      "Inquiry availability check failed:",
+      error
+    );
+  }
+}
+
+checkInquiryAvailability();
+    
 async function checkInquiryAvailability() {
   try {
     const response =
