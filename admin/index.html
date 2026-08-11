@@ -674,11 +674,6 @@
     </div>
 
 <div
-  id="wkSettingsPanel"
-  class="wk-subpanel"
->
-
-<div
   class="wk-section"
   data-wk-section="settings"
 >
@@ -724,14 +719,6 @@
       style="margin-top: 12px;"
     ></div>
   </section>
-</div>
-  
-    <div
-      id="applicationModeStatus"
-      class="small"
-      style="margin-top: 12px;"
-    ></div>
-  </div>
 </div>
 
 
@@ -879,7 +866,7 @@ const applicationModeStatus =
     let adminSecret = "";
     let currentData = null;
 
-const wkData = {
+let wkData = {
   tiers: [],
   alliances: [],
   settings: {
