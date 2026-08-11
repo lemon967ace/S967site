@@ -146,6 +146,15 @@ inquiryContactKakao:
 inquiryContactEmail:
   "Email",
 
+    inquiryContactLine:
+  "LINE",
+
+inquiryContactOther:
+  "Other",
+
+inquiryContactPairError:
+  "Please select a contact method and enter your contact information.",
+
 inquiryContactExample:
   "Example: In-game name: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: link / Email: address",
 
@@ -296,6 +305,15 @@ inquiryContactKakao:
 
 inquiryContactEmail:
   "Email",
+
+    inquiryContactLine:
+  "라인",
+
+inquiryContactOther:
+  "기타",
+
+inquiryContactPairError:
+  "연락처 종류를 선택하고 연락처를 입력해주세요.",
 
 inquiryContactExample:
   "예: 게임 닉네임: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: 링크 / Email: 주소",
@@ -448,6 +466,15 @@ inquiryContactKakao:
 inquiryContactEmail:
   "Email",
 
+    inquiryContactLine:
+  "LINE",
+
+inquiryContactOther:
+  "その他",
+
+inquiryContactPairError:
+  "連絡方法を選択し、連絡先をご入力ください。",
+
 inquiryContactExample:
   "例：ゲーム内ニックネーム: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: リンク / Email: アドレス",
 
@@ -598,6 +625,15 @@ inquiryContactKakao:
 
 inquiryContactEmail:
   "Email",
+
+    inquiryContactLine:
+  "LINE",
+
+inquiryContactOther:
+  "Другое",
+
+inquiryContactPairError:
+  "Выберите способ связи и укажите контактные данные.",
 
 inquiryContactExample:
   "Например: Игровой ник: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: ссылка / Email: адрес",
