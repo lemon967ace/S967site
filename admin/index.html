@@ -954,9 +954,7 @@ function createWkManageItem(
     item.admin_note
   ) {
     const note =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     note.className =
       "manage-note";
@@ -976,9 +974,7 @@ function createWkManageItem(
 
 
   const toggleButton =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
   toggleButton.type =
     "button";
@@ -990,15 +986,176 @@ function createWkManageItem(
 
 
   const editButton =
-    document.createElement(
-      "button"
-    );
+    document.createElement("button");
 
   editButton.type =
     "button";
 
   editButton.textContent =
     "Edit";
+
+
+  toggleButton.addEventListener(
+    "click",
+    async () => {
+      const statusElement =
+        type === "tier"
+          ? tierStatus
+          : allianceStatus;
+
+      const action =
+        type === "tier"
+          ? "toggle_tier"
+          : "toggle_alliance";
+
+      toggleButton.disabled =
+        true;
+
+      setStatus(
+        statusElement,
+        "Updating…"
+      );
+
+      try {
+        await wkApiRequest(
+          "POST",
+          {
+            action,
+            id: item.id,
+            active: !item.active,
+          }
+        );
+
+        await loadWkData();
+
+        setStatus(
+          statusElement,
+          item.active
+            ? "Item deactivated."
+            : "Item activated."
+        );
+      } catch (error) {
+        setStatus(
+          statusElement,
+          error.message ||
+            "Update failed.",
+          true
+        );
+      } finally {
+        toggleButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+  editButton.addEventListener(
+    "click",
+    async () => {
+      const statusElement =
+        type === "tier"
+          ? tierStatus
+          : allianceStatus;
+
+      const newName =
+        prompt(
+          type === "tier"
+            ? "Tier name:"
+            : "Alliance name:",
+          item.name
+        );
+
+      if (newName === null) {
+        return;
+      }
+
+      const trimmedName =
+        newName.trim();
+
+      if (!trimmedName) {
+        setStatus(
+          statusElement,
+          "Name cannot be empty.",
+          true
+        );
+
+        return;
+      }
+
+
+      let adminNote =
+        item.admin_note ?? "";
+
+      if (type === "tier") {
+        const newNote =
+          prompt(
+            "Admin note:",
+            adminNote
+          );
+
+        if (newNote === null) {
+          return;
+        }
+
+        adminNote =
+          newNote.trim();
+      }
+
+
+      editButton.disabled =
+        true;
+
+      setStatus(
+        statusElement,
+        "Updating…"
+      );
+
+      try {
+        if (type === "tier") {
+          await wkApiRequest(
+            "POST",
+            {
+              action:
+                "update_tier",
+              id: item.id,
+              name:
+                trimmedName,
+              admin_note:
+                adminNote,
+            }
+          );
+        } else {
+          await wkApiRequest(
+            "POST",
+            {
+              action:
+                "update_alliance",
+              id: item.id,
+              name:
+                trimmedName,
+            }
+          );
+        }
+
+        await loadWkData();
+
+        setStatus(
+          statusElement,
+          "Updated."
+        );
+      } catch (error) {
+        setStatus(
+          statusElement,
+          error.message ||
+            "Update failed.",
+          true
+        );
+      } finally {
+        editButton.disabled =
+          false;
+      }
+    }
+  );
 
 
   actions.appendChild(
@@ -1016,7 +1173,7 @@ function createWkManageItem(
 
   return row;
 }
-
+    
    function renderWkLists() {
   tierList.innerHTML = "";
   allianceList.innerHTML = "";
