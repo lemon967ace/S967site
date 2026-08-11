@@ -833,7 +833,54 @@ const allianceStatus =
           );
       }
 
-      async function wkApiRequest(
+ async function apiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "Request failed."
+    );
+  }
+
+  return result;
+}
+
+
+async function wkApiRequest(
   method,
   body = null
 ) {
@@ -878,29 +925,6 @@ const allianceStatus =
 
   return result;
 }
-      
-      const response =
-        await fetch(
-          ADMIN_API_URL,
-          options
-        );
-
-      const result =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (!response.ok) {
-        throw new Error(
-          result.error ||
-          "Request failed."
-        );
-      }
-
-      return result;
-    }
 
 function createWkManageItem(
   item,
