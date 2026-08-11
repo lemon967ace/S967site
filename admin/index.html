@@ -278,6 +278,14 @@
   background: var(--surface-hover);
 }
 
+    .manage-item.dragging {
+  opacity: 0.35;
+}
+
+.manage-item.drag-over {
+  border-color: var(--border-hover);
+}
+    
 .drag-handle {
   flex: 0 0 auto;
   padding: 4px 7px;
@@ -910,6 +918,9 @@ function createWkManageItem(
   row.className =
     "manage-item";
 
+  row.draggable = true;
+row.dataset.type = type;
+  
   if (!item.active) {
     row.classList.add(
       "item-inactive"
@@ -1173,6 +1184,174 @@ function createWkManageItem(
 
   return row;
 }
+
+    let draggedManageItem = null;
+
+
+function setupDragSort(
+  container,
+  type
+) {
+  const items =
+    container.querySelectorAll(
+      ".manage-item"
+    );
+
+  items.forEach((item) => {
+    item.addEventListener(
+      "dragstart",
+      () => {
+        draggedManageItem =
+          item;
+
+        item.classList.add(
+          "dragging"
+        );
+      }
+    );
+
+
+    item.addEventListener(
+      "dragend",
+      async () => {
+        item.classList.remove(
+          "dragging"
+        );
+
+        container
+          .querySelectorAll(
+            ".manage-item"
+          )
+          .forEach(
+            (row) => {
+              row.classList.remove(
+                "drag-over"
+              );
+            }
+          );
+
+        draggedManageItem =
+          null;
+
+        await saveManageOrder(
+          container,
+          type
+        );
+      }
+    );
+
+
+    item.addEventListener(
+      "dragover",
+      (event) => {
+        event.preventDefault();
+
+        if (
+          !draggedManageItem ||
+          draggedManageItem ===
+            item
+        ) {
+          return;
+        }
+
+        item.classList.add(
+          "drag-over"
+        );
+
+
+        const rect =
+          item.getBoundingClientRect();
+
+        const after =
+          event.clientY >
+          rect.top +
+            rect.height / 2;
+
+        if (after) {
+          item.after(
+            draggedManageItem
+          );
+        } else {
+          item.before(
+            draggedManageItem
+          );
+        }
+      }
+    );
+
+
+    item.addEventListener(
+      "dragleave",
+      () => {
+        item.classList.remove(
+          "drag-over"
+        );
+      }
+    );
+  });
+}
+
+    async function saveManageOrder(
+  container,
+  type
+) {
+  const ids =
+    Array.from(
+      container.querySelectorAll(
+        ".manage-item"
+      )
+    ).map(
+      (row) =>
+        Number(
+          row.dataset.id
+        )
+    );
+
+
+  const statusElement =
+    type === "tier"
+      ? tierStatus
+      : allianceStatus;
+
+
+  const action =
+    type === "tier"
+      ? "reorder_tiers"
+      : "reorder_alliances";
+
+
+  setStatus(
+    statusElement,
+    "Saving order…"
+  );
+
+
+  try {
+    await wkApiRequest(
+      "POST",
+      {
+        action,
+        ids,
+      }
+    );
+
+    await loadWkData();
+
+    setStatus(
+      statusElement,
+      "Order saved."
+    );
+  } catch (error) {
+    setStatus(
+      statusElement,
+      error.message ||
+        "Failed to save order.",
+      true
+    );
+
+    await loadWkData();
+  }
+}
     
    function renderWkLists() {
   tierList.innerHTML = "";
@@ -1215,6 +1394,15 @@ function createWkManageItem(
       }
     );
   }
+     setupDragSort(
+  tierList,
+  "tier"
+);
+
+setupDragSort(
+  allianceList,
+  "alliance"
+);
 }
 
     async function loadWkData() {
