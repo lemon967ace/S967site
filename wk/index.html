@@ -332,6 +332,7 @@
     </button>
   </div>
 </div>
+
   <div
   class="language-picker"
   data-language-picker
@@ -385,35 +386,7 @@
     </button>
   </div>
 </div>
-  <main>
-    <div class="eyebrow">
-      S967
-    </div>
-
-    <h1 id="pageTitle">
-      WK Application
-    </h1>
-
-    <div
-  class="language-switcher"
-  id="languageSwitcher"
->
-  <button type="button" data-language="ko">
-    한국어
-  </button>
-
-  <button type="button" data-language="en">
-    English
-  </button>
-
-  <button type="button" data-language="ja">
-    日本語
-  </button>
-
-  <button type="button" data-language="ru">
-    Русский
-  </button>
-</div>
+  
     
     <p
       id="pageIntro"
@@ -1283,55 +1256,6 @@ hours:
   "ч.",
       },
     };
-
-
-    const language =
-      typeof getCurrentLanguage ===
-        "function"
-        ? getCurrentLanguage()
-        : "en";
-
-const languageSwitcher =
-  document.getElementById(
-    "languageSwitcher"
-  );
-
-languageSwitcher
-  ?.querySelectorAll(
-    "[data-language]"
-  )
-  .forEach((button) => {
-    const buttonLanguage =
-      button.dataset.language;
-
-    button.classList.toggle(
-      "is-active",
-      buttonLanguage === language
-    );
-
-    button.addEventListener(
-      "click",
-      () => {
-        if (
-          buttonLanguage ===
-          language
-        ) {
-          return;
-        }
-
-        if (
-          typeof setLanguage ===
-          "function"
-        ) {
-          setLanguage(
-            buttonLanguage
-          );
-
-          location.reload();
-        }
-      }
-    );
-  });
     
     const text =
       TEXT[language] ??
@@ -1949,49 +1873,6 @@ updateApplicationSchedule();
         );
       }
     }
-
-    const languagePicker =
-  document.querySelector(
-    "[data-language-picker]"
-  );
-
-const languageButton =
-  document.querySelector(
-    "[data-language-button]"
-  );
-
-const languageMenu =
-  document.querySelector(
-    "[data-language-menu]"
-  );
-
-languageButton?.addEventListener(
-  "click",
-  () => {
-    const isOpen =
-      languagePicker.classList.toggle(
-        "is-open"
-      );
-
-    languageButton.setAttribute(
-      "aria-expanded",
-      String(isOpen)
-    );
-  }
-);
-
-languageMenu
-  ?.querySelectorAll(
-    "[data-language-choice]"
-  )
-  .forEach((button) => {
-    const choice =
-      button.dataset.languageChoice;
-
-    button.classList.toggle(
-      "is-active",
-      choice === language
-    );
 
     button.addEventListener(
       "click",
