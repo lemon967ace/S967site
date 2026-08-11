@@ -2240,12 +2240,12 @@ function updateParticipationState() {
           form.reset();
 
           updateParticipationState();
+setStatus(
+  text.success,
+  "success"
+);
 
-          setStatus(
-            text.success,
-            "success"
-
-            setTimeout(
+setTimeout(
   () => {
     window.location.href =
       "/";
