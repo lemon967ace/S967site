@@ -289,6 +289,7 @@
 </head>
 
 <body>
+  <div class="top-pickers">
   <div class="theme-picker" data-theme-picker>
   <button
     class="theme-button"
@@ -385,9 +386,17 @@
       Русский
     </button>
   </div>
-</div>
+  </div>
+  </div>
   
-    
+    <div class="eyebrow">
+  S967
+</div>
+
+<h1 id="pageTitle">
+  WK Application
+</h1>
+  
     <p
       id="pageIntro"
       class="small"
@@ -1948,50 +1957,6 @@ updateApplicationSchedule();
         );
       }
     }
-
-    button.addEventListener(
-      "click",
-      () => {
-        if (
-          choice === language
-        ) {
-          languagePicker.classList.remove(
-            "is-open"
-          );
-
-          return;
-        }
-
-        if (
-          typeof setLanguage ===
-          "function"
-        ) {
-          setLanguage(choice);
-          location.reload();
-        }
-      }
-    );
-  });
-
-document.addEventListener(
-  "click",
-  (event) => {
-    if (
-      !languagePicker?.contains(
-        event.target
-      )
-    ) {
-      languagePicker?.classList.remove(
-        "is-open"
-      );
-
-      languageButton?.setAttribute(
-        "aria-expanded",
-        "false"
-      );
-    }
-  }
-);
     
 function formatNumberInput(
   input
