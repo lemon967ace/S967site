@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Group Purchase · S967</title>
+
+  <link
+    rel="stylesheet"
+    href="/theme.css"
+  >
+
+  <script
+    src="/theme.js"
+    defer
+  ></script>
+
+  <script
+    src="/language.js"
+  ></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+
+      padding:
+        36px
+        20px;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width:
+        min(
+          760px,
+          100%
+        );
+
+      margin:
+        0
+        auto;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-size:
+        clamp(
+          2.2rem,
+          7vw,
+          4rem
+        );
+
+      letter-spacing:
+        -0.04em;
+    }
+
+    .eyebrow {
+      margin-bottom:
+        10px;
+
+      font-size:
+        0.82rem;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        0.12em;
+    }
+
+    .panel {
+      margin-top:
+        24px;
+
+      padding:
+        20px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        18px;
+
+      background:
+        var(--surface);
+
+      box-shadow:
+        var(--shadow);
+
+      backdrop-filter:
+        blur(14px);
+
+      -webkit-backdrop-filter:
+        blur(14px);
+    }
+
+    .field {
+      margin-top:
+        24px;
+    }
+
+    .field:first-child {
+      margin-top:
+        0;
+    }
+
+    .label {
+      display:
+        block;
+
+      margin-bottom:
+        8px;
+
+      font-size:
+        0.92rem;
+
+      font-weight:
+        700;
+
+      line-height:
+        1.5;
+    }
+
+    .required {
+      color:
+        #d75555;
+    }
+
+    input[type="text"],
+    select {
+      width:
+        100%;
+
+      padding:
+        12px
+        13px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+
+      color:
+        var(--text);
+
+      font:
+        inherit;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      outline:
+        none;
+
+      border-color:
+        var(--border-hover);
+    }
+
+    .small {
+      margin-top:
+        7px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        0.84rem;
+
+      line-height:
+        1.55;
+    }
+
+    .purchase-list {
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        9px;
+    }
+
+    .purchase-item {
+      display:
+        grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+
+      align-items:
+        center;
+
+      gap:
+        14px;
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+    }
+
+    .purchase-check {
+      display:
+        flex;
+
+      align-items:
+        flex-start;
+
+      gap:
+        9px;
+
+      min-width:
+        0;
+
+      cursor:
+        pointer;
+    }
+
+    .purchase-check input {
+      margin-top:
+        3px;
+
+      flex:
+        0
+        0
+        auto;
+    }
+
+    .purchase-name {
+      min-width:
+        0;
+
+      line-height:
+        1.5;
+
+      overflow-wrap:
+        anywhere;
+    }
+
+    .quantity-box {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
+    }
+
+    .quantity-label {
+      color:
+        var(--muted);
+
+      font-size:
+        0.82rem;
+
+      white-space:
+        nowrap;
+    }
+
+    .quantity-select {
+      width:
+        auto;
+
+      min-width:
+        72px;
+
+      padding:
+        9px
+        30px
+        9px
+        10px;
+    }
+
+    .quantity-select:disabled {
+      opacity:
+        0.45;
+
+      cursor:
+        not-allowed;
+    }
+
+    .agreement {
+      display:
+        flex;
+
+      align-items:
+        flex-start;
+
+      gap:
+        9px;
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+
+      cursor:
+        pointer;
+    }
+
+    .agreement input {
+      margin-top:
+        3px;
+
+      flex:
+        0
+        0
+        auto;
+    }
+
+    .agreement span {
+      min-width:
+        0;
+
+      line-height:
+        1.55;
+    }
+
+    .schedule-title {
+      font-size:
+        1.1rem;
+
+      font-weight:
+        700;
+    }
+
+    .status {
+      margin-top:
+        16px;
+
+      min-height:
+        1.4em;
+
+      color:
+        var(--muted);
+
+      font-size:
+        0.9rem;
+
+      line-height:
+        1.5;
+    }
+
+    .error {
+      color:
+        #d75555;
+    }
+
+    .success {
+      color:
+        #3f9565;
+    }
+
+    button {
+      padding:
+        11px
+        15px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+
+      color:
+        var(--text);
+
+      font:
+        inherit;
+
+      font-weight:
+        700;
+
+      cursor:
+        pointer;
+    }
+
+    button:hover {
+      border-color:
+        var(--border-hover);
+    }
+
+    button:disabled {
+      opacity:
+        0.5;
+
+      cursor:
+        not-allowed;
+    }
+
+    .submit-row {
+      margin-top:
+        24px;
+    }
+
+    .submit-row button {
+      width:
+        100%;
+    }
+
+    .back {
+      display:
+        inline-block;
+
+      margin-top:
+        26px;
+
+      font-size:
+        0.9rem;
+
+      text-decoration:
+        none;
+    }
+
+    .hidden {
+      display:
+        none !important;
+    }
+
+    @media (
+      max-width: 520px
+    ) {
+      body {
+        padding:
+          28px
+          14px;
+      }
+
+      .panel {
+        padding:
+          18px;
+      }
+
+      .purchase-item {
+        grid-template-columns:
+          1fr;
+      }
+
+      .quantity-box {
+        padding-left:
+          27px;
+      }
+
+      .quantity-select {
+        flex:
+          1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div
+    class="language-picker"
+    data-language-picker
+  >
+    <button
+      class="language-button"
+      type="button"
+      data-language-button
+      aria-label="Language"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      🌐
+    </button>
+
+    <div
+      class="language-menu"
+      data-language-menu
+      role="menu"
+    >
+      <button
+        type="button"
+        data-language-choice="ko"
+        role="menuitemradio"
+      >
+        한국어
+      </button>
+
+      <button
+        type="button"
+        data-language-choice="en"
+        role="menuitemradio"
+      >
+        English
+      </button>
+
+      <button
+        type="button"
+        data-language-choice="ja"
+        role="menuitemradio"
+      >
+        日本語
+      </button>
+
+      <button
+        type="button"
+        data-language-choice="ru"
+        role="menuitemradio"
+      >
+        Русский
+      </button>
+    </div>
+  </div>
+
+
+  <div
+    class="theme-picker"
+    data-theme-picker
+  >
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      ◐
+    </button>
+
+    <div
+      class="theme-menu"
+      data-theme-menu
+      role="menu"
+    >
+      <button
+        type="button"
+        data-theme-choice="system"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">
+          ◐
+        </span>
+
+        <span data-i18n="themeSystem">
+          System
+        </span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="light"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">
+          ☀
+        </span>
+
+        <span data-i18n="themeLight">
+          Light
+        </span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="dark"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">
+          ☾
+        </span>
+
+        <span data-i18n="themeDark">
+          Dark
+        </span>
+      </button>
+    </div>
+  </div>
+
+
+  <main>
+
+    <div class="eyebrow">
+      S967
+    </div>
+
+    <h1 id="pageTitle">
+      Group Purchase
+    </h1>
+
+    <p
+      id="pageIntro"
+      class="small"
+    ></p>
+
+
+    <div
+      id="recruitmentScheduleStatus"
+      class="panel hidden"
+    >
+      <div
+        id="scheduleStatus"
+        class="schedule-title"
+      ></div>
+
+      <div
+        id="scheduleDetail"
+        class="small"
+      ></div>
+    </div>
+
+
+    <section
+      id="applicationPanel"
+      class="panel hidden"
+    >
+      <form
+        id="groupBuyForm"
+        novalidate
+      >
+
+        <div class="field">
+          <label
+            id="allianceLabel"
+            class="label"
+            for="alliance"
+          >
+            Alliance
+            <span class="required">*</span>
+          </label>
+
+          <select
+            id="alliance"
+            required
+          >
+            <option value="">
+              Loading…
+            </option>
+          </select>
+        </div>
+
+
+        <div class="field">
+          <label
+            id="playerNameLabel"
+            class="label"
+            for="playerName"
+          >
+            Player Name
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="playerName"
+            type="text"
+            maxlength="100"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+
+        <div class="field">
+
+          <div
+            id="purchaseItemsLabel"
+            class="label"
+          >
+            Planned Purchase
+            <span class="required">*</span>
+          </div>
+
+          <div
+            id="purchaseItemsHelp"
+            class="small"
+          ></div>
+
+          <div
+            id="purchaseItems"
+            class="purchase-list"
+          ></div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            class="agreement"
+          >
+            <input
+              id="agreementPurchase"
+              type="checkbox"
+              required
+            >
+
+            <span
+              id="agreementPurchaseText"
+            ></span>
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            class="agreement"
+          >
+            <input
+              id="agreementRestriction"
+              type="checkbox"
+              required
+            >
+
+            <span
+              id="agreementRestrictionText"
+            ></span>
+          </label>
+
+        </div>
+
+
+        <div class="submit-row">
+
+          <button
+            id="submitButton"
+            type="submit"
+          >
+            Submit
+          </button>
+
+        </div>
+
+
+        <div
+          id="formStatus"
+          class="status"
+          aria-live="polite"
+        ></div>
+
+      </form>
+    </section>
+
+
+    <a
+      id="backLink"
+      class="back"
+      href="/"
+    >
+      ← Back to Home
+    </a>
+
+  </main>
+
+
+  <script>
+    const GROUP_BUY_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-submit";
+
+
+    let language =
+      typeof getCurrentLanguage ===
+        "function"
+        ? getCurrentLanguage()
+        : "en";
+
+
+    let currentEvent =
+      null;
+
+    let currentItems =
+      [];
+
+    let recruitmentAvailability =
+      null;
+
+
+    const form =
+      document.getElementById(
+        "groupBuyForm"
+      );
+
+    const applicationPanel =
+      document.getElementById(
+        "applicationPanel"
+      );
+
+    const scheduleBox =
+      document.getElementById(
+        "recruitmentScheduleStatus"
+      );
+
+    const scheduleStatus =
+      document.getElementById(
+        "scheduleStatus"
+      );
+
+    const scheduleDetail =
+      document.getElementById(
+        "scheduleDetail"
+      );
+
+    const alliance =
+      document.getElementById(
+        "alliance"
+      );
+
+    const playerName =
+      document.getElementById(
+        "playerName"
+      );
+
+    const purchaseItems =
+      document.getElementById(
+        "purchaseItems"
+      );
+
+    const agreementPurchase =
+      document.getElementById(
+        "agreementPurchase"
+      );
+
+    const agreementRestriction =
+      document.getElementById(
+        "agreementRestriction"
+      );
+
+    const submitButton =
+      document.getElementById(
+        "submitButton"
+      );
+
+    const formStatus =
+      document.getElementById(
+        "formStatus"
+      );
+
+
+    function t(
+      key,
+      fallback = ""
+    ) {
+      if (
+        typeof getTranslation ===
+        "function"
+      ) {
+        const translated =
+          getTranslation(
+            key
+          );
+
+        if (
+          translated &&
+          translated !== key
+        ) {
+          return translated;
+        }
+      }
+
+      return fallback ||
+        key;
+    }
+
+
+    function setStatus(
+      message,
+      type = ""
+    ) {
+      formStatus.textContent =
+        message;
+
+      formStatus.classList.remove(
+        "error",
+        "success"
+      );
+
+      if (type) {
+        formStatus.classList.add(
+          type
+        );
+      }
+    }
+
+
+    function setStaticText() {
+      language =
+        typeof getCurrentLanguage ===
+          "function"
+          ? getCurrentLanguage()
+          : language;
+
+      document.documentElement.lang =
+        language;
+
+      document.title =
+        `${t(
+          "groupBuyTitle",
+          "Group Purchase"
+        )} · S967`;
+
+      document.getElementById(
+        "pageTitle"
+      ).textContent =
+        t(
+          "groupBuyTitle",
+          "Group Purchase"
+        );
+
+      document.getElementById(
+        "pageIntro"
+      ).textContent =
+        t(
+          "groupBuyIntro",
+          "Please complete all required fields."
+        );
+
+      document.getElementById(
+        "allianceLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyAlliance",
+          "Alliance"
+        ) + " ";
+
+      document.getElementById(
+        "playerNameLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyPlayerName",
+          "Player Name"
+        ) + " ";
+
+      document.getElementById(
+        "purchaseItemsLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyPurchaseItems",
+          "Planned Purchase"
+        ) + " ";
+
+      document.getElementById(
+        "purchaseItemsHelp"
+      ).textContent =
+        t(
+          "groupBuyPurchaseItemsHelp",
+          "Select at least one item and choose the quantity."
+        );
+
+      document.getElementById(
+        "agreementPurchaseText"
+      ).textContent =
+        t(
+          "groupBuyAgreementPurchase",
+          "If you participate, you must purchase at least one item. To avoid unexpected problems, please purchase your coupons in advance."
+        );
+
+      document.getElementById(
+        "agreementRestrictionText"
+      ).textContent =
+        t(
+          "groupBuyAgreementRestriction",
+          "If you are found participating without making a purchase, your participation in future events may be restricted."
+        );
+
+      playerName.placeholder =
+        t(
+          "groupBuyNamePlaceholder",
+          "Please copy and paste your name 😉"
+        );
+
+      submitButton.textContent =
+        t(
+          "groupBuySubmit",
+          "Submit"
+        );
+
+      document.getElementById(
+        "backLink"
+      ).textContent =
+        t(
+          "backHome",
+          "← Back to Home"
+        );
+
+      renderSchedule();
+      renderPurchaseItems();
+      refreshAlliancePlaceholder();
+    }
+
+
+    function refreshAlliancePlaceholder() {
+      const firstOption =
+        alliance.querySelector(
+          'option[value=""]'
+        );
+
+      if (firstOption) {
+        firstOption.textContent =
+          t(
+            "groupBuySelect",
+            "Select"
+          );
+      }
+    }
+
+
+    function formatDateTime(
+      value
+    ) {
+      if (!value) {
+        return "";
+      }
+
+      const date =
+        new Date(value);
+
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+        return "";
+      }
+
+      try {
+        return new Intl.DateTimeFormat(
+          language,
+          {
+            timeZone:
+              "Asia/Seoul",
+
+            year:
+              "numeric",
+
+            month:
+              "2-digit",
+
+            day:
+              "2-digit",
+
+            hour:
+              "2-digit",
+
+            minute:
+              "2-digit",
+
+            hour12:
+              false,
+          }
+        ).format(date) +
+          " KST";
+
+      } catch {
+        return date.toLocaleString() +
+          " KST";
+      }
+    }
+
+
+    function renderSchedule() {
+      scheduleBox.classList.remove(
+        "hidden"
+      );
+
+
+      if (
+        recruitmentAvailability ===
+        null
+      ) {
+        applicationPanel.classList.add(
+          "hidden"
+        );
+
+        scheduleStatus.textContent =
+          t(
+            "groupBuyLoading",
+            "Loading…"
+          );
+
+        scheduleDetail.textContent =
+          "";
+
+        return;
+      }
+
+
+      const status =
+        recruitmentAvailability
+          ?.status ??
+        "closed";
+
+
+      if (
+        status ===
+        "open"
+      ) {
+        applicationPanel.classList.remove(
+          "hidden"
+        );
+
+        scheduleStatus.textContent =
+          t(
+            "groupBuyRecruitmentOpen",
+            "Recruitment is currently open."
+          );
+
+        const closeAt =
+          currentEvent
+            ?.end_at;
+
+        scheduleDetail.textContent =
+          closeAt
+            ? (
+                t(
+                  "groupBuyRecruitmentEnds",
+                  "Recruitment ends:"
+                ) +
+                " " +
+                formatDateTime(
+                  closeAt
+                )
+              )
+            : "";
+
+        return;
+      }
+
+
+      applicationPanel.classList.add(
+        "hidden"
+      );
+
+
+      if (
+        status ===
+        "before"
+      ) {
+        scheduleStatus.textContent =
+          t(
+            "groupBuyRecruitmentBefore",
+            "Recruitment has not started yet."
+          );
+
+        const startAt =
+          currentEvent
+            ?.start_at;
+
+        scheduleDetail.textContent =
+          startAt
+            ? (
+                t(
+                  "groupBuyRecruitmentStarts",
+                  "Recruitment starts:"
+                ) +
+                " " +
+                formatDateTime(
+                  startAt
+                )
+              )
+            : "";
+
+        return;
+      }
+
+
+      scheduleStatus.textContent =
+        t(
+          "groupBuyRecruitmentClosed",
+          "Recruitment has ended."
+        );
+
+      scheduleDetail.textContent =
+        "";
+    }
+
+
+    function createQuantitySelect(
+      item
+    ) {
+      const select =
+        document.createElement(
+          "select"
+        );
+
+      select.className =
+        "quantity-select";
+
+      select.dataset.itemId =
+        String(
+          item.id
+        );
+
+      select.disabled =
+        true;
+
+
+      const maxQuantity =
+        Math.max(
+          1,
+          Number(
+            item.max_quantity
+          ) || 1
+        );
+
+
+      for (
+        let quantity = 1;
+        quantity <= maxQuantity;
+        quantity += 1
+      ) {
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          String(
+            quantity
+          );
+
+        option.textContent =
+          String(
+            quantity
+          );
+
+        select.appendChild(
+          option
+        );
+      }
+
+
+      return select;
+    }
+
+
+    function renderPurchaseItems() {
+      const previousSelections =
+        new Map();
+
+
+      purchaseItems
+        .querySelectorAll(
+          ".purchase-item"
+        )
+        .forEach(
+          (row) => {
+            const checkbox =
+              row.querySelector(
+                'input[type="checkbox"]'
+              );
+
+            const quantity =
+              row.querySelector(
+                ".quantity-select"
+              );
+
+
+            if (
+              checkbox &&
+              checkbox.checked
+            ) {
+              previousSelections.set(
+                checkbox.value,
+                quantity?.value ??
+                  "1"
+              );
+            }
+          }
+        );
+
+
+      purchaseItems.innerHTML =
+        "";
+
+
+      for (
+        const item
+        of currentItems
+      ) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "purchase-item";
+
+
+        const label =
+          document.createElement(
+            "label"
+          );
+
+        label.className =
+          "purchase-check";
+
+
+        const checkbox =
+          document.createElement(
+            "input"
+          );
+
+        checkbox.type =
+          "checkbox";
+
+        checkbox.name =
+          "purchase_item";
+
+        checkbox.value =
+          String(
+            item.id
+          );
+
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+        name.className =
+          "purchase-name";
+
+        name.textContent =
+          item.name;
+
+
+        label.appendChild(
+          checkbox
+        );
+
+        label.appendChild(
+          name
+        );
+
+
+        const quantityBox =
+          document.createElement(
+            "div"
+          );
+
+        quantityBox.className =
+          "quantity-box";
+
+
+        const quantityLabel =
+          document.createElement(
+            "span"
+          );
+
+        quantityLabel.className =
+          "quantity-label";
+
+        quantityLabel.textContent =
+          t(
+            "groupBuyQuantity",
+            "Qty"
+          );
+
+
+        const quantitySelect =
+          createQuantitySelect(
+            item
+          );
+
+
+        checkbox.addEventListener(
+          "change",
+          () => {
+            quantitySelect.disabled =
+              !checkbox.checked;
+
+            if (
+              checkbox.checked &&
+              !quantitySelect.value
+            ) {
+              quantitySelect.value =
+                "1";
+            }
+
+            setStatus("");
+          }
+        );
+
+
+        const previousQuantity =
+          previousSelections.get(
+            String(
+              item.id
+            )
+          );
+
+
+        if (
+          previousQuantity
+        ) {
+          checkbox.checked =
+            true;
+
+          quantitySelect.disabled =
+            false;
+
+          const quantityExists =
+            Array.from(
+              quantitySelect.options
+            ).some(
+              (option) =>
+                option.value ===
+                previousQuantity
+            );
+
+          quantitySelect.value =
+            quantityExists
+              ? previousQuantity
+              : "1";
+        }
+
+
+        quantityBox.appendChild(
+          quantityLabel
+        );
+
+        quantityBox.appendChild(
+          quantitySelect
+        );
+
+
+        row.appendChild(
+          label
+        );
+
+        row.appendChild(
+          quantityBox
+        );
+
+
+        purchaseItems.appendChild(
+          row
+        );
+      }
+
+
+      if (
+        currentItems.length ===
+        0
+      ) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "small";
+
+        empty.textContent =
+          t(
+            "groupBuyNoItems",
+            "No purchase items are currently available."
+          );
+
+        purchaseItems.appendChild(
+          empty
+        );
+      }
+    }
+
+
+    function getSelectedItems() {
+      const selected =
+        [];
+
+
+      document
+        .querySelectorAll(
+          'input[name="purchase_item"]:checked'
+        )
+        .forEach(
+          (checkbox) => {
+            const row =
+              checkbox.closest(
+                ".purchase-item"
+              );
+
+            const quantitySelect =
+              row?.querySelector(
+                ".quantity-select"
+              );
+
+            const quantity =
+              Number(
+                quantitySelect
+                  ?.value ??
+                0
+              );
+
+
+            if (
+              Number.isInteger(
+                quantity
+              ) &&
+              quantity >= 1
+            ) {
+              selected.push({
+                item_id:
+                  Number(
+                    checkbox.value
+                  ),
+
+                quantity,
+              });
+            }
+          }
+        );
+
+
+      return selected;
+    }
+
+
+    async function loadFormData() {
+      const response =
+        await fetch(
+          GROUP_BUY_API_URL,
+          {
+            method:
+              "GET",
+          }
+        );
+
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
+          )
+        );
+      }
+
+
+      currentEvent =
+        result.event ??
+        null;
+
+      recruitmentAvailability =
+        result.availability ??
+        {
+          status:
+            "closed",
+        };
+
+      currentItems =
+        Array.isArray(
+          result.items
+        )
+          ? result.items
+          : [];
+
+
+      alliance.innerHTML =
+        "";
+
+
+      const placeholder =
+        document.createElement(
+          "option"
+        );
+
+      placeholder.value =
+        "";
+
+      placeholder.textContent =
+        t(
+          "groupBuySelect",
+          "Select"
+        );
+
+      alliance.appendChild(
+        placeholder
+      );
+
+
+      for (
+        const item
+        of (
+          result.alliances ??
+          []
+        )
+      ) {
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          String(
+            item.id
+          );
+
+        option.textContent =
+          item.name;
+
+        alliance.appendChild(
+          option
+        );
+      }
+
+
+      renderPurchaseItems();
+      renderSchedule();
+    }
+
+
+    form.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        setStatus("");
+
+
+        if (
+          !form.reportValidity()
+        ) {
+          setStatus(
+            t(
+              "groupBuyRequired",
+              "Please complete all required fields."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        const selectedItems =
+          getSelectedItems();
+
+
+        if (
+          selectedItems.length <
+          1
+        ) {
+          setStatus(
+            t(
+              "groupBuySelectAtLeastOne",
+              "Please select at least one purchase item."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (
+          !agreementPurchase.checked ||
+          !agreementRestriction.checked
+        ) {
+          setStatus(
+            t(
+              "groupBuyAgreementsRequired",
+              "Please confirm all required agreements."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (
+          !currentEvent?.id
+        ) {
+          setStatus(
+            t(
+              "groupBuyRecruitmentClosed",
+              "Recruitment has ended."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          t(
+            "groupBuySubmitting",
+            "Submitting…"
+          );
+
+
+        try {
+          const response =
+            await fetch(
+              GROUP_BUY_API_URL,
+              {
+                method:
+                  "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+
+                body:
+                  JSON.stringify({
+                    event_id:
+                      Number(
+                        currentEvent.id
+                      ),
+
+                    language,
+
+                    alliance_id:
+                      Number(
+                        alliance.value
+                      ),
+
+                    player_name:
+                      playerName
+                        .value
+                        .trim(),
+
+                    items:
+                      selectedItems,
+
+                    agreement_purchase:
+                      agreementPurchase
+                        .checked,
+
+                    agreement_restriction:
+                      agreementRestriction
+                        .checked,
+                  }),
+              }
+            );
+
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => ({})
+              );
+
+
+          if (
+            !response.ok
+          ) {
+            if (
+              result.error ===
+              "RECRUITMENT_NOT_STARTED"
+            ) {
+              throw new Error(
+                t(
+                  "groupBuyRecruitmentBefore",
+                  "Recruitment has not started yet."
+                )
+              );
+            }
+
+
+            if (
+              result.error ===
+              "RECRUITMENT_CLOSED"
+            ) {
+              throw new Error(
+                t(
+                  "groupBuyRecruitmentClosed",
+                  "Recruitment has ended."
+                )
+              );
+            }
+
+
+            throw new Error(
+              result.error ||
+              t(
+                "groupBuySubmitFailed",
+                "Submission failed."
+              )
+            );
+          }
+
+
+          form.reset();
+
+          renderPurchaseItems();
+
+
+          setStatus(
+            result.updated ===
+              true
+              ? t(
+                  "groupBuyUpdateSuccess",
+                  "Your application has been updated."
+                )
+              : t(
+                  "groupBuySubmitSuccess",
+                  "Your application has been submitted."
+                ),
+            "success"
+          );
+
+
+          setTimeout(
+            () => {
+              window.location.href =
+                "/";
+            },
+            1000
+          );
+
+        } catch (
+          error
+        ) {
+          setStatus(
+            error.message ||
+            t(
+              "groupBuySubmitFailed",
+              "Submission failed."
+            ),
+            "error"
+          );
+
+        } finally {
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            t(
+              "groupBuySubmit",
+              "Submit"
+            );
+        }
+      }
+    );
+
+
+    window.addEventListener(
+      "s967languagechange",
+      (event) => {
+        language =
+          event.detail
+            ?.language ??
+          (
+            typeof getCurrentLanguage ===
+              "function"
+              ? getCurrentLanguage()
+              : "en"
+          );
+
+        setStaticText();
+      }
+    );
+
+
+    async function initialize() {
+      setStaticText();
+      renderSchedule();
+
+
+      try {
+        await loadFormData();
+
+      } catch (
+        error
+      ) {
+        console.error(
+          error
+        );
+
+        applicationPanel.classList.add(
+          "hidden"
+        );
+
+        scheduleBox.classList.remove(
+          "hidden"
+        );
+
+        scheduleStatus.textContent =
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
+          );
+
+        scheduleDetail.textContent =
+          "";
+
+        setStatus(
+          error.message ||
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
+          ),
+          "error"
+        );
+
+        submitButton.disabled =
+          true;
+      }
+    }
+
+
+    initialize();
+  </script>
+
+</body>
+</html>
