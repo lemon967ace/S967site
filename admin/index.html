@@ -410,63 +410,94 @@
 
 
   <div
-    id="uploadAdminSection"
-    class="admin-section is-active"
-    data-admin-section="uploads"
-  >
-        <h2>Upload Control</h2>
+  id="uploadAdminSection"
+  class="admin-section is-active"
+  data-admin-section="uploads"
+>
 
-        <p
-          id="pauseStatus"
-          class="small"
-        ></p>
+  <section class="panel">
+    <h2>Upload Control</h2>
 
-        <div class="row">
-          <button
-            type="button"
-            data-pause-hours="1"
-          >
-            Pause 1 hour
-          </button>
+    <p
+      id="pauseStatus"
+      class="small"
+    ></p>
 
-          <button
-            type="button"
-            data-pause-hours="6"
-          >
-            Pause 6 hours
-          </button>
+    <div class="row">
+      <button
+        type="button"
+        data-pause-hours="1"
+      >
+        Pause 1 hour
+      </button>
 
-          <button
-            type="button"
-            data-pause-hours="24"
-          >
-            Pause 24 hours
-          </button>
+      <button
+        type="button"
+        data-pause-hours="6"
+      >
+        Pause 6 hours
+      </button>
 
-          <button
-            type="button"
-            data-pause-hours="72"
-          >
-            Pause 3 days
-          </button>
+      <button
+        type="button"
+        data-pause-hours="24"
+      >
+        Pause 24 hours
+      </button>
 
-          <button
-            id="resumeButton"
-            type="button"
-          >
-            Resume now
-          </button>
-        </div>
+      <button
+        type="button"
+        data-pause-hours="72"
+      >
+        Pause 3 days
+      </button>
 
-        <div
-          id="controlStatus"
-          class="status"
-        ></div>
-      </section>
-      </div>
+      <button
+        id="resumeButton"
+        type="button"
+      >
+        Resume now
+      </button>
+    </div>
 
-        <div
-    id="wkAdminSection"
+    <div
+      id="controlStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        Recent Uploads
+      </h2>
+
+      <button
+        id="refreshButton"
+        type="button"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <p class="small">
+      Up to 100 recent upload events are shown.
+    </p>
+
+    <div id="uploads"></div>
+
+    <div
+      id="uploadsStatus"
+      class="status"
+    ></div>
+  </section>
+
+</div>
+
+
+<div
+  id="wkAdminSection"
     class="admin-section"
     data-admin-section="wk"
   >
