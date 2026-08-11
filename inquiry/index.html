@@ -981,10 +981,19 @@ try {
 
   inquiryForm.reset();
 
-  formStatus.textContent =
-    getTranslation(
-      "inquirySubmitSuccess"
-    );
+formStatus.textContent =
+  getTranslation(
+    "inquirySubmitSuccess"
+  );
+
+setTimeout(
+  () => {
+    window.location.href =
+      "/";
+  },
+  2000
+);
+  
 } catch (error) {
   console.error(
     error
