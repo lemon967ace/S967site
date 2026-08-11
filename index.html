@@ -30,6 +30,20 @@
     .button:hover { transform:translateY(-2px); background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.32); }
     .button:active { transform:translateY(0); }
     footer { margin-top:54px; color:#626875; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+    .source-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #555c68;
+  font-size: .72rem;
+  letter-spacing: .03em;
+  text-transform: none;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  color: #8c939f;
+  text-decoration: underline;
+}
 @media (max-width: 480px) {
   .buttons {
     grid-template-columns: 1fr;
@@ -151,12 +165,28 @@
 </a>
 </nav>
 
-  <footer>
-    PNS · State 967<br>
-   <span class="unofficial" data-i18n="unofficial">
-  Unofficial community site for State 967.
-</span>
-  </footer>
+<footer>
+  PNS · State 967<br>
+
+  <span
+    class="unofficial"
+    data-i18n="unofficial"
+  >
+    Unofficial community site for State 967.
+  </span>
+
+  <br>
+
+  <a
+    class="source-link"
+    href="https://github.com/lemon967ace/S967site"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-i18n="sourceCode"
+  >
+    View source code
+  </a>
+</footer>
 </main>
 </body>
 </html>
