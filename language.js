@@ -166,7 +166,10 @@ inquirySubmit:
 
 inquiryRequiredError:
   "Please complete all required fields.",
-    },
+
+    sourceCode:
+  "View source code",
+  },
 
   ko: {
     language: "언어",
@@ -326,6 +329,10 @@ inquirySubmit:
 
 inquiryRequiredError:
   "필수 항목을 모두 입력해주세요.",
+
+    sourceCode:
+  "소스 코드 보기",
+
   },
 
   ja: {
@@ -486,6 +493,9 @@ inquirySubmit:
 
 inquiryRequiredError:
   "必須項目をすべて入力してください。",
+
+    sourceCode:
+  "ソースコードを見る",
   },
 
   ru: {
@@ -646,6 +656,9 @@ inquirySubmit:
 
 inquiryRequiredError:
   "Пожалуйста, заполните все обязательные поля.",
+
+    sourceCode:
+  "Посмотреть исходный код",
   },
 };
 
