@@ -24,76 +24,6 @@
   ></script>
 
   <style>
-.top-pickers {
-  position: fixed;
-  left: 18px;
-  bottom: 18px;
-  z-index: 1000;
-
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-}
-
-.top-pickers .theme-picker,
-.top-pickers .language-picker {
-  position: relative;
-  inset: auto;
-}
-    
-.language-picker {
-  position: relative;
-}
-
-.language-button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.language-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-
-  min-width: 140px;
-  padding: 6px;
-
-  border: 1px solid var(--border);
-  border-radius: 12px;
-
-  background: var(--surface);
-  box-shadow: var(--shadow);
-
-  display: none;
-}
-
-.language-picker.is-open
-.language-menu {
-  display: block;
-}
-
-.language-menu button {
-  width: 100%;
-  padding: 9px 10px;
-
-  border: 0;
-  background: transparent;
-
-  text-align: left;
-}
-
-.language-menu button:hover {
-  background: var(--surface-hover);
-}
-
-.language-menu button.is-active::before {
-  content: "✓ ";
-}
     * {
       box-sizing: border-box;
     }
@@ -296,52 +226,7 @@
 </head>
 
 <body>
-  <div class="top-pickers">
-  <div class="theme-picker" data-theme-picker>
-  <button
-    class="theme-button"
-    type="button"
-    data-theme-button
-    aria-label="Theme"
-    aria-haspopup="true"
-    aria-expanded="false"
-  >◐</button>
-
-  <div
-    class="theme-menu"
-    data-theme-menu
-    role="menu"
-  >
-    <button
-      type="button"
-      data-theme-choice="system"
-      role="menuitemradio"
-    >
-      <span class="theme-choice-icon">◐</span>
-      <span>System</span>
-    </button>
-
-    <button
-      type="button"
-      data-theme-choice="light"
-      role="menuitemradio"
-    >
-      <span class="theme-choice-icon">☀</span>
-      <span>Light</span>
-    </button>
-
-    <button
-      type="button"
-      data-theme-choice="dark"
-      role="menuitemradio"
-    >
-      <span class="theme-choice-icon">☾</span>
-      <span>Dark</span>
-    </button>
-  </div>
-</div>
-
-  <div
+ <div
   class="language-picker"
   data-language-picker
 >
@@ -393,9 +278,73 @@
       Русский
     </button>
   </div>
+</div>
+
+
+<div
+  class="theme-picker"
+  data-theme-picker
+>
+  <button
+    class="theme-button"
+    type="button"
+    data-theme-button
+    aria-label="Theme"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >
+    ◐
+  </button>
+
+  <div
+    class="theme-menu"
+    data-theme-menu
+    role="menu"
+  >
+    <button
+      type="button"
+      data-theme-choice="system"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">
+        ◐
+      </span>
+
+      <span data-i18n="themeSystem">
+        System
+      </span>
+    </button>
+
+    <button
+      type="button"
+      data-theme-choice="light"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">
+        ☀
+      </span>
+
+      <span data-i18n="themeLight">
+        Light
+      </span>
+    </button>
+
+    <button
+      type="button"
+      data-theme-choice="dark"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">
+        ☾
+      </span>
+
+      <span data-i18n="themeDark">
+        Dark
+      </span>
+    </button>
   </div>
-  </div>
-  
+</div>
+  <main>
     <div class="eyebrow">
   S967
 </div>
