@@ -303,7 +303,7 @@
 
 <section
   id="applicationPanel"
-  class="panel"
+  class="panel hidden"
 >
   <form id="wkForm">
 
@@ -1159,6 +1159,8 @@ hours:
       TEXT[language] ??
       TEXT.en;
 
+    let serverAvailability = null;
+    
 // ============================================================
 // WK APPLICATION SCHEDULE
 //
@@ -1298,9 +1300,8 @@ function formatTimeLeft(
   );
 }
 
-
 function updateApplicationSchedule() {
-  const state =
+  const automaticState =
     getApplicationState();
 
   const applicationPanel =
@@ -1323,6 +1324,31 @@ function updateApplicationSchedule() {
       "scheduleDetail"
     );
 
+  let state =
+    automaticState;
+
+  let forcedMode =
+    false;
+
+  if (
+    serverAvailability?.mode ===
+    "open"
+  ) {
+    state = {
+      isOpen: true,
+    };
+
+    forcedMode = true;
+  } else if (
+    serverAvailability?.mode ===
+    "closed"
+  ) {
+    state = {
+      isOpen: false,
+    };
+
+    forcedMode = true;
+  }
 
   if (state.isOpen) {
     applicationPanel.classList.remove(
@@ -1336,15 +1362,19 @@ function updateApplicationSchedule() {
     scheduleStatus.textContent =
       text.applicationsOpen;
 
-    scheduleDetail.textContent =
-      `${text.closesIn} ` +
-      formatTimeLeft(
-        state.closeAt
-      );
+    if (forcedMode) {
+      scheduleDetail.textContent =
+        "";
+    } else {
+      scheduleDetail.textContent =
+        `${text.closesIn} ` +
+        formatTimeLeft(
+          state.closeAt
+        );
+    }
 
     return;
   }
-
 
   applicationPanel.classList.add(
     "hidden"
@@ -1357,73 +1387,17 @@ function updateApplicationSchedule() {
   scheduleStatus.textContent =
     text.applicationsClosed;
 
-  scheduleDetail.textContent =
-    `${text.opensIn} ` +
-    formatTimeLeft(
-      state.nextOpen
-    );
+  if (forcedMode) {
+    scheduleDetail.textContent =
+      "";
+  } else {
+    scheduleDetail.textContent =
+      `${text.opensIn} ` +
+      formatTimeLeft(
+        state.nextOpen
+      );
+  }
 }
-    
-    const form =
-      document.getElementById(
-        "wkForm"
-      );
-
-    const tier =
-      document.getElementById(
-        "tier"
-      );
-
-    const alliance =
-      document.getElementById(
-        "alliance"
-      );
-
-    const playerName =
-      document.getElementById(
-        "playerName"
-      );
-
-    const troopSize =
-      document.getElementById(
-        "troopSize"
-      );
-
-    const rallySize =
-      document.getElementById(
-        "rallySize"
-      );
-
-    const s967Confirmed =
-      document.getElementById(
-        "s967Confirmed"
-      );
-
-    const agreementColony =
-      document.getElementById(
-        "agreementColony"
-      );
-
-    const agreementTroopReturn =
-      document.getElementById(
-        "agreementTroopReturn"
-      );
-
-    const submitButton =
-      document.getElementById(
-        "submitButton"
-      );
-
-    const formStatus =
-      document.getElementById(
-        "formStatus"
-      );
-
-    const participationNotice =
-      document.getElementById(
-        "participationNotice"
-      );
-
 
     function setStatus(
       message,
@@ -1658,7 +1632,14 @@ rallySize.placeholder =
         );
       }
 
+serverAvailability =
+  result.availability ?? {
+    mode: "auto",
+    is_open: null,
+  };
 
+updateApplicationSchedule();
+      
       tier.innerHTML = "";
 
       const tierPlaceholder =
@@ -2064,8 +2045,7 @@ function updateParticipationState() {
  async function initialize() {
   setStaticText();
   renderRadioGroups();
-  updateApplicationSchedule();
-
+   
   try {
     await loadOptions();
       } catch (error) {
