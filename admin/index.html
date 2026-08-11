@@ -1567,7 +1567,7 @@ setupDragSort(
 );
 }
 
-    async function loadWkData() {
+ async function loadWkData() {
   setStatus(
     tierStatus,
     "Loading…"
@@ -1585,6 +1585,8 @@ setupDragSort(
       );
 
     renderWkLists();
+
+    renderApplicationMode();
 
     setStatus(
       tierStatus,
