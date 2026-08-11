@@ -259,6 +259,9 @@ groupBuyRecruitmentStarts:
 
 groupBuyRecruitmentEnds:
   "Registration ends:",
+
+    groupBuyApplication: 
+      "Group Buy Application"
   },
 
   ko: {
@@ -513,6 +516,9 @@ groupBuyRecruitmentStarts:
 groupBuyRecruitmentEnds:
   "신청 마감:",
 
+   groupBuyApplication: 
+     "공동구매 신청" 
+
   },
 
   ja: {
@@ -766,6 +772,9 @@ groupBuyRecruitmentStarts:
 
 groupBuyRecruitmentEnds:
   "申請締切：",
+
+    groupBuyApplication: 
+      "共同購入申請"
   },
 
   ru: {
@@ -1019,6 +1028,10 @@ groupBuyRecruitmentStarts:
 
 groupBuyRecruitmentEnds:
   "Окончание приёма заявок:",
+
+   groupBuyApplication: 
+     "Совместная покупка" 
+
   },
 };
 
