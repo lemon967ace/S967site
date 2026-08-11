@@ -295,13 +295,13 @@ inquiryContactGame:
   "게임 닉네임",
 
 inquiryContactDiscord:
-  "Discord",
+  "디스코드",
 
 inquiryContactTelegram:
-  "Telegram",
+  "텔레그램",
 
 inquiryContactKakao:
-  "Kakao Open Profile",
+  "카카오 오픈 프로필",
 
 inquiryContactEmail:
   "Email",
