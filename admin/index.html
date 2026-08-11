@@ -1019,31 +1019,47 @@ function createWkManageItem(
   return row;
 }
 
-    function renderWkLists() {
+   function renderWkLists() {
   tierList.innerHTML = "";
   allianceList.innerHTML = "";
 
-  wkData.tiers.forEach(
-    (item) => {
-      tierList.appendChild(
-        createWkManageItem(
-          item,
-          "tier"
-        )
-      );
-    }
-  );
+  if (
+    !Array.isArray(wkData.tiers) ||
+    wkData.tiers.length === 0
+  ) {
+    tierList.innerHTML =
+      '<div class="small">No tiers found.</div>';
+  } else {
+    wkData.tiers.forEach(
+      (item) => {
+        tierList.appendChild(
+          createWkManageItem(
+            item,
+            "tier"
+          )
+        );
+      }
+    );
+  }
 
-  wkData.alliances.forEach(
-    (item) => {
-      allianceList.appendChild(
-        createWkManageItem(
-          item,
-          "alliance"
-        )
-      );
-    }
-  );
+  if (
+    !Array.isArray(wkData.alliances) ||
+    wkData.alliances.length === 0
+  ) {
+    allianceList.innerHTML =
+      '<div class="small">No alliances found.</div>';
+  } else {
+    wkData.alliances.forEach(
+      (item) => {
+        allianceList.appendChild(
+          createWkManageItem(
+            item,
+            "alliance"
+          )
+        );
+      }
+    );
+  }
 }
 
     async function loadWkData() {
