@@ -478,13 +478,16 @@
         "lazy";
 
 
-      img.addEventListener(
-        "load",
-        () => {
-          card.style.display =
-            "";
-        }
-      );
+     img.addEventListener(
+  "load",
+  () => {
+    card.style.display = "";
+    visibleImageCount++;
+
+    status.style.display = "none";
+    gallery.classList.remove("hidden");
+  }
+);
 
 
       img.addEventListener(
@@ -547,7 +550,10 @@ meta.textContent =
   }
 );
 
+    let visibleImageCount = 0;
+    
     async function loadGallery() {
+      visibleImageCount = 0;
       refreshButton.disabled =
         true;
 
@@ -651,66 +657,6 @@ meta.textContent =
        gallery.classList.remove(
   "hidden"
 );
-
-const images =
-  Array.from(
-    gallery.querySelectorAll(
-      "img"
-    )
-  );
-
-await Promise.allSettled(
-  images.map(
-    (img) =>
-      new Promise(
-        (resolve) => {
-          if (img.complete) {
-            resolve();
-            return;
-          }
-
-          img.addEventListener(
-            "load",
-            resolve,
-            {
-              once: true,
-            }
-          );
-
-          img.addEventListener(
-            "error",
-            resolve,
-            {
-              once: true,
-            }
-          );
-        }
-      )
-  )
-);
-
-const visibleCards =
-  gallery.querySelectorAll(
-    ".card:not([style*='display: none'])"
-  );
-
-if (
-  visibleCards.length === 0
-) {
-  gallery.classList.add(
-    "hidden"
-  );
-
-  status.style.display =
-    "";
-
-  status.textContent =
-    getTranslation(
-      "galleryEmpty"
-    );
-
-  return;
-}
 
 status.style.display =
   "none";
