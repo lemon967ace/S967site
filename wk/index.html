@@ -2244,6 +2244,14 @@ function updateParticipationState() {
           setStatus(
             text.success,
             "success"
+
+            setTimeout(
+  () => {
+    window.location.href =
+      "/";
+  },
+  2000
+);
           );
         } catch (error) {
           setStatus(
