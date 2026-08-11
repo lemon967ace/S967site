@@ -24,6 +24,24 @@
   ></script>
 
   <style>
+    .language-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.language-switcher button {
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.language-switcher button.is-active {
+  border-color: var(--text);
+  box-shadow:
+    inset 0 0 0 1px var(--text);
+}
     * {
       box-sizing: border-box;
     }
@@ -278,6 +296,27 @@
       WK Application
     </h1>
 
+    <div
+  class="language-switcher"
+  id="languageSwitcher"
+>
+  <button type="button" data-language="ko">
+    한국어
+  </button>
+
+  <button type="button" data-language="en">
+    English
+  </button>
+
+  <button type="button" data-language="ja">
+    日本語
+  </button>
+
+  <button type="button" data-language="ru">
+    Русский
+  </button>
+</div>
+    
     <p
       id="pageIntro"
       class="small"
