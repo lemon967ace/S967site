@@ -430,13 +430,12 @@ return card;
       refreshButton.disabled =
         true;
 
-      status.classList.remove(
-        "hidden"
-      );
+    status.style.display =
+  "none";
 
-      gallery.classList.add(
-        "hidden"
-      );
+gallery.classList.remove(
+  "hidden"
+);
 
      status.textContent =
   getTranslation(
@@ -503,13 +502,12 @@ return card;
   return;
 }
 
-        status.classList.add(
-          "hidden"
-        );
+        status.style.display =
+  "none";
 
-        gallery.classList.remove(
-          "hidden"
-        );
+status.style.display =
+  "";
+        
       } catch (error) {
       status.textContent =
   error.message ||
