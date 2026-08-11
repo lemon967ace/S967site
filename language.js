@@ -92,6 +92,15 @@ refresh:
 
 loadingImages:
   "Loading images…",
+    
+    galleryLoadFailed:
+  "Could not load gallery.",
+
+galleryEmpty:
+  "No images have been uploaded yet.",
+
+communityUpload:
+  "Community upload",
   },
 
   ko: {
@@ -177,6 +186,15 @@ refresh:
 
 loadingImages:
   "이미지를 불러오는 중…",
+
+    galleryLoadFailed:
+  "갤러리를 불러올 수 없습니다.",
+
+galleryEmpty:
+  "아직 업로드된 이미지가 없습니다.",
+
+communityUpload:
+  "커뮤니티 업로드 이미지",
   },
 
   ja: {
@@ -262,6 +280,15 @@ refresh:
 
 loadingImages:
   "画像を読み込んでいます…",
+
+    galleryLoadFailed:
+  "ギャラリーを読み込めませんでした。",
+
+galleryEmpty:
+  "まだ画像はアップロードされていません。",
+
+communityUpload:
+  "コミュニティのアップロード画像",
   },
 
   ru: {
@@ -347,6 +374,15 @@ refresh:
 
 loadingImages:
   "Загрузка изображений…",
+
+    galleryLoadFailed:
+  "Не удалось загрузить галерею.",
+
+galleryEmpty:
+  "Изображения пока не загружены.",
+
+communityUpload:
+  "Изображение сообщества",
   },
 };
 
