@@ -448,6 +448,14 @@
     >
       황무지 설문
     </button>
+    
+    <button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="inquiry"
+>
+  문의
+</button>
   </div>
 
 
@@ -846,7 +854,54 @@
 
 </div>
 
+<div
+  id="inquiryAdminSection"
+  class="admin-section"
+  data-admin-section="inquiry"
+>
+  <section class="panel">
+    <h2>
+      문의 이메일 수신자
+    </h2>
 
+    <p class="small">
+      새 문의 알림을 받을 이메일 주소를 관리합니다.
+      비활성 수신자에게는 알림이 발송되지 않습니다.
+    </p>
+
+    <div
+      id="inquiryEmailRecipientList"
+      class="manage-list"
+    ></div>
+
+    <div class="row add-row">
+      <input
+        id="newInquiryEmailNickname"
+        type="text"
+        placeholder="별명"
+      >
+
+      <input
+        id="newInquiryEmailAddress"
+        type="email"
+        placeholder="Email address"
+      >
+
+      <button
+        id="addInquiryEmailRecipientButton"
+        type="button"
+      >
+        + 수신자 추가
+      </button>
+    </div>
+
+    <div
+      id="inquiryEmailRecipientStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+  
     <a class="back" href="/">
       ← Back to Home
     </a>
@@ -861,6 +916,9 @@
     
     const WK_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
+
+    const INQUIRY_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/inquiry-admin";
     
     const SUPABASE_PUBLIC_STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
@@ -991,6 +1049,35 @@ const applicationModeStatus =
     "applicationModeStatus"
   );
 
+    const inquiryEmailRecipientList =
+  document.getElementById(
+    "inquiryEmailRecipientList"
+  );
+
+const newInquiryEmailNickname =
+  document.getElementById(
+    "newInquiryEmailNickname"
+  );
+
+const newInquiryEmailAddress =
+  document.getElementById(
+    "newInquiryEmailAddress"
+  );
+
+const addInquiryEmailRecipientButton =
+  document.getElementById(
+    "addInquiryEmailRecipientButton"
+  );
+
+const inquiryEmailRecipientStatus =
+  document.getElementById(
+    "inquiryEmailRecipientStatus"
+  );
+
+let inquiryData = {
+  email_recipients: [],
+};
+
     const emailRecipientList =
   document.getElementById(
     "emailRecipientList"
@@ -1118,7 +1205,54 @@ async function apiRequest(
   return result;
 }
 
+async function inquiryApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
 
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      INQUIRY_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Inquiry admin request failed."
+    );
+  }
+
+  return result;
+}
+    
 async function wkApiRequest(
   method,
   body = null
@@ -1165,6 +1299,420 @@ async function wkApiRequest(
   return result;
 }
 
+    async function inquiryApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      INQUIRY_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Inquiry admin request failed."
+    );
+  }
+
+  return result;
+}
+
+    function renderInquiryEmailRecipients() {
+  inquiryEmailRecipientList.innerHTML =
+    "";
+
+  const recipients =
+    Array.isArray(
+      inquiryData.email_recipients
+    )
+      ? inquiryData.email_recipients
+      : [];
+
+  if (
+    recipients.length ===
+    0
+  ) {
+    inquiryEmailRecipientList.innerHTML =
+      '<div class="small">등록된 수신자가 없습니다.</div>';
+
+    return;
+  }
+
+  recipients.forEach(
+    (recipient) => {
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "manage-item";
+
+      if (!recipient.active) {
+        row.classList.add(
+          "item-inactive"
+        );
+      }
+
+
+      const content =
+        document.createElement(
+          "div"
+        );
+
+      content.style.flex =
+        "1";
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "manage-name";
+
+      name.textContent =
+        recipient.nickname ||
+        "이름 없음";
+
+
+      const email =
+        document.createElement(
+          "div"
+        );
+
+      email.className =
+        "manage-note";
+
+      email.textContent =
+        recipient.email;
+
+
+      content.appendChild(
+        name
+      );
+
+      content.appendChild(
+        email
+      );
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "manage-actions";
+
+
+      /*
+        Active / Inactive
+      */
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        recipient.active
+          ? "Active"
+          : "Inactive";
+
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "update_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  recipient.nickname ??
+                  "",
+
+                email:
+                  recipient.email,
+
+                active:
+                  !recipient.active,
+              }
+            );
+
+            await loadInquiryData();
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      /*
+        수정
+      */
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        "Edit";
+
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const nickname =
+            prompt(
+              "별명:",
+              recipient.nickname ??
+                ""
+            );
+
+          if (
+            nickname ===
+            null
+          ) {
+            return;
+          }
+
+
+          const emailValue =
+            prompt(
+              "이메일 주소:",
+              recipient.email
+            );
+
+          if (
+            emailValue ===
+            null
+          ) {
+            return;
+          }
+
+
+          const email =
+            emailValue.trim();
+
+          if (!email) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "이메일 주소를 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "update_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  nickname.trim(),
+
+                email,
+
+                active:
+                  recipient.active,
+              }
+            );
+
+            await loadInquiryData();
+
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "수정했습니다."
+            );
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      /*
+        삭제
+      */
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.className =
+        "danger";
+
+      deleteButton.textContent =
+        "Delete";
+
+
+      deleteButton.addEventListener(
+        "click",
+        async () => {
+          if (
+            !confirm(
+              `${recipient.email} 수신자를 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+              }
+            );
+
+            await loadInquiryData();
+
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "삭제했습니다."
+            );
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Delete failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        editButton
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      row.appendChild(
+        content
+      );
+
+      row.appendChild(
+        actions
+      );
+
+
+      inquiryEmailRecipientList
+        .appendChild(
+          row
+        );
+    }
+  );
+}
+
+    async function loadInquiryData() {
+  setStatus(
+    inquiryEmailRecipientStatus,
+    "Loading…"
+  );
+
+  try {
+    inquiryData =
+      await inquiryApiRequest(
+        "GET"
+      );
+
+    renderInquiryEmailRecipients();
+
+    setStatus(
+      inquiryEmailRecipientStatus,
+      ""
+    );
+
+  } catch (error) {
+    setStatus(
+      inquiryEmailRecipientStatus,
+      error.message ||
+        "Failed to load Inquiry data.",
+      true
+    );
+  }
+}
+    
     async function wkExportEmailRequest(
   type
 ) {
@@ -3013,6 +3561,14 @@ function renderOnlyIp(ipHash) {
   loadWkData();
 }
 
+      if (
+  target ===
+  "inquiry"
+) {
+  loadInquiryData();
+}
+      
+      
       adminTabs.forEach(
         (item) => {
           item.classList.toggle(
@@ -3223,6 +3779,83 @@ addEmailRecipientButton
           addEmailRecipientButton.disabled =
             false;
         }
+      }
+    }
+  );
+
+    addInquiryEmailRecipientButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const nickname =
+        newInquiryEmailNickname
+          .value
+          .trim();
+
+      const email =
+        newInquiryEmailAddress
+          .value
+          .trim();
+
+      if (!email) {
+        setStatus(
+          inquiryEmailRecipientStatus,
+          "이메일 주소를 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+
+      addInquiryEmailRecipientButton.disabled =
+        true;
+
+      setStatus(
+        inquiryEmailRecipientStatus,
+        "추가 중…"
+      );
+
+
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "add_inquiry_email_recipient",
+
+            nickname,
+            email,
+          }
+        );
+
+
+        newInquiryEmailNickname.value =
+          "";
+
+        newInquiryEmailAddress.value =
+          "";
+
+
+        await loadInquiryData();
+
+
+        setStatus(
+          inquiryEmailRecipientStatus,
+          "수신자를 추가했습니다."
+        );
+
+      } catch (error) {
+        setStatus(
+          inquiryEmailRecipientStatus,
+          error.message ||
+            "추가에 실패했습니다.",
+          true
+        );
+
+      } finally {
+        addInquiryEmailRecipientButton.disabled =
+          false;
       }
     }
   );
