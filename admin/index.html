@@ -677,17 +677,7 @@
   id="wkSettingsPanel"
   class="wk-subpanel"
 >
-  <div class="manage-card">
-    <div class="manage-card-header">
-      <div>
-        <h3>Application Mode</h3>
-        <p class="small">
-          Control whether WK applications follow the automatic schedule or are manually overridden.
-        </p>
-      </div>
-    </div>
-
-    <div
+  <div
       class="application-mode-options"
       id="applicationModeOptions"
     >
@@ -723,6 +713,7 @@
     ></div>
   </div>
 </div>
+
 
     <a class="back" href="/">
       ← Back to Home
@@ -916,10 +907,11 @@ async function apiRequest(
         () => ({})
       );
 
-  if (!response.ok) {
+    if (!response.ok) {
     throw new Error(
       result.error ||
-      "Request failed."
+      result.message ||
+      "WK admin request failed."
     );
   }
 
