@@ -178,6 +178,87 @@ inquirySubmitError:
 
     inquiryClosed:
     "We are not accepting inquiries at this time.",
+    
+    groupBuyTitle:
+  "Group Buy Application",
+
+groupBuyIntro:
+  "Please complete all required fields.",
+
+groupBuyAlliance:
+  "Alliance",
+
+groupBuyPlayerName:
+  "Player Name",
+
+groupBuyNamePlaceholder:
+  "Please enter your name by copy & paste 😉",
+
+groupBuyPurchaseItems:
+  "Items You Plan to Purchase",
+
+groupBuyPurchaseItemsHelp:
+  "Select at least one item and choose the quantity.",
+
+groupBuyQuantity:
+  "Qty",
+
+groupBuyNoItems:
+  "No purchase items are currently available.",
+
+groupBuyAgreementPurchase:
+  "If you participate, you must purchase at least one item. To avoid unexpected issues, please purchase your coupons in advance.",
+
+groupBuyAgreementRestriction:
+  "If you are found participating without making a purchase, you may be restricted from participating in future events.",
+
+groupBuySubmit:
+  "Submit",
+
+groupBuySubmitting:
+  "Submitting…",
+
+groupBuySubmitSuccess:
+  "Your application has been successfully submitted.",
+
+groupBuyUpdateSuccess:
+  "Your application has been successfully updated.",
+
+groupBuySubmitFailed:
+  "Submission failed.",
+
+groupBuyLoadFailed:
+  "Failed to load the application form.",
+
+groupBuySelect:
+  "Select",
+
+groupBuyRequired:
+  "Please complete all required fields.",
+
+groupBuySelectAtLeastOne:
+  "Please select at least one item.",
+
+groupBuyAgreementsRequired:
+  "Please confirm both required agreements.",
+
+groupBuyLoading:
+  "Loading…",
+
+groupBuyRecruitmentBefore:
+  "Registration has not started yet.",
+
+groupBuyRecruitmentOpen:
+  "Registration is currently open.",
+
+groupBuyRecruitmentClosed:
+  "Registration has ended.",
+
+groupBuyRecruitmentStarts:
+  "Registration starts:",
+
+groupBuyRecruitmentEnds:
+  "Registration ends:",
   },
 
   ko: {
@@ -350,6 +431,87 @@ inquirySubmitError:
 
     inquiryClosed:
     "현재 문의를 받지 않고 있습니다.",
+    
+    groupBuyTitle:
+  "공동구매 신청",
+
+groupBuyIntro:
+  "필수 항목을 모두 작성해 주세요.",
+
+groupBuyAlliance:
+  "연맹",
+
+groupBuyPlayerName:
+  "이름",
+
+groupBuyNamePlaceholder:
+  "반드시 복사붙이기로 입력해주세요😉",
+
+groupBuyPurchaseItems:
+  "구매 예정 항목",
+
+groupBuyPurchaseItemsHelp:
+  "최소 1개 이상의 항목을 선택하고 수량을 선택해 주세요.",
+
+groupBuyQuantity:
+  "수량",
+
+groupBuyNoItems:
+  "현재 선택 가능한 구매 항목이 없습니다.",
+
+groupBuyAgreementPurchase:
+  "참여할 경우 반드시 하나 이상의 상품을 구매해야 합니다. 예상치 못한 문제를 피하기 위해 쿠폰은 미리 구매해 두시기 바랍니다.",
+
+groupBuyAgreementRestriction:
+  "구매하지 않고 참여한 사실이 확인될 경우 향후 참여가 제한될 수 있습니다.",
+
+groupBuySubmit:
+  "제출",
+
+groupBuySubmitting:
+  "제출 중…",
+
+groupBuySubmitSuccess:
+  "신청이 성공적으로 제출되었습니다.",
+
+groupBuyUpdateSuccess:
+  "기존 신청 내용이 성공적으로 수정되었습니다.",
+
+groupBuySubmitFailed:
+  "제출에 실패했습니다.",
+
+groupBuyLoadFailed:
+  "신청서를 불러오지 못했습니다.",
+
+groupBuySelect:
+  "선택",
+
+groupBuyRequired:
+  "필수 항목을 모두 작성해 주세요.",
+
+groupBuySelectAtLeastOne:
+  "구매 예정 항목을 최소 1개 이상 선택해 주세요.",
+
+groupBuyAgreementsRequired:
+  "필수 확인 사항에 모두 동의해 주세요.",
+
+groupBuyLoading:
+  "불러오는 중…",
+
+groupBuyRecruitmentBefore:
+  "아직 신청 기간이 아닙니다.",
+
+groupBuyRecruitmentOpen:
+  "현재 공동구매 신청을 받고 있습니다.",
+
+groupBuyRecruitmentClosed:
+  "공동구매 신청이 종료되었습니다.",
+
+groupBuyRecruitmentStarts:
+  "신청 시작:",
+
+groupBuyRecruitmentEnds:
+  "신청 마감:",
 
   },
 
@@ -523,6 +685,87 @@ inquirySubmitError:
 
     inquiryClosed:
     "現在、お問い合わせの受付を停止しています。",
+    
+    groupBuyTitle:
+  "共同購入申請",
+
+groupBuyIntro:
+  "必須項目をすべて入力してください。",
+
+groupBuyAlliance:
+  "ギルド",
+
+groupBuyPlayerName:
+  "名前",
+
+groupBuyNamePlaceholder:
+  "必ずコピー＆ペーストで入力してください😉",
+
+groupBuyPurchaseItems:
+  "購入予定の商品",
+
+groupBuyPurchaseItemsHelp:
+  "1つ以上の商品を選択し、数量を選んでください。",
+
+groupBuyQuantity:
+  "数量",
+
+groupBuyNoItems:
+  "現在選択できる商品はありません。",
+
+groupBuyAgreementPurchase:
+  "参加する場合は、必ず1つ以上の商品を購入してください。予期せぬ問題を避けるため、クーポンは事前に購入しておくことをおすすめします。",
+
+groupBuyAgreementRestriction:
+  "商品を購入せずに参加したことが確認された場合、今後の参加が制限される可能性があります。",
+
+groupBuySubmit:
+  "送信",
+
+groupBuySubmitting:
+  "送信中…",
+
+groupBuySubmitSuccess:
+  "申請が正常に送信されました。",
+
+groupBuyUpdateSuccess:
+  "申請内容が正常に更新されました。",
+
+groupBuySubmitFailed:
+  "送信に失敗しました。",
+
+groupBuyLoadFailed:
+  "申請フォームを読み込めませんでした。",
+
+groupBuySelect:
+  "選択",
+
+groupBuyRequired:
+  "必須項目をすべて入力してください。",
+
+groupBuySelectAtLeastOne:
+  "購入予定の商品を1つ以上選択してください。",
+
+groupBuyAgreementsRequired:
+  "必須の確認事項すべてに同意してください。",
+
+groupBuyLoading:
+  "読み込み中…",
+
+groupBuyRecruitmentBefore:
+  "まだ申請期間ではありません。",
+
+groupBuyRecruitmentOpen:
+  "現在、共同購入の申請を受け付けています。",
+
+groupBuyRecruitmentClosed:
+  "共同購入の申請受付は終了しました。",
+
+groupBuyRecruitmentStarts:
+  "申請開始：",
+
+groupBuyRecruitmentEnds:
+  "申請締切：",
   },
 
   ru: {
@@ -695,6 +938,87 @@ inquirySubmitError:
 
       inquiryClosed:
     "В настоящее время мы не принимаем обращения.",
+    
+    groupBuyTitle:
+  "Заявка на совместную покупку",
+
+groupBuyIntro:
+  "Заполните все обязательные поля.",
+
+groupBuyAlliance:
+  "Альянс",
+
+groupBuyPlayerName:
+  "Ник",
+
+groupBuyNamePlaceholder:
+  "Обязательно скопируйте и вставьте ник 😉",
+
+groupBuyPurchaseItems:
+  "Планируемые покупки",
+
+groupBuyPurchaseItemsHelp:
+  "Выберите хотя бы один товар и укажите количество.",
+
+groupBuyQuantity:
+  "Кол-во",
+
+groupBuyNoItems:
+  "В настоящее время нет доступных товаров для выбора.",
+
+groupBuyAgreementPurchase:
+  "Для участия необходимо приобрести как минимум один товар. Чтобы избежать непредвиденных проблем, рекомендуется приобрести купоны заранее.",
+
+groupBuyAgreementRestriction:
+  "Если будет установлено, что вы участвовали без покупки, ваше участие в будущих мероприятиях может быть ограничено.",
+
+groupBuySubmit:
+  "Отправить",
+
+groupBuySubmitting:
+  "Отправка…",
+
+groupBuySubmitSuccess:
+  "Заявка успешно отправлена.",
+
+groupBuyUpdateSuccess:
+  "Ваша заявка успешно обновлена.",
+
+groupBuySubmitFailed:
+  "Не удалось отправить заявку.",
+
+groupBuyLoadFailed:
+  "Не удалось загрузить форму заявки.",
+
+groupBuySelect:
+  "Выберите",
+
+groupBuyRequired:
+  "Заполните все обязательные поля.",
+
+groupBuySelectAtLeastOne:
+  "Выберите как минимум один товар.",
+
+groupBuyAgreementsRequired:
+  "Подтвердите оба обязательных условия.",
+
+groupBuyLoading:
+  "Загрузка…",
+
+groupBuyRecruitmentBefore:
+  "Период подачи заявок ещё не начался.",
+
+groupBuyRecruitmentOpen:
+  "Приём заявок на совместную покупку открыт.",
+
+groupBuyRecruitmentClosed:
+  "Приём заявок на совместную покупку завершён.",
+
+groupBuyRecruitmentStarts:
+  "Начало приёма заявок:",
+
+groupBuyRecruitmentEnds:
+  "Окончание приёма заявок:",
   },
 };
 
