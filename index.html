@@ -44,9 +44,18 @@
   color: #8c939f;
   text-decoration: underline;
 }
+    .group-buy-button {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
 @media (max-width: 480px) {
   .buttons {
     grid-template-columns: 1fr;
+ 
+    .group-buy-button {
+  grid-column: auto;
+  justify-self: stretch;
+}
   }
 
   .button {
@@ -162,6 +171,10 @@
 
 <a class="button" href="/gallery" data-i18n="viewImages">
   View Images
+</a>
+
+  <a class="button group-buy-button" href="/group-buy" data-i18n="groupBuyApplication">
+  Group Buy Application
 </a>
 </nav>
 
