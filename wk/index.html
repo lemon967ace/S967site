@@ -1382,7 +1382,7 @@ rallySize.placeholder =
     }
 
 
-  function updateParticipationState() {
+function updateParticipationState() {
   const realtime =
     getCheckedValue(
       "realtime_response"
@@ -1397,7 +1397,6 @@ rallySize.placeholder =
     document.querySelectorAll(
       'input[name="captain_role"]'
     );
-
 
   if (
     realtime ===
@@ -1437,7 +1436,6 @@ rallySize.placeholder =
     return;
   }
 
-
   participationInputs.forEach(
     (input) => {
       input.disabled =
@@ -1455,27 +1453,7 @@ rallySize.placeholder =
   participationNotice.classList.add(
     "hidden"
   );
-}
-
-
-  participationInputs.forEach(
-    (input) => {
-      input.disabled =
-        false;
-    }
-  );
-
-  captainInputs.forEach(
-    (input) => {
-      input.disabled =
-        false;
-    }
-  );
-
-  participationNotice.classList.add(
-    "hidden"
-  );
-}
+} 
 
 
     document.addEventListener(
