@@ -1193,7 +1193,48 @@ hours:
         ? getCurrentLanguage()
         : "en";
 
+const languageSwitcher =
+  document.getElementById(
+    "languageSwitcher"
+  );
 
+languageSwitcher
+  ?.querySelectorAll(
+    "[data-language]"
+  )
+  .forEach((button) => {
+    const buttonLanguage =
+      button.dataset.language;
+
+    button.classList.toggle(
+      "is-active",
+      buttonLanguage === language
+    );
+
+    button.addEventListener(
+      "click",
+      () => {
+        if (
+          buttonLanguage ===
+          language
+        ) {
+          return;
+        }
+
+        if (
+          typeof setLanguage ===
+          "function"
+        ) {
+          setLanguage(
+            buttonLanguage
+          );
+
+          location.reload();
+        }
+      }
+    );
+  });
+    
     const text =
       TEXT[language] ??
       TEXT.en;
