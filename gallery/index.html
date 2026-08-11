@@ -324,23 +324,33 @@
       document.getElementById("refreshButton");
 
     function formatDate(value) {
-      try {
-        return new Intl.DateTimeFormat(
-          undefined,
-          {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        ).format(
-          new Date(value)
-        );
-      } catch {
-        return "";
+  try {
+    const locales = {
+      en: "en-US",
+      ko: "ko-KR",
+      ja: "ja-JP",
+      ru: "ru-RU",
+    };
+
+    const language =
+      getCurrentLanguage();
+
+    return new Intl.DateTimeFormat(
+      locales[language] || "en-US",
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }
-    }
+    ).format(
+      new Date(value)
+    );
+  } catch {
+    return "";
+  }
+}
 
     function createCard(
       image,
@@ -501,9 +511,11 @@ return card;
           "hidden"
         );
       } catch (error) {
-        status.textContent =
-          error.message ||
-          "Could not load gallery.";
+      status.textContent =
+  error.message ||
+  getTranslation(
+    "galleryLoadFailed"
+  );
       } finally {
         refreshButton.disabled =
           false;
