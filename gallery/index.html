@@ -483,9 +483,9 @@
   () => {
     card.style.display = "";
     visibleImageCount++;
+    pendingImageCount--;
 
     status.style.display = "none";
-    gallery.classList.remove("hidden");
   }
 );
 
@@ -494,10 +494,30 @@
         "error",
         () => {
           card.remove();
+
+          pendingImageCount--;
+
+          if (
+            pendingImageCount === 0 &&
+            visibleImageCount === 0
+            ) {
+            gallery.classList.add(
+              "hidden"
+              );
+
+            status.style.display = 
+              "";
+
+            status.textContent =
+              getTranslation(
+                "galleryEmpty"
+                );
+          }
         }
       );
 
-
+pendingImageCount++;
+      
       img.src =
         image.url;
 
@@ -551,9 +571,11 @@ meta.textContent =
 );
 
     let visibleImageCount = 0;
+    let pendingImageCount = 0;
     
     async function loadGallery() {
       visibleImageCount = 0;
+      pendingImageCount = 0;
       refreshButton.disabled =
         true;
 
@@ -649,14 +671,15 @@ meta.textContent =
           return;
         }
 
-
+        gallery.classList.remove(
+          "hidden"
+          );
+        
         /*
           데이터가 정상적으로 왔으면
           로딩 문구를 숨기고 갤러리를 표시한다.
         */
-       gallery.classList.remove(
-  "hidden"
-);
+        
         if (
           count === 0
           ){
