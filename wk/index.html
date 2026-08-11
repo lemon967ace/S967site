@@ -606,6 +606,12 @@
 
         back:
           "← Back to Home",
+
+        namePlaceholder:
+  "Please copy&paste",
+
+numberPlaceholder:
+  "Please enter a number",
       },
 
 
@@ -725,6 +731,12 @@
 
         back:
           "← 홈으로",
+
+        namePlaceholder:
+  "복붙해주세용",
+
+numberPlaceholder:
+  "숫자를 입력해주세요",
       },
 
 
@@ -844,6 +856,12 @@
 
         back:
           "← ホームへ",
+
+        namePlaceholder:
+  "コピペでお願いします。",
+
+numberPlaceholder:
+  "数字を入力してください",
       },
 
 
@@ -963,6 +981,12 @@
 
         back:
           "← На главную",
+
+        namePlaceholder:
+  "Скопируйте и вставьте, пожалуйста ))",
+
+numberPlaceholder:
+  "Введите число",
       },
     };
 
@@ -1144,6 +1168,15 @@
         "backLink"
       ).textContent =
         text.back;
+
+      playerName.placeholder =
+  text.namePlaceholder;
+
+troopSize.placeholder =
+  text.numberPlaceholder;
+
+rallySize.placeholder =
+  text.numberPlaceholder;
     }
 
 
@@ -1349,56 +1382,77 @@
     }
 
 
-    function updateParticipationState() {
-      const realtime =
-        getCheckedValue(
-          "realtime_response"
-        );
+   function updateParticipationState() {
+  const realtime =
+    getCheckedValue(
+      "realtime_response"
+    );
 
-      const participationInputs =
-        document.querySelectorAll(
-          'input[name="participation_time"]'
-        );
+  const participationInputs =
+    document.querySelectorAll(
+      'input[name="participation_time"]'
+    );
 
+  const captainInputs =
+    document.querySelectorAll(
+      'input[name="captain_role"]'
+    );
 
-      if (
-        realtime ===
-        "monitor_unavailable"
-      ) {
-        participationInputs.forEach(
-          (input) => {
-            input.checked =
-              input.value ===
-              "second_half";
+let finalCaptainRole =
+  captainRole;
 
-            input.disabled =
-              input.value !==
-              "second_half";
-          }
-        );
+if (
+  realtimeResponse ===
+  "monitor_unavailable"
+) {
+  participationTime =
+    "second_half";
 
-        participationNotice.textContent =
-          text.forcedSecondHalf;
+  finalCaptainRole =
+    "regular";
+}
 
-        participationNotice.classList.remove(
-          "hidden"
-        );
+    captainInputs.forEach(
+      (input) => {
+        input.checked =
+          input.value ===
+          "regular";
 
-        return;
+        input.disabled =
+          input.value !==
+          "regular";
       }
+    );
+
+    participationNotice.textContent =
+      text.forcedSecondHalf;
+
+    participationNotice.classList.remove(
+      "hidden"
+    );
+
+    return;
+  }
 
 
-      participationInputs.forEach(
-        (input) => {
-          input.disabled =
-            false;
-        }
-      );
-
-      participationNotice.classList.add(
-        "hidden"
-      );
+  participationInputs.forEach(
+    (input) => {
+      input.disabled =
+        false;
     }
+  );
+
+  captainInputs.forEach(
+    (input) => {
+      input.disabled =
+        false;
+    }
+  );
+
+  participationNotice.classList.add(
+    "hidden"
+  );
+}
 
 
     document.addEventListener(
@@ -1525,7 +1579,7 @@
                       realtimeResponse,
 
                     captain_role:
-                      captainRole,
+                      finalCaptainRole,
 
                     participation_time:
                       participationTime,
