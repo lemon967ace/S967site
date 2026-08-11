@@ -896,14 +896,8 @@
 
 
 if (
-  (
-    contact &&
-    !contactMethod
-  ) ||
-  (
-    contactMethod &&
-    !contact
-  )
+  contact &&
+  !contactMethod
 ) {
   formStatus.textContent =
     getTranslation(
@@ -922,12 +916,14 @@ if (
 
           details,
 
-          contact_method:
-            contactMethod
-              ? contactMethod.value
-              : null,
+contact_method:
+  contact
+    ? contactMethod?.value ?? null
+    : null,
 
-          contact,
+contact:
+  contact || null,
+          
         };
 
 
