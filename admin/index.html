@@ -1206,54 +1206,6 @@ async function apiRequest(
 
   return result;
 }
-
-async function inquiryApiRequest(
-  method,
-  body = null
-) {
-  const options = {
-    method,
-
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
-  };
-
-  if (body !== null) {
-    options.headers[
-      "Content-Type"
-    ] =
-      "application/json";
-
-    options.body =
-      JSON.stringify(
-        body
-      );
-  }
-
-  const response =
-    await fetch(
-      INQUIRY_ADMIN_API_URL,
-      options
-    );
-
-  const result =
-    await response
-      .json()
-      .catch(
-        () => ({})
-      );
-
-  if (!response.ok) {
-    throw new Error(
-      result.error ||
-        "Inquiry admin request failed."
-    );
-  }
-
-  return result;
-}
     
 async function wkApiRequest(
   method,
