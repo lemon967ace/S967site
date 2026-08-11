@@ -278,28 +278,29 @@
       margin-top: 32px;
     }
 
-    .submit-button {
-      min-width: 190px;
+  .submit-button {
+  min-width: 190px;
 
-      padding:
-        14px
-        24px;
+  padding:
+    14px
+    24px;
 
-      border:
-        1px solid
-        rgba(255,255,255,.2);
+  border:
+    1px solid
+    var(--border);
 
-      border-radius: 12px;
+  border-radius: 12px;
 
-      background:
-        rgba(255,255,255,.09);
+  background:
+    var(--surface-hover);
 
-      color: #f7f7f8;
+  color:
+    var(--text);
 
-      font: inherit;
-      font-weight: 700;
+  font: inherit;
+  font-weight: 700;
 
-      cursor: pointer;
+  cursor: pointer;
 
       transition:
         transform 150ms ease,
@@ -307,16 +308,16 @@
         border-color 150ms ease;
     }
 
-    .submit-button:hover {
-      transform:
-        translateY(-1px);
+.submit-button:hover {
+  transform:
+    translateY(-1px);
 
-      background:
-        rgba(255,255,255,.14);
+  background:
+    var(--surface);
 
-      border-color:
-        rgba(255,255,255,.32);
-    }
+  border-color:
+    var(--border-hover);
+}
 
     .submit-button:disabled {
       opacity: .55;
