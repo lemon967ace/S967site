@@ -807,33 +807,7 @@ const allianceStatus =
       );
     }
 
-
-    async function apiRequest(
-      method,
-      body = null
-    ) {
-      const options = {
-        method,
-
-        headers: {
-          "x-admin-secret":
-            adminSecret,
-        },
-      };
-
-      if (body !== null) {
-        options.headers[
-          "Content-Type"
-        ] =
-          "application/json";
-
-        options.body =
-          JSON.stringify(
-            body
-          );
-      }
-
- async function apiRequest(
+async function apiRequest(
   method,
   body = null
 ) {
@@ -925,7 +899,7 @@ async function wkApiRequest(
 
   return result;
 }
-
+    
 function createWkManageItem(
   item,
   type
