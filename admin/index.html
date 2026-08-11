@@ -2015,14 +2015,96 @@ row.dataset.type = type;
     }
   );
 
-
-  actions.appendChild(
-    toggleButton
+  const deleteButton =
+  document.createElement(
+    "button"
   );
 
+deleteButton.type =
+  "button";
+
+deleteButton.className =
+  "danger";
+
+deleteButton.textContent =
+  "Delete";
+
+deleteButton.addEventListener(
+  "click",
+  async () => {
+    const statusElement =
+      type === "tier"
+        ? tierStatus
+        : allianceStatus;
+
+    const itemTypeLabel =
+      type === "tier"
+        ? "티어"
+        : "연맹";
+
+    if (
+      !confirm(
+        `${item.name} ${itemTypeLabel}을 삭제할까요?`
+      )
+    ) {
+      return;
+    }
+
+    deleteButton.disabled =
+      true;
+
+    setStatus(
+      statusElement,
+      "Deleting…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            type === "tier"
+              ? "delete_tier"
+              : "delete_alliance",
+
+          id:
+            item.id,
+        }
+      );
+
+      await loadWkData();
+
+      setStatus(
+        statusElement,
+        "삭제했습니다."
+      );
+
+    } catch (error) {
+      setStatus(
+        statusElement,
+        error.message ||
+          "Delete failed.",
+        true
+      );
+
+      deleteButton.disabled =
+        false;
+    }
+  }
+);
+  
+
   actions.appendChild(
-    editButton
-  );
+  toggleButton
+);
+
+actions.appendChild(
+  editButton
+);
+
+actions.appendChild(
+  deleteButton
+);
 
 
   row.appendChild(handle);
