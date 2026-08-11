@@ -226,6 +226,49 @@
 </head>
 
 <body>
+  <div class="theme-picker" data-theme-picker>
+  <button
+    class="theme-button"
+    type="button"
+    data-theme-button
+    aria-label="Theme"
+    aria-haspopup="true"
+    aria-expanded="false"
+  >◐</button>
+
+  <div
+    class="theme-menu"
+    data-theme-menu
+    role="menu"
+  >
+    <button
+      type="button"
+      data-theme-choice="system"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">◐</span>
+      <span>System</span>
+    </button>
+
+    <button
+      type="button"
+      data-theme-choice="light"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">☀</span>
+      <span>Light</span>
+    </button>
+
+    <button
+      type="button"
+      data-theme-choice="dark"
+      role="menuitemradio"
+    >
+      <span class="theme-choice-icon">☾</span>
+      <span>Dark</span>
+    </button>
+  </div>
+</div>
   <main>
     <div class="eyebrow">
       S967
@@ -240,9 +283,29 @@
       class="small"
     ></p>
 
+    <div
+  id="applicationScheduleStatus"
+  class="panel hidden"
+>
+  <div
+    id="scheduleStatus"
+    style="
+      font-size: 1.1rem;
+      font-weight: 700;
+    "
+  ></div>
 
-    <section class="panel">
-      <form id="wkForm">
+  <div
+    id="scheduleDetail"
+    class="small"
+  ></div>
+</div>
+
+<section
+  id="applicationPanel"
+  class="panel"
+>
+  <form id="wkForm">
 
         <div class="field">
           <label class="choice">
@@ -610,6 +673,30 @@
 
 numberPlaceholder:
   "Please enter a number",
+
+        applicationsOpen:
+  "Applications are currently open.",
+
+applicationsClosed:
+  "Applications are currently closed.",
+
+closesIn:
+  "Applications close in",
+
+opensIn:
+  "Applications open in",
+
+day:
+  "day",
+
+days:
+  "days",
+
+hour:
+  "hr",
+
+hours:
+  "hrs",
       },
 
 
@@ -735,6 +822,30 @@ numberPlaceholder:
 
 numberPlaceholder:
   "숫자를 입력해주세요",
+
+        applicationsOpen:
+  "현재 WK 신청을 받고 있습니다.",
+
+applicationsClosed:
+  "현재 WK 신청 기간이 아닙니다.",
+
+closesIn:
+  "신청 마감까지",
+
+opensIn:
+  "다음 신청 시작까지",
+
+day:
+  "일",
+
+days:
+  "일",
+
+hour:
+  "시간",
+
+hours:
+  "시간",
       },
 
 
@@ -860,6 +971,30 @@ numberPlaceholder:
 
 numberPlaceholder:
   "数字を入力してください",
+
+        applicationsOpen:
+  "現在WK申請を受け付けています。",
+
+applicationsClosed:
+  "現在WK申請期間ではありません。",
+
+closesIn:
+  "申請締切まで",
+
+opensIn:
+  "次の申請開始まで",
+
+day:
+  "日",
+
+days:
+  "日",
+
+hour:
+  "時間",
+
+hours:
+  "時間",
       },
 
 
@@ -985,6 +1120,30 @@ numberPlaceholder:
 
 numberPlaceholder:
   "Введите число",
+
+        applicationsOpen:
+  "Приём заявок WK открыт.",
+
+applicationsClosed:
+  "Приём заявок WK сейчас закрыт.",
+
+closesIn:
+  "До закрытия заявок:",
+
+opensIn:
+  "До открытия заявок:",
+
+day:
+  "дн.",
+
+days:
+  "дн.",
+
+hour:
+  "ч.",
+
+hours:
+  "ч.",
       },
     };
 
@@ -1000,7 +1159,211 @@ numberPlaceholder:
       TEXT[language] ??
       TEXT.en;
 
+// ============================================================
+// WK APPLICATION SCHEDULE
+//
+// First opening:
+// 2026-08-15 09:00 KST
+//
+// Opens every 14 days.
+// Each window lasts 5 days.
+//
+// Saturday 09:00 KST
+// → Thursday 09:00 KST
+// ============================================================
 
+const FIRST_OPEN_KST =
+  "2026-08-15T09:00:00+09:00";
+
+const CYCLE_DAYS =
+  14;
+
+const OPEN_DAYS =
+  5;
+
+const DAY_MS =
+  24 * 60 * 60 * 1000;
+
+const cycleMs =
+  CYCLE_DAYS * DAY_MS;
+
+const openMs =
+  OPEN_DAYS * DAY_MS;
+
+
+function getApplicationState() {
+  const now =
+    Date.now();
+
+  const firstOpen =
+    new Date(
+      FIRST_OPEN_KST
+    ).getTime();
+
+
+  if (now < firstOpen) {
+    return {
+      isOpen: false,
+      nextOpen: firstOpen,
+    };
+  }
+
+
+  const elapsed =
+    now - firstOpen;
+
+  const cycleIndex =
+    Math.floor(
+      elapsed / cycleMs
+    );
+
+  const cycleStart =
+    firstOpen +
+    cycleIndex * cycleMs;
+
+  const cycleEnd =
+    cycleStart + openMs;
+
+
+  if (
+    now >= cycleStart &&
+    now < cycleEnd
+  ) {
+    return {
+      isOpen: true,
+      closeAt: cycleEnd,
+    };
+  }
+
+
+  return {
+    isOpen: false,
+
+    nextOpen:
+      cycleStart +
+      cycleMs,
+  };
+}
+
+
+function formatTimeLeft(
+  timestamp
+) {
+  const diff =
+    Math.max(
+      0,
+      timestamp - Date.now()
+    );
+
+  const totalHours =
+    Math.floor(
+      diff /
+      (60 * 60 * 1000)
+    );
+
+  const days =
+    Math.floor(
+      totalHours / 24
+    );
+
+  const hours =
+    totalHours % 24;
+
+
+  if (days > 0) {
+    return (
+      `${days} ` +
+      `${
+        days === 1
+          ? text.day
+          : text.days
+      } ` +
+      `${hours} ` +
+      `${
+        hours === 1
+          ? text.hour
+          : text.hours
+      }`
+    );
+  }
+
+
+  return (
+    `${hours} ` +
+    `${
+      hours === 1
+        ? text.hour
+        : text.hours
+    }`
+  );
+}
+
+
+function updateApplicationSchedule() {
+  const state =
+    getApplicationState();
+
+  const applicationPanel =
+    document.getElementById(
+      "applicationPanel"
+    );
+
+  const scheduleBox =
+    document.getElementById(
+      "applicationScheduleStatus"
+    );
+
+  const scheduleStatus =
+    document.getElementById(
+      "scheduleStatus"
+    );
+
+  const scheduleDetail =
+    document.getElementById(
+      "scheduleDetail"
+    );
+
+
+  if (state.isOpen) {
+    applicationPanel.classList.remove(
+      "hidden"
+    );
+
+    scheduleBox.classList.remove(
+      "hidden"
+    );
+
+    scheduleStatus.textContent =
+      text.applicationsOpen;
+
+    scheduleDetail.textContent =
+      `${text.closesIn} ` +
+      formatTimeLeft(
+        state.closeAt
+      );
+
+    return;
+  }
+
+
+  applicationPanel.classList.add(
+    "hidden"
+  );
+
+  scheduleBox.classList.remove(
+    "hidden"
+  );
+
+  scheduleStatus.textContent =
+    text.applicationsClosed;
+
+  scheduleDetail.textContent =
+    `${text.opensIn} ` +
+    formatTimeLeft(
+      state.nextOpen
+    );
+}
+    
     const form =
       document.getElementById(
         "wkForm"
@@ -1698,12 +2061,13 @@ function updateParticipationState() {
     );
 
 
-    async function initialize() {
-      setStaticText();
-      renderRadioGroups();
+ async function initialize() {
+  setStaticText();
+  renderRadioGroups();
+  updateApplicationSchedule();
 
-      try {
-        await loadOptions();
+  try {
+    await loadOptions();
       } catch (error) {
         setStatus(
           error.message ||
@@ -1716,6 +2080,10 @@ function updateParticipationState() {
       }
     }
 
+    setInterval(
+  updateApplicationSchedule,
+  60 * 1000
+);
 
     initialize();
   </script>
