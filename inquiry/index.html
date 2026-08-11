@@ -883,10 +883,10 @@ async function checkInquiryAvailability() {
       );
     }
 
-    if (
-      result.accepting ===
-      false
-    ) {
+ if (
+  result.inquiry_open ===
+  false
+) {
       alert(
         getTranslation(
           "inquiryClosed"
