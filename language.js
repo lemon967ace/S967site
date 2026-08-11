@@ -159,7 +159,7 @@ inquiryContactExample:
   "Example: In-game name: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: link / Email: address",
 
 inquiryContactPlaceholder:
-  "Enter your contact information.",
+  "If the information is incorrect, you may not receive a reply.",
 
 inquirySubmit:
   "Submit",
@@ -331,7 +331,7 @@ inquiryContactExample:
   "예: 게임 닉네임: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: 링크 / Email: 주소",
 
 inquiryContactPlaceholder:
-  "연락처를 입력하세요.",
+  "부정확한 경우 답신을 받지 못할 수 있습니다.",
 
 inquirySubmit:
   "제출",
@@ -504,7 +504,7 @@ inquiryContactExample:
   "例：ゲーム内ニックネーム: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: リンク / Email: アドレス",
 
 inquiryContactPlaceholder:
-  "連絡先をご入力ください。",
+  "情報が正確でない場合、返信を受け取れない可能性があります。",
 
 inquirySubmit:
   "送信",
@@ -676,7 +676,7 @@ inquiryContactExample:
   "Например: Игровой ник: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: ссылка / Email: адрес",
 
 inquiryContactPlaceholder:
-  "Введите контактные данные.",
+  "Если информация указана неверно, вы можете не получить ответ. ",
 
 inquirySubmit:
   "Отправить",
