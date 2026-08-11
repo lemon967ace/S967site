@@ -83,6 +83,15 @@ uploading:
 
 uploadFailed:
   "Upload failed.",
+    
+    galleryLead:
+  "Images uploaded by the community.",
+
+refresh:
+  "Refresh",
+
+loadingImages:
+  "Loading images…",
   },
 
   ko: {
@@ -159,6 +168,15 @@ uploading:
 
 uploadFailed:
   "업로드에 실패했습니다.",
+
+    galleryLead:
+  "커뮤니티에서 업로드한 이미지입니다.",
+
+refresh:
+  "새로고침",
+
+loadingImages:
+  "이미지를 불러오는 중…",
   },
 
   ja: {
@@ -235,6 +253,15 @@ uploading:
 
 uploadFailed:
   "アップロードに失敗しました。",
+
+    galleryLead:
+  "コミュニティによってアップロードされた画像です。",
+
+refresh:
+  "更新",
+
+loadingImages:
+  "画像を読み込んでいます…",
   },
 
   ru: {
@@ -311,6 +338,15 @@ uploading:
 
 uploadFailed:
   "Не удалось загрузить изображения.",
+
+    galleryLead:
+  "Изображения, загруженные сообществом.",
+
+refresh:
+  "Обновить",
+
+loadingImages:
+  "Загрузка изображений…",
   },
 };
 
