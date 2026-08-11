@@ -662,6 +662,9 @@
     const ADMIN_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
     
+    const WK_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
+    
     const SUPABASE_PUBLIC_STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
     
@@ -784,6 +787,11 @@ const allianceStatus =
     let adminSecret = "";
     let currentData = null;
 
+    let wkData = {
+  tiers: [],
+  alliances: [],
+};
+
 
     function setStatus(
       element,
@@ -825,6 +833,52 @@ const allianceStatus =
           );
       }
 
+      async function wkApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      WK_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "WK request failed."
+    );
+  }
+
+  return result;
+}
+      
       const response =
         await fetch(
           ADMIN_API_URL,
@@ -848,7 +902,197 @@ const allianceStatus =
       return result;
     }
 
+function createWkManageItem(
+  item,
+  type
+) {
+  const row =
+    document.createElement("div");
 
+  row.className =
+    "manage-item";
+
+  if (!item.active) {
+    row.classList.add(
+      "item-inactive"
+    );
+  }
+
+  row.dataset.id =
+    String(item.id);
+
+
+  const handle =
+    document.createElement("div");
+
+  handle.className =
+    "drag-handle";
+
+  handle.textContent =
+    "☰";
+
+
+  const content =
+    document.createElement("div");
+
+  content.style.flex =
+    "1";
+
+
+  const name =
+    document.createElement("div");
+
+  name.className =
+    "manage-name";
+
+  name.textContent =
+    item.name;
+
+  content.appendChild(name);
+
+
+  if (
+    type === "tier" &&
+    item.admin_note
+  ) {
+    const note =
+      document.createElement(
+        "div"
+      );
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      item.admin_note;
+
+    content.appendChild(note);
+  }
+
+
+  const actions =
+    document.createElement("div");
+
+  actions.className =
+    "manage-actions";
+
+
+  const toggleButton =
+    document.createElement(
+      "button"
+    );
+
+  toggleButton.type =
+    "button";
+
+  toggleButton.textContent =
+    item.active
+      ? "Active"
+      : "Inactive";
+
+
+  const editButton =
+    document.createElement(
+      "button"
+    );
+
+  editButton.type =
+    "button";
+
+  editButton.textContent =
+    "Edit";
+
+
+  actions.appendChild(
+    toggleButton
+  );
+
+  actions.appendChild(
+    editButton
+  );
+
+
+  row.appendChild(handle);
+  row.appendChild(content);
+  row.appendChild(actions);
+
+  return row;
+}
+
+    function renderWkLists() {
+  tierList.innerHTML = "";
+  allianceList.innerHTML = "";
+
+  wkData.tiers.forEach(
+    (item) => {
+      tierList.appendChild(
+        createWkManageItem(
+          item,
+          "tier"
+        )
+      );
+    }
+  );
+
+  wkData.alliances.forEach(
+    (item) => {
+      allianceList.appendChild(
+        createWkManageItem(
+          item,
+          "alliance"
+        )
+      );
+    }
+  );
+}
+
+    async function loadWkData() {
+  setStatus(
+    tierStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    allianceStatus,
+    "Loading…"
+  );
+
+  try {
+    wkData =
+      await wkApiRequest(
+        "GET"
+      );
+
+    renderWkLists();
+
+    setStatus(
+      tierStatus,
+      ""
+    );
+
+    setStatus(
+      allianceStatus,
+      ""
+    );
+  } catch (error) {
+    const message =
+      error.message ||
+      "Failed to load WK data.";
+
+    setStatus(
+      tierStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      allianceStatus,
+      message,
+      true
+    );
+  }
+}
+    
     function getBlockInfo(
       ipHash
     ) {
@@ -1554,6 +1798,9 @@ function renderOnlyIp(ipHash) {
     () => {
       const target =
         button.dataset.adminTab;
+      if (target === "wk") {
+  loadWkData();
+}
 
       adminTabs.forEach(
         (item) => {
