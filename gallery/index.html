@@ -657,6 +657,16 @@ meta.textContent =
        gallery.classList.remove(
   "hidden"
 );
+        if (
+          count === 0
+          ){
+          status.textContent =
+            getTranslation(
+              "galleryEmpty"
+              );
+
+          return;
+        }
 
 status.style.display =
   "none";
