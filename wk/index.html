@@ -1382,7 +1382,7 @@ rallySize.placeholder =
     }
 
 
-   function updateParticipationState() {
+  function updateParticipationState() {
   const realtime =
     getCheckedValue(
       "realtime_response"
@@ -1398,19 +1398,22 @@ rallySize.placeholder =
       'input[name="captain_role"]'
     );
 
-let finalCaptainRole =
-  captainRole;
 
-if (
-  realtimeResponse ===
-  "monitor_unavailable"
-) {
-  participationTime =
-    "second_half";
+  if (
+    realtime ===
+    "monitor_unavailable"
+  ) {
+    participationInputs.forEach(
+      (input) => {
+        input.checked =
+          input.value ===
+          "second_half";
 
-  finalCaptainRole =
-    "regular";
-}
+        input.disabled =
+          input.value !==
+          "second_half";
+      }
+    );
 
     captainInputs.forEach(
       (input) => {
@@ -1433,6 +1436,26 @@ if (
 
     return;
   }
+
+
+  participationInputs.forEach(
+    (input) => {
+      input.disabled =
+        false;
+    }
+  );
+
+  captainInputs.forEach(
+    (input) => {
+      input.disabled =
+        false;
+    }
+  );
+
+  participationNotice.classList.add(
+    "hidden"
+  );
+}
 
 
   participationInputs.forEach(
@@ -1579,7 +1602,7 @@ if (
                       realtimeResponse,
 
                     captain_role:
-                      finalCaptainRole,
+                      captainRole,
 
                     participation_time:
                       participationTime,
