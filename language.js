@@ -169,6 +169,12 @@ inquiryRequiredError:
 
     sourceCode:
   "View source code",
+
+    inquirySubmitSuccess:
+  "Your inquiry has been submitted successfully.",
+
+inquirySubmitError:
+  "Failed to submit your inquiry.",
   },
 
   ko: {
@@ -333,6 +339,11 @@ inquiryRequiredError:
     sourceCode:
   "소스 코드 보기",
 
+    inquirySubmitSuccess:
+  "문의가 성공적으로 접수되었습니다.",
+
+inquirySubmitError:
+  "문의 제출에 실패했습니다.",
   },
 
   ja: {
@@ -496,6 +507,12 @@ inquiryRequiredError:
 
     sourceCode:
   "ソースコードを見る",
+
+    inquirySubmitSuccess:
+  "お問い合わせを受け付けました。",
+
+inquirySubmitError:
+  "お問い合わせの送信に失敗しました。",
   },
 
   ru: {
@@ -659,6 +676,12 @@ inquiryRequiredError:
 
     sourceCode:
   "Посмотреть исходный код",
+
+    inquirySubmitSuccess:
+  "Ваше обращение успешно отправлено.",
+
+inquirySubmitError:
+  "Не удалось отправить обращение.",
   },
 };
 
