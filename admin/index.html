@@ -333,6 +333,35 @@
 .add-row {
   margin-top: 14px;
 }
+
+    .application-mode-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.mode-button {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-hover);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode-button:hover {
+  border-color: var(--border-hover);
+}
+
+.mode-button.active {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--background);
+}
+    
   </style>
 </head>
 
@@ -644,22 +673,56 @@
       </section>
     </div>
 
+<div
+  id="wkSettingsPanel"
+  class="wk-subpanel"
+>
+  <div class="manage-card">
+    <div class="manage-card-header">
+      <div>
+        <h3>Application Mode</h3>
+        <p class="small">
+          Control whether WK applications follow the automatic schedule or are manually overridden.
+        </p>
+      </div>
+    </div>
 
     <div
-      class="wk-section"
-      data-wk-section="settings"
+      class="application-mode-options"
+      id="applicationModeOptions"
     >
-      <section class="panel">
-        <h2>WK Settings</h2>
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="auto"
+      >
+        Auto
+      </button>
 
-        <p class="small">
-          Application availability and other WK settings
-          will be managed here.
-        </p>
-      </section>
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="open"
+      >
+        Force Open
+      </button>
+
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="closed"
+      >
+        Force Closed
+      </button>
     </div>
+
+    <div
+      id="applicationModeStatus"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
   </div>
-    </div>
+</div>
 
     <a class="back" href="/">
       ← Back to Home
@@ -795,11 +858,13 @@ const allianceStatus =
     let adminSecret = "";
     let currentData = null;
 
-    let wkData = {
+const wkData = {
   tiers: [],
   alliances: [],
+  settings: {
+    application_mode: "auto",
+  },
 };
-
 
     function setStatus(
       element,
@@ -999,6 +1064,16 @@ row.dataset.type = type;
   const editButton =
     document.createElement("button");
 
+  const applicationModeOptions =
+  document.getElementById(
+    "applicationModeOptions"
+  );
+
+const applicationModeStatus =
+  document.getElementById(
+    "applicationModeStatus"
+  );
+  
   editButton.type =
     "button";
 
@@ -1957,13 +2032,53 @@ function createImageGrid(item) {
 
       renderControl();
       renderUploads();
-
+      renderApplicationMode();
+    
       setStatus(
         uploadsStatus,
         ""
       );
     }
 
+    function renderApplicationMode() {
+  const mode =
+    wkData.settings
+      ?.application_mode ??
+    "auto";
+
+  document
+    .querySelectorAll(
+      "[data-application-mode]"
+    )
+    .forEach(
+      (button) => {
+        button.classList.toggle(
+          "active",
+          button.dataset
+            .applicationMode ===
+            mode
+        );
+      }
+    );
+
+  if (!applicationModeStatus) {
+    return;
+  }
+
+  if (mode === "open") {
+    applicationModeStatus.textContent =
+      "Current mode: Force Open";
+  } else if (
+    mode === "closed"
+  ) {
+    applicationModeStatus.textContent =
+      "Current mode: Force Closed";
+  } else {
+    applicationModeStatus.textContent =
+      "Current mode: Auto";
+  }
+}
+    
 function renderOnlyIp(ipHash) {
   const original =
     currentData.uploads;
@@ -2413,6 +2528,78 @@ wkTabs.forEach((button) => {
     }
   );
 });
+
+    applicationModeOptions
+  ?.addEventListener(
+    "click",
+    async (event) => {
+      const button =
+        event.target.closest(
+          "[data-application-mode]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const mode =
+        button.dataset
+          .applicationMode;
+
+      if (
+        ![
+          "auto",
+          "open",
+          "closed",
+        ].includes(mode)
+      ) {
+        return;
+      }
+
+      applicationModeOptions
+        .querySelectorAll(
+          "button"
+        )
+        .forEach(
+          (item) => {
+            item.disabled =
+              true;
+          }
+        );
+
+      try {
+        await wkApiRequest({
+          method: "POST",
+
+          body: {
+            action:
+              "update_application_mode",
+
+            application_mode:
+              mode,
+          },
+        });
+
+        await loadWkData();
+      } catch (error) {
+        alert(
+          error.message ||
+            "Failed to update application mode."
+        );
+      } finally {
+        applicationModeOptions
+          .querySelectorAll(
+            "button"
+          )
+          .forEach(
+            (item) => {
+              item.disabled =
+                false;
+            }
+          );
+      }
+    }
+  );
   </script>
 </body>
 </html>
