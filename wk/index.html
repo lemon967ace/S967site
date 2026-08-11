@@ -346,14 +346,13 @@
             <span class="required">*</span>
           </label>
 
-          <input
-            id="troopSize"
-            type="number"
-            min="0"
-            step="1"
-            inputmode="numeric"
-            required
-          >
+      <input
+  id="troopSize"
+  type="text"
+  inputmode="numeric"
+  autocomplete="off"
+  required
+>
         </div>
 
 
@@ -367,14 +366,13 @@
             <span class="required">*</span>
           </label>
 
-          <input
-            id="rallySize"
-            type="number"
-            min="0"
-            step="1"
-            inputmode="numeric"
-            required
-          >
+    <input
+  id="rallySize"
+  type="text"
+  inputmode="numeric"
+  autocomplete="off"
+  required
+>
         </div>
 
 
@@ -703,7 +701,7 @@ numberPlaceholder:
           "실시간 모니터링이 불가능하므로 참여 시간이 후반부로 고정됩니다.",
 
         colony:
-          "골든 티어의 경우 식민지를 공략할 수 있으며 이 경우 현장 상황에 따라 변경되는 지시에 대응해야 할 수 있음을 확인합니다.",
+          "골드 티어의 경우 식민지를 공략할 수 있으며 이 경우 현장 상황에 따라 변경되는 지시에 대응해야 할 수 있음을 확인합니다.",
 
         troopReturn:
           "부적합한 병력, 리더 자리 부족 또는 NAP 위험 등의 사유로 병력이 반환되거나 LSA에서 일시적으로 제외될 수 있음을 확인합니다.",
@@ -1370,7 +1368,65 @@ rallySize.placeholder =
       }
     }
 
+function formatNumberInput(
+  input
+) {
+  const digits =
+    input.value.replace(
+      /[^0-9]/g,
+      ""
+    );
 
+  if (!digits) {
+    input.value = "";
+    return;
+  }
+
+  input.value =
+    Number(digits)
+      .toLocaleString(
+        "en-US"
+      );
+}
+
+
+function parseFormattedNumber(
+  value
+) {
+  const digits =
+    String(value)
+      .replace(
+        /,/g,
+        ""
+      )
+      .trim();
+
+  if (!digits) {
+    return NaN;
+  }
+
+  return Number(digits);
+}
+
+    troopSize.addEventListener(
+  "input",
+  () => {
+    formatNumberInput(
+      troopSize
+    );
+  }
+);
+
+rallySize.addEventListener(
+  "input",
+  () => {
+    formatNumberInput(
+      rallySize
+    );
+  }
+);
+    
+    
     function getCheckedValue(
       name
     ) {
@@ -1567,12 +1623,12 @@ function updateParticipationState() {
                       troopType,
 
                     troop_size:
-                      Number(
+                       parseFormattedNumber(
                         troopSize.value
                       ),
 
                     rally_size:
-                      Number(
+                       parseFormattedNumber(
                         rallySize.value
                       ),
 
