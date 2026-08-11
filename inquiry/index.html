@@ -369,6 +369,11 @@
         width: 100%;
       }
     }
+    @media (min-width: 769px) {
+  .contact-methods {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
   </style>
 </head>
 
@@ -831,6 +836,9 @@
 
 
   <script>
+    const INQUIRY_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/inquiry-submit";
+    
     const inquiryForm =
       document.getElementById(
         "inquiryForm"
@@ -852,9 +860,9 @@
       );
 
 
-    inquiryForm.addEventListener(
-      "submit",
-      (event) => {
+inquiryForm.addEventListener(
+  "submit",
+  async (event) => {
         event.preventDefault();
 
 
@@ -926,18 +934,71 @@ contact:
           
         };
 
+const submitButton =
+  document.getElementById(
+    "submitButton"
+  );
 
-        /*
-          다음 단계에서
-          inquiry-submit Edge Function 호출
-        */
+submitButton.disabled =
+  true;
 
-        console.log(
-          submission
-        );
+formStatus.textContent =
+  "";
 
-        formStatus.textContent =
-          "OK";
+try {
+  const response =
+    await fetch(
+      INQUIRY_API_URL,
+      {
+        method:
+          "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify(
+            submission
+          ),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Submission failed."
+    );
+  }
+
+  inquiryForm.reset();
+
+  formStatus.textContent =
+    getTranslation(
+      "inquirySubmitSuccess"
+    );
+} catch (error) {
+  console.error(
+    error
+  );
+
+  formStatus.textContent =
+    getTranslation(
+      "inquirySubmitError"
+    );
+} finally {
+  submitButton.disabled =
+    false;
+}
+     
       }
     );
 
