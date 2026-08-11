@@ -371,7 +371,9 @@
   document.createElement("img");
 
 img.alt =
-  "Community upload";
+  getTranslation(
+    "communityUpload"
+  );
 
 img.loading =
   "lazy";
@@ -426,8 +428,10 @@ return card;
         "hidden"
       );
 
-      status.textContent =
-        "Loading images…";
+     status.textContent =
+  getTranslation(
+    "loadingImages"
+  );
 
       gallery.innerHTML =
         "";
@@ -451,10 +455,12 @@ return card;
           !response.ok ||
           !result.success
         ) {
-          throw new Error(
-            result.error ||
-            "Could not load gallery."
-          );
+         throw new Error(
+  result.error ||
+  getTranslation(
+    "galleryLoadFailed"
+  )
+);
         }
 
         let count = 0;
@@ -478,12 +484,14 @@ return card;
           }
         }
 
-        if (count === 0) {
-          status.textContent =
-            "No images have been uploaded yet.";
+       if (count === 0) {
+  status.textContent =
+    getTranslation(
+      "galleryEmpty"
+    );
 
-          return;
-        }
+  return;
+}
 
         status.classList.add(
           "hidden"
