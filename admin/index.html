@@ -677,7 +677,19 @@
   id="wkSettingsPanel"
   class="wk-subpanel"
 >
-  <div
+
+<div
+  class="wk-section"
+  data-wk-section="settings"
+>
+  <section class="panel">
+    <h2>WK 설정</h2>
+
+    <p class="small">
+      신청서 개폐 방식을 설정합니다.
+    </p>
+
+    <div
       class="application-mode-options"
       id="applicationModeOptions"
     >
@@ -706,6 +718,14 @@
       </button>
     </div>
 
+    <div
+      id="applicationModeStatus"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+  </section>
+</div>
+  
     <div
       id="applicationModeStatus"
       class="small"
@@ -844,6 +864,16 @@ const tierStatus =
 const allianceStatus =
   document.getElementById(
     "allianceStatus"
+  );
+
+    const applicationModeOptions =
+  document.getElementById(
+    "applicationModeOptions"
+  );
+
+const applicationModeStatus =
+  document.getElementById(
+    "applicationModeStatus"
   );
 
     let adminSecret = "";
@@ -1055,16 +1085,6 @@ row.dataset.type = type;
 
   const editButton =
     document.createElement("button");
-
-  const applicationModeOptions =
-  document.getElementById(
-    "applicationModeOptions"
-  );
-
-const applicationModeStatus =
-  document.getElementById(
-    "applicationModeStatus"
-  );
   
   editButton.type =
     "button";
@@ -2026,7 +2046,6 @@ function createImageGrid(item) {
 
       renderControl();
       renderUploads();
-      renderApplicationMode();
     
       setStatus(
         uploadsStatus,
@@ -2562,18 +2581,16 @@ wkTabs.forEach((button) => {
         );
 
       try {
-        await wkApiRequest({
-          method: "POST",
+       await wkApiRequest(
+  "POST",
+  {
+    action:
+      "update_application_mode",
 
-          body: {
-            action:
-              "update_application_mode",
-
-            application_mode:
-              mode,
-          },
-        });
-
+    application_mode:
+      mode,
+  }
+);
         await loadWkData();
       } catch (error) {
         alert(
