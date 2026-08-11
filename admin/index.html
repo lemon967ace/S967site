@@ -918,7 +918,7 @@ function createWkManageItem(
   row.className =
     "manage-item";
 
-  row.draggable = true;
+  
 row.dataset.type = type;
   
   if (!item.active) {
@@ -1187,6 +1187,10 @@ row.dataset.type = type;
 
     let draggedManageItem = null;
 
+let draggedManageItem = null;
+let dragContainer = null;
+let dragType = null;
+
 
 function setupDragSort(
   container,
@@ -1198,11 +1202,32 @@ function setupDragSort(
     );
 
   items.forEach((item) => {
-    item.addEventListener(
-      "dragstart",
-      () => {
+    const handle =
+      item.querySelector(
+        ".drag-handle"
+      );
+
+    if (!handle) {
+      return;
+    }
+
+    handle.addEventListener(
+      "pointerdown",
+      (event) => {
+        event.preventDefault();
+
         draggedManageItem =
           item;
+
+        dragContainer =
+          container;
+
+        dragType =
+          type;
+
+        handle.setPointerCapture(
+          event.pointerId
+        );
 
         item.classList.add(
           "dragging"
@@ -1211,12 +1236,36 @@ function setupDragSort(
     );
 
 
-    item.addEventListener(
-      "dragend",
-      async () => {
-        item.classList.remove(
-          "dragging"
-        );
+    handle.addEventListener(
+      "pointermove",
+      (event) => {
+        if (
+          !draggedManageItem ||
+          dragContainer !==
+            container
+        ) {
+          return;
+        }
+
+        const target =
+          document
+            .elementFromPoint(
+              event.clientX,
+              event.clientY
+            )
+            ?.closest(
+              ".manage-item"
+            );
+
+        if (
+          !target ||
+          target ===
+            draggedManageItem ||
+          target.parentElement !==
+            container
+        ) {
+          return;
+        }
 
         container
           .querySelectorAll(
@@ -1230,37 +1279,13 @@ function setupDragSort(
             }
           );
 
-        draggedManageItem =
-          null;
-
-        await saveManageOrder(
-          container,
-          type
-        );
-      }
-    );
-
-
-    item.addEventListener(
-      "dragover",
-      (event) => {
-        event.preventDefault();
-
-        if (
-          !draggedManageItem ||
-          draggedManageItem ===
-            item
-        ) {
-          return;
-        }
-
-        item.classList.add(
+        target.classList.add(
           "drag-over"
         );
 
-
         const rect =
-          item.getBoundingClientRect();
+          target
+            .getBoundingClientRect();
 
         const after =
           event.clientY >
@@ -1268,11 +1293,11 @@ function setupDragSort(
             rect.height / 2;
 
         if (after) {
-          item.after(
+          target.after(
             draggedManageItem
           );
         } else {
-          item.before(
+          target.before(
             draggedManageItem
           );
         }
@@ -1280,13 +1305,76 @@ function setupDragSort(
     );
 
 
-    item.addEventListener(
-      "dragleave",
-      () => {
-        item.classList.remove(
-          "drag-over"
-        );
+    async function finishDrag(
+      event
+    ) {
+      if (
+        !draggedManageItem ||
+        dragContainer !==
+          container
+      ) {
+        return;
       }
+
+      try {
+        if (
+          handle.hasPointerCapture(
+            event.pointerId
+          )
+        ) {
+          handle.releasePointerCapture(
+            event.pointerId
+          );
+        }
+      } catch {
+        // ignore
+      }
+
+      draggedManageItem
+        .classList
+        .remove(
+          "dragging"
+        );
+
+      container
+        .querySelectorAll(
+          ".manage-item"
+        )
+        .forEach(
+          (row) => {
+            row.classList.remove(
+              "drag-over"
+            );
+          }
+        );
+
+      const currentType =
+        dragType;
+
+      draggedManageItem =
+        null;
+
+      dragContainer =
+        null;
+
+      dragType =
+        null;
+
+      await saveManageOrder(
+        container,
+        currentType
+      );
+    }
+
+
+    handle.addEventListener(
+      "pointerup",
+      finishDrag
+    );
+
+    handle.addEventListener(
+      "pointercancel",
+      finishDrag
     );
   });
 }
