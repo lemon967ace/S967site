@@ -2485,11 +2485,16 @@ function renderEmailRecipients() {
     }
   );
 
-  function renderEmailAutoSend() {
-const enabled =
-  wkData.settings
-    ?.email_auto_send_enabled ===
-  true;
+  addEmailRecipientButton.disabled =
+    recipients.length >= 6;
+}
+
+
+function renderEmailAutoSend() {
+  const enabled =
+    wkData.settings
+      ?.email_auto_send_enabled ===
+    true;
 
   emailAutoSendButton.textContent =
     enabled
@@ -2505,11 +2510,6 @@ const enabled =
     enabled
       ? "자동 발송이 활성화되어 있습니다."
       : "자동 발송이 비활성화되어 있습니다.";
-}
-  
-
-  addEmailRecipientButton.disabled =
-    recipients.length >= 6;
 }
 
     function renderEmailExportHistory() {
