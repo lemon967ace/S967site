@@ -1331,16 +1331,46 @@
 
 
   <section class="panel">
-    <h2>자동 Excel 발송 상태</h2>
+    <div class="row">
+      <h2 style="margin: 0;">
+        Excel 발송
+      </h2>
+
+      <button
+        id="groupBuyManualExportButton"
+        type="button"
+      >
+        Excel 지금 발송
+      </button>
+    </div>
 
     <p class="small">
-      각 회차의 모집 종료 10분 후 자동 발송 기능은
-      별도의 Scheduled Edge Function에서 처리합니다.
-      여기에는 그 발송 기록이 표시됩니다.
+      선택한 회차의 현재 신청 내역을 Excel로 생성해
+      Active 이메일 수신자에게 즉시 발송합니다.
+      자동 발송은 모집 종료 10분 후 실행되며,
+      자동 재시도에서는 이미 성공한 수신자는 다시 보내지 않습니다.
     </p>
 
     <div
+      id="groupBuyManualExportStatus"
+      class="status"
+    ></div>
+
+    <hr class="section-divider">
+
+    <h3>회차 발송 기록</h3>
+
+    <div
       id="groupBuyExportHistory"
+      class="manage-list"
+    ></div>
+
+    <hr class="section-divider">
+
+    <h3>수신자별 발송 결과</h3>
+
+    <div
+      id="groupBuyRecipientExportHistory"
       class="manage-list"
     ></div>
 
@@ -1372,6 +1402,9 @@
 
     const GROUP_BUY_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-admin";
+
+    const GROUP_BUY_EXPORT_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-export-email";
     
     const SUPABASE_PUBLIC_STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
@@ -1691,9 +1724,24 @@ const groupBuyEmailRecipientStatus =
     "groupBuyEmailRecipientStatus"
   );
 
+const groupBuyManualExportButton =
+  document.getElementById(
+    "groupBuyManualExportButton"
+  );
+
+const groupBuyManualExportStatus =
+  document.getElementById(
+    "groupBuyManualExportStatus"
+  );
+
 const groupBuyExportHistory =
   document.getElementById(
     "groupBuyExportHistory"
+  );
+
+const groupBuyRecipientExportHistory =
+  document.getElementById(
+    "groupBuyRecipientExportHistory"
   );
 
 const groupBuyExportStatus =
@@ -1707,12 +1755,15 @@ let groupBuyData = {
   alliances: [],
   email_recipients: [],
   export_logs: [],
+  export_recipient_logs: [],
 };
 
 let groupBuyDetail = {
   event: null,
   items: [],
   applications: [],
+  export_logs: [],
+  export_recipient_logs: [],
 };
 
 let selectedGroupBuyEventId =
@@ -2057,6 +2108,57 @@ async function groupBuyApiRequest(
       result;
 
     throw error;
+  }
+
+  return result;
+}
+
+
+
+async function groupBuyExportEmailRequest(
+  eventId
+) {
+  const response =
+    await fetch(
+      GROUP_BUY_EXPORT_EMAIL_API_URL,
+      {
+        method:
+          "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "x-admin-secret":
+            adminSecret,
+        },
+
+        body:
+          JSON.stringify({
+            type:
+              "manual",
+
+            event_id:
+              Number(
+                eventId
+              ),
+          }),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.errors?.join("\\n") ||
+      "Excel 발송에 실패했습니다."
+    );
   }
 
   return result;
@@ -4842,19 +4944,39 @@ function renderGroupBuyExportHistory() {
   groupBuyExportHistory.innerHTML =
     "";
 
+  /*
+    회차가 선택돼 있으면 해당 회차 로그만 표시.
+    상세 데이터가 아직 없을 때만 전체 데이터에서 필터링한다.
+  */
   const logs =
     Array.isArray(
-      groupBuyData.export_logs
-    )
-      ? groupBuyData.export_logs
-      : [];
+      groupBuyDetail.export_logs
+    ) &&
+    groupBuyDetail.event
+      ? groupBuyDetail.export_logs
+      : (
+          Array.isArray(
+            groupBuyData.export_logs
+          )
+            ? groupBuyData.export_logs.filter(
+                (log) =>
+                  !selectedGroupBuyEventId ||
+                  Number(
+                    log.event_id
+                  ) ===
+                    Number(
+                      selectedGroupBuyEventId
+                    )
+              )
+            : []
+        );
 
   if (
     logs.length ===
     0
   ) {
     groupBuyExportHistory.innerHTML =
-      '<div class="small">아직 발송 기록이 없습니다.</div>';
+      '<div class="small">선택한 회차의 발송 기록이 없습니다.</div>';
 
     return;
   }
@@ -4863,7 +4985,7 @@ function renderGroupBuyExportHistory() {
     const log
     of logs.slice(
       0,
-      20
+      30
     )
   ) {
     const row =
@@ -4890,8 +5012,17 @@ function renderGroupBuyExportHistory() {
     title.className =
       "manage-name";
 
+    const statusLabel =
+      log.status === "success"
+        ? "성공"
+        : log.status === "partial_failure"
+          ? "일부 실패"
+          : log.status === "failed"
+            ? "실패"
+            : "처리 중";
+
     title.textContent =
-      `Event #${log.event_id} · ${log.status}`;
+      `${statusLabel} · ${formatKstDateTime(log.started_at)}`;
 
     const detail =
       document.createElement(
@@ -4902,7 +5033,6 @@ function renderGroupBuyExportHistory() {
       "manage-note";
 
     detail.textContent =
-      `${formatKstDateTime(log.started_at)} · ` +
       `수신 ${log.recipient_count ?? 0} · ` +
       `성공 ${log.success_count ?? 0} · ` +
       `실패 ${log.failure_count ?? 0}`;
@@ -4945,6 +5075,150 @@ function renderGroupBuyExportHistory() {
 }
 
 
+function renderGroupBuyRecipientExportHistory() {
+  groupBuyRecipientExportHistory.innerHTML =
+    "";
+
+  const logs =
+    Array.isArray(
+      groupBuyDetail.export_recipient_logs
+    ) &&
+    groupBuyDetail.event
+      ? groupBuyDetail.export_recipient_logs
+      : (
+          Array.isArray(
+            groupBuyData.export_recipient_logs
+          )
+            ? groupBuyData.export_recipient_logs.filter(
+                (log) =>
+                  !selectedGroupBuyEventId ||
+                  Number(
+                    log.event_id
+                  ) ===
+                    Number(
+                      selectedGroupBuyEventId
+                    )
+              )
+            : []
+        );
+
+  if (
+    logs.length ===
+    0
+  ) {
+    groupBuyRecipientExportHistory.innerHTML =
+      '<div class="small">선택한 회차의 수신자별 발송 기록이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const log
+    of logs.slice(
+      0,
+      100
+    )
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    const statusLabel =
+      log.status === "success"
+        ? "✓ 성공"
+        : log.status === "failed"
+          ? "✕ 실패"
+          : "처리 중";
+
+    title.textContent =
+      `${statusLabel} · ${log.recipient_nickname || "이름 없음"}`;
+
+    const email =
+      document.createElement(
+        "div"
+      );
+
+    email.className =
+      "manage-note";
+
+    email.textContent =
+      log.recipient_email || "";
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+    time.className =
+      "manage-note";
+
+    time.textContent =
+      log.status === "success"
+        ? `발송 ${formatKstDateTime(log.sent_at)}`
+        : `시도 ${formatKstDateTime(log.created_at)}`;
+
+    content.appendChild(
+      title
+    );
+
+    content.appendChild(
+      email
+    );
+
+    content.appendChild(
+      time
+    );
+
+    if (
+      log.error_message
+    ) {
+      const error =
+        document.createElement(
+          "div"
+        );
+
+      error.className =
+        "manage-note danger";
+
+      error.textContent =
+        log.error_message;
+
+      content.appendChild(
+        error
+      );
+    }
+
+    row.appendChild(
+      content
+    );
+
+    groupBuyRecipientExportHistory.appendChild(
+      row
+    );
+  }
+}
+
+
 function renderGroupBuySelectedEvent() {
   if (
     !groupBuyDetail.event
@@ -4972,6 +5246,7 @@ function renderGroupBuyAll() {
   renderGroupBuyApplications();
   renderGroupBuyEmailRecipients();
   renderGroupBuyExportHistory();
+  renderGroupBuyRecipientExportHistory();
   renderGroupBuySelectedEvent();
 }
 
@@ -4995,6 +5270,8 @@ async function loadGroupBuyDetail(
       event: null,
       items: [],
       applications: [],
+      export_logs: [],
+      export_recipient_logs: [],
     };
 
     renderGroupBuyItems();
@@ -5035,10 +5312,20 @@ async function loadGroupBuyDetail(
       applications:
         result.applications ??
         [],
+
+      export_logs:
+        result.export_logs ??
+        [],
+
+      export_recipient_logs:
+        result.export_recipient_logs ??
+        [],
     };
 
     renderGroupBuyItems();
     renderGroupBuyApplications();
+    renderGroupBuyExportHistory();
+    renderGroupBuyRecipientExportHistory();
     renderGroupBuySelectedEvent();
 
     setStatus(
@@ -5094,6 +5381,10 @@ async function loadGroupBuyData() {
       export_logs:
         result.export_logs ??
         [],
+
+      export_recipient_logs:
+        result.export_recipient_logs ??
+        [],
     };
 
     if (
@@ -5129,6 +5420,7 @@ async function loadGroupBuyData() {
     renderGroupBuyAlliances();
     renderGroupBuyEmailRecipients();
     renderGroupBuyExportHistory();
+    renderGroupBuyRecipientExportHistory();
 
     if (
       selectedGroupBuyEventId
@@ -5145,6 +5437,8 @@ async function loadGroupBuyData() {
 
       renderGroupBuyItems();
       renderGroupBuyApplications();
+      renderGroupBuyExportHistory();
+      renderGroupBuyRecipientExportHistory();
       renderGroupBuySelectedEvent();
     }
 
@@ -6957,6 +7251,103 @@ inquiryCloseButton
    GROUP BUY ADMIN EVENTS
    ============================================================ */
 
+groupBuyManualExportButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !selectedGroupBuyEventId
+      ) {
+        setStatus(
+          groupBuyManualExportStatus,
+          "먼저 발송할 회차를 선택하세요.",
+          true
+        );
+
+        return;
+      }
+
+      const selectedEvent =
+        groupBuyData.events.find(
+          (event) =>
+            Number(
+              event.id
+            ) ===
+              Number(
+                selectedGroupBuyEventId
+              )
+        );
+
+      const eventTitle =
+        selectedEvent?.title ||
+        `Event #${selectedGroupBuyEventId}`;
+
+      if (
+        !confirm(
+          `${eventTitle}의 현재 신청 내역 Excel을 Active 수신자에게 지금 발송할까요?\n\n수동 발송은 이전 성공 여부와 관계없이 현재 Active 수신자에게 다시 발송됩니다.`
+        )
+      ) {
+        return;
+      }
+
+      groupBuyManualExportButton.disabled =
+        true;
+
+      setStatus(
+        groupBuyManualExportStatus,
+        "Excel을 생성하고 이메일을 발송하는 중…"
+      );
+
+      try {
+        const result =
+          await groupBuyExportEmailRequest(
+            selectedGroupBuyEventId
+          );
+
+        const successCount =
+          Number(
+            result.success_count ??
+            0
+          );
+
+        const failureCount =
+          Number(
+            result.failure_count ??
+            0
+          );
+
+        if (
+          failureCount > 0
+        ) {
+          setStatus(
+            groupBuyManualExportStatus,
+            `발송 완료 · 성공 ${successCount} · 실패 ${failureCount}`,
+            true
+          );
+        } else {
+          setStatus(
+            groupBuyManualExportStatus,
+            `발송 완료 · 성공 ${successCount}`
+          );
+        }
+
+        await loadGroupBuyData();
+
+      } catch (error) {
+        setStatus(
+          groupBuyManualExportStatus,
+          error.message ||
+            "Excel 발송에 실패했습니다.",
+          true
+        );
+      } finally {
+        groupBuyManualExportButton.disabled =
+          false;
+      }
+    }
+  );
+
+
 groupBuyRefreshButton
   ?.addEventListener(
     "click",
@@ -6986,10 +7377,14 @@ groupBuyEventSelect
           event: null,
           items: [],
           applications: [],
+          export_logs: [],
+          export_recipient_logs: [],
         };
 
         renderGroupBuyItems();
         renderGroupBuyApplications();
+        renderGroupBuyExportHistory();
+        renderGroupBuyRecipientExportHistory();
         renderGroupBuySelectedEvent();
 
         return;
