@@ -895,6 +895,35 @@
       >
         + 수신자 추가
       </button>
+      <section class="panel">
+  <h2>문의 접수 상태</h2>
+
+  <p class="small">
+    문의창을 닫으면 새로운 문의를 제출할 수 없습니다.
+  </p>
+
+  <div class="row">
+    <button
+      id="inquiryOpenButton"
+      type="button"
+    >
+      문의창 열기
+    </button>
+
+    <button
+      id="inquiryCloseButton"
+      type="button"
+      class="danger"
+    >
+      문의창 닫기
+    </button>
+  </div>
+
+  <div
+    id="inquiryOpenStatus"
+    class="status"
+  ></div>
+</section>
     </div>
 
     <div
@@ -1056,6 +1085,20 @@ const applicationModeStatus =
     "inquiryEmailRecipientList"
   );
 
+    const inquiryOpenButton =
+  document.getElementById(
+    "inquiryOpenButton"
+  );
+
+const inquiryCloseButton =
+  document.getElementById(
+    "inquiryCloseButton"
+  );
+
+const inquiryOpenStatus =
+  document.getElementById(
+    "inquiryOpenStatus"
+  );
 const newInquiryEmailNickname =
   document.getElementById(
     "newInquiryEmailNickname"
@@ -1077,9 +1120,29 @@ const inquiryEmailRecipientStatus =
   );
 
 let inquiryData = {
+  settings: {
+    inquiry_open: true,
+  },
+
   email_recipients: [],
 };
+    function renderInquiryOpenStatus() {
+  const isOpen =
+    inquiryData?.settings
+      ?.inquiry_open !== false;
 
+  inquiryOpenStatus.textContent =
+    isOpen
+      ? "현재 문의를 받고 있습니다."
+      : "현재 문의창이 닫혀 있습니다.";
+
+  inquiryOpenButton.disabled =
+    isOpen;
+
+  inquiryCloseButton.disabled =
+    !isOpen;
+}
+    
     const emailRecipientList =
   document.getElementById(
     "emailRecipientList"
@@ -1651,6 +1714,7 @@ async function wkApiRequest(
       );
 
     renderInquiryEmailRecipients();
+    renderInquiryOpenStatus();
 
     setStatus(
       inquiryEmailRecipientStatus,
@@ -4099,6 +4163,78 @@ wkTabs.forEach((button) => {
       }
     }
   );
+    inquiryOpenButton.addEventListener(
+  "click",
+  async () => {
+    try {
+      await inquiryApiRequest(
+        "POST",
+        {
+          action:
+            "update_inquiry_open",
+
+          inquiry_open:
+            true,
+        }
+      );
+
+      await loadInquiryData();
+
+      setStatus(
+        inquiryOpenStatus,
+        "문의창을 열었습니다."
+      );
+    } catch (error) {
+      setStatus(
+        inquiryOpenStatus,
+        error.message ||
+          "변경하지 못했습니다.",
+        true
+      );
+    }
+  }
+);
+
+
+inquiryCloseButton.addEventListener(
+  "click",
+  async () => {
+    if (
+      !confirm(
+        "문의창을 닫을까요?\n새로운 문의 제출이 차단됩니다."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await inquiryApiRequest(
+        "POST",
+        {
+          action:
+            "update_inquiry_open",
+
+          inquiry_open:
+            false,
+        }
+      );
+
+      await loadInquiryData();
+
+      setStatus(
+        inquiryOpenStatus,
+        "문의창을 닫았습니다."
+      );
+    } catch (error) {
+      setStatus(
+        inquiryOpenStatus,
+        error.message ||
+          "변경하지 못했습니다.",
+        true
+      );
+    }
+  }
+);
   </script>
 </body>
 </html>
