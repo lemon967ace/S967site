@@ -101,7 +101,63 @@ galleryEmpty:
 
 communityUpload:
   "Community upload",
-  },
+    inquiryFormTitle:
+  "Greetings!",
+
+inquiryCategoryQuestion:
+  "What brings you here?",
+
+inquiryCategorySuggestion:
+  "Suggestion",
+
+inquiryCategoryReport:
+  "Report",
+
+inquiryCategoryInquiry:
+  "Inquiry (including immigration)",
+
+inquiryCategoryTileIssue:
+  "Tile Issue",
+
+inquiryCategoryOther:
+  "Other",
+
+inquiryDetailsQuestion:
+  "Please enter the details.",
+
+inquiryDetailsPlaceholder:
+  "For Tile Issues, please include the coordinates in the details.",
+
+inquiryContactQuestion:
+  "(Optional) If you would like a reply from us, please provide your contact method with your contact information. (Optional)",
+
+inquiryContactGame:
+  "In-game name",
+
+inquiryContactDiscord:
+  "Discord",
+
+inquiryContactTelegram:
+  "Telegram",
+
+inquiryContactKakao:
+  "Kakao Open Profile",
+
+inquiryContactEmail:
+  "Email",
+
+inquiryContactExample:
+  "Example: In-game name: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: link / Email: address",
+
+inquiryContactPlaceholder:
+  "Enter your contact information.",
+
+inquirySubmit:
+  "Submit",
+
+inquiryRequiredError:
+  "Please complete all required fields.",
+    },
 
   ko: {
     language: "언어",
@@ -195,6 +251,63 @@ galleryEmpty:
 
 communityUpload:
   "커뮤니티 업로드 이미지",
+
+    inquiryFormTitle:
+  "안녕하세요!",
+
+inquiryCategoryQuestion:
+  "어떤 이유로 찾아오셨나요?",
+
+inquiryCategorySuggestion:
+  "건의",
+
+inquiryCategoryReport:
+  "신고",
+
+inquiryCategoryInquiry:
+  "문의 (이민 포함)",
+
+inquiryCategoryTileIssue:
+  "채집지 문제",
+
+inquiryCategoryOther:
+  "기타",
+
+inquiryDetailsQuestion:
+  "내용을 입력해주세요.",
+
+inquiryDetailsPlaceholder:
+  "채집지 문제의 경우, 내용에 좌표를 포함해주세요.",
+
+inquiryContactQuestion:
+  "(선택) 답신을 원하시는 경우, 연락 가능한 수단과 연락처를 함께 입력해주세요. (선택)",
+
+inquiryContactGame:
+  "게임 닉네임",
+
+inquiryContactDiscord:
+  "Discord",
+
+inquiryContactTelegram:
+  "Telegram",
+
+inquiryContactKakao:
+  "Kakao Open Profile",
+
+inquiryContactEmail:
+  "Email",
+
+inquiryContactExample:
+  "예: 게임 닉네임: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: 링크 / Email: 주소",
+
+inquiryContactPlaceholder:
+  "연락처를 입력하세요.",
+
+inquirySubmit:
+  "제출",
+
+inquiryRequiredError:
+  "필수 항목을 모두 입력해주세요.",
   },
 
   ja: {
@@ -289,6 +402,63 @@ galleryEmpty:
 
 communityUpload:
   "コミュニティのアップロード画像",
+
+    inquiryFormTitle:
+  "こんにちは！",
+
+inquiryCategoryQuestion:
+  "どのような理由でこちらに来られましたか？",
+
+inquiryCategorySuggestion:
+  "提案・要望",
+
+inquiryCategoryReport:
+  "通報",
+
+inquiryCategoryInquiry:
+  "お問い合わせ（移民を含む）",
+
+inquiryCategoryTileIssue:
+  "タイルの問題",
+
+inquiryCategoryOther:
+  "その他",
+
+inquiryDetailsQuestion:
+  "内容をご入力ください。",
+
+inquiryDetailsPlaceholder:
+  "タイルの問題の場合は、内容に座標を含めてください。",
+
+inquiryContactQuestion:
+  "（任意）こちらからの返信をご希望の場合は、連絡可能な方法・連絡先をご入力ください。（任意）",
+
+inquiryContactGame:
+  "ゲーム内ニックネーム",
+
+inquiryContactDiscord:
+  "Discord",
+
+inquiryContactTelegram:
+  "Telegram",
+
+inquiryContactKakao:
+  "Kakao Open Profile",
+
+inquiryContactEmail:
+  "Email",
+
+inquiryContactExample:
+  "例：ゲーム内ニックネーム: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: リンク / Email: アドレス",
+
+inquiryContactPlaceholder:
+  "連絡先をご入力ください。",
+
+inquirySubmit:
+  "送信",
+
+inquiryRequiredError:
+  "必須項目をすべて入力してください。",
   },
 
   ru: {
@@ -383,6 +553,63 @@ galleryEmpty:
 
 communityUpload:
   "Изображение сообщества",
+
+    inquiryFormTitle:
+  "Здравствуйте!",
+
+inquiryCategoryQuestion:
+  "Что привело вас сюда?",
+
+inquiryCategorySuggestion:
+  "Предложение",
+
+inquiryCategoryReport:
+  "Сообщение о нарушении",
+
+inquiryCategoryInquiry:
+  "Вопросы (включая иммиграцию)",
+
+inquiryCategoryTileIssue:
+  "Проблема с местом сбора",
+
+inquiryCategoryOther:
+  "Другое",
+
+inquiryDetailsQuestion:
+  "Пожалуйста, опишите подробности.",
+
+inquiryDetailsPlaceholder:
+  "Если проблема связана с местом сбора, укажите координаты в описании.",
+
+inquiryContactQuestion:
+  "(Необязательно) Если вы хотите получить от нас ответ, укажите удобный способ связи и контактные данные. (Необязательно)",
+
+inquiryContactGame:
+  "Игровой ник",
+
+inquiryContactDiscord:
+  "Discord",
+
+inquiryContactTelegram:
+  "Telegram",
+
+inquiryContactKakao:
+  "Kakao Open Profile",
+
+inquiryContactEmail:
+  "Email",
+
+inquiryContactExample:
+  "Например: Игровой ник: ᴬᶜᴱ⍣⃝ 레몬 / Discord: username / Telegram: @username / Kakao Open Profile: ссылка / Email: адрес",
+
+inquiryContactPlaceholder:
+  "Введите контактные данные.",
+
+inquirySubmit:
+  "Отправить",
+
+inquiryRequiredError:
+  "Пожалуйста, заполните все обязательные поля.",
   },
 };
 
