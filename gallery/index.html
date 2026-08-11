@@ -510,13 +510,14 @@
         );
 
       meta.className =
-        "meta";
+  "meta";
 
-      meta.textContent =
-        formatDate(
-          createdAt
-        );
+meta.dataset.createdAt =
+  createdAt;
 
+meta.textContent =
+  formatDate(createdAt);
+      )
 
       card.appendChild(
         link
@@ -530,6 +531,21 @@
       return card;
     }
 
+    window.addEventListener(
+  "s967languagechange",
+  () => {
+    document
+      .querySelectorAll(
+        ".meta[data-created-at]"
+      )
+      .forEach((meta) => {
+        meta.textContent =
+          formatDate(
+            meta.dataset.createdAt
+          );
+      });
+  }
+);
 
     async function loadGallery() {
       refreshButton.disabled =
