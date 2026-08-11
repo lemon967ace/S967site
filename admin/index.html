@@ -1838,7 +1838,121 @@ function renderOnlyIp(ipHash) {
   );
 });
 
+addTierButton.addEventListener(
+  "click",
+  async () => {
+    const name =
+      newTierName.value.trim();
 
+    if (!name) {
+      setStatus(
+        tierStatus,
+        "Enter a tier name.",
+        true
+      );
+
+      return;
+    }
+
+    addTierButton.disabled =
+      true;
+
+    setStatus(
+      tierStatus,
+      "Adding…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            "add_tier",
+          name,
+        }
+      );
+
+      newTierName.value =
+        "";
+
+      await loadWkData();
+
+      setStatus(
+        tierStatus,
+        "Tier added."
+      );
+    } catch (error) {
+      setStatus(
+        tierStatus,
+        error.message ||
+          "Failed to add tier.",
+        true
+      );
+    } finally {
+      addTierButton.disabled =
+        false;
+    }
+  }
+);
+
+
+addAllianceButton.addEventListener(
+  "click",
+  async () => {
+    const name =
+      newAllianceName.value.trim();
+
+    if (!name) {
+      setStatus(
+        allianceStatus,
+        "Enter an alliance name.",
+        true
+      );
+
+      return;
+    }
+
+    addAllianceButton.disabled =
+      true;
+
+    setStatus(
+      allianceStatus,
+      "Adding…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            "add_alliance",
+          name,
+        }
+      );
+
+      newAllianceName.value =
+        "";
+
+      await loadWkData();
+
+      setStatus(
+        allianceStatus,
+        "Alliance added."
+      );
+    } catch (error) {
+      setStatus(
+        allianceStatus,
+        error.message ||
+          "Failed to add alliance.",
+        true
+      );
+    } finally {
+      addAllianceButton.disabled =
+        false;
+    }
+  }
+);
+    
 wkTabs.forEach((button) => {
   button.addEventListener(
     "click",
