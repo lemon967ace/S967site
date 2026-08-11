@@ -2486,10 +2486,10 @@ function renderEmailRecipients() {
   );
 
   function renderEmailAutoSend() {
-  const enabled =
-    wkData.settings
-      ?.email_auto_send_enabled !==
-    false;
+const enabled =
+  wkData.settings
+    ?.email_auto_send_enabled ===
+  true;
 
   emailAutoSendButton.textContent =
     enabled
@@ -3286,10 +3286,10 @@ wkTabs.forEach((button) => {
   ?.addEventListener(
     "click",
     async () => {
-      const current =
-        wkData.settings
-          ?.email_auto_send_enabled !==
-        false;
+     const current =
+  wkData.settings
+    ?.email_auto_send_enabled ===
+  true;
 
       emailAutoSendButton.disabled =
         true;
