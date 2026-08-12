@@ -1039,18 +1039,6 @@
         >
       </label>
 
-      <label class="group-buy-check">
-        <input
-          id="newGroupBuyEventActive"
-          type="checkbox"
-          checked
-        >
-
-        <span data-i18n="groupBuyActive">
-          Active
-        </span>
-      </label>
-
       <button
         id="addGroupBuyEventButton"
         type="button"
@@ -1108,18 +1096,6 @@
         data-i18n-placeholder="groupBuyMaxQuantity"
         placeholder="Max quantity"
       >
-
-      <label class="group-buy-check">
-        <input
-          id="newGroupBuyItemActive"
-          type="checkbox"
-          checked
-        >
-
-        <span data-i18n="groupBuyActive">
-          Active
-        </span>
-      </label>
 
       <button
         id="addGroupBuyItemButton"
@@ -3327,8 +3303,7 @@ function renderGroupBuyApplications() {
                 endAt,
 
               active:
-                newGroupBuyEventActive
-                  .checked,
+            true
             }
           );
 
@@ -3427,8 +3402,7 @@ addGroupBuyItemButton
               maxQuantity,
 
             active:
-              newGroupBuyItemActive
-                .checked,
+              true
 
             display_order:
               groupBuyDetail
