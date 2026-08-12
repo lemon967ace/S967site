@@ -1375,14 +1375,11 @@ function formatTimeLeft(
 }
 
 function formatCycleSaturday(
-  closeAt
+  saturdayTimestamp
 ) {
-  // WK 신청 마감은 목요일 09:00 KST.
-  // 이틀 뒤가 해당 회차 종료 주간의 토요일.
   const saturday =
     new Date(
-      closeAt +
-      2 * DAY_MS
+      saturdayTimestamp
     );
 
   if (language === "ko") {
@@ -1489,6 +1486,34 @@ function formatCycleSaturday(
   );
 }
 
+function getTargetCycleSaturday(
+  automaticState
+) {
+  // 현재 자동 신청 기간 안이라면
+  // 현재 회차 마감 목요일 + 2일 = 해당 회차 토요일
+  if (
+    automaticState.isOpen &&
+    automaticState.closeAt
+  ) {
+    return (
+      automaticState.closeAt +
+      2 * DAY_MS
+    );
+  }
+
+  // 현재 자동 신청 기간 밖이라면
+  // 앞으로 열릴 가장 가까운 회차 시작 토요일 + 7일
+  // = 그 회차가 종료되는 주의 토요일
+  if (automaticState.nextOpen) {
+    return (
+      automaticState.nextOpen +
+      7 * DAY_MS
+    );
+  }
+
+  return null;
+}
+
 function updateApplicationSchedule() {
   const automaticState =
     getApplicationState();
@@ -1566,11 +1591,16 @@ function updateApplicationSchedule() {
       "hidden"
     );
 
-    if (automaticState.closeAt) {
+    const targetSaturday =
+  getTargetCycleSaturday(
+    automaticState
+  );
+
+if (targetSaturday) {
   scheduleStatus.textContent =
     `${text.applicationsOpen} - ` +
     formatCycleSaturday(
-      automaticState.closeAt
+      targetSaturday
     );
 } else {
   scheduleStatus.textContent =
