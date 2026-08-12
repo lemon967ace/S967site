@@ -1038,8 +1038,6 @@ staffIdInvalid:
   },
 
   ja: {
-    ja: {
-
   operatedBy: "Operated by ᴬᶜᴱ⍣⃝ 레몬",
 
   privacyNotice:
