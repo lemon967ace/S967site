@@ -515,6 +515,12 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID may contain only letters, numbers, periods, underscores, and hyphens.",
+
+staffEmailNone:
+  "No email addresses registered.",
+
+staffEmailCount:
+  "{count} / {max} registered",
   },
 
   ko: {
@@ -1023,6 +1029,11 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID에는 영문, 숫자, 마침표, 밑줄, 하이픈만 사용할 수 있습니다.",
+
+ "등록된 이메일이 없습니다.",
+
+staffEmailCount:
+  "{count} / {max}개 등록".
   },
 
   ja: {
@@ -1528,6 +1539,11 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff IDには英数字、ピリオド、アンダースコア、ハイフンのみ使用できます。",
+
+ "登録されたメールアドレスはありません。",
+
+staffEmailCount:
+  "{count} / {max} 件登録済み",
   },
 
   ru: {
@@ -2033,6 +2049,12 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID может содержать только латинские буквы, цифры, точки, подчёркивания и дефисы.",
+
+    staffEmailNone:
+  "Нет зарегистрированных адресов электронной почты.",
+
+staffEmailCount:
+  "Зарегистрировано: {count} / {max}",
   },
 };
 
