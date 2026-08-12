@@ -5030,28 +5030,49 @@ async function loadWkApplications() {
           );
 
           try {
-            const {
-              error
-            } =
-              await supabase.auth
-                .updateUser({
-                  password
-                });
+          const {
+  error:
+    updateError
+} =
+  await supabase.auth
+    .updateUser({
+      password
+    });
 
-            if (error) {
-              throw error;
-            }
+if (updateError) {
+  throw updateError;
+}
 
-            newPasswordInput.value =
-              "";
 
-            confirmPasswordInput.value =
-              "";
+/*
+  현재 세션은 유지하고
+  같은 Staff 계정의
+  다른 모든 세션을 종료한다.
+*/
+const {
+  error:
+    signOutError
+} =
+  await supabase.auth
+    .signOut({
+      scope: "others"
+    });
 
-            setTranslatedStatus(
-              passwordStatus,
-              "passwordChanged"
-            );
+if (signOutError) {
+  throw signOutError;
+}
+
+
+newPasswordInput.value =
+  "";
+
+confirmPasswordInput.value =
+  "";
+
+setTranslatedStatus(
+  passwordStatus,
+  "passwordChanged"
+);
 
           } catch (error) {
             console.error(error);
