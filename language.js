@@ -1461,10 +1461,10 @@ groupBuyEdit:
   "編集",
 
 groupBuyStartKst:
-  "募集開始（KST、YYYY-MM-DDTHH:MM）：",
+  "募集開始（JST、YYYY-MM-DDTHH:MM）：",
 
 groupBuyEndKst:
-  "募集終了（KST、YYYY-MM-DDTHH:MM）：",
+  "募集終了（JST、YYYY-MM-DDTHH:MM）：",
 
 groupBuyInvalidRound:
   "回次名と募集開始・終了日時を正しく入力してください。",
