@@ -458,6 +458,51 @@ groupBuyInvalidItem:
   "Enter a valid item name and maximum quantity.",
 
     staffLoading: "Loading…",
+
+    staffTabInquiry:
+  "Inquiry",
+
+staffWkEmailTitle:
+  "WK Automatic Email Recipients",
+
+staffInquiryEmailTitle:
+  "Inquiry Automatic Email Recipients",
+
+staffGroupBuyEmailTitle:
+  "Group Purchase Automatic Email Recipients",
+
+staffEmailLead:
+  "You can manage up to 3 email recipients added by you.",
+
+staffEmailNickname:
+  "Nickname",
+
+staffEmailAdd:
+  "Add Email",
+
+staffEmailNone:
+  "No email recipients have been added.",
+
+staffEmailCount:
+  "{count} / {max} registered",
+
+staffEmailInvalid:
+  "Please enter both a nickname and a valid email address.",
+
+staffEmailLimit:
+  "You can register up to 3 email recipients.",
+
+staffEmailDuplicate:
+  "This email address is already registered.",
+
+staffEmailDeleteConfirm:
+  "Delete this email recipient?",
+
+staffEmailRequestFailed:
+  "Email recipient request failed.",
+
+staffSessionExpired:
+  "Your login session has expired. Please sign in again.",
   },
 
   ko: {
@@ -909,6 +954,51 @@ groupBuyInvalidItem:
   "구매항목명과 최대 수량을 정확히 입력하세요.",
 
 staffLoading: "불러오는 중…",
+
+    staffTabInquiry:
+  "문의",
+
+staffWkEmailTitle:
+  "황무지 자동발송 이메일",
+
+staffInquiryEmailTitle:
+  "문의 자동발송 이메일",
+
+staffGroupBuyEmailTitle:
+  "공동구매 자동발송 이메일",
+
+staffEmailLead:
+  "본인이 추가한 이메일을 최대 3개까지 관리할 수 있습니다.",
+
+staffEmailNickname:
+  "닉네임",
+
+staffEmailAdd:
+  "이메일 추가",
+
+staffEmailNone:
+  "등록한 이메일이 없습니다.",
+
+staffEmailCount:
+  "{count} / {max}개 등록",
+
+staffEmailInvalid:
+  "닉네임과 올바른 이메일 주소를 모두 입력해 주세요.",
+
+staffEmailLimit:
+  "이메일은 최대 3개까지 등록할 수 있습니다.",
+
+staffEmailDuplicate:
+  "이미 등록한 이메일 주소입니다.",
+
+staffEmailDeleteConfirm:
+  "이 이메일을 삭제하시겠습니까?",
+
+staffEmailRequestFailed:
+  "이메일 수신자 요청에 실패했습니다.",
+
+staffSessionExpired:
+  "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
   },
 
   ja: {
@@ -1360,6 +1450,49 @@ groupBuyInvalidItem:
   "購入項目名と最大数量を正しく入力してください。",
 
 staffLoading: "読み込み中…",
+
+    staffTabInquiry:
+  "お問い合わせ",
+
+staffWkEmailTitle:
+  "WK 自動送信メール",
+
+staffInquiryEmailTitle:
+  "お問い合わせ自動送信メール",
+
+staffGroupBuyEmailTitle:
+  "共同購入自動送信メール",
+
+staffEmailLead:
+  "自分で登録したメールアドレスを最大3件まで管理できます。",
+
+staffEmailNickname:
+  "名前",
+
+staffEmailAdd:
+  "メールを追加",
+
+staffEmailNone:
+  "登録されたメールアドレスはありません。",
+
+staffEmailCount:
+  "{count} / {max}",
+
+staffEmailDeleteConfirm:
+  "このメールアドレスを削除しますか？",
+
+staffEmailInvalid:
+  "名前とメールアドレスを入力してください。",
+
+staffEmailLimit:
+  "この項目にはメールアドレスを最大3件まで登録できます。",
+
+staffEmailDuplicate:
+  "このメールアドレスはすでに登録されています。",
+
+staffEmailRequestFailed:
+  "メール受信者の処理に失敗しました。",
+
   },
 
   ru: {
@@ -1811,6 +1944,48 @@ groupBuyInvalidItem:
   "Укажите корректное название товара и максимальное количество.",
 
 staffLoading: "Загрузка…",
+
+    staffTabInquiry:
+  "Обращения",
+
+staffWkEmailTitle:
+  "Email для автоматической рассылки WK",
+
+staffInquiryEmailTitle:
+  "Email для автоматической рассылки обращений",
+
+staffGroupBuyEmailTitle:
+  "Email для автоматической рассылки совместных покупок",
+
+staffEmailLead:
+  "Вы можете управлять максимум 3 адресами, добавленными вами.",
+
+staffEmailNickname:
+  "Имя",
+
+staffEmailAdd:
+  "Добавить email",
+
+staffEmailNone:
+  "Добавленных email-адресов нет.",
+
+staffEmailCount:
+  "{count} / {max}",
+
+staffEmailDeleteConfirm:
+  "Удалить этот email-адрес?",
+
+staffEmailInvalid:
+  "Введите имя и email-адрес.",
+
+staffEmailLimit:
+  "Для этого раздела можно добавить не более 3 email-адресов.",
+
+staffEmailDuplicate:
+  "Этот email-адрес уже зарегистрирован.",
+
+staffEmailRequestFailed:
+  "Не удалось выполнить операцию с получателем email.",
   },
 };
 
