@@ -1,0 +1,7993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Upload Admin · S967</title>
+
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js" defer></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width: min(1000px, 100%);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input {
+      min-width: 240px;
+      flex: 1;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    button {
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--border-hover);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .danger {
+      color: #d75555;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 1.4em;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      color: #d75555;
+    }
+
+    .upload {
+      margin-top: 14px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .upload:first-child {
+      margin-top: 0;
+    }
+
+    .upload-meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .paths {
+      margin-top: 8px;
+    }
+
+    .path {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .blocked {
+      margin-top: 8px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 26px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .upload-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.upload-image {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-hover);
+}
+
+.upload-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+
+.badge-blocked {
+  color: #d75555;
+}
+
+.badge-active {
+  color: var(--muted);
+}
+
+.same-ip {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.same-ip button {
+  margin-left: 6px;
+  padding: 5px 8px;
+  font-size: 0.78rem;
+}
+    
+    .admin-tabs,
+.wk-tabs,
+.group-buy-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.admin-tab,
+.wk-tab,
+.group-buy-tab {
+  background: transparent;
+}
+
+.admin-tab.is-active,
+.wk-tab.is-active,
+.group-buy-tab.is-active {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.admin-section,
+.wk-section,
+.group-buy-section {
+  display: none;
+}
+
+.admin-section.is-active,
+.wk-section.is-active,
+.group-buy-section.is-active {
+  display: block;
+}
+
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.manage-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-hover);
+}
+
+    .manage-item.dragging {
+  opacity: 0.35;
+}
+
+.manage-item.drag-over {
+  border-color: var(--border-hover);
+}
+    
+.drag-handle {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+
+  color: var(--muted);
+  font-size: 1.1rem;
+
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.manage-name {
+  min-width: 0;
+  flex: 1;
+
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.manage-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.manage-actions button {
+  padding: 7px 9px;
+  font-size: 0.82rem;
+}
+
+.item-inactive {
+  opacity: 0.55;
+}
+
+.add-row {
+  margin-top: 14px;
+}
+
+    .application-mode-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.mode-button {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-hover);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode-button:hover {
+  border-color: var(--border-hover);
+}
+
+.mode-button.active {
+  border-color: var(--text);
+  background: transparent;
+  box-shadow:
+    inset 0 0 0 1px var(--text);
+}
+
+.mode-button.active::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+
+    /* ========================================================
+       GROUP BUY ADMIN
+       ======================================================== */
+
+    select,
+    input[type="datetime-local"],
+    input[type="number"],
+    input[type="email"] {
+      min-width: 180px;
+      flex: 1;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .group-buy-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(280px, 1fr)
+        );
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .group-buy-card {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-hover);
+    }
+
+    .group-buy-card-title {
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .group-buy-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .group-buy-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .group-buy-actions button {
+      padding: 7px 9px;
+      font-size: 0.82rem;
+    }
+
+    .group-buy-form-row {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(180px, 1fr)
+        );
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .group-buy-form-row input,
+    .group-buy-form-row select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .group-buy-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 4px;
+      font-size: 0.9rem;
+    }
+
+    .group-buy-checkbox input {
+      min-width: auto;
+      flex: 0 0 auto;
+    }
+
+    .application-card {
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-hover);
+    }
+
+    .application-items {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .section-divider {
+      margin: 24px 0;
+      border: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .group-buy-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .group-buy-form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="theme-picker" data-theme-picker>
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >◐</button>
+
+    <div class="theme-menu" data-theme-menu role="menu">
+      <button type="button" data-theme-choice="system" role="menuitemradio">
+        <span class="theme-choice-icon">◐</span>
+        <span>System</span>
+      </button>
+
+      <button type="button" data-theme-choice="light" role="menuitemradio">
+        <span class="theme-choice-icon">☀</span>
+        <span>Light</span>
+      </button>
+
+      <button type="button" data-theme-choice="dark" role="menuitemradio">
+        <span class="theme-choice-icon">☾</span>
+        <span>Dark</span>
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <div class="eyebrow">S967</div>
+    <h1>사이트 관리</h1>
+
+    <section id="loginPanel" class="panel">
+      <h2>관리자 로그인</h2>
+
+      <div class="row">
+        <input
+          id="adminSecret"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Admin password"
+        >
+
+        <button
+          id="loginButton"
+          type="button"
+        >
+          로그인
+        </button>
+      </div>
+
+      <div
+        id="loginStatus"
+        class="status"
+      ></div>
+    </section>
+
+    <div
+  id="adminArea"
+  class="hidden"
+>
+  <div class="admin-tabs">
+    <button
+      type="button"
+      class="admin-tab is-active"
+      data-admin-tab="uploads"
+    >
+      이미지
+    </button>
+
+    <button
+      type="button"
+      class="admin-tab"
+      data-admin-tab="wk"
+    >
+      황무지 설문
+    </button>
+    
+    <button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="inquiry"
+>
+  문의
+</button>
+
+<button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="groupbuy"
+>
+  공동구매
+</button>
+  </div>
+
+
+  <div
+  id="uploadAdminSection"
+  class="admin-section is-active"
+  data-admin-section="uploads"
+>
+
+  <section class="panel">
+    <h2>Upload Control</h2>
+
+    <p
+      id="pauseStatus"
+      class="small"
+    ></p>
+
+    <div class="row">
+      <button
+        type="button"
+        data-pause-hours="1"
+      >
+        전체 1시간 정지
+      </button>
+
+      <button
+        type="button"
+        data-pause-hours="6"
+      >
+        전체 6시간 정지
+      </button>
+
+      <button
+        type="button"
+        data-pause-hours="24"
+      >
+        전체 24시간 정지
+      </button>
+
+      <button
+        type="button"
+        data-pause-hours="72"
+      >
+        전체 3일 정지
+      </button>
+
+      <button
+        id="resumeButton"
+        type="button"
+      >
+        업로드 재개
+      </button>
+    </div>
+
+    <div
+      id="controlStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        최근 업로드
+      </h2>
+
+      <button
+        id="refreshButton"
+        type="button"
+      >
+        새로고침
+      </button>
+    </div>
+
+    <p class="small">
+      Up to 100 recent upload events are shown.
+    </p>
+
+    <div id="uploads"></div>
+
+    <div
+      id="uploadsStatus"
+      class="status"
+    ></div>
+  </section>
+
+</div>
+
+
+<div
+  id="wkAdminSection"
+    class="admin-section"
+    data-admin-section="wk"
+  >
+    <div class="wk-tabs">
+      <button
+        type="button"
+        class="wk-tab is-active"
+        data-wk-tab="settings"
+      >
+        설정
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="applications"
+      >
+        Applications
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="tiers"
+      >
+        티어
+      </button>
+
+      <button
+        type="button"
+        class="wk-tab"
+        data-wk-tab="alliances"
+      >
+        연맹
+      </button>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="applications"
+    >
+      <section class="panel">
+        <h2>황무지 신청서</h2>
+
+        <p class="small">
+          WK applications will be shown here.
+        </p>
+
+        <div id="wkApplications"></div>
+
+        <div
+          id="wkApplicationsStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="tiers"
+    >
+      <section class="panel">
+        <h2>티어 관리</h2>
+
+        <p class="small">
+          Drag items to change their order.
+          Inactive items are hidden from the public application form.
+        </p>
+
+        <div
+          id="tierList"
+          class="manage-list"
+        ></div>
+
+        <div class="row add-row">
+          <input
+            id="newTierName"
+            type="text"
+            placeholder="New tier"
+          >
+
+          <button
+            id="addTierButton"
+            type="button"
+          >
+            + Add Tier
+          </button>
+        </div>
+
+        <div
+          id="tierStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+
+    <div
+      class="wk-section"
+      data-wk-section="alliances"
+    >
+      <section class="panel">
+        <h2>연맹 관리</h2>
+
+        <p class="small">
+          Drag items to change their order.
+          Alliance names are case-sensitive.
+        </p>
+
+        <div
+          id="allianceList"
+          class="manage-list"
+        ></div>
+
+        <div class="row add-row">
+          <input
+            id="newAllianceName"
+            type="text"
+            placeholder="New alliance"
+          >
+
+          <button
+            id="addAllianceButton"
+            type="button"
+          >
+            + Add Alliance
+          </button>
+        </div>
+
+        <div
+          id="allianceStatus"
+          class="status"
+        ></div>
+      </section>
+    </div>
+
+<div
+  class="wk-section is-active"
+  data-wk-section="settings"
+>
+  <section class="panel">
+    <h2>WK 설정</h2>
+
+    <p class="small">
+      신청서 개폐 방식을 설정합니다.
+    </p>
+
+    <div
+      class="application-mode-options"
+      id="applicationModeOptions"
+    >
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="auto"
+      >
+        Auto
+      </button>
+
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="open"
+      >
+        Force Open
+      </button>
+
+      <button
+        type="button"
+        class="mode-button"
+        data-application-mode="closed"
+      >
+        Force Closed
+      </button>
+    </div>
+
+    <div
+      id="applicationModeStatus"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+    </section>
+
+  <section class="panel">
+    <h2>Excel 이메일 발송</h2>
+
+    <p class="small">
+      WK 신청 결과를 받을 이메일 주소를 관리합니다.
+      비활성 수신자는 자동 및 수동 발송에서 제외됩니다.
+    </p>
+
+    <div
+      id="emailRecipientList"
+      class="manage-list"
+    ></div>
+
+    <div class="row add-row">
+      <input
+        id="newEmailNickname"
+        type="text"
+        placeholder="별명"
+      >
+
+      <input
+        id="newEmailAddress"
+        type="email"
+        placeholder="Email address"
+      >
+
+      <button
+        id="addEmailRecipientButton"
+        type="button"
+      >
+        + 수신자 추가
+      </button>
+    </div>
+
+    <div
+      id="emailRecipientStatus"
+      class="status"
+    ></div>
+
+    <hr
+      style="
+        margin: 24px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
+    <div class="row">
+      <div style="flex: 1;">
+        <strong>자동 발송</strong>
+
+        <div class="small">
+          정규 WK 신청 마감 10분 후
+          활성 수신자에게 Excel을 자동 발송합니다.
+        </div>
+      </div>
+
+      <button
+        id="emailAutoSendButton"
+        type="button"
+        class="mode-button"
+      >
+        자동 발송 ON
+      </button>
+    </div>
+
+    <div
+      id="emailAutoSendStatus"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+
+    <hr
+      style="
+        margin: 24px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
+    <div>
+      <strong>수동 발송</strong>
+
+      <p class="small">
+        현재 WK 신청 회차의 결과를
+        활성 수신자에게 즉시 발송합니다.
+      </p>
+
+      <button
+        id="manualEmailSendButton"
+        type="button"
+      >
+        Excel 이메일 발송
+      </button>
+
+      <div
+        id="manualEmailSendStatus"
+        class="status"
+      ></div>
+    </div>
+
+    <hr
+      style="
+        margin: 24px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
+    <div>
+      <strong>최근 발송 기록</strong>
+
+      <div
+        id="emailExportHistory"
+        class="manage-list"
+      ></div>
+    </div>
+  </section>
+
+</div>
+
+</div>
+
+<div
+  id="inquiryAdminSection"
+  class="admin-section"
+  data-admin-section="inquiry"
+>
+  <section class="panel">
+    <h2>
+      문의 이메일 수신자
+    </h2>
+
+    <p class="small">
+      새 문의 알림을 받을 이메일 주소를 관리합니다.
+      비활성 수신자에게는 알림이 발송되지 않습니다.
+    </p>
+
+    <div
+      id="inquiryEmailRecipientList"
+      class="manage-list"
+    ></div>
+
+    <div class="row add-row">
+      <input
+        id="newInquiryEmailNickname"
+        type="text"
+        placeholder="별명"
+      >
+
+      <input
+        id="newInquiryEmailAddress"
+        type="email"
+        placeholder="Email address"
+      >
+
+      <button
+        id="addInquiryEmailRecipientButton"
+        type="button"
+      >
+        + 수신자 추가
+      </button>
+    </div>
+
+    <div
+      id="inquiryEmailRecipientStatus"
+      class="status"
+    ></div>
+  </section>
+
+  <section class="panel">
+    <h2>문의 접수 상태</h2>
+
+    <p class="small">
+      문의창을 닫으면 새로운 문의를 제출할 수 없습니다.
+    </p>
+
+    <div class="row">
+      <button
+        id="inquiryOpenButton"
+        type="button"
+      >
+        문의창 열기
+      </button>
+
+      <button
+        id="inquiryCloseButton"
+        type="button"
+        class="danger"
+      >
+        문의창 닫기
+      </button>
+    </div>
+
+    <div
+      id="inquiryOpenStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+
+<div
+  id="groupBuyAdminSection"
+  class="admin-section"
+  data-admin-section="groupbuy"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        공동구매 회차 관리
+      </h2>
+
+      <button
+        id="groupBuyRefreshButton"
+        type="button"
+      >
+        새로고침
+      </button>
+    </div>
+
+    <p class="small">
+      모집 시작/종료 시간은 한국시간(KST) 기준입니다.
+      활성 회차의 모집기간은 서로 겹칠 수 없습니다.
+    </p>
+
+    <div
+      id="groupBuyEventList"
+      class="group-buy-grid"
+    ></div>
+
+    <hr class="section-divider">
+
+    <strong>새 회차 추가</strong>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyEventTitle"
+        type="text"
+        placeholder="회차명 / 이벤트명"
+      >
+
+      <input
+        id="newGroupBuyStartAt"
+        type="datetime-local"
+        aria-label="모집 시작"
+      >
+
+      <input
+        id="newGroupBuyEndAt"
+        type="datetime-local"
+        aria-label="모집 종료"
+      >
+    </div>
+
+    <div class="row add-row">
+      <label class="group-buy-checkbox">
+        <input
+          id="newGroupBuyEventActive"
+          type="checkbox"
+          checked
+        >
+        Active
+      </label>
+
+      <button
+        id="addGroupBuyEventButton"
+        type="button"
+      >
+        + 회차 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyEventStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>관리할 회차 선택</h2>
+
+    <div class="row">
+      <select
+        id="groupBuyEventSelect"
+      >
+        <option value="">
+          회차를 선택하세요
+        </option>
+      </select>
+    </div>
+
+    <div
+      id="groupBuySelectedEventInfo"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+
+    <div
+      id="groupBuyDetailStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>연맹 관리</h2>
+
+    <p class="small">
+      Active 연맹만 공개 신청폼에 표시됩니다.
+      과거 신청에 사용된 연맹은 삭제할 수 없으며 Inactive로 변경해야 합니다.
+    </p>
+
+    <div
+      id="groupBuyAllianceList"
+      class="manage-list"
+    ></div>
+
+    <div class="row add-row">
+      <input
+        id="newGroupBuyAllianceName"
+        type="text"
+        placeholder="새 연맹"
+      >
+
+      <button
+        id="addGroupBuyAllianceButton"
+        type="button"
+      >
+        + 연맹 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyAllianceStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>구매 항목 관리</h2>
+
+    <p class="small">
+      상품은 선택한 회차에 귀속됩니다.
+      각 상품마다 1인 최대 신청 수량을 설정할 수 있습니다.
+      Active 상품만 공개 신청폼에 표시됩니다.
+    </p>
+
+    <div
+      id="groupBuyItemList"
+      class="manage-list"
+    ></div>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyItemName"
+        type="text"
+        placeholder="새 구매 항목"
+      >
+
+      <input
+        id="newGroupBuyItemMaxQuantity"
+        type="number"
+        min="1"
+        step="1"
+        value="1"
+        placeholder="최대 수량"
+      >
+    </div>
+
+    <div class="row add-row">
+      <button
+        id="addGroupBuyItemButton"
+        type="button"
+      >
+        + 구매 항목 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyItemStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        신청 내역
+      </h2>
+
+      <span
+        id="groupBuyApplicationCount"
+        class="small"
+      ></span>
+    </div>
+
+    <p class="small">
+      동일 회차 + 완전히 동일한 닉네임으로 다시 제출하면
+      연맹과 관계없이 새 신청이 아니라 기존 신청이 수정됩니다.
+    </p>
+
+    <div
+      id="groupBuyApplicationList"
+    ></div>
+
+    <div
+      id="groupBuyApplicationStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2>Excel 이메일 수신자</h2>
+
+    <p class="small">
+      공동구매 모집 종료 10분 후 생성되는 Excel을 받을 수신자를 관리합니다.
+      Active 수신자에게만 발송됩니다.
+    </p>
+
+    <div
+      id="groupBuyEmailRecipientList"
+      class="manage-list"
+    ></div>
+
+    <div class="group-buy-form-row">
+      <input
+        id="newGroupBuyEmailNickname"
+        type="text"
+        placeholder="별명"
+      >
+
+      <input
+        id="newGroupBuyEmailAddress"
+        type="email"
+        placeholder="Email address"
+      >
+    </div>
+
+    <div class="row add-row">
+      <button
+        id="addGroupBuyEmailRecipientButton"
+        type="button"
+      >
+        + 수신자 추가
+      </button>
+    </div>
+
+    <div
+      id="groupBuyEmailRecipientStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        Excel 발송
+      </h2>
+
+      <button
+        id="groupBuyManualExportButton"
+        type="button"
+      >
+        Excel 지금 발송
+      </button>
+    </div>
+
+    <p class="small">
+      선택한 회차의 현재 신청 내역을 Excel로 생성해
+      Active 이메일 수신자에게 즉시 발송합니다.
+      자동 발송은 모집 종료 10분 후 실행되며,
+      자동 재시도에서는 이미 성공한 수신자는 다시 보내지 않습니다.
+    </p>
+
+    <div
+      id="groupBuyManualExportStatus"
+      class="status"
+    ></div>
+
+    <hr class="section-divider">
+
+    <h3>회차 발송 기록</h3>
+
+    <div
+      id="groupBuyExportHistory"
+      class="manage-list"
+    ></div>
+
+    <hr class="section-divider">
+
+    <h3>수신자별 발송 결과</h3>
+
+    <div
+      id="groupBuyRecipientExportHistory"
+      class="manage-list"
+    ></div>
+
+    <div
+      id="groupBuyExportStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+
+    <a class="back" href="/">
+      ← Back to Home
+    </a>
+  </main>
+
+  <script>
+    const ADMIN_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
+
+    const WK_EXPORT_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-export-email";
+    
+    const WK_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
+
+    const INQUIRY_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/inquiry-admin";
+
+    const GROUP_BUY_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-admin";
+
+    const GROUP_BUY_EXPORT_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-export-email";
+    
+    const SUPABASE_PUBLIC_STORAGE_BASE =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
+    
+    const loginPanel =
+      document.getElementById(
+        "loginPanel"
+      );
+
+    const adminArea =
+      document.getElementById(
+        "adminArea"
+      );
+
+    const adminSecretInput =
+      document.getElementById(
+        "adminSecret"
+      );
+
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
+
+    const loginStatus =
+      document.getElementById(
+        "loginStatus"
+      );
+
+    const pauseStatus =
+      document.getElementById(
+        "pauseStatus"
+      );
+
+    const controlStatus =
+      document.getElementById(
+        "controlStatus"
+      );
+
+    const uploads =
+      document.getElementById(
+        "uploads"
+      );
+
+    const uploadsStatus =
+      document.getElementById(
+        "uploadsStatus"
+      );
+
+    const refreshButton =
+      document.getElementById(
+        "refreshButton"
+      );
+
+    const resumeButton =
+      document.getElementById(
+        "resumeButton"
+      );
+
+    const adminTabs =
+  document.querySelectorAll(
+    "[data-admin-tab]"
+  );
+
+const adminSections =
+  document.querySelectorAll(
+    "[data-admin-section]"
+  );
+
+const wkTabs =
+  document.querySelectorAll(
+    "[data-wk-tab]"
+  );
+
+const wkSections =
+  document.querySelectorAll(
+    "[data-wk-section]"
+  );
+
+const wkApplications =
+  document.getElementById(
+    "wkApplications"
+  );
+
+const wkApplicationsStatus =
+  document.getElementById(
+    "wkApplicationsStatus"
+  );
+
+
+const tierList =
+  document.getElementById(
+    "tierList"
+  );
+
+const allianceList =
+  document.getElementById(
+    "allianceList"
+  );
+
+const newTierName =
+  document.getElementById(
+    "newTierName"
+  );
+
+const newAllianceName =
+  document.getElementById(
+    "newAllianceName"
+  );
+
+const addTierButton =
+  document.getElementById(
+    "addTierButton"
+  );
+
+const addAllianceButton =
+  document.getElementById(
+    "addAllianceButton"
+  );
+
+const tierStatus =
+  document.getElementById(
+    "tierStatus"
+  );
+
+const allianceStatus =
+  document.getElementById(
+    "allianceStatus"
+  );
+
+    const applicationModeOptions =
+  document.getElementById(
+    "applicationModeOptions"
+  );
+
+const applicationModeStatus =
+  document.getElementById(
+    "applicationModeStatus"
+  );
+
+    const inquiryEmailRecipientList =
+  document.getElementById(
+    "inquiryEmailRecipientList"
+  );
+
+const newInquiryEmailNickname =
+  document.getElementById(
+    "newInquiryEmailNickname"
+  );
+
+const newInquiryEmailAddress =
+  document.getElementById(
+    "newInquiryEmailAddress"
+  );
+
+const addInquiryEmailRecipientButton =
+  document.getElementById(
+    "addInquiryEmailRecipientButton"
+  );
+
+const inquiryEmailRecipientStatus =
+  document.getElementById(
+    "inquiryEmailRecipientStatus"
+  );
+
+const inquiryOpenButton =
+  document.getElementById(
+    "inquiryOpenButton"
+  );
+
+const inquiryCloseButton =
+  document.getElementById(
+    "inquiryCloseButton"
+  );
+
+const inquiryOpenStatus =
+  document.getElementById(
+    "inquiryOpenStatus"
+  );
+
+let inquiryData = {
+  settings: {
+    inquiry_open: true,
+  },
+
+  email_recipients: [],
+};
+
+
+const groupBuyRefreshButton =
+  document.getElementById(
+    "groupBuyRefreshButton"
+  );
+
+const groupBuyEventList =
+  document.getElementById(
+    "groupBuyEventList"
+  );
+
+const groupBuyEventStatus =
+  document.getElementById(
+    "groupBuyEventStatus"
+  );
+
+const newGroupBuyEventTitle =
+  document.getElementById(
+    "newGroupBuyEventTitle"
+  );
+
+const newGroupBuyStartAt =
+  document.getElementById(
+    "newGroupBuyStartAt"
+  );
+
+const newGroupBuyEndAt =
+  document.getElementById(
+    "newGroupBuyEndAt"
+  );
+
+const newGroupBuyEventActive =
+  document.getElementById(
+    "newGroupBuyEventActive"
+  );
+
+const addGroupBuyEventButton =
+  document.getElementById(
+    "addGroupBuyEventButton"
+  );
+
+const groupBuyEventSelect =
+  document.getElementById(
+    "groupBuyEventSelect"
+  );
+
+const groupBuySelectedEventInfo =
+  document.getElementById(
+    "groupBuySelectedEventInfo"
+  );
+
+const groupBuyDetailStatus =
+  document.getElementById(
+    "groupBuyDetailStatus"
+  );
+
+const groupBuyAllianceList =
+  document.getElementById(
+    "groupBuyAllianceList"
+  );
+
+const newGroupBuyAllianceName =
+  document.getElementById(
+    "newGroupBuyAllianceName"
+  );
+
+const addGroupBuyAllianceButton =
+  document.getElementById(
+    "addGroupBuyAllianceButton"
+  );
+
+const groupBuyAllianceStatus =
+  document.getElementById(
+    "groupBuyAllianceStatus"
+  );
+
+const groupBuyItemList =
+  document.getElementById(
+    "groupBuyItemList"
+  );
+
+const newGroupBuyItemName =
+  document.getElementById(
+    "newGroupBuyItemName"
+  );
+
+const newGroupBuyItemMaxQuantity =
+  document.getElementById(
+    "newGroupBuyItemMaxQuantity"
+  );
+
+const addGroupBuyItemButton =
+  document.getElementById(
+    "addGroupBuyItemButton"
+  );
+
+const groupBuyItemStatus =
+  document.getElementById(
+    "groupBuyItemStatus"
+  );
+
+const groupBuyApplicationList =
+  document.getElementById(
+    "groupBuyApplicationList"
+  );
+
+const groupBuyApplicationCount =
+  document.getElementById(
+    "groupBuyApplicationCount"
+  );
+
+const groupBuyApplicationStatus =
+  document.getElementById(
+    "groupBuyApplicationStatus"
+  );
+
+const groupBuyEmailRecipientList =
+  document.getElementById(
+    "groupBuyEmailRecipientList"
+  );
+
+const newGroupBuyEmailNickname =
+  document.getElementById(
+    "newGroupBuyEmailNickname"
+  );
+
+const newGroupBuyEmailAddress =
+  document.getElementById(
+    "newGroupBuyEmailAddress"
+  );
+
+const addGroupBuyEmailRecipientButton =
+  document.getElementById(
+    "addGroupBuyEmailRecipientButton"
+  );
+
+const groupBuyEmailRecipientStatus =
+  document.getElementById(
+    "groupBuyEmailRecipientStatus"
+  );
+
+const groupBuyManualExportButton =
+  document.getElementById(
+    "groupBuyManualExportButton"
+  );
+
+const groupBuyManualExportStatus =
+  document.getElementById(
+    "groupBuyManualExportStatus"
+  );
+
+const groupBuyExportHistory =
+  document.getElementById(
+    "groupBuyExportHistory"
+  );
+
+const groupBuyRecipientExportHistory =
+  document.getElementById(
+    "groupBuyRecipientExportHistory"
+  );
+
+const groupBuyExportStatus =
+  document.getElementById(
+    "groupBuyExportStatus"
+  );
+
+
+let groupBuyData = {
+  events: [],
+  alliances: [],
+  email_recipients: [],
+  export_logs: [],
+  export_recipient_logs: [],
+};
+
+let groupBuyDetail = {
+  event: null,
+  items: [],
+  applications: [],
+  export_logs: [],
+  export_recipient_logs: [],
+};
+
+let selectedGroupBuyEventId =
+  null;
+
+    const emailRecipientList =
+  document.getElementById(
+    "emailRecipientList"
+  );
+
+const newEmailNickname =
+  document.getElementById(
+    "newEmailNickname"
+  );
+
+const newEmailAddress =
+  document.getElementById(
+    "newEmailAddress"
+  );
+
+const addEmailRecipientButton =
+  document.getElementById(
+    "addEmailRecipientButton"
+  );
+
+const emailRecipientStatus =
+  document.getElementById(
+    "emailRecipientStatus"
+  );
+
+const emailAutoSendButton =
+  document.getElementById(
+    "emailAutoSendButton"
+  );
+
+const emailAutoSendStatus =
+  document.getElementById(
+    "emailAutoSendStatus"
+  );
+
+const manualEmailSendButton =
+  document.getElementById(
+    "manualEmailSendButton"
+  );
+
+const manualEmailSendStatus =
+  document.getElementById(
+    "manualEmailSendStatus"
+  );
+
+const emailExportHistory =
+  document.getElementById(
+    "emailExportHistory"
+  );
+    
+    let adminSecret = "";
+    let currentData = null;
+
+let wkData = {
+  tiers: [],
+  alliances: [],
+  applications: [],
+
+  settings: {
+    application_mode: "auto",
+    email_auto_send_enabled: true,
+  },
+
+  email_recipients: [],
+  email_exports: [],
+};
+
+    function setStatus(
+      element,
+      message,
+      isError = false
+    ) {
+      element.textContent =
+        message;
+
+      element.classList.toggle(
+        "error",
+        isError
+      );
+    }
+
+async function apiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+    if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.message ||
+      "WK admin request failed."
+    );
+  }
+
+  return result;
+}
+
+async function inquiryApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      INQUIRY_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Inquiry admin request failed."
+    );
+  }
+
+  return result;
+}
+    
+async function wkApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      WK_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "WK request failed."
+    );
+  }
+
+  return result;
+}
+
+    async function inquiryApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      INQUIRY_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "Inquiry admin request failed."
+    );
+  }
+
+  return result;
+}
+
+    function renderInquiryOpenStatus() {
+  const isOpen =
+    inquiryData?.settings
+      ?.inquiry_open !== false;
+
+  inquiryOpenStatus.textContent =
+    isOpen
+      ? "현재 문의를 받고 있습니다."
+      : "현재 문의창이 닫혀 있습니다.";
+
+  inquiryOpenButton.disabled =
+    isOpen;
+
+  inquiryCloseButton.disabled =
+    !isOpen;
+}
+
+
+
+async function groupBuyApiRequest(
+  method,
+  body = null,
+  query = ""
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(
+        body
+      );
+  }
+
+  const response =
+    await fetch(
+      GROUP_BUY_ADMIN_API_URL +
+        query,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    const error =
+      new Error(
+        result.error ||
+          "Group Buy admin request failed."
+      );
+
+    error.payload =
+      result;
+
+    throw error;
+  }
+
+  return result;
+}
+
+
+
+async function groupBuyExportEmailRequest(
+  eventId
+) {
+  const response =
+    await fetch(
+      GROUP_BUY_EXPORT_EMAIL_API_URL,
+      {
+        method:
+          "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "x-admin-secret":
+            adminSecret,
+        },
+
+        body:
+          JSON.stringify({
+            type:
+              "manual",
+
+            event_id:
+              Number(
+                eventId
+              ),
+          }),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.errors?.join("\\n") ||
+      "Excel 발송에 실패했습니다."
+    );
+  }
+
+  return result;
+}
+
+
+    function renderInquiryEmailRecipients() {
+  inquiryEmailRecipientList.innerHTML =
+    "";
+
+  const recipients =
+    Array.isArray(
+      inquiryData.email_recipients
+    )
+      ? inquiryData.email_recipients
+      : [];
+
+  if (
+    recipients.length ===
+    0
+  ) {
+    inquiryEmailRecipientList.innerHTML =
+      '<div class="small">등록된 수신자가 없습니다.</div>';
+
+    return;
+  }
+
+  recipients.forEach(
+    (recipient) => {
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "manage-item";
+
+      if (!recipient.active) {
+        row.classList.add(
+          "item-inactive"
+        );
+      }
+
+
+      const content =
+        document.createElement(
+          "div"
+        );
+
+      content.style.flex =
+        "1";
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "manage-name";
+
+      name.textContent =
+        recipient.nickname ||
+        "이름 없음";
+
+
+      const email =
+        document.createElement(
+          "div"
+        );
+
+      email.className =
+        "manage-note";
+
+      email.textContent =
+        recipient.email;
+
+
+      content.appendChild(
+        name
+      );
+
+      content.appendChild(
+        email
+      );
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "manage-actions";
+
+
+      /*
+        Active / Inactive
+      */
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        recipient.active
+          ? "Active"
+          : "Inactive";
+
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "update_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  recipient.nickname ??
+                  "",
+
+                email:
+                  recipient.email,
+
+                active:
+                  !recipient.active,
+              }
+            );
+
+            await loadInquiryData();
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      /*
+        수정
+      */
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        "Edit";
+
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const nickname =
+            prompt(
+              "별명:",
+              recipient.nickname ??
+                ""
+            );
+
+          if (
+            nickname ===
+            null
+          ) {
+            return;
+          }
+
+
+          const emailValue =
+            prompt(
+              "이메일 주소:",
+              recipient.email
+            );
+
+          if (
+            emailValue ===
+            null
+          ) {
+            return;
+          }
+
+
+          const email =
+            emailValue.trim();
+
+          if (!email) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "이메일 주소를 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "update_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  nickname.trim(),
+
+                email,
+
+                active:
+                  recipient.active,
+              }
+            );
+
+            await loadInquiryData();
+
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "수정했습니다."
+            );
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      /*
+        삭제
+      */
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.className =
+        "danger";
+
+      deleteButton.textContent =
+        "Delete";
+
+
+      deleteButton.addEventListener(
+        "click",
+        async () => {
+          if (
+            !confirm(
+              `${recipient.email} 수신자를 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+
+          try {
+            await inquiryApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_inquiry_email_recipient",
+
+                id:
+                  recipient.id,
+              }
+            );
+
+            await loadInquiryData();
+
+            setStatus(
+              inquiryEmailRecipientStatus,
+              "삭제했습니다."
+            );
+
+          } catch (error) {
+            setStatus(
+              inquiryEmailRecipientStatus,
+              error.message ||
+                "Delete failed.",
+              true
+            );
+          }
+        }
+      );
+
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        editButton
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      row.appendChild(
+        content
+      );
+
+      row.appendChild(
+        actions
+      );
+
+
+      inquiryEmailRecipientList
+        .appendChild(
+          row
+        );
+    }
+  );
+}
+
+    async function loadInquiryData() {
+  setStatus(
+    inquiryEmailRecipientStatus,
+    "Loading…"
+  );
+
+  try {
+    inquiryData =
+      await inquiryApiRequest(
+        "GET"
+      );
+
+    renderInquiryEmailRecipients();
+    renderInquiryOpenStatus();
+
+    setStatus(
+      inquiryEmailRecipientStatus,
+      ""
+    );
+
+  } catch (error) {
+    setStatus(
+      inquiryEmailRecipientStatus,
+      error.message ||
+        "Failed to load Inquiry data.",
+      true
+    );
+  }
+}
+    
+    async function wkExportEmailRequest(
+  type
+) {
+  const response =
+    await fetch(
+      WK_EXPORT_EMAIL_API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "x-admin-secret":
+            adminSecret,
+        },
+
+        body:
+          JSON.stringify({
+            type,
+          }),
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.errors?.join("\n") ||
+      "Email export failed."
+    );
+  }
+
+  return result;
+}
+    
+function createWkManageItem(
+  item,
+  type
+) {
+  const row =
+    document.createElement("div");
+
+  row.className =
+    "manage-item";
+
+  
+row.dataset.type = type;
+  
+  if (!item.active) {
+    row.classList.add(
+      "item-inactive"
+    );
+  }
+
+  row.dataset.id =
+    String(item.id);
+
+
+  const handle =
+    document.createElement("div");
+
+  handle.className =
+    "drag-handle";
+
+  handle.textContent =
+    "☰";
+
+
+  const content =
+    document.createElement("div");
+
+  content.style.flex =
+    "1";
+
+
+  const name =
+    document.createElement("div");
+
+  name.className =
+    "manage-name";
+
+  name.textContent =
+    item.name;
+
+  content.appendChild(name);
+
+
+  if (
+    type === "tier" &&
+    item.admin_note
+  ) {
+    const note =
+      document.createElement("div");
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      item.admin_note;
+
+    content.appendChild(note);
+  }
+
+
+  const actions =
+    document.createElement("div");
+
+  actions.className =
+    "manage-actions";
+
+
+  const toggleButton =
+    document.createElement("button");
+
+  toggleButton.type =
+    "button";
+
+  toggleButton.textContent =
+    item.active
+      ? "Active"
+      : "Inactive";
+
+
+  const editButton =
+    document.createElement("button");
+  
+  editButton.type =
+    "button";
+
+  editButton.textContent =
+    "Edit";
+
+
+  toggleButton.addEventListener(
+    "click",
+    async () => {
+      const statusElement =
+        type === "tier"
+          ? tierStatus
+          : allianceStatus;
+
+      const action =
+        type === "tier"
+          ? "toggle_tier"
+          : "toggle_alliance";
+
+      toggleButton.disabled =
+        true;
+
+      setStatus(
+        statusElement,
+        "Updating…"
+      );
+
+      try {
+        await wkApiRequest(
+          "POST",
+          {
+            action,
+            id: item.id,
+            active: !item.active,
+          }
+        );
+
+        await loadWkData();
+
+        setStatus(
+          statusElement,
+          item.active
+            ? "Item deactivated."
+            : "Item activated."
+        );
+      } catch (error) {
+        setStatus(
+          statusElement,
+          error.message ||
+            "Update failed.",
+          true
+        );
+      } finally {
+        toggleButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+  editButton.addEventListener(
+    "click",
+    async () => {
+      const statusElement =
+        type === "tier"
+          ? tierStatus
+          : allianceStatus;
+
+      const newName =
+        prompt(
+          type === "tier"
+            ? "Tier name:"
+            : "Alliance name:",
+          item.name
+        );
+
+      if (newName === null) {
+        return;
+      }
+
+      const trimmedName =
+        newName.trim();
+
+      if (!trimmedName) {
+        setStatus(
+          statusElement,
+          "Name cannot be empty.",
+          true
+        );
+
+        return;
+      }
+
+
+      let adminNote =
+        item.admin_note ?? "";
+
+      if (type === "tier") {
+        const newNote =
+          prompt(
+            "Admin note:",
+            adminNote
+          );
+
+        if (newNote === null) {
+          return;
+        }
+
+        adminNote =
+          newNote.trim();
+      }
+
+
+      editButton.disabled =
+        true;
+
+      setStatus(
+        statusElement,
+        "Updating…"
+      );
+
+      try {
+        if (type === "tier") {
+          await wkApiRequest(
+            "POST",
+            {
+              action:
+                "update_tier",
+              id: item.id,
+              name:
+                trimmedName,
+              admin_note:
+                adminNote,
+            }
+          );
+        } else {
+          await wkApiRequest(
+            "POST",
+            {
+              action:
+                "update_alliance",
+              id: item.id,
+              name:
+                trimmedName,
+            }
+          );
+        }
+
+        await loadWkData();
+
+        setStatus(
+          statusElement,
+          "Updated."
+        );
+      } catch (error) {
+        setStatus(
+          statusElement,
+          error.message ||
+            "Update failed.",
+          true
+        );
+      } finally {
+        editButton.disabled =
+          false;
+      }
+    }
+  );
+
+  const deleteButton =
+  document.createElement(
+    "button"
+  );
+
+deleteButton.type =
+  "button";
+
+deleteButton.className =
+  "danger";
+
+deleteButton.textContent =
+  "Delete";
+
+deleteButton.addEventListener(
+  "click",
+  async () => {
+    const statusElement =
+      type === "tier"
+        ? tierStatus
+        : allianceStatus;
+
+    const itemTypeLabel =
+      type === "tier"
+        ? "티어"
+        : "연맹";
+
+    if (
+      !confirm(
+        `${item.name} ${itemTypeLabel}을 삭제할까요?`
+      )
+    ) {
+      return;
+    }
+
+    deleteButton.disabled =
+      true;
+
+    setStatus(
+      statusElement,
+      "Deleting…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            type === "tier"
+              ? "delete_tier"
+              : "delete_alliance",
+
+          id:
+            item.id,
+        }
+      );
+
+      await loadWkData();
+
+      setStatus(
+        statusElement,
+        "삭제했습니다."
+      );
+
+    } catch (error) {
+      setStatus(
+        statusElement,
+        error.message ||
+          "Delete failed.",
+        true
+      );
+
+      deleteButton.disabled =
+        false;
+    }
+  }
+);
+  
+
+  actions.appendChild(
+  toggleButton
+);
+
+actions.appendChild(
+  editButton
+);
+
+actions.appendChild(
+  deleteButton
+);
+
+
+  row.appendChild(handle);
+  row.appendChild(content);
+  row.appendChild(actions);
+
+  return row;
+}
+
+
+let draggedManageItem = null;
+let dragContainer = null;
+let dragType = null;
+
+
+function setupDragSort(
+  container,
+  type
+) {
+  const items =
+    container.querySelectorAll(
+      ".manage-item"
+    );
+
+  items.forEach((item) => {
+    const handle =
+      item.querySelector(
+        ".drag-handle"
+      );
+
+    if (!handle) {
+      return;
+    }
+
+    handle.addEventListener(
+      "pointerdown",
+      (event) => {
+        event.preventDefault();
+
+        draggedManageItem =
+          item;
+
+        dragContainer =
+          container;
+
+        dragType =
+          type;
+
+        handle.setPointerCapture(
+          event.pointerId
+        );
+
+        item.classList.add(
+          "dragging"
+        );
+      }
+    );
+
+
+    handle.addEventListener(
+      "pointermove",
+      (event) => {
+        if (
+          !draggedManageItem ||
+          dragContainer !==
+            container
+        ) {
+          return;
+        }
+
+        const target =
+          document
+            .elementFromPoint(
+              event.clientX,
+              event.clientY
+            )
+            ?.closest(
+              ".manage-item"
+            );
+
+        if (
+          !target ||
+          target ===
+            draggedManageItem ||
+          target.parentElement !==
+            container
+        ) {
+          return;
+        }
+
+        container
+          .querySelectorAll(
+            ".manage-item"
+          )
+          .forEach(
+            (row) => {
+              row.classList.remove(
+                "drag-over"
+              );
+            }
+          );
+
+        target.classList.add(
+          "drag-over"
+        );
+
+        const rect =
+          target
+            .getBoundingClientRect();
+
+        const after =
+          event.clientY >
+          rect.top +
+            rect.height / 2;
+
+        if (after) {
+          target.after(
+            draggedManageItem
+          );
+        } else {
+          target.before(
+            draggedManageItem
+          );
+        }
+      }
+    );
+
+
+    async function finishDrag(
+      event
+    ) {
+      if (
+        !draggedManageItem ||
+        dragContainer !==
+          container
+      ) {
+        return;
+      }
+
+      try {
+        if (
+          handle.hasPointerCapture(
+            event.pointerId
+          )
+        ) {
+          handle.releasePointerCapture(
+            event.pointerId
+          );
+        }
+      } catch {
+        // ignore
+      }
+
+      draggedManageItem
+        .classList
+        .remove(
+          "dragging"
+        );
+
+      container
+        .querySelectorAll(
+          ".manage-item"
+        )
+        .forEach(
+          (row) => {
+            row.classList.remove(
+              "drag-over"
+            );
+          }
+        );
+
+      const currentType =
+        dragType;
+
+      draggedManageItem =
+        null;
+
+      dragContainer =
+        null;
+
+      dragType =
+        null;
+
+      await saveManageOrder(
+        container,
+        currentType
+      );
+    }
+
+
+    handle.addEventListener(
+      "pointerup",
+      finishDrag
+    );
+
+    handle.addEventListener(
+      "pointercancel",
+      finishDrag
+    );
+  });
+}
+
+    async function saveManageOrder(
+  container,
+  type
+) {
+  const ids =
+    Array.from(
+      container.querySelectorAll(
+        ".manage-item"
+      )
+    ).map(
+      (row) =>
+        Number(
+          row.dataset.id
+        )
+    );
+
+
+  const statusElement =
+    type === "tier"
+      ? tierStatus
+      : allianceStatus;
+
+
+  const action =
+    type === "tier"
+      ? "reorder_tiers"
+      : "reorder_alliances";
+
+
+  setStatus(
+    statusElement,
+    "Saving order…"
+  );
+
+
+  try {
+    await wkApiRequest(
+      "POST",
+      {
+        action,
+        ids,
+      }
+    );
+
+    await loadWkData();
+
+    setStatus(
+      statusElement,
+      "Order saved."
+    );
+  } catch (error) {
+    setStatus(
+      statusElement,
+      error.message ||
+        "Failed to save order.",
+      true
+    );
+
+    await loadWkData();
+  }
+}
+    
+function formatWkValue(value) {
+  const labels = {
+    fighter: "Fighter",
+    shooter: "Shooter",
+    rider: "Rider",
+    all_strong: "All Strong",
+
+    monitor_available: "실시간 모니터링 가능",
+    monitor_unavailable: "실시간 모니터링 불가",
+
+    captain: "Captain",
+    sub_captain: "Subcaptain",
+    regular: "일반 참여",
+    negotiable: "협의 가능",
+
+    first_half: "전반",
+    second_half: "후반",
+    full: "전체",
+  };
+
+  return labels[value] ?? value ?? "-";
+}
+
+
+function renderWkApplications() {
+  if (
+    !wkApplications
+  ) {
+    return;
+  }
+
+  wkApplications.innerHTML =
+    "";
+
+  const applications =
+    Array.isArray(
+      wkData.applications
+    )
+      ? wkData.applications
+      : [];
+
+  if (
+    applications.length === 0
+  ) {
+    wkApplications.innerHTML =
+      '<div class="small">신청 내역이 없습니다.</div>';
+
+    if (
+      wkApplicationsStatus
+    ) {
+      setStatus(
+        wkApplicationsStatus,
+        ""
+      );
+    }
+
+    return;
+  }
+
+  let lastCycle =
+    null;
+
+  for (
+    const application
+    of applications
+  ) {
+    const cycle =
+      Number(
+        application.cycle_number
+      );
+
+    if (
+      cycle !== lastCycle
+    ) {
+      const heading =
+        document.createElement(
+          "h3"
+        );
+
+      heading.textContent =
+        Number.isFinite(cycle)
+          ? `${cycle}회차`
+          : "회차 미지정";
+
+      heading.style.margin =
+        lastCycle === null
+          ? "4px 0 10px"
+          : "24px 0 10px";
+
+      wkApplications.appendChild(
+        heading
+      );
+
+      lastCycle =
+        cycle;
+    }
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "application-card";
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `${application.player_name ?? "-"} · ` +
+      `${application.alliance_name_snapshot ?? "-"}`;
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "manage-note";
+
+    meta.textContent =
+      `티어 ${application.tier_name_snapshot ?? "-"} · ` +
+      `병종 ${formatWkValue(application.troop_type)} · ` +
+      `부대 ${Number(application.troop_size ?? 0).toLocaleString()} · ` +
+      `집결 ${Number(application.rally_size ?? 0).toLocaleString()}`;
+
+    const detail =
+      document.createElement(
+        "div"
+      );
+
+    detail.className =
+      "application-items";
+
+    detail.textContent =
+      `${formatWkValue(application.realtime_response)} · ` +
+      `${formatWkValue(application.captain_role)} · ` +
+      `${formatWkValue(application.participation_time)} · ` +
+      `상태 ${application.status ?? "new"}`;
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+    time.className =
+      "manage-note";
+
+    time.style.marginTop =
+      "6px";
+
+    time.textContent =
+      `신청 ${formatKstDateTime(application.created_at)} · ` +
+      `언어 ${application.language ?? "-"}`;
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      detail
+    );
+
+    card.appendChild(
+      time
+    );
+
+    wkApplications.appendChild(
+      card
+    );
+  }
+
+  if (
+    wkApplicationsStatus
+  ) {
+    setStatus(
+      wkApplicationsStatus,
+      `총 ${applications.length}건`
+    );
+  }
+}
+
+
+   function renderWkLists() {
+  tierList.innerHTML = "";
+  allianceList.innerHTML = "";
+
+  if (
+    !Array.isArray(wkData.tiers) ||
+    wkData.tiers.length === 0
+  ) {
+    tierList.innerHTML =
+      '<div class="small">No tiers found.</div>';
+  } else {
+    wkData.tiers.forEach(
+      (item) => {
+        tierList.appendChild(
+          createWkManageItem(
+            item,
+            "tier"
+          )
+        );
+      }
+    );
+  }
+
+  if (
+    !Array.isArray(wkData.alliances) ||
+    wkData.alliances.length === 0
+  ) {
+    allianceList.innerHTML =
+      '<div class="small">No alliances found.</div>';
+  } else {
+    wkData.alliances.forEach(
+      (item) => {
+        allianceList.appendChild(
+          createWkManageItem(
+            item,
+            "alliance"
+          )
+        );
+      }
+    );
+  }
+     setupDragSort(
+  tierList,
+  "tier"
+);
+
+setupDragSort(
+  allianceList,
+  "alliance"
+);
+}
+
+ async function loadWkData() {
+  setStatus(
+    tierStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    allianceStatus,
+    "Loading…"
+  );
+
+  if (
+    wkApplicationsStatus
+  ) {
+    setStatus(
+      wkApplicationsStatus,
+      "Loading…"
+    );
+  }
+
+  try {
+    wkData =
+      await wkApiRequest(
+        "GET"
+      );
+
+    renderWkLists();
+    renderWkApplications();
+
+renderApplicationMode();
+
+renderEmailRecipients();
+renderEmailAutoSend();
+renderEmailExportHistory();
+    
+    setStatus(
+      tierStatus,
+      ""
+    );
+
+    setStatus(
+      allianceStatus,
+      ""
+    );
+
+    if (
+      wkApplicationsStatus
+    ) {
+      setStatus(
+        wkApplicationsStatus,
+        `총 ${(wkData.applications ?? []).length}건`
+      );
+    }
+  } catch (error) {
+    const message =
+      error.message ||
+      "Failed to load WK data.";
+
+    setStatus(
+      tierStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      allianceStatus,
+      message,
+      true
+    );
+
+    if (
+      wkApplicationsStatus
+    ) {
+      setStatus(
+        wkApplicationsStatus,
+        message,
+        true
+      );
+    }
+  }
+}
+    
+
+function formatKstDateTime(
+  value
+) {
+  if (!value) {
+    return "-";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(
+    "ko-KR",
+    {
+      timeZone:
+        "Asia/Seoul",
+
+      year:
+        "numeric",
+
+      month:
+        "2-digit",
+
+      day:
+        "2-digit",
+
+      hour:
+        "2-digit",
+
+      minute:
+        "2-digit",
+
+      hour12:
+        false,
+    }
+  ).format(date) +
+    " KST";
+}
+
+
+function isoToKstInput(
+  value
+) {
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const formatter =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Seoul",
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        hour12:
+          false,
+      }
+    );
+
+  const parts =
+    Object.fromEntries(
+      formatter
+        .formatToParts(date)
+        .filter(
+          (part) =>
+            part.type !==
+            "literal"
+        )
+        .map(
+          (part) => [
+            part.type,
+            part.value,
+          ]
+        )
+    );
+
+  return (
+    `${parts.year}-` +
+    `${parts.month}-` +
+    `${parts.day}T` +
+    `${parts.hour}:` +
+    `${parts.minute}`
+  );
+}
+
+
+function kstInputToIso(
+  value
+) {
+  const text =
+    String(
+      value ?? ""
+    ).trim();
+
+  if (!text) {
+    return "";
+  }
+
+  const date =
+    new Date(
+      `${text}:00+09:00`
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return date.toISOString();
+}
+
+
+function getGroupBuyEventState(
+  event
+) {
+  if (!event?.active) {
+    return "Inactive";
+  }
+
+  const now =
+    Date.now();
+
+  const start =
+    new Date(
+      event.start_at
+    ).getTime();
+
+  const end =
+    new Date(
+      event.end_at
+    ).getTime();
+
+  if (now < start) {
+    return "모집 전";
+  }
+
+  if (
+    now >= start &&
+    now < end
+  ) {
+    return "모집 중";
+  }
+
+  return "종료";
+}
+
+
+function createGroupBuyActionButton(
+  text,
+  handler,
+  danger = false
+) {
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.type =
+    "button";
+
+  button.textContent =
+    text;
+
+  if (danger) {
+    button.classList.add(
+      "danger"
+    );
+  }
+
+  button.addEventListener(
+    "click",
+    handler
+  );
+
+  return button;
+}
+
+
+function renderGroupBuyEventSelect() {
+  const previous =
+    selectedGroupBuyEventId;
+
+  groupBuyEventSelect.innerHTML =
+    "";
+
+  const placeholder =
+    document.createElement(
+      "option"
+    );
+
+  placeholder.value =
+    "";
+
+  placeholder.textContent =
+    "회차를 선택하세요";
+
+  groupBuyEventSelect.appendChild(
+    placeholder
+  );
+
+  for (
+    const event
+    of (
+      groupBuyData.events ??
+      []
+    )
+  ) {
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      String(
+        event.id
+      );
+
+    option.textContent =
+      `${event.title} · ${getGroupBuyEventState(event)}`;
+
+    groupBuyEventSelect.appendChild(
+      option
+    );
+  }
+
+  if (
+    previous &&
+    (
+      groupBuyData.events ??
+      []
+    ).some(
+      (event) =>
+        Number(
+          event.id
+        ) ===
+        Number(previous)
+    )
+  ) {
+    groupBuyEventSelect.value =
+      String(previous);
+  }
+}
+
+
+function renderGroupBuyEvents() {
+  groupBuyEventList.innerHTML =
+    "";
+
+  const events =
+    Array.isArray(
+      groupBuyData.events
+    )
+      ? groupBuyData.events
+      : [];
+
+  if (
+    events.length ===
+    0
+  ) {
+    groupBuyEventList.innerHTML =
+      '<div class="small">등록된 공동구매 회차가 없습니다.</div>';
+
+    renderGroupBuyEventSelect();
+
+    return;
+  }
+
+  for (
+    const event
+    of events
+  ) {
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "group-buy-card";
+
+    if (!event.active) {
+      card.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "group-buy-card-title";
+
+    title.textContent =
+      event.title;
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "group-buy-meta";
+
+    meta.textContent =
+      `${getGroupBuyEventState(event)} · ` +
+      `${formatKstDateTime(event.start_at)} → ` +
+      `${formatKstDateTime(event.end_at)}` +
+      (
+        event.export_email_sent_at
+          ? ` · Excel 발송 ${formatKstDateTime(event.export_email_sent_at)}`
+          : ""
+      );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "group-buy-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "관리",
+        async () => {
+          selectedGroupBuyEventId =
+            Number(
+              event.id
+            );
+
+          groupBuyEventSelect.value =
+            String(
+              event.id
+            );
+
+          await loadGroupBuyDetail(
+            selectedGroupBuyEventId
+          );
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        event.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            setStatus(
+              groupBuyEventStatus,
+              "변경 중…"
+            );
+
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                active:
+                  !event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "변경했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const titleValue =
+            prompt(
+              "회차명:",
+              event.title
+            );
+
+          if (
+            titleValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startValue =
+            prompt(
+              "모집 시작 (KST, YYYY-MM-DDTHH:MM):",
+              isoToKstInput(
+                event.start_at
+              )
+            );
+
+          if (
+            startValue ===
+            null
+          ) {
+            return;
+          }
+
+          const endValue =
+            prompt(
+              "모집 종료 (KST, YYYY-MM-DDTHH:MM):",
+              isoToKstInput(
+                event.end_at
+              )
+            );
+
+          if (
+            endValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startAt =
+            kstInputToIso(
+              startValue
+            );
+
+          const endAt =
+            kstInputToIso(
+              endValue
+            );
+
+          if (
+            !titleValue.trim() ||
+            !startAt ||
+            !endAt
+          ) {
+            setStatus(
+              groupBuyEventStatus,
+              "회차명과 모집기간을 정확히 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                title:
+                  titleValue.trim(),
+
+                start_at:
+                  startAt,
+
+                end_at:
+                  endAt,
+
+                active:
+                  event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${event.title} 회차를 삭제할까요?\n신청 기록이 있는 회차는 삭제되지 않습니다.`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_event",
+
+                id:
+                  event.id,
+              }
+            );
+
+            if (
+              Number(
+                selectedGroupBuyEventId
+              ) ===
+              Number(
+                event.id
+              )
+            ) {
+              selectedGroupBuyEventId =
+                null;
+
+              groupBuyDetail = {
+                event: null,
+                items: [],
+                applications: [],
+              };
+            }
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEventStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEventStatus,
+              error.message ===
+                "EVENT_IN_USE"
+                ? "신청 기록이 있는 회차는 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      actions
+    );
+
+    groupBuyEventList.appendChild(
+      card
+    );
+  }
+
+  renderGroupBuyEventSelect();
+}
+
+
+function renderGroupBuyAlliances() {
+  groupBuyAllianceList.innerHTML =
+    "";
+
+  const alliances =
+    Array.isArray(
+      groupBuyData.alliances
+    )
+      ? groupBuyData.alliances
+      : [];
+
+  if (
+    alliances.length ===
+    0
+  ) {
+    groupBuyAllianceList.innerHTML =
+      '<div class="small">등록된 연맹이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const alliance
+    of alliances
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!alliance.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      alliance.name;
+
+    const note =
+      document.createElement(
+        "div"
+      );
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      `순서 ${alliance.display_order ?? 0}`;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      note
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        alliance.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_alliance",
+
+                id:
+                  alliance.id,
+
+                name:
+                  alliance.name,
+
+                active:
+                  !alliance.active,
+
+                display_order:
+                  alliance.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const newName =
+            prompt(
+              "연맹명:",
+              alliance.name
+            );
+
+          if (
+            newName ===
+            null
+          ) {
+            return;
+          }
+
+          const nameValue =
+            newName.trim();
+
+          if (!nameValue) {
+            setStatus(
+              groupBuyAllianceStatus,
+              "연맹명을 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_alliance",
+
+                id:
+                  alliance.id,
+
+                name:
+                  nameValue,
+
+                active:
+                  alliance.active,
+
+                display_order:
+                  alliance.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyAllianceStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${alliance.name} 연맹을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_alliance",
+
+                id:
+                  alliance.id,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyAllianceStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyAllianceStatus,
+              error.message ===
+                "ALLIANCE_IN_USE"
+                ? "과거 신청에 사용된 연맹은 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyAllianceList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyItems() {
+  groupBuyItemList.innerHTML =
+    "";
+
+  const items =
+    Array.isArray(
+      groupBuyDetail.items
+    )
+      ? groupBuyDetail.items
+      : [];
+
+  if (
+    !selectedGroupBuyEventId
+  ) {
+    groupBuyItemList.innerHTML =
+      '<div class="small">먼저 관리할 회차를 선택하세요.</div>';
+
+    addGroupBuyItemButton.disabled =
+      true;
+
+    return;
+  }
+
+  addGroupBuyItemButton.disabled =
+    false;
+
+  if (
+    items.length ===
+    0
+  ) {
+    groupBuyItemList.innerHTML =
+      '<div class="small">이 회차에 등록된 구매 항목이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const item
+    of items
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!item.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      item.name;
+
+    const note =
+      document.createElement(
+        "div"
+      );
+
+    note.className =
+      "manage-note";
+
+    note.textContent =
+      `1인 최대 ${item.max_quantity}개 · 순서 ${item.display_order ?? 0}`;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      note
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        item.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  item.name,
+
+                max_quantity:
+                  item.max_quantity,
+
+                active:
+                  !item.active,
+
+                display_order:
+                  item.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const newName =
+            prompt(
+              "구매 항목명:",
+              item.name
+            );
+
+          if (
+            newName ===
+            null
+          ) {
+            return;
+          }
+
+          const quantityValue =
+            prompt(
+              "1인 최대 수량:",
+              String(
+                item.max_quantity
+              )
+            );
+
+          if (
+            quantityValue ===
+            null
+          ) {
+            return;
+          }
+
+          const maxQuantity =
+            Number(
+              quantityValue
+            );
+
+          if (
+            !newName.trim() ||
+            !Number.isSafeInteger(
+              maxQuantity
+            ) ||
+            maxQuantity < 1
+          ) {
+            setStatus(
+              groupBuyItemStatus,
+              "상품명과 최대 수량을 정확히 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  newName.trim(),
+
+                max_quantity:
+                  maxQuantity,
+
+                active:
+                  item.active,
+
+                display_order:
+                  item.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyItemStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${item.name} 항목을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_item",
+
+                id:
+                  item.id,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyItemStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyItemStatus,
+              error.message ===
+                "ITEM_IN_USE"
+                ? "신청에 사용된 상품은 삭제할 수 없습니다. Inactive로 변경하세요."
+                : (
+                    error.message ||
+                    "삭제에 실패했습니다."
+                  ),
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyItemList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyApplications() {
+  groupBuyApplicationList.innerHTML =
+    "";
+
+  const applications =
+    Array.isArray(
+      groupBuyDetail.applications
+    )
+      ? groupBuyDetail.applications
+      : [];
+
+  groupBuyApplicationCount.textContent =
+    selectedGroupBuyEventId
+      ? `${applications.length}명`
+      : "";
+
+  if (
+    !selectedGroupBuyEventId
+  ) {
+    groupBuyApplicationList.innerHTML =
+      '<div class="small">먼저 관리할 회차를 선택하세요.</div>';
+
+    return;
+  }
+
+  if (
+    applications.length ===
+    0
+  ) {
+    groupBuyApplicationList.innerHTML =
+      '<div class="small">신청 내역이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const application
+    of applications
+  ) {
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "application-card";
+
+    const allianceName =
+      application
+        .group_buy_alliances
+        ?.name ??
+      `Alliance #${application.alliance_id}`;
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `${allianceName} · ${application.player_name}`;
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "manage-note";
+
+    meta.textContent =
+      `최초 신청 ${formatKstDateTime(application.created_at)} · ` +
+      `최종 수정 ${formatKstDateTime(application.updated_at)}`;
+
+    const items =
+      document.createElement(
+        "div"
+      );
+
+    items.className =
+      "application-items";
+
+    const itemRows =
+      Array.isArray(
+        application
+          .group_buy_application_items
+      )
+        ? application
+            .group_buy_application_items
+        : [];
+
+    items.textContent =
+      itemRows.length > 0
+        ? itemRows
+            .map(
+              (row) => {
+                const name =
+                  row
+                    .group_buy_items
+                    ?.name ??
+                  `Item #${row.item_id}`;
+
+                return (
+                  `${name} × ${row.quantity}`
+                );
+              }
+            )
+            .join(" / ")
+        : "선택 상품 없음";
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "group-buy-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "신청 삭제",
+        async () => {
+          if (
+            !confirm(
+              `${allianceName} / ${application.player_name} 신청을 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_application",
+
+                id:
+                  application.id,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+            setStatus(
+              groupBuyApplicationStatus,
+              "신청을 삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyApplicationStatus,
+              error.message ||
+                "삭제에 실패했습니다.",
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      items
+    );
+
+    card.appendChild(
+      actions
+    );
+
+    groupBuyApplicationList.appendChild(
+      card
+    );
+  }
+}
+
+
+function renderGroupBuyEmailRecipients() {
+  groupBuyEmailRecipientList.innerHTML =
+    "";
+
+  const recipients =
+    Array.isArray(
+      groupBuyData.email_recipients
+    )
+      ? groupBuyData.email_recipients
+      : [];
+
+  if (
+    recipients.length ===
+    0
+  ) {
+    groupBuyEmailRecipientList.innerHTML =
+      '<div class="small">등록된 수신자가 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const recipient
+    of recipients
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    if (!recipient.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      recipient.nickname;
+
+    const email =
+      document.createElement(
+        "div"
+      );
+
+    email.className =
+      "manage-note";
+
+    email.textContent =
+      recipient.email;
+
+    content.appendChild(
+      name
+    );
+
+    content.appendChild(
+      email
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        recipient.active
+          ? "Active"
+          : "Inactive",
+        async () => {
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  recipient.nickname,
+
+                email:
+                  recipient.email,
+
+                active:
+                  !recipient.active,
+
+                display_order:
+                  recipient.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "변경에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Edit",
+        async () => {
+          const nickname =
+            prompt(
+              "별명:",
+              recipient.nickname
+            );
+
+          if (
+            nickname ===
+            null
+          ) {
+            return;
+          }
+
+          const emailValue =
+            prompt(
+              "이메일:",
+              recipient.email
+            );
+
+          if (
+            emailValue ===
+            null
+          ) {
+            return;
+          }
+
+          if (
+            !nickname.trim() ||
+            !emailValue.trim()
+          ) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "별명과 이메일을 모두 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  nickname.trim(),
+
+                email:
+                  emailValue.trim(),
+
+                active:
+                  recipient.active,
+
+                display_order:
+                  recipient.display_order ?? 0,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "수정에 실패했습니다.",
+              true
+            );
+          }
+        }
+      )
+    );
+
+    actions.appendChild(
+      createGroupBuyActionButton(
+        "Delete",
+        async () => {
+          if (
+            !confirm(
+              `${recipient.email} 수신자를 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await groupBuyApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_email_recipient",
+
+                id:
+                  recipient.id,
+              }
+            );
+
+            await loadGroupBuyData();
+
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              groupBuyEmailRecipientStatus,
+              error.message ||
+                "삭제에 실패했습니다.",
+              true
+            );
+          }
+        },
+        true
+      )
+    );
+
+    row.appendChild(
+      content
+    );
+
+    row.appendChild(
+      actions
+    );
+
+    groupBuyEmailRecipientList.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyExportHistory() {
+  groupBuyExportHistory.innerHTML =
+    "";
+
+  /*
+    회차가 선택돼 있으면 해당 회차 로그만 표시.
+    상세 데이터가 아직 없을 때만 전체 데이터에서 필터링한다.
+  */
+  const logs =
+    Array.isArray(
+      groupBuyDetail.export_logs
+    ) &&
+    groupBuyDetail.event
+      ? groupBuyDetail.export_logs
+      : (
+          Array.isArray(
+            groupBuyData.export_logs
+          )
+            ? groupBuyData.export_logs.filter(
+                (log) =>
+                  !selectedGroupBuyEventId ||
+                  Number(
+                    log.event_id
+                  ) ===
+                    Number(
+                      selectedGroupBuyEventId
+                    )
+              )
+            : []
+        );
+
+  if (
+    logs.length ===
+    0
+  ) {
+    groupBuyExportHistory.innerHTML =
+      '<div class="small">선택한 회차의 발송 기록이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const log
+    of logs.slice(
+      0,
+      30
+    )
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    const statusLabel =
+      log.status === "success"
+        ? "성공"
+        : log.status === "partial_failure"
+          ? "일부 실패"
+          : log.status === "failed"
+            ? "실패"
+            : "처리 중";
+
+    title.textContent =
+      `${statusLabel} · ${formatKstDateTime(log.started_at)}`;
+
+    const detail =
+      document.createElement(
+        "div"
+      );
+
+    detail.className =
+      "manage-note";
+
+    detail.textContent =
+      `수신 ${log.recipient_count ?? 0} · ` +
+      `성공 ${log.success_count ?? 0} · ` +
+      `실패 ${log.failure_count ?? 0}`;
+
+    content.appendChild(
+      title
+    );
+
+    content.appendChild(
+      detail
+    );
+
+    if (
+      log.error_message
+    ) {
+      const error =
+        document.createElement(
+          "div"
+        );
+
+      error.className =
+        "manage-note danger";
+
+      error.textContent =
+        log.error_message;
+
+      content.appendChild(
+        error
+      );
+    }
+
+    row.appendChild(
+      content
+    );
+
+    groupBuyExportHistory.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuyRecipientExportHistory() {
+  groupBuyRecipientExportHistory.innerHTML =
+    "";
+
+  const logs =
+    Array.isArray(
+      groupBuyDetail.export_recipient_logs
+    ) &&
+    groupBuyDetail.event
+      ? groupBuyDetail.export_recipient_logs
+      : (
+          Array.isArray(
+            groupBuyData.export_recipient_logs
+          )
+            ? groupBuyData.export_recipient_logs.filter(
+                (log) =>
+                  !selectedGroupBuyEventId ||
+                  Number(
+                    log.event_id
+                  ) ===
+                    Number(
+                      selectedGroupBuyEventId
+                    )
+              )
+            : []
+        );
+
+  if (
+    logs.length ===
+    0
+  ) {
+    groupBuyRecipientExportHistory.innerHTML =
+      '<div class="small">선택한 회차의 수신자별 발송 기록이 없습니다.</div>';
+
+    return;
+  }
+
+  for (
+    const log
+    of logs.slice(
+      0,
+      100
+    )
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    const statusLabel =
+      log.status === "success"
+        ? "✓ 성공"
+        : log.status === "failed"
+          ? "✕ 실패"
+          : "처리 중";
+
+    title.textContent =
+      `${statusLabel} · ${log.recipient_nickname || "이름 없음"}`;
+
+    const email =
+      document.createElement(
+        "div"
+      );
+
+    email.className =
+      "manage-note";
+
+    email.textContent =
+      log.recipient_email || "";
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+    time.className =
+      "manage-note";
+
+    time.textContent =
+      log.status === "success"
+        ? `발송 ${formatKstDateTime(log.sent_at)}`
+        : `시도 ${formatKstDateTime(log.created_at)}`;
+
+    content.appendChild(
+      title
+    );
+
+    content.appendChild(
+      email
+    );
+
+    content.appendChild(
+      time
+    );
+
+    if (
+      log.error_message
+    ) {
+      const error =
+        document.createElement(
+          "div"
+        );
+
+      error.className =
+        "manage-note danger";
+
+      error.textContent =
+        log.error_message;
+
+      content.appendChild(
+        error
+      );
+    }
+
+    row.appendChild(
+      content
+    );
+
+    groupBuyRecipientExportHistory.appendChild(
+      row
+    );
+  }
+}
+
+
+function renderGroupBuySelectedEvent() {
+  if (
+    !groupBuyDetail.event
+  ) {
+    groupBuySelectedEventInfo.textContent =
+      "";
+
+    return;
+  }
+
+  const event =
+    groupBuyDetail.event;
+
+  groupBuySelectedEventInfo.textContent =
+    `${event.title} · ${getGroupBuyEventState(event)} · ` +
+    `${formatKstDateTime(event.start_at)} → ` +
+    `${formatKstDateTime(event.end_at)}`;
+}
+
+
+function renderGroupBuyAll() {
+  renderGroupBuyEvents();
+  renderGroupBuyAlliances();
+  renderGroupBuyItems();
+  renderGroupBuyApplications();
+  renderGroupBuyEmailRecipients();
+  renderGroupBuyExportHistory();
+  renderGroupBuyRecipientExportHistory();
+  renderGroupBuySelectedEvent();
+}
+
+
+async function loadGroupBuyDetail(
+  eventId
+) {
+  const id =
+    Number(
+      eventId
+    );
+
+  if (
+    !Number.isSafeInteger(id) ||
+    id <= 0
+  ) {
+    selectedGroupBuyEventId =
+      null;
+
+    groupBuyDetail = {
+      event: null,
+      items: [],
+      applications: [],
+      export_logs: [],
+      export_recipient_logs: [],
+    };
+
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+    renderGroupBuySelectedEvent();
+
+    return;
+  }
+
+  selectedGroupBuyEventId =
+    id;
+
+  groupBuyEventSelect.value =
+    String(id);
+
+  setStatus(
+    groupBuyDetailStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await groupBuyApiRequest(
+        "GET",
+        null,
+        `?event_id=${encodeURIComponent(id)}`
+      );
+
+    groupBuyDetail = {
+      event:
+        result.event ??
+        null,
+
+      items:
+        result.items ??
+        [],
+
+      applications:
+        result.applications ??
+        [],
+
+      export_logs:
+        result.export_logs ??
+        [],
+
+      export_recipient_logs:
+        result.export_recipient_logs ??
+        [],
+    };
+
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+    renderGroupBuyExportHistory();
+    renderGroupBuyRecipientExportHistory();
+    renderGroupBuySelectedEvent();
+
+    setStatus(
+      groupBuyDetailStatus,
+      ""
+    );
+  } catch (error) {
+    setStatus(
+      groupBuyDetailStatus,
+      error.message ||
+        "회차 상세정보를 불러오지 못했습니다.",
+      true
+    );
+  }
+}
+
+
+async function loadGroupBuyData() {
+  setStatus(
+    groupBuyEventStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    groupBuyAllianceStatus,
+    "Loading…"
+  );
+
+  setStatus(
+    groupBuyEmailRecipientStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await groupBuyApiRequest(
+        "GET"
+      );
+
+    groupBuyData = {
+      events:
+        result.events ??
+        [],
+
+      alliances:
+        result.alliances ??
+        [],
+
+      email_recipients:
+        result.email_recipients ??
+        [],
+
+      export_logs:
+        result.export_logs ??
+        [],
+
+      export_recipient_logs:
+        result.export_recipient_logs ??
+        [],
+    };
+
+    if (
+      selectedGroupBuyEventId &&
+      !groupBuyData.events.some(
+        (event) =>
+          Number(
+            event.id
+          ) ===
+          Number(
+            selectedGroupBuyEventId
+          )
+      )
+    ) {
+      selectedGroupBuyEventId =
+        null;
+    }
+
+    if (
+      !selectedGroupBuyEventId &&
+      groupBuyData.events.length >
+        0
+    ) {
+      selectedGroupBuyEventId =
+        Number(
+          groupBuyData
+            .events[0]
+            .id
+        );
+    }
+
+    renderGroupBuyEvents();
+    renderGroupBuyAlliances();
+    renderGroupBuyEmailRecipients();
+    renderGroupBuyExportHistory();
+    renderGroupBuyRecipientExportHistory();
+
+    if (
+      selectedGroupBuyEventId
+    ) {
+      await loadGroupBuyDetail(
+        selectedGroupBuyEventId
+      );
+    } else {
+      groupBuyDetail = {
+        event: null,
+        items: [],
+        applications: [],
+      };
+
+      renderGroupBuyItems();
+      renderGroupBuyApplications();
+      renderGroupBuyExportHistory();
+      renderGroupBuyRecipientExportHistory();
+      renderGroupBuySelectedEvent();
+    }
+
+    setStatus(
+      groupBuyEventStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyAllianceStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyEmailRecipientStatus,
+      ""
+    );
+
+    setStatus(
+      groupBuyExportStatus,
+      ""
+    );
+  } catch (error) {
+    const message =
+      error.message ||
+      "공동구매 관리 데이터를 불러오지 못했습니다.";
+
+    setStatus(
+      groupBuyEventStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      groupBuyAllianceStatus,
+      message,
+      true
+    );
+
+    setStatus(
+      groupBuyEmailRecipientStatus,
+      message,
+      true
+    );
+  }
+}
+
+
+    function getBlockInfo(
+      ipHash
+    ) {
+      if (
+        !currentData ||
+        !Array.isArray(
+          currentData.blocked
+        )
+      ) {
+        return null;
+      }
+
+      return (
+        currentData.blocked.find(
+          (entry) =>
+            entry.ip_hash ===
+            ipHash
+        ) || null
+      );
+    }
+
+
+    function isActiveBlock(
+      block
+    ) {
+      if (!block) {
+        return false;
+      }
+
+      if (
+        !block.blocked_until
+      ) {
+        return true;
+      }
+
+      return (
+        new Date(
+          block.blocked_until
+        ).getTime() >
+        Date.now()
+      );
+    }
+
+
+    function formatBlock(
+      block
+    ) {
+      if (!block) {
+        return "";
+      }
+
+      if (
+        !block.blocked_until
+      ) {
+        return "Blocked indefinitely";
+      }
+
+      const until =
+        new Date(
+          block.blocked_until
+        );
+
+      if (
+        until.getTime() <=
+        Date.now()
+      ) {
+        return "";
+      }
+
+      return (
+        "Blocked until " +
+        until.toLocaleString()
+      );
+    }
+
+
+    function renderControl() {
+      const pausedUntil =
+        currentData?.control
+          ?.paused_until;
+
+      if (!pausedUntil) {
+        pauseStatus.textContent =
+          "Uploads are active.";
+
+        return;
+      }
+
+      const date =
+        new Date(
+          pausedUntil
+        );
+
+      if (
+        date.getTime() <=
+        Date.now()
+      ) {
+        pauseStatus.textContent =
+          "Uploads are active.";
+
+        return;
+      }
+
+      pauseStatus.textContent =
+        "Uploads paused until " +
+        date.toLocaleString();
+    }
+
+function getPublicImageUrl(path) {
+  return (
+    SUPABASE_PUBLIC_STORAGE_BASE +
+    path
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/")
+  );
+}
+
+
+function getSameIpUploads(ipHash) {
+  return (
+    currentData?.uploads?.filter(
+      (item) =>
+        item.ip_hash === ipHash
+    ) ?? []
+  );
+}
+
+
+function createImageGrid(item) {
+  const grid =
+    document.createElement("div");
+
+  grid.className =
+    "upload-images";
+
+  for (
+    const path
+    of (item.storage_paths || [])
+  ) {
+    const link =
+      document.createElement("a");
+
+    link.className =
+      "upload-image";
+
+    link.href =
+      getPublicImageUrl(path);
+
+    link.target =
+      "_blank";
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const img =
+      document.createElement("img");
+
+    img.src =
+      getPublicImageUrl(path);
+
+    img.alt =
+      "Uploaded image";
+
+    img.loading =
+      "lazy";
+
+
+    img.addEventListener(
+      "error",
+      () => {
+        link.remove();
+      }
+    );
+
+
+    link.appendChild(img);
+    grid.appendChild(link);
+  }
+
+  return grid;
+}
+    
+    function renderUploads() {
+  uploads.innerHTML = "";
+
+  const list =
+    currentData?.uploads ?? [];
+
+  if (list.length === 0) {
+    uploads.textContent =
+      "No uploads found.";
+
+    return;
+  }
+
+  for (const item of list) {
+    const container =
+      document.createElement("div");
+
+    container.className =
+      "upload";
+
+
+    const meta =
+      document.createElement("div");
+
+    meta.className =
+      "upload-meta";
+
+
+    const reference =
+      document.createElement("strong");
+
+    reference.textContent =
+      item.reference_code ||
+      "Unknown";
+
+    meta.appendChild(reference);
+
+    meta.appendChild(
+      document.createElement("br")
+    );
+
+
+    const created =
+      new Date(item.created_at);
+
+    meta.append(
+      created.toLocaleString()
+    );
+
+    meta.appendChild(
+      document.createElement("br")
+    );
+
+    meta.append(
+      `${item.file_count} image(s)`
+    );
+
+
+    const block =
+      getBlockInfo(item.ip_hash);
+
+    const activeBlock =
+      isActiveBlock(block);
+
+
+    const badge =
+      document.createElement("div");
+
+    badge.className =
+      "badge " +
+      (
+        activeBlock
+          ? "badge-blocked"
+          : "badge-active"
+      );
+
+    if (activeBlock) {
+      badge.textContent =
+        formatBlock(block);
+    } else {
+      badge.textContent =
+        "Not blocked";
+    }
+
+
+    const imageGrid =
+      createImageGrid(item);
+
+
+    const sameIpUploads =
+      getSameIpUploads(item.ip_hash);
+
+    const sameIp =
+      document.createElement("div");
+
+    sameIp.className =
+      "same-ip";
+
+    sameIp.textContent =
+      `Same uploader: ${sameIpUploads.length} recent upload event(s)`;
+
+
+    if (sameIpUploads.length > 1) {
+      const filterButton =
+        document.createElement("button");
+
+      filterButton.type =
+        "button";
+
+      filterButton.textContent =
+        "Show only this uploader";
+
+      filterButton.addEventListener(
+        "click",
+        () => {
+          renderOnlyIp(
+            item.ip_hash
+          );
+        }
+      );
+
+      sameIp.appendChild(
+        filterButton
+      );
+    }
+
+
+    const actions =
+      document.createElement("div");
+
+    actions.className =
+      "upload-actions";
+
+
+    const block7 =
+      document.createElement("button");
+
+    block7.type =
+      "button";
+
+    block7.textContent =
+      "7일 차단";
+
+    block7.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "block_ip_7d",
+          item.ip_hash
+        )
+    );
+
+
+    const blockForever =
+      document.createElement("button");
+
+    blockForever.type =
+      "button";
+
+    blockForever.textContent =
+      "무기한 차단";
+
+    blockForever.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "block_ip_forever",
+          item.ip_hash
+        )
+    );
+
+
+    const unblock =
+      document.createElement("button");
+
+    unblock.type =
+      "button";
+
+    unblock.textContent =
+      "차단 해제";
+
+    unblock.disabled =
+      !activeBlock;
+
+    unblock.addEventListener(
+      "click",
+      () =>
+        runIpAction(
+          "unblock_ip",
+          item.ip_hash
+        )
+    );
+
+
+    actions.appendChild(block7);
+    actions.appendChild(
+      blockForever
+    );
+    actions.appendChild(unblock);
+
+
+    container.appendChild(meta);
+    container.appendChild(badge);
+    container.appendChild(
+      imageGrid
+    );
+    container.appendChild(
+      sameIp
+    );
+    container.appendChild(actions);
+
+    uploads.appendChild(
+      container
+    );
+  }
+}
+    
+function renderEmailRecipients() {
+  emailRecipientList.innerHTML = "";
+
+  const recipients =
+    Array.isArray(
+      wkData.email_recipients
+    )
+      ? wkData.email_recipients
+      : [];
+
+  if (recipients.length === 0) {
+    emailRecipientList.innerHTML =
+      '<div class="small">등록된 수신자가 없습니다.</div>';
+
+    return;
+  }
+
+  recipients.forEach(
+    (recipient) => {
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "manage-item";
+
+      if (!recipient.active) {
+        row.classList.add(
+          "item-inactive"
+        );
+      }
+
+      const content =
+        document.createElement(
+          "div"
+        );
+
+      content.style.flex = "1";
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "manage-name";
+
+      name.textContent =
+        recipient.nickname ||
+        "이름 없음";
+
+      const email =
+        document.createElement(
+          "div"
+        );
+
+      email.className =
+        "manage-note";
+
+      email.textContent =
+        recipient.email;
+
+      content.appendChild(name);
+      content.appendChild(email);
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "manage-actions";
+
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        recipient.active
+          ? "Active"
+          : "Inactive";
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await wkApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  recipient.nickname ??
+                  "",
+
+                email:
+                  recipient.email,
+
+                active:
+                  !recipient.active,
+              }
+            );
+
+            await loadWkData();
+          } catch (error) {
+            setStatus(
+              emailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        "Edit";
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const nickname =
+            prompt(
+              "별명:",
+              recipient.nickname ??
+                ""
+            );
+
+          if (nickname === null) {
+            return;
+          }
+
+          const emailValue =
+            prompt(
+              "이메일 주소:",
+              recipient.email
+            );
+
+          if (emailValue === null) {
+            return;
+          }
+
+          const email =
+            emailValue.trim();
+
+          if (!email) {
+            setStatus(
+              emailRecipientStatus,
+              "이메일 주소를 입력하세요.",
+              true
+            );
+
+            return;
+          }
+
+          try {
+            await wkApiRequest(
+              "POST",
+              {
+                action:
+                  "update_email_recipient",
+
+                id:
+                  recipient.id,
+
+                nickname:
+                  nickname.trim(),
+
+                email,
+
+                active:
+                  recipient.active,
+              }
+            );
+
+            await loadWkData();
+
+            setStatus(
+              emailRecipientStatus,
+              "수정했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              emailRecipientStatus,
+              error.message ||
+                "Update failed.",
+              true
+            );
+          }
+        }
+      );
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.className =
+        "danger";
+
+      deleteButton.textContent =
+        "Delete";
+
+      deleteButton.addEventListener(
+        "click",
+        async () => {
+          if (
+            !confirm(
+              `${recipient.email} 수신자를 삭제할까요?`
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await wkApiRequest(
+              "POST",
+              {
+                action:
+                  "delete_email_recipient",
+
+                id:
+                  recipient.id,
+              }
+            );
+
+            await loadWkData();
+
+            setStatus(
+              emailRecipientStatus,
+              "삭제했습니다."
+            );
+          } catch (error) {
+            setStatus(
+              emailRecipientStatus,
+              error.message ||
+                "Delete failed.",
+              true
+            );
+          }
+        }
+      );
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        editButton
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+      row.appendChild(content);
+      row.appendChild(actions);
+
+      emailRecipientList.appendChild(
+        row
+      );
+    }
+  );
+
+  addEmailRecipientButton.disabled =
+    recipients.length >= 6;
+}
+
+
+function renderEmailAutoSend() {
+  const enabled =
+    wkData.settings
+      ?.email_auto_send_enabled ===
+    true;
+
+  emailAutoSendButton.textContent =
+    enabled
+      ? "자동 발송 ON"
+      : "자동 발송 OFF";
+
+  emailAutoSendButton.classList.toggle(
+    "active",
+    enabled
+  );
+
+  emailAutoSendStatus.textContent =
+    enabled
+      ? "자동 발송이 활성화되어 있습니다."
+      : "자동 발송이 비활성화되어 있습니다.";
+}
+
+    function renderEmailExportHistory() {
+  emailExportHistory.innerHTML = "";
+
+  const exports =
+    Array.isArray(
+      wkData.email_exports
+    )
+      ? wkData.email_exports
+      : [];
+
+  if (exports.length === 0) {
+    emailExportHistory.innerHTML =
+      '<div class="small">발송 기록이 없습니다.</div>';
+
+    return;
+  }
+
+  exports
+    .slice(0, 10)
+    .forEach(
+      (item) => {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "manage-item";
+
+        const content =
+          document.createElement(
+            "div"
+          );
+
+        content.style.flex = "1";
+
+        const title =
+          document.createElement(
+            "div"
+          );
+
+        title.className =
+          "manage-name";
+
+        title.textContent =
+          item.export_type ===
+          "automatic"
+            ? "자동 발송"
+            : "수동 발송";
+
+        const detail =
+          document.createElement(
+            "div"
+          );
+
+        detail.className =
+          "manage-note";
+
+        const date =
+          item.sent_at
+            ? new Date(
+                item.sent_at
+              ).toLocaleString()
+            : "-";
+
+        detail.textContent =
+          `${date} · ` +
+          `${
+            item.success
+              ? "성공"
+              : "실패"
+          } · ` +
+          `${item.recipient_count ?? 0}명`;
+
+        content.appendChild(
+          title
+        );
+
+        content.appendChild(
+          detail
+        );
+
+        if (
+          !item.success &&
+          item.error_message
+        ) {
+          const error =
+            document.createElement(
+              "div"
+            );
+
+          error.className =
+            "manage-note danger";
+
+          error.textContent =
+            item.error_message;
+
+          content.appendChild(
+            error
+          );
+        }
+
+        row.appendChild(content);
+
+        emailExportHistory.appendChild(
+          row
+        );
+      }
+    );
+}
+    
+    async function loadAdminData() {
+      setStatus(
+        uploadsStatus,
+        "Loading…"
+      );
+
+      const result =
+        await apiRequest(
+          "GET"
+        );
+
+      currentData =
+        result;
+
+      renderControl();
+      renderUploads();
+    
+      setStatus(
+        uploadsStatus,
+        ""
+      );
+    }
+
+    function renderApplicationMode() {
+  const mode =
+    wkData.settings
+      ?.application_mode ??
+    "auto";
+
+  document
+    .querySelectorAll(
+      "[data-application-mode]"
+    )
+    .forEach(
+      (button) => {
+        button.classList.toggle(
+          "active",
+          button.dataset
+            .applicationMode ===
+            mode
+        );
+      }
+    );
+
+  if (!applicationModeStatus) {
+    return;
+  }
+
+  if (mode === "open") {
+    applicationModeStatus.textContent =
+      "Current mode: Force Open";
+  } else if (
+    mode === "closed"
+  ) {
+    applicationModeStatus.textContent =
+      "Current mode: Force Closed";
+  } else {
+    applicationModeStatus.textContent =
+      "Current mode: Auto";
+  }
+}
+    
+function renderOnlyIp(ipHash) {
+  const original =
+    currentData.uploads;
+
+  currentData.uploads =
+    original.filter(
+      (item) =>
+        item.ip_hash === ipHash
+    );
+
+  renderUploads();
+
+  currentData.uploads =
+    original;
+
+
+  const reset =
+    document.createElement(
+      "button"
+    );
+
+  reset.type =
+    "button";
+
+  reset.textContent =
+    "Show all uploads";
+
+  reset.style.marginTop =
+    "14px";
+
+  reset.addEventListener(
+    "click",
+    () => {
+      renderUploads();
+    }
+  );
+
+  uploads.appendChild(reset);
+}
+    
+    async function runIpAction(
+      action,
+      ipHash
+    ) {
+      const message =
+        action ===
+        "block_ip_7d"
+          ? "Block this uploader for 7 days?"
+          : action ===
+            "block_ip_forever"
+            ? "Block this uploader indefinitely?"
+            : "Unblock this uploader?";
+
+      if (
+        !confirm(message)
+      ) {
+        return;
+      }
+
+      try {
+        setStatus(
+          uploadsStatus,
+          "Updating…"
+        );
+
+        await apiRequest(
+          "POST",
+          {
+            action,
+            ipHash,
+          }
+        );
+
+        await loadAdminData();
+      } catch (error) {
+        setStatus(
+          uploadsStatus,
+          error.message ||
+          "Update failed.",
+          true
+        );
+      }
+    }
+
+
+    loginButton.addEventListener(
+      "click",
+      async () => {
+        const value =
+          adminSecretInput
+            .value
+            .trim();
+
+        if (!value) {
+          setStatus(
+            loginStatus,
+            "Enter the administrator password.",
+            true
+          );
+
+          return;
+        }
+
+        adminSecret =
+          value;
+
+        loginButton.disabled =
+          true;
+
+        setStatus(
+          loginStatus,
+          "Checking…"
+        );
+
+        try {
+          await loadAdminData();
+
+          adminSecretInput.value =
+            "";
+
+          loginPanel.classList.add(
+            "hidden"
+          );
+
+          adminArea.classList.remove(
+            "hidden"
+          );
+        } catch (error) {
+          adminSecret = "";
+
+          setStatus(
+            loginStatus,
+            error.message ||
+            "Login failed.",
+            true
+          );
+        } finally {
+          loginButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    adminSecretInput
+      .addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key ===
+            "Enter"
+          ) {
+            loginButton.click();
+          }
+        }
+      );
+
+
+    refreshButton.addEventListener(
+      "click",
+      async () => {
+        try {
+          await loadAdminData();
+        } catch (error) {
+          setStatus(
+            uploadsStatus,
+            error.message ||
+            "Refresh failed.",
+            true
+          );
+        }
+      }
+    );
+
+
+    document
+      .querySelectorAll(
+        "[data-pause-hours]"
+      )
+      .forEach(
+        (button) => {
+          button.addEventListener(
+            "click",
+            async () => {
+              const hours =
+                Number(
+                  button.dataset
+                    .pauseHours
+                );
+
+              if (
+                !confirm(
+                  `Pause all image uploads for ${hours} hour(s)?`
+                )
+              ) {
+                return;
+              }
+
+              try {
+                setStatus(
+                  controlStatus,
+                  "Updating…"
+                );
+
+                await apiRequest(
+                  "POST",
+                  {
+                    action:
+                      "pause_uploads",
+                    hours,
+                  }
+                );
+
+                await loadAdminData();
+
+                setStatus(
+                  controlStatus,
+                  "Upload pause updated."
+                );
+              } catch (error) {
+                setStatus(
+                  controlStatus,
+                  error.message ||
+                  "Update failed.",
+                  true
+                );
+              }
+            }
+          );
+        }
+      );
+
+
+    resumeButton.addEventListener(
+      "click",
+      async () => {
+        if (
+          !confirm(
+            "Resume image uploads now?"
+          )
+        ) {
+          return;
+        }
+
+        try {
+          setStatus(
+            controlStatus,
+            "Updating…"
+          );
+
+          await apiRequest(
+            "POST",
+            {
+              action:
+                "resume_uploads",
+            }
+          );
+
+          await loadAdminData();
+
+          setStatus(
+            controlStatus,
+            "Uploads resumed."
+          );
+        } catch (error) {
+          setStatus(
+            controlStatus,
+            error.message ||
+            "Update failed.",
+            true
+          );
+        }
+      }
+    );
+    adminTabs.forEach((button) => {
+  button.addEventListener(
+    "click",
+    () => {
+      const target =
+        button.dataset.adminTab;
+      if (target === "wk") {
+  loadWkData();
+}
+
+      if (
+  target ===
+  "inquiry"
+) {
+  loadInquiryData();
+}
+
+      if (
+  target ===
+  "groupbuy"
+) {
+  loadGroupBuyData();
+}
+      
+      
+      adminTabs.forEach(
+        (item) => {
+          item.classList.toggle(
+            "is-active",
+            item === button
+          );
+        }
+      );
+
+      adminSections.forEach(
+        (section) => {
+          section.classList.toggle(
+            "is-active",
+            section.dataset
+              .adminSection === target
+          );
+        }
+      );
+    }
+  );
+});
+
+addTierButton.addEventListener(
+  "click",
+  async () => {
+    const name =
+      newTierName.value.trim();
+
+    if (!name) {
+      setStatus(
+        tierStatus,
+        "Enter a tier name.",
+        true
+      );
+
+      return;
+    }
+
+    addTierButton.disabled =
+      true;
+
+    setStatus(
+      tierStatus,
+      "Adding…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            "add_tier",
+          name,
+        }
+      );
+
+      newTierName.value =
+        "";
+
+      await loadWkData();
+
+      setStatus(
+        tierStatus,
+        "Tier added."
+      );
+    } catch (error) {
+      setStatus(
+        tierStatus,
+        error.message ||
+          "Failed to add tier.",
+        true
+      );
+    } finally {
+      addTierButton.disabled =
+        false;
+    }
+  }
+);
+
+
+addAllianceButton.addEventListener(
+  "click",
+  async () => {
+    const name =
+      newAllianceName.value.trim();
+
+    if (!name) {
+      setStatus(
+        allianceStatus,
+        "Enter an alliance name.",
+        true
+      );
+
+      return;
+    }
+
+    addAllianceButton.disabled =
+      true;
+
+    setStatus(
+      allianceStatus,
+      "Adding…"
+    );
+
+    try {
+      await wkApiRequest(
+        "POST",
+        {
+          action:
+            "add_alliance",
+          name,
+        }
+      );
+
+      newAllianceName.value =
+        "";
+
+      await loadWkData();
+
+      setStatus(
+        allianceStatus,
+        "Alliance added."
+      );
+    } catch (error) {
+      setStatus(
+        allianceStatus,
+        error.message ||
+          "Failed to add alliance.",
+        true
+      );
+    } finally {
+      addAllianceButton.disabled =
+        false;
+    }
+  }
+);
+
+addEmailRecipientButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const nickname =
+        newEmailNickname
+          .value
+          .trim();
+
+      const email =
+        newEmailAddress
+          .value
+          .trim();
+
+      if (!email) {
+        setStatus(
+          emailRecipientStatus,
+          "이메일 주소를 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addEmailRecipientButton.disabled =
+        true;
+
+      setStatus(
+        emailRecipientStatus,
+        "추가 중…"
+      );
+
+      try {
+        await wkApiRequest(
+          "POST",
+          {
+            action:
+              "add_email_recipient",
+
+            nickname,
+            email,
+          }
+        );
+
+        newEmailNickname.value =
+          "";
+
+        newEmailAddress.value =
+          "";
+
+        await loadWkData();
+
+        setStatus(
+          emailRecipientStatus,
+          "수신자를 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          emailRecipientStatus,
+          error.message ||
+            "추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        if (
+          (
+            wkData.email_recipients ??
+            []
+          ).length < 6
+        ) {
+          addEmailRecipientButton.disabled =
+            false;
+        }
+      }
+    }
+  );
+
+    addInquiryEmailRecipientButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const nickname =
+        newInquiryEmailNickname
+          .value
+          .trim();
+
+      const email =
+        newInquiryEmailAddress
+          .value
+          .trim();
+
+      if (!email) {
+        setStatus(
+          inquiryEmailRecipientStatus,
+          "이메일 주소를 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+
+      addInquiryEmailRecipientButton.disabled =
+        true;
+
+      setStatus(
+        inquiryEmailRecipientStatus,
+        "추가 중…"
+      );
+
+
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "add_inquiry_email_recipient",
+
+            nickname,
+            email,
+          }
+        );
+
+
+        newInquiryEmailNickname.value =
+          "";
+
+        newInquiryEmailAddress.value =
+          "";
+
+
+        await loadInquiryData();
+
+
+        setStatus(
+          inquiryEmailRecipientStatus,
+          "수신자를 추가했습니다."
+        );
+
+      } catch (error) {
+        setStatus(
+          inquiryEmailRecipientStatus,
+          error.message ||
+            "추가에 실패했습니다.",
+          true
+        );
+
+      } finally {
+        addInquiryEmailRecipientButton.disabled =
+          false;
+      }
+    }
+  );
+    
+wkTabs.forEach((button) => {
+  button.addEventListener(
+    "click",
+    () => {
+      const target =
+        button.dataset.wkTab;
+
+      wkTabs.forEach(
+        (item) => {
+          item.classList.toggle(
+            "is-active",
+            item === button
+          );
+        }
+      );
+
+      wkSections.forEach(
+        (section) => {
+          section.classList.toggle(
+            "is-active",
+            section.dataset
+              .wkSection === target
+          );
+        }
+      );
+    }
+  );
+});
+
+    applicationModeOptions
+  ?.addEventListener(
+    "click",
+    async (event) => {
+      const button =
+        event.target.closest(
+          "[data-application-mode]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const mode =
+        button.dataset
+          .applicationMode;
+
+      if (
+        ![
+          "auto",
+          "open",
+          "closed",
+        ].includes(mode)
+      ) {
+        return;
+      }
+
+      applicationModeOptions
+        .querySelectorAll(
+          "button"
+        )
+        .forEach(
+          (item) => {
+            item.disabled =
+              true;
+          }
+        );
+
+      try {
+       await wkApiRequest(
+  "POST",
+  {
+    action:
+      "update_application_mode",
+
+    application_mode:
+      mode,
+  }
+);
+        await loadWkData();
+      } catch (error) {
+        alert(
+          error.message ||
+            "Failed to update application mode."
+        );
+      } finally {
+        applicationModeOptions
+          .querySelectorAll(
+            "button"
+          )
+          .forEach(
+            (item) => {
+              item.disabled =
+                false;
+            }
+          );
+      }
+    }
+  );
+
+    emailAutoSendButton
+  ?.addEventListener(
+    "click",
+    async () => {
+     const current =
+  wkData.settings
+    ?.email_auto_send_enabled ===
+  true;
+
+      emailAutoSendButton.disabled =
+        true;
+
+      try {
+        await wkApiRequest(
+          "POST",
+          {
+            action:
+              "update_email_auto_send",
+
+            enabled:
+              !current,
+          }
+        );
+
+        await loadWkData();
+      } catch (error) {
+        setStatus(
+          emailAutoSendStatus,
+          error.message ||
+            "자동 발송 설정 변경에 실패했습니다.",
+          true
+        );
+      } finally {
+        emailAutoSendButton.disabled =
+          false;
+      }
+    }
+  );
+    manualEmailSendButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const activeRecipients =
+        (
+          wkData.email_recipients ??
+          []
+        ).filter(
+          (item) =>
+            item.active === true
+        );
+
+      if (
+        activeRecipients.length === 0
+      ) {
+        setStatus(
+          manualEmailSendStatus,
+          "활성화된 이메일 수신자가 없습니다.",
+          true
+        );
+
+        return;
+      }
+
+      if (
+        !confirm(
+          `현재 WK 회차 결과를 활성 수신자 ${activeRecipients.length}명에게 이메일로 발송할까요?`
+        )
+      ) {
+        return;
+      }
+
+      manualEmailSendButton.disabled =
+        true;
+
+      setStatus(
+        manualEmailSendStatus,
+        "Excel 생성 및 이메일 발송 중…"
+      );
+
+      try {
+        const result =
+          await wkExportEmailRequest(
+            "manual"
+          );
+
+        await loadWkData();
+
+        setStatus(
+          manualEmailSendStatus,
+          `발송 완료 · 신청 ${result.application_count ?? 0}명 · 수신자 ${result.recipient_count ?? 0}명`
+        );
+      } catch (error) {
+        setStatus(
+          manualEmailSendStatus,
+          error.message ||
+            "이메일 발송에 실패했습니다.",
+          true
+        );
+      } finally {
+        manualEmailSendButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+/* ============================================================
+   INQUIRY OPEN / CLOSE
+   ============================================================ */
+
+inquiryOpenButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "update_inquiry_open",
+
+            inquiry_open:
+              true,
+          }
+        );
+
+        await loadInquiryData();
+
+        setStatus(
+          inquiryOpenStatus,
+          "문의창을 열었습니다."
+        );
+      } catch (error) {
+        setStatus(
+          inquiryOpenStatus,
+          error.message ||
+            "변경하지 못했습니다.",
+          true
+        );
+      }
+    }
+  );
+
+
+inquiryCloseButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !confirm(
+          "문의창을 닫을까요?\n새로운 문의 제출이 차단됩니다."
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action:
+              "update_inquiry_open",
+
+            inquiry_open:
+              false,
+          }
+        );
+
+        await loadInquiryData();
+
+        setStatus(
+          inquiryOpenStatus,
+          "문의창을 닫았습니다."
+        );
+      } catch (error) {
+        setStatus(
+          inquiryOpenStatus,
+          error.message ||
+            "변경하지 못했습니다.",
+          true
+        );
+      }
+    }
+  );
+
+
+/* ============================================================
+   GROUP BUY ADMIN EVENTS
+   ============================================================ */
+
+groupBuyManualExportButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !selectedGroupBuyEventId
+      ) {
+        setStatus(
+          groupBuyManualExportStatus,
+          "먼저 발송할 회차를 선택하세요.",
+          true
+        );
+
+        return;
+      }
+
+      const selectedEvent =
+        groupBuyData.events.find(
+          (event) =>
+            Number(
+              event.id
+            ) ===
+              Number(
+                selectedGroupBuyEventId
+              )
+        );
+
+      const eventTitle =
+        selectedEvent?.title ||
+        `Event #${selectedGroupBuyEventId}`;
+
+      if (
+        !confirm(
+          `${eventTitle}의 현재 신청 내역 Excel을 Active 수신자에게 지금 발송할까요?\n\n수동 발송은 이전 성공 여부와 관계없이 현재 Active 수신자에게 다시 발송됩니다.`
+        )
+      ) {
+        return;
+      }
+
+      groupBuyManualExportButton.disabled =
+        true;
+
+      setStatus(
+        groupBuyManualExportStatus,
+        "Excel을 생성하고 이메일을 발송하는 중…"
+      );
+
+      try {
+        const result =
+          await groupBuyExportEmailRequest(
+            selectedGroupBuyEventId
+          );
+
+        const successCount =
+          Number(
+            result.success_count ??
+            0
+          );
+
+        const failureCount =
+          Number(
+            result.failure_count ??
+            0
+          );
+
+        if (
+          failureCount > 0
+        ) {
+          setStatus(
+            groupBuyManualExportStatus,
+            `발송 완료 · 성공 ${successCount} · 실패 ${failureCount}`,
+            true
+          );
+        } else {
+          setStatus(
+            groupBuyManualExportStatus,
+            `발송 완료 · 성공 ${successCount}`
+          );
+        }
+
+        await loadGroupBuyData();
+
+      } catch (error) {
+        setStatus(
+          groupBuyManualExportStatus,
+          error.message ||
+            "Excel 발송에 실패했습니다.",
+          true
+        );
+      } finally {
+        groupBuyManualExportButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+groupBuyRefreshButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      await loadGroupBuyData();
+    }
+  );
+
+
+groupBuyEventSelect
+  ?.addEventListener(
+    "change",
+    async () => {
+      const id =
+        Number(
+          groupBuyEventSelect.value
+        );
+
+      if (
+        !Number.isSafeInteger(id) ||
+        id <= 0
+      ) {
+        selectedGroupBuyEventId =
+          null;
+
+        groupBuyDetail = {
+          event: null,
+          items: [],
+          applications: [],
+          export_logs: [],
+          export_recipient_logs: [],
+        };
+
+        renderGroupBuyItems();
+        renderGroupBuyApplications();
+        renderGroupBuyExportHistory();
+        renderGroupBuyRecipientExportHistory();
+        renderGroupBuySelectedEvent();
+
+        return;
+      }
+
+      await loadGroupBuyDetail(
+        id
+      );
+    }
+  );
+
+
+addGroupBuyEventButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const title =
+        newGroupBuyEventTitle
+          .value
+          .trim();
+
+      const startAt =
+        kstInputToIso(
+          newGroupBuyStartAt
+            .value
+        );
+
+      const endAt =
+        kstInputToIso(
+          newGroupBuyEndAt
+            .value
+        );
+
+      if (
+        !title ||
+        !startAt ||
+        !endAt
+      ) {
+        setStatus(
+          groupBuyEventStatus,
+          "회차명, 시작일시, 종료일시를 모두 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyEventButton.disabled =
+        true;
+
+      setStatus(
+        groupBuyEventStatus,
+        "추가 중…"
+      );
+
+      try {
+        const result =
+          await groupBuyApiRequest(
+            "POST",
+            {
+              action:
+                "create_event",
+
+              title,
+
+              start_at:
+                startAt,
+
+              end_at:
+                endAt,
+
+              active:
+                newGroupBuyEventActive
+                  .checked,
+            }
+          );
+
+        selectedGroupBuyEventId =
+          Number(
+            result.event?.id
+          ) || null;
+
+        newGroupBuyEventTitle.value =
+          "";
+
+        newGroupBuyStartAt.value =
+          "";
+
+        newGroupBuyEndAt.value =
+          "";
+
+        newGroupBuyEventActive.checked =
+          true;
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyEventStatus,
+          "회차를 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyEventStatus,
+          error.message ===
+            "EVENT_PERIOD_OVERLAP"
+            ? "다른 Active 공동구매 회차와 모집기간이 겹칩니다."
+            : (
+                error.message ||
+                "회차 추가에 실패했습니다."
+              ),
+          true
+        );
+      } finally {
+        addGroupBuyEventButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+addGroupBuyAllianceButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const name =
+        newGroupBuyAllianceName
+          .value
+          .trim();
+
+      if (!name) {
+        setStatus(
+          groupBuyAllianceStatus,
+          "연맹명을 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyAllianceButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_alliance",
+
+            name,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyData
+                  .alliances
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyAllianceName.value =
+          "";
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyAllianceStatus,
+          "연맹을 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyAllianceStatus,
+          error.message ||
+            "연맹 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyAllianceButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+addGroupBuyItemButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        !selectedGroupBuyEventId
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          "먼저 회차를 선택하세요.",
+          true
+        );
+
+        return;
+      }
+
+      const name =
+        newGroupBuyItemName
+          .value
+          .trim();
+
+      const maxQuantity =
+        Number(
+          newGroupBuyItemMaxQuantity
+            .value
+        );
+
+      if (
+        !name ||
+        !Number.isSafeInteger(
+          maxQuantity
+        ) ||
+        maxQuantity < 1
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          "상품명과 1 이상의 최대 수량을 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyItemButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_item",
+
+            event_id:
+              selectedGroupBuyEventId,
+
+            name,
+
+            max_quantity:
+              maxQuantity,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyDetail
+                  .items
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyItemName.value =
+          "";
+
+        newGroupBuyItemMaxQuantity.value =
+          "1";
+
+        await loadGroupBuyDetail(
+          selectedGroupBuyEventId
+        );
+
+        setStatus(
+          groupBuyItemStatus,
+          "구매 항목을 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyItemStatus,
+          error.message ||
+            "구매 항목 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyItemButton.disabled =
+          false;
+      }
+    }
+  );
+
+
+addGroupBuyEmailRecipientButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      const nickname =
+        newGroupBuyEmailNickname
+          .value
+          .trim();
+
+      const email =
+        newGroupBuyEmailAddress
+          .value
+          .trim();
+
+      if (
+        !nickname ||
+        !email
+      ) {
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          "별명과 이메일을 모두 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      addGroupBuyEmailRecipientButton.disabled =
+        true;
+
+      try {
+        await groupBuyApiRequest(
+          "POST",
+          {
+            action:
+              "create_email_recipient",
+
+            nickname,
+
+            email,
+
+            active:
+              true,
+
+            display_order:
+              (
+                groupBuyData
+                  .email_recipients
+                  ?.length ??
+                0
+              ) + 1,
+          }
+        );
+
+        newGroupBuyEmailNickname.value =
+          "";
+
+        newGroupBuyEmailAddress.value =
+          "";
+
+        await loadGroupBuyData();
+
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          "수신자를 추가했습니다."
+        );
+      } catch (error) {
+        setStatus(
+          groupBuyEmailRecipientStatus,
+          error.message ||
+            "수신자 추가에 실패했습니다.",
+          true
+        );
+      } finally {
+        addGroupBuyEmailRecipientButton.disabled =
+          false;
+      }
+    }
+  );
+
+  </script>
+</body>
+</html>
