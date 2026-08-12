@@ -321,6 +321,7 @@ block7DaysConfirm: "Block this uploader for 7 days?",
 blockFailed: "Could not block uploader.",
 unblockConfirm: "Unblock this uploader?",
 unblockFailed: "Could not unblock uploader.",
+    blockedUntil: "Blocked until {date}",
   },
 
   ko: {
@@ -635,7 +636,7 @@ block7DaysConfirm: "이 업로더를 7일간 차단하시겠습니까?",
 blockFailed: "업로더를 차단할 수 없습니다.",
 unblockConfirm: "이 업로더의 차단을 해제하시겠습니까?",
 unblockFailed: "차단을 해제할 수 없습니다.",
-
+    blockedUntil: "{date}까지 차단됨",
 
   },
 
@@ -951,7 +952,7 @@ block7DaysConfirm: "このアップロード者を7日間ブロックします�
 blockFailed: "アップロード者をブロックできませんでした。",
 unblockConfirm: "このアップロード者のブロックを解除しますか？",
 unblockFailed: "ブロックを解除できませんでした。",
-
+blockedUntil: "{date}までブロック中",
     
   },
 
@@ -1267,6 +1268,7 @@ block7DaysConfirm: "Заблокировать этого пользовател
 blockFailed: "Не удалось заблокировать пользователя.",
 unblockConfirm: "Разблокировать этого пользователя?",
 unblockFailed: "Не удалось снять блокировку.",
+    blockedUntil: "Заблокирован до {date}",
   },
 };
 
