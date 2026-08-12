@@ -509,6 +509,12 @@ staffSessionExpired:
 
 uploadBlocked:
   "Image uploads are currently unavailable. Please try again later.",
+
+    staffId:
+  "Staff ID",
+
+staffIdInvalid:
+  "Staff ID may contain only letters, numbers, periods, underscores, and hyphens.",
   },
 
   ko: {
@@ -1011,6 +1017,12 @@ staffSessionExpired:
 
 uploadBlocked:
   "이미지 업로드를 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+
+    staffId:
+  "Staff ID",
+
+staffIdInvalid:
+  "Staff ID에는 영문, 숫자, 마침표, 밑줄, 하이픈만 사용할 수 있습니다.",
   },
 
   ja: {
@@ -1510,6 +1522,12 @@ staffEmailRequestFailed:
 
 uploadBlocked:
   "現在、画像をアップロードすることはできません。しばらくしてからもう一度お試しください。",
+
+    staffId:
+  "Staff ID",
+
+staffIdInvalid:
+  "Staff IDには英数字、ピリオド、アンダースコア、ハイフンのみ使用できます。",
   },
 
   ru: {
@@ -2009,6 +2027,12 @@ staffEmailRequestFailed:
 
 uploadBlocked:
   "Загрузка изображений сейчас недоступна. Повторите попытку позже.",
+
+    staffId:
+  "Staff ID",
+
+staffIdInvalid:
+  "Staff ID может содержать только латинские буквы, цифры, точки, подчёркивания и дефисы.",
   },
 };
 
