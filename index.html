@@ -209,29 +209,27 @@
       letter-spacing: .01em;
     }
 
-    .buttons {
-      display: grid;
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 
-      grid-template-columns:
-        repeat(
-          2,
-          minmax(0, 180px)
-        );
+  gap:
+    clamp(
+      10px,
+      2vw,
+      18px
+    );
 
-      justify-content: center;
+  width: 100%;
+  max-width: 378px;
 
-      gap:
-        clamp(
-          10px,
-          2vw,
-          18px
-        );
-
-      margin-top: 44px;
-    }
+  margin: 44px auto 0;
+}
 
     .button {
-      min-width: 180px;
+  flex: 1 1 180px;
+  min-width: 180px;
 
       padding: 15px 24px;
 
@@ -277,9 +275,8 @@
     }
 
     .group-buy-button {
-      grid-column: 1 / -1;
-      justify-self: center;
-    }
+  flex-basis: 100%;
+}
 
     footer {
       margin-top: 54px;
@@ -351,28 +348,13 @@
 
 
     @media (
-      max-width: 480px
-    ) {
-      .buttons {
-        grid-template-columns:
-          1fr;
-      }
-
-      .group-buy-button {
-        grid-column: auto;
-        justify-self: stretch;
-      }
-
-      .button {
-        width: 100%;
-        min-width: 0;
-      }
-
-      .top-pickers {
-        right: 14px;
-        bottom: 14px;
-      }
-    }
+  max-width: 480px
+) {
+  .top-pickers {
+    right: 14px;
+    bottom: 14px;
+  }
+}
   </style>
 </head>
 
