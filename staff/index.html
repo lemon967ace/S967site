@@ -938,34 +938,53 @@
   class="staff-section"
   data-staff-section="groupbuy"
 >
-  <section class="panel">
-    <div class="row">
-      <h2
-        style="margin: 0; flex: 1;"
-        data-i18n="staffGroupBuyTitle"
-      >
-        Group Purchase
-      </h2>
 
-      <button
-        id="groupBuyRefreshButton"
-        type="button"
-        data-i18n="refresh"
-      >
-        Refresh
-      </button>
-    </div>
+<section class="panel">
+  <h2 data-i18n="staffGroupBuyEmailTitle">
+    Group Purchase Automatic Email Recipients
+  </h2>
 
-    <p
-      class="small"
-      data-i18n="staffGroupBuyLead"
+  <p
+    class="small"
+    data-i18n="staffEmailLead"
+  >
+    You can manage up to 3 email recipients added by you.
+  </p>
+
+  <div
+    id="groupBuyEmailRecipientList"
+  ></div>
+
+  <div class="group-buy-form">
+    <input
+      id="groupBuyEmailNicknameInput"
+      type="text"
+      data-i18n-placeholder="staffEmailNickname"
+      placeholder="Nickname"
     >
-      Manage group purchase rounds and items,
-      and view applications.
-    </p>
-  </section>
 
+    <input
+      id="groupBuyEmailAddressInput"
+      type="email"
+      data-i18n-placeholder="email"
+      placeholder="Email"
+    >
 
+    <button
+      id="groupBuyEmailAddButton"
+      type="button"
+      data-i18n="staffEmailAdd"
+    >
+      Add Email
+    </button>
+  </div>
+
+  <div
+    id="groupBuyEmailStatus"
+    class="status"
+  ></div>
+</section>
+  
   <section class="panel">
     <h2 data-i18n="groupBuyRounds">
       Rounds
@@ -1114,51 +1133,7 @@
     ></div>
   </section>
 
-<section class="panel">
-  <h2 data-i18n="staffGroupBuyEmailTitle">
-    Group Purchase Automatic Email Recipients
-  </h2>
 
-  <p
-    class="small"
-    data-i18n="staffEmailLead"
-  >
-    You can manage up to 3 email recipients added by you.
-  </p>
-
-  <div
-    id="groupBuyEmailRecipientList"
-  ></div>
-
-  <div class="group-buy-form">
-    <input
-      id="groupBuyEmailNicknameInput"
-      type="text"
-      data-i18n-placeholder="staffEmailNickname"
-      placeholder="Nickname"
-    >
-
-    <input
-      id="groupBuyEmailAddressInput"
-      type="email"
-      data-i18n-placeholder="email"
-      placeholder="Email"
-    >
-
-    <button
-      id="groupBuyEmailAddButton"
-      type="button"
-      data-i18n="staffEmailAdd"
-    >
-      Add Email
-    </button>
-  </div>
-
-  <div
-    id="groupBuyEmailStatus"
-    class="status"
-  ></div>
-</section>
   
   <section class="panel">
     <h2 data-i18n="groupBuyApplications">
