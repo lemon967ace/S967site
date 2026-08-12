@@ -594,8 +594,23 @@
 >
   공동구매
 </button>
-  </div>
 
+    <button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="staff"
+>
+  Staff
+</button>
+  </div>
+      
+<button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="staff"
+>
+  Staff
+</button>
 
   <div
   id="uploadAdminSection"
@@ -654,75 +669,6 @@
     ></div>
   </section>
 
-<section class="panel">
-  <div class="row">
-    <h2 style="margin: 0;">
-      Staff Accounts
-    </h2>
-
-    <button
-      id="refreshStaffButton"
-      type="button"
-    >
-      Refresh
-    </button>
-  </div>
-
-  <p class="small">
-    Create, disable, reset, or delete Staff accounts.
-  </p>
-
-  <div
-    id="staffAccounts"
-  ></div>
-
-  <div
-    id="staffStatus"
-    class="status"
-  ></div>
-
-  <hr
-    style="
-      margin: 20px 0;
-      border: 0;
-      border-top: 1px solid var(--border);
-    "
-  >
-
-  <h2>
-    Create Staff
-  </h2>
-
-  <div class="row">
-    <input
-      id="staffDisplayName"
-      type="text"
-      maxlength="50"
-      placeholder="Display name"
-    >
-
-    <input
-      id="staffEmail"
-      type="email"
-      placeholder="Email"
-    >
-
-    <input
-      id="staffPassword"
-      type="password"
-      minlength="10"
-      autocomplete="new-password"
-      placeholder="Temporary password"
-    >
-
-    <button
-      id="createStaffButton"
-      type="button"
-    >
-      Create Staff
-    </button>
-  </div>
-</section>
     
   <section class="panel">
     <div class="row">
@@ -752,7 +698,82 @@
 
 </div>
 
+<div
+  id="staffAdminSection"
+  class="admin-section"
+  data-admin-section="staff"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        Staff Accounts
+      </h2>
 
+      <button
+        id="refreshStaffButton"
+        type="button"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <p class="small">
+      Create, disable, reset, or delete Staff accounts.
+    </p>
+
+    <div
+      id="staffAccounts"
+    ></div>
+
+    <div
+      id="staffStatus"
+      class="status"
+    ></div>
+
+    <hr
+      style="
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
+    <h2>
+      Create Staff
+    </h2>
+
+    <div class="row">
+      <input
+        id="staffDisplayName"
+        type="text"
+        maxlength="50"
+        placeholder="Display name"
+      >
+
+      <input
+        id="staffEmail"
+        type="email"
+        placeholder="Email"
+      >
+
+      <input
+        id="staffPassword"
+        type="password"
+        minlength="10"
+        autocomplete="new-password"
+        placeholder="Temporary password"
+      >
+
+      <button
+        id="createStaffButton"
+        type="button"
+      >
+        Create Staff
+      </button>
+    </div>
+  </section>
+</div>
+      
 <div
   id="wkAdminSection"
     class="admin-section"
@@ -7191,6 +7212,12 @@ try {
   "groupbuy"
 ) {
   loadGroupBuyData();
+}
+      if (
+  target ===
+  "staff"
+) {
+  loadStaffAccounts();
 }
       
       
