@@ -322,6 +322,40 @@ blockFailed: "Could not block uploader.",
 unblockConfirm: "Unblock this uploader?",
 unblockFailed: "Could not unblock uploader.",
     blockedUntil: "Blocked until {date}",
+
+    wkNoApplications: "No applications found.",
+wkLoading: "Loading applications…",
+wkLoadFailed: "Could not load WK applications.",
+wkTotal: "{count} application(s)",
+wkCycle: "Cycle {cycle}",
+wkCycleUnknown: "Unassigned cycle",
+
+wkTier: "Tier",
+wkTroopType: "Troop Type",
+wkTroopSize: "Troop Size",
+wkRallySize: "Rally Size",
+wkStatus: "Status",
+wkSubmitted: "Submitted",
+wkLanguage: "Language",
+
+wkFighter: "Fighter",
+wkShooter: "Shooter",
+wkRider: "Rider",
+wkAllStrong: "All strong",
+
+wkMonitorAvailable: "Real-time monitoring available",
+wkMonitorUnavailable: "Real-time monitoring unavailable",
+
+wkCaptain: "Captain",
+wkSubCaptain: "Subcaptain",
+wkRegular: "Regular Participant",
+wkNegotiable: "Negotiable",
+
+wkFirstHalf: "First Half",
+wkSecondHalf: "Second Half",
+wkFull: "Full",
+
+
   },
 
   ko: {
@@ -638,6 +672,39 @@ unblockConfirm: "이 업로더의 차단을 해제하시겠습니까?",
 unblockFailed: "차단을 해제할 수 없습니다.",
     blockedUntil: "{date}까지 차단됨",
 
+    wkNoApplications: "신청 내역이 없습니다.",
+wkLoading: "신청 내역을 불러오는 중…",
+wkLoadFailed: "황무지 신청 내역을 불러올 수 없습니다.",
+wkTotal: "총 {count}건",
+wkCycle: "{cycle}회차",
+wkCycleUnknown: "회차 미지정",
+
+wkTier: "티어",
+wkTroopType: "병종",
+wkTroopSize: "부대",
+wkRallySize: "집결",
+wkStatus: "상태",
+wkSubmitted: "신청",
+wkLanguage: "언어",
+
+wkFighter: "용사",
+wkShooter: "슈터",
+wkRider: "기수",
+wkAllStrong: "전 병종 강함",
+
+wkMonitorAvailable: "실시간 모니터링 및 대응 가능",
+wkMonitorUnavailable: "실시간 모니터링 불가",
+
+wkCaptain: "캡틴 가능",
+wkSubCaptain: "서브캡틴 가능",
+wkRegular: "일반 참가",
+wkNegotiable: "필요 시 협의 가능",
+
+wkFirstHalf: "전반부",
+wkSecondHalf: "후반부",
+wkFull: "전체",
+
+
   },
 
   ja: {
@@ -953,7 +1020,39 @@ blockFailed: "アップロード者をブロックできませんでした。",
 unblockConfirm: "このアップロード者のブロックを解除しますか？",
 unblockFailed: "ブロックを解除できませんでした。",
 blockedUntil: "{date}までブロック中",
-    
+
+wkNoApplications: "申請はありません。",
+wkLoading: "申請を読み込んでいます…",
+wkLoadFailed: "荒野申請を読み込めませんでした。",
+wkTotal: "合計 {count} 件",
+wkCycle: "第{cycle}回",
+wkCycleUnknown: "回次未指定",
+
+wkTier: "ティア",
+wkTroopType: "兵種",
+wkTroopSize: "部隊規模",
+wkRallySize: "集結規模",
+wkStatus: "状態",
+wkSubmitted: "申請",
+wkLanguage: "言語",
+
+wkFighter: "ファイター",
+wkShooter: "シューター",
+wkRider: "ライダー",
+wkAllStrong: "全兵種",
+
+wkMonitorAvailable: "リアルタイム対応可能",
+wkMonitorUnavailable: "リアルタイム対応不可",
+
+wkCaptain: "キャプテン可能",
+wkSubCaptain: "サブキャプテン可能",
+wkRegular: "一般参加",
+wkNegotiable: "必要に応じて相談可能",
+
+wkFirstHalf: "前半",
+wkSecondHalf: "後半",
+wkFull: "全時間",
+
   },
 
   ru: {
@@ -1268,7 +1367,39 @@ block7DaysConfirm: "Заблокировать этого пользовател
 blockFailed: "Не удалось заблокировать пользователя.",
 unblockConfirm: "Разблокировать этого пользователя?",
 unblockFailed: "Не удалось снять блокировку.",
-    blockedUntil: "Заблокирован до {date}",
+blockedUntil: "Заблокирован до {date}",
+
+wkNoApplications: "Заявок нет.",
+wkLoading: "Загрузка заявок…",
+wkLoadFailed: "Не удалось загрузить заявки WK.",
+wkTotal: "Всего заявок: {count}",
+wkCycle: "Раунд {cycle}",
+wkCycleUnknown: "Раунд не указан",
+
+wkTier: "Тир",
+wkTroopType: "Тип войск",
+wkTroopSize: "Размер отряда",
+wkRallySize: "Размер групповой атаки",
+wkStatus: "Статус",
+wkSubmitted: "Заявка",
+wkLanguage: "Язык",
+
+wkFighter: "Боец",
+wkShooter: "Стрелок",
+wkRider: "Наездник",
+wkAllStrong: "Все типы войск",
+
+wkMonitorAvailable: "Могу находиться онлайн",
+wkMonitorUnavailable: "Не могу находиться онлайн",
+
+wkCaptain: "Могу быть командиром",
+wkSubCaptain: "Могу быть заместителем командира",
+wkRegular: "Обычный участник",
+wkNegotiable: "Можно обсудить",
+
+wkFirstHalf: "Первые 4 часа",
+wkSecondHalf: "Последние 4 часа",
+wkFull: "Полностью",
   },
 };
 
