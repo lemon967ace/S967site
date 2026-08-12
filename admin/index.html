@@ -1547,6 +1547,41 @@
         "resumeButton"
       );
 
+    const staffAccounts =
+  document.getElementById(
+    "staffAccounts"
+  );
+
+const staffStatus =
+  document.getElementById(
+    "staffStatus"
+  );
+
+const refreshStaffButton =
+  document.getElementById(
+    "refreshStaffButton"
+  );
+
+const staffDisplayName =
+  document.getElementById(
+    "staffDisplayName"
+  );
+
+const staffEmail =
+  document.getElementById(
+    "staffEmail"
+  );
+
+const staffPassword =
+  document.getElementById(
+    "staffPassword"
+  );
+
+const createStaffButton =
+  document.getElementById(
+    "createStaffButton"
+  );
+    
     const adminTabs =
   document.querySelectorAll(
     "[data-admin-tab]"
@@ -1995,6 +2030,172 @@ async function apiRequest(
   return result;
 }
 
+    async function staffApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+
+    headers: {
+      "x-admin-secret":
+        adminSecret,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      STAFF_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "Staff request failed."
+    );
+  }
+
+  return result;
+}
+
+    function renderStaffAccounts(
+  accounts
+) {
+  staffAccounts.innerHTML =
+    "";
+
+  if (
+    !Array.isArray(accounts) ||
+    accounts.length === 0
+  ) {
+    staffAccounts.innerHTML =
+      '<div class="small">등록된 Staff 계정이 없습니다.</div>';
+
+    return;
+  }
+
+  accounts.forEach(
+    (account) => {
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "manage-item";
+
+      if (!account.is_active) {
+        row.classList.add(
+          "item-inactive"
+        );
+      }
+
+      const content =
+        document.createElement(
+          "div"
+        );
+
+      content.style.flex =
+        "1";
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+      name.className =
+        "manage-name";
+
+      name.textContent =
+        account.display_name;
+
+      const email =
+        document.createElement(
+          "div"
+        );
+
+      email.className =
+        "manage-note";
+
+      email.textContent =
+        account.email || "";
+
+      const state =
+        document.createElement(
+          "div"
+        );
+
+      state.className =
+        "manage-note";
+
+      state.textContent =
+        account.is_active
+          ? "Active"
+          : "Disabled";
+
+      content.appendChild(name);
+      content.appendChild(email);
+      content.appendChild(state);
+
+      row.appendChild(content);
+
+      staffAccounts.appendChild(
+        row
+      );
+    }
+  );
+}
+
+    async function loadStaffAccounts() {
+  setStatus(
+    staffStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await staffApiRequest(
+        "GET"
+      );
+
+    renderStaffAccounts(
+      result.accounts || []
+    );
+
+    setStatus(
+      staffStatus,
+      ""
+    );
+  } catch (error) {
+    setStatus(
+      staffStatus,
+      error.message ||
+        "Could not load Staff accounts.",
+      true
+    );
+
+    throw error;
+  }
+}
+    
 async function inquiryApiRequest(
   method,
   body = null
@@ -6806,11 +7007,13 @@ function renderOnlyIp(ipHash) {
           "Checking…"
         );
 
-        try {
-          await loadAdminData();
+try {
+  await loadAdminData();
 
-          adminSecretInput.value =
-            "";
+  await loadStaffAccounts();
+
+  adminSecretInput.value =
+    "";
 
           loginPanel.classList.add(
             "hidden"
@@ -8109,6 +8312,110 @@ addGroupBuyEmailRecipientButton
     }
   );
 
+    createStaffButton.addEventListener(
+  "click",
+  async () => {
+    const displayName =
+      staffDisplayName
+        .value
+        .trim();
+
+    const email =
+      staffEmail
+        .value
+        .trim();
+
+    const password =
+      staffPassword.value;
+
+    if (
+      !displayName ||
+      !email ||
+      !password
+    ) {
+      setStatus(
+        staffStatus,
+        "이름, 이메일, 임시 비밀번호를 모두 입력하세요.",
+        true
+      );
+
+      return;
+    }
+
+    if (
+      password.length < 10
+    ) {
+      setStatus(
+        staffStatus,
+        "임시 비밀번호는 10자 이상이어야 합니다.",
+        true
+      );
+
+      return;
+    }
+
+    createStaffButton.disabled =
+      true;
+
+    setStatus(
+      staffStatus,
+      "Creating Staff account…"
+    );
+
+    try {
+      await staffApiRequest(
+        "POST",
+        {
+          action:
+            "create_staff",
+
+          displayName,
+
+          email,
+
+          password,
+        }
+      );
+
+      staffDisplayName.value =
+        "";
+
+      staffEmail.value =
+        "";
+
+      staffPassword.value =
+        "";
+
+      await loadStaffAccounts();
+
+      setStatus(
+        staffStatus,
+        "Staff 계정을 생성했습니다."
+      );
+    } catch (error) {
+      setStatus(
+        staffStatus,
+        error.message ||
+          "Staff 계정을 생성하지 못했습니다.",
+        true
+      );
+    } finally {
+      createStaffButton.disabled =
+        false;
+    }
+  }
+);
+
+
+refreshStaffButton.addEventListener(
+  "click",
+  async () => {
+    try {
+      await loadStaffAccounts();
+    } catch {}
+  }
+);
+    
   </script>
 </body>
 </html>
