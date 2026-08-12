@@ -737,6 +737,15 @@
         </button>
 
         <button
+  type="button"
+  class="staff-tab"
+  data-staff-tab="inquiry"
+  data-i18n="staffTabInquiry"
+>
+  Inquiry
+</button>
+        
+        <button
           type="button"
           class="staff-tab"
           data-staff-tab="groupbuy"
@@ -826,9 +835,105 @@
             id="wkStatus"
             class="status"
           ></div>
+          <section class="panel">
+  <h2 data-i18n="staffWkEmailTitle">
+    WK Automatic Email Recipients
+  </h2>
+
+  <p
+    class="small"
+    data-i18n="staffEmailLead"
+  >
+    You can manage up to 3 email recipients added by you.
+  </p>
+
+  <div
+    id="wkEmailRecipientList"
+  ></div>
+
+  <div class="group-buy-form">
+    <input
+      id="wkEmailNicknameInput"
+      type="text"
+      data-i18n-placeholder="staffEmailNickname"
+      placeholder="Nickname"
+    >
+
+    <input
+      id="wkEmailAddressInput"
+      type="email"
+      data-i18n-placeholder="email"
+      placeholder="Email"
+    >
+
+    <button
+      id="wkEmailAddButton"
+      type="button"
+      data-i18n="staffEmailAdd"
+    >
+      Add Email
+    </button>
+  </div>
+
+  <div
+    id="wkEmailStatus"
+    class="status"
+  ></div>
+</section>
         </section>
       </div>
 
+      <div
+  class="staff-section"
+  data-staff-section="inquiry"
+>
+  <section class="panel">
+    <h2 data-i18n="staffInquiryEmailTitle">
+      Inquiry Automatic Email Recipients
+    </h2>
+
+    <p
+      class="small"
+      data-i18n="staffEmailLead"
+    >
+      You can manage up to 3 email recipients added by you.
+    </p>
+
+    <div
+      id="inquiryEmailRecipientList"
+    ></div>
+
+    <div class="group-buy-form">
+      <input
+        id="inquiryEmailNicknameInput"
+        type="text"
+        data-i18n-placeholder="staffEmailNickname"
+        placeholder="Nickname"
+      >
+
+      <input
+        id="inquiryEmailAddressInput"
+        type="email"
+        data-i18n-placeholder="email"
+        placeholder="Email"
+      >
+
+      <button
+        id="inquiryEmailAddButton"
+        type="button"
+        data-i18n="staffEmailAdd"
+      >
+        Add Email
+      </button>
+    </div>
+
+    <div
+      id="inquiryEmailStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+      
 <div
   class="staff-section"
   data-staff-section="groupbuy"
@@ -1009,7 +1114,52 @@
     ></div>
   </section>
 
+<section class="panel">
+  <h2 data-i18n="staffGroupBuyEmailTitle">
+    Group Purchase Automatic Email Recipients
+  </h2>
 
+  <p
+    class="small"
+    data-i18n="staffEmailLead"
+  >
+    You can manage up to 3 email recipients added by you.
+  </p>
+
+  <div
+    id="groupBuyEmailRecipientList"
+  ></div>
+
+  <div class="group-buy-form">
+    <input
+      id="groupBuyEmailNicknameInput"
+      type="text"
+      data-i18n-placeholder="staffEmailNickname"
+      placeholder="Nickname"
+    >
+
+    <input
+      id="groupBuyEmailAddressInput"
+      type="email"
+      data-i18n-placeholder="email"
+      placeholder="Email"
+    >
+
+    <button
+      id="groupBuyEmailAddButton"
+      type="button"
+      data-i18n="staffEmailAdd"
+    >
+      Add Email
+    </button>
+  </div>
+
+  <div
+    id="groupBuyEmailStatus"
+    class="status"
+  ></div>
+</section>
+  
   <section class="panel">
     <h2 data-i18n="groupBuyApplications">
       Applications
@@ -1058,6 +1208,9 @@
     const SUPABASE_PUBLISHABLE_KEY =
       "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
 
+    const STAFF_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-email-recipients";
+    
     const STAFF_IMAGE_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-image-admin";
 
@@ -1286,7 +1439,96 @@ const groupBuyApplicationsStatus =
   document.getElementById(
     "groupBuyApplicationsStatus"
   );
+    
+const wkEmailRecipientList =
+  document.getElementById(
+    "wkEmailRecipientList"
+  );
 
+const wkEmailNicknameInput =
+  document.getElementById(
+    "wkEmailNicknameInput"
+  );
+
+const wkEmailAddressInput =
+  document.getElementById(
+    "wkEmailAddressInput"
+  );
+
+const wkEmailAddButton =
+  document.getElementById(
+    "wkEmailAddButton"
+  );
+
+const wkEmailStatus =
+  document.getElementById(
+    "wkEmailStatus"
+  );
+
+
+const inquiryEmailRecipientList =
+  document.getElementById(
+    "inquiryEmailRecipientList"
+  );
+
+const inquiryEmailNicknameInput =
+  document.getElementById(
+    "inquiryEmailNicknameInput"
+  );
+
+const inquiryEmailAddressInput =
+  document.getElementById(
+    "inquiryEmailAddressInput"
+  );
+
+const inquiryEmailAddButton =
+  document.getElementById(
+    "inquiryEmailAddButton"
+  );
+
+const inquiryEmailStatus =
+  document.getElementById(
+    "inquiryEmailStatus"
+  );
+
+
+const groupBuyEmailRecipientList =
+  document.getElementById(
+    "groupBuyEmailRecipientList"
+  );
+
+const groupBuyEmailNicknameInput =
+  document.getElementById(
+    "groupBuyEmailNicknameInput"
+  );
+
+const groupBuyEmailAddressInput =
+  document.getElementById(
+    "groupBuyEmailAddressInput"
+  );
+
+const groupBuyEmailAddButton =
+  document.getElementById(
+    "groupBuyEmailAddButton"
+  );
+
+const groupBuyEmailStatus =
+  document.getElementById(
+    "groupBuyEmailStatus"
+  );
+
+    const staffEmailData = {
+  wk: [],
+  inquiry: [],
+  group_buy: [],
+};
+
+const staffEmailLoaded = {
+  wk: false,
+  inquiry: false,
+  group_buy: false,
+};
+    
     let groupBuyData = {
   events: [],
 };
@@ -1308,6 +1550,563 @@ let groupBuyLoaded =
       uploads: [],
       blocked: [],
     };
+
+    async function staffEmailRequest(
+  method,
+  type,
+  body = null
+) {
+  const {
+    data: sessionData
+  } =
+    await supabase.auth
+      .getSession();
+
+  const token =
+    sessionData.session
+      ?.access_token;
+
+  if (!token) {
+    throw new Error(
+      translate(
+        "staffSessionExpired"
+      )
+    );
+  }
+
+  let url =
+    STAFF_EMAIL_API_URL;
+
+  const options = {
+    method,
+
+    headers: {
+      "Authorization":
+        `Bearer ${token}`,
+    },
+  };
+
+  if (method === "GET") {
+    url +=
+      `?type=${
+        encodeURIComponent(type)
+      }`;
+
+  } else {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify({
+        type,
+        ...(body ?? {}),
+      });
+  }
+
+  const response =
+    await fetch(
+      url,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      translate(
+        "staffEmailRequestFailed"
+      )
+    );
+  }
+
+  return result;
+}
+
+    function getStaffEmailElements(
+  type
+) {
+  if (type === "wk") {
+    return {
+      list:
+        wkEmailRecipientList,
+      nicknameInput:
+        wkEmailNicknameInput,
+      emailInput:
+        wkEmailAddressInput,
+      addButton:
+        wkEmailAddButton,
+      status:
+        wkEmailStatus,
+    };
+  }
+
+  if (type === "inquiry") {
+    return {
+      list:
+        inquiryEmailRecipientList,
+      nicknameInput:
+        inquiryEmailNicknameInput,
+      emailInput:
+        inquiryEmailAddressInput,
+      addButton:
+        inquiryEmailAddButton,
+      status:
+        inquiryEmailStatus,
+    };
+  }
+
+  return {
+    list:
+      groupBuyEmailRecipientList,
+    nicknameInput:
+      groupBuyEmailNicknameInput,
+    emailInput:
+      groupBuyEmailAddressInput,
+    addButton:
+      groupBuyEmailAddButton,
+    status:
+      groupBuyEmailStatus,
+  };
+}
+
+    function renderStaffEmailRecipients(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  const recipients =
+    staffEmailData[type] ?? [];
+
+  elements.list.innerHTML =
+    "";
+
+  if (
+    recipients.length === 0
+  ) {
+    elements.list.textContent =
+      translate(
+        "staffEmailNone"
+      );
+
+  } else {
+    recipients.forEach(
+      (recipient) => {
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className =
+          "group-buy-card";
+
+
+        const title =
+          document.createElement(
+            "div"
+          );
+
+        title.className =
+          "group-buy-card-title";
+
+        title.textContent =
+          recipient.nickname;
+
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+        meta.className =
+          "group-buy-card-meta";
+
+        meta.textContent =
+          `${recipient.email} · ${
+            recipient.active
+              ? translate(
+                  "groupBuyActive"
+                )
+              : translate(
+                  "groupBuyInactive"
+                )
+          }`;
+
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+        actions.className =
+          "group-buy-actions";
+
+
+        const toggleButton =
+          document.createElement(
+            "button"
+          );
+
+        toggleButton.type =
+          "button";
+
+        toggleButton.textContent =
+          recipient.active
+            ? translate(
+                "groupBuySetInactive"
+              )
+            : translate(
+                "groupBuySetActive"
+              );
+
+        toggleButton.addEventListener(
+          "click",
+          async () => {
+            await updateStaffEmailRecipient(
+              type,
+              recipient.id,
+              {
+                active:
+                  !recipient.active,
+              }
+            );
+          }
+        );
+
+
+        const editButton =
+          document.createElement(
+            "button"
+          );
+
+        editButton.type =
+          "button";
+
+        editButton.textContent =
+          translate(
+            "groupBuyEdit"
+          );
+
+        editButton.addEventListener(
+          "click",
+          async () => {
+            const nickname =
+              prompt(
+                translate(
+                  "staffEmailNickname"
+                ),
+                recipient.nickname
+              );
+
+            if (
+              nickname === null
+            ) {
+              return;
+            }
+
+            const email =
+              prompt(
+                translate(
+                  "email"
+                ),
+                recipient.email
+              );
+
+            if (
+              email === null
+            ) {
+              return;
+            }
+
+            await updateStaffEmailRecipient(
+              type,
+              recipient.id,
+              {
+                nickname:
+                  nickname.trim(),
+
+                email:
+                  email.trim(),
+              }
+            );
+          }
+        );
+
+
+        const deleteButton =
+          document.createElement(
+            "button"
+          );
+
+        deleteButton.type =
+          "button";
+
+        deleteButton.textContent =
+          translate(
+            "delete"
+          );
+
+        deleteButton.addEventListener(
+          "click",
+          async () => {
+            if (
+              !confirm(
+                translate(
+                  "staffEmailDeleteConfirm"
+                )
+              )
+            ) {
+              return;
+            }
+
+            await deleteStaffEmailRecipient(
+              type,
+              recipient.id
+            );
+          }
+        );
+
+
+        actions.appendChild(
+          toggleButton
+        );
+
+        actions.appendChild(
+          editButton
+        );
+
+        actions.appendChild(
+          deleteButton
+        );
+
+        card.appendChild(
+          title
+        );
+
+        card.appendChild(
+          meta
+        );
+
+        card.appendChild(
+          actions
+        );
+
+        elements.list.appendChild(
+          card
+        );
+      }
+    );
+  }
+
+
+  elements.status.textContent =
+    translate(
+      "staffEmailCount"
+    )
+      .replace(
+        "{count}",
+        String(
+          recipients.length
+        )
+      )
+      .replace(
+        "{max}",
+        "3"
+      );
+
+
+  elements.addButton.disabled =
+    recipients.length >= 3;
+}
+
+    async function loadStaffEmailRecipients(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    const result =
+      await staffEmailRequest(
+        "GET",
+        type
+      );
+
+    staffEmailData[type] =
+      result.recipients ??
+      [];
+
+    staffEmailLoaded[type] =
+      true;
+
+    renderStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message,
+      true
+    );
+  }
+}
+
+
+async function addStaffEmailRecipient(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  const nickname =
+    elements.nicknameInput
+      .value
+      .trim();
+
+  const email =
+    elements.emailInput
+      .value
+      .trim();
+
+  if (
+    !nickname ||
+    !email
+  ) {
+    setStatus(
+      elements.status,
+      translate(
+        "staffEmailInvalid"
+      ),
+      true
+    );
+
+    return;
+  }
+
+  try {
+    await staffEmailRequest(
+      "POST",
+      type,
+      {
+        nickname,
+        email,
+      }
+    );
+
+    elements.nicknameInput.value =
+      "";
+
+    elements.emailInput.value =
+      "";
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message ===
+        "RECIPIENT_LIMIT_REACHED"
+        ? translate(
+            "staffEmailLimit"
+          )
+        : error.message ===
+            "EMAIL_ALREADY_EXISTS"
+          ? translate(
+              "staffEmailDuplicate"
+            )
+          : error.message,
+      true
+    );
+  }
+}
+
+
+async function updateStaffEmailRecipient(
+  type,
+  id,
+  updates
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    await staffEmailRequest(
+      "PATCH",
+      type,
+      {
+        id,
+        ...updates,
+      }
+    );
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message ===
+        "EMAIL_ALREADY_EXISTS"
+        ? translate(
+            "staffEmailDuplicate"
+          )
+        : error.message,
+      true
+    );
+  }
+}
+
+
+async function deleteStaffEmailRecipient(
+  type,
+  id
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    await staffEmailRequest(
+      "DELETE",
+      type,
+      {
+        id,
+      }
+    );
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message,
+      true
+    );
+  }
+}
 
     async function staffGroupBuyRequest(
   method,
@@ -4343,6 +5142,33 @@ async function loadWkApplications() {
 ) {
   loadGroupBuyData();
 }
+
+  if (
+  target === "wk" &&
+  !staffEmailLoaded.wk
+) {
+  loadStaffEmailRecipients(
+    "wk"
+  );
+}
+
+if (
+  target === "inquiry" &&
+  !staffEmailLoaded.inquiry
+) {
+  loadStaffEmailRecipients(
+    "inquiry"
+  );
+}
+
+if (
+  target === "groupbuy" &&
+  !staffEmailLoaded.group_buy
+) {
+  loadStaffEmailRecipients(
+    "group_buy"
+  );
+}
             
             
             staffTabs.forEach(
@@ -4418,8 +5244,36 @@ async function loadWkApplications() {
       }
     );
 
+wkEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "wk"
+    );
+  }
+);
 
+inquiryEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "inquiry"
+    );
+  }
+);
+
+groupBuyEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "group_buy"
+    );
+  }
+);
+    
     openExistingSession();
+
+    
   </script>
 
 </body>
