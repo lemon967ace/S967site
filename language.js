@@ -299,7 +299,7 @@ blockedByAdmin: "Blocked by Admin",
 noUploadsFound: "No uploads found.",
 
 staffSigningIn: "Signing in…",
-staffLoginRequired: "Enter your email and password.",
+staffLoginRequired: "Enter your Staff ID and password.",
 staffAccessDenied:
   "This account does not have active Staff access.",
 staffVerifyFailed: "Could not verify Staff access.",
@@ -481,7 +481,7 @@ staffEmailAdd:
   "Add Email",
 
 staffEmailNone:
-  "No email recipients have been added.",
+  "No email addresses registered.",
 
 staffEmailCount:
   "{count} / {max} registered",
@@ -515,12 +515,6 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID may contain only letters, numbers, periods, underscores, and hyphens.",
-
-staffEmailNone:
-  "No email addresses registered.",
-
-staffEmailCount:
-  "{count} / {max} registered",
   },
 
   ko: {
@@ -814,7 +808,7 @@ blockedByAdmin: "관리자가 차단함",
 noUploadsFound: "업로드 내역이 없습니다.",
 
 staffSigningIn: "로그인 중…",
-staffLoginRequired: "이메일과 비밀번호를 입력하세요.",
+staffLoginRequired: "Staff ID와 비밀번호를 입력하세요.",
 staffAccessDenied: "활성화된 스태프 권한이 없는 계정입니다.",
 staffVerifyFailed: "스태프 권한을 확인할 수 없습니다.",
 staffLoginFailed: "로그인에 실패했습니다.",
@@ -995,7 +989,7 @@ staffEmailAdd:
   "이메일 추가",
 
 staffEmailNone:
-  "등록한 이메일이 없습니다.",
+  "등록된 이메일이 없습니다.",
 
 staffEmailCount:
   "{count} / {max}개 등록",
@@ -1029,11 +1023,6 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID에는 영문, 숫자, 마침표, 밑줄, 하이픈만 사용할 수 있습니다.",
-
- "등록된 이메일이 없습니다.",
-
-staffEmailCount:
-  "{count} / {max}개 등록",
   },
 
   ja: {
@@ -1327,7 +1316,7 @@ blockedByAdmin: "管理者によるブロック",
 noUploadsFound: "アップロードはありません。",
 
 staffSigningIn: "ログイン中…",
-staffLoginRequired: "メールアドレスとパスワードを入力してください。",
+staffLoginRequired: "Staff IDとパスワードを入力してください。",
 staffAccessDenied: "有効なスタッフ権限がありません。",
 staffVerifyFailed: "スタッフ権限を確認できませんでした。",
 staffLoginFailed: "ログインに失敗しました。",
@@ -1511,7 +1500,7 @@ staffEmailNone:
   "登録されたメールアドレスはありません。",
 
 staffEmailCount:
-  "{count} / {max}",
+  "{count} / {max} 件登録済み",
 
 staffEmailDeleteConfirm:
   "このメールアドレスを削除しますか？",
@@ -1539,11 +1528,6 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff IDには英数字、ピリオド、アンダースコア、ハイフンのみ使用できます。",
-
- "登録されたメールアドレスはありません。",
-
-staffEmailCount:
-  "{count} / {max} 件登録済み",
   },
 
   ru: {
@@ -1837,7 +1821,7 @@ blockedByAdmin: "Заблокирован администратором",
 noUploadsFound: "Загрузок нет.",
 
 staffSigningIn: "Вход…",
-staffLoginRequired: "Введите электронную почту и пароль.",
+staffLoginRequired: "Введите Staff ID и пароль.",
 staffAccessDenied: "У этой учётной записи нет активного доступа персонала.",
 staffVerifyFailed: "Не удалось проверить права персонала.",
 staffLoginFailed: "Не удалось войти.",
@@ -2021,7 +2005,7 @@ staffEmailNone:
   "Добавленных email-адресов нет.",
 
 staffEmailCount:
-  "{count} / {max}",
+  "Зарегистрировано: {count} / {max}",
 
 staffEmailDeleteConfirm:
   "Удалить этот email-адрес?",
@@ -2049,12 +2033,6 @@ uploadBlocked:
 
 staffIdInvalid:
   "Staff ID может содержать только латинские буквы, цифры, точки, подчёркивания и дефисы.",
-
-    staffEmailNone:
-  "Нет зарегистрированных адресов электронной почты.",
-
-staffEmailCount:
-  "Зарегистрировано: {count} / {max}",
   },
 };
 
