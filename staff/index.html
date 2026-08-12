@@ -1509,6 +1509,535 @@ function formatKstDateTime(
   );
 }
 
+
+function renderGroupBuyEvents() {
+  groupBuyEventList.innerHTML =
+    "";
+
+  groupBuyEventSelect.innerHTML =
+    "";
+
+  const events =
+    groupBuyData.events ?? [];
+
+  if (
+    events.length === 0
+  ) {
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "small";
+
+    empty.textContent =
+      translate(
+        "groupBuyNoRounds"
+      );
+
+    groupBuyEventList.appendChild(
+      empty
+    );
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      "";
+
+    option.textContent =
+      translate(
+        "groupBuyNoRounds"
+      );
+
+    groupBuyEventSelect.appendChild(
+      option
+    );
+
+    return;
+  }
+
+  events.forEach(
+    (event) => {
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        String(
+          event.id
+        );
+
+      option.textContent =
+        event.title;
+
+      groupBuyEventSelect.appendChild(
+        option
+      );
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "group-buy-card";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "group-buy-card-title";
+
+      title.textContent =
+        event.title;
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "group-buy-card-meta";
+
+      meta.textContent =
+        `${
+          event.active
+            ? translate(
+                "groupBuyActive"
+              )
+            : translate(
+                "groupBuyInactive"
+              )
+        } · ${
+          formatKstDateTime(
+            event.start_at
+          )
+        } → ${
+          formatKstDateTime(
+            event.end_at
+          )
+        }`;
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "group-buy-actions";
+
+
+      const manageButton =
+        document.createElement(
+          "button"
+        );
+
+      manageButton.type =
+        "button";
+
+      manageButton.textContent =
+        translate(
+          "groupBuyManage"
+        );
+
+      manageButton.addEventListener(
+        "click",
+        async () => {
+          selectedGroupBuyEventId =
+            Number(
+              event.id
+            );
+
+          groupBuyEventSelect.value =
+            String(
+              event.id
+            );
+
+          await loadGroupBuyDetail(
+            event.id
+          );
+        }
+      );
+
+
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        event.active
+          ? translate(
+              "groupBuySetInactive"
+            )
+          : translate(
+              "groupBuySetActive"
+            );
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                active:
+                  !event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+          } catch (error) {
+            alert(
+              error.message
+            );
+          }
+        }
+      );
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        translate(
+          "groupBuyEdit"
+        );
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const titleValue =
+            prompt(
+              translate(
+                "groupBuyRoundName"
+              ),
+              event.title
+            );
+
+          if (
+            titleValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startValue =
+            prompt(
+              translate(
+                "groupBuyStartKst"
+              ),
+              isoToKstInput(
+                event.start_at
+              )
+            );
+
+          if (
+            startValue ===
+            null
+          ) {
+            return;
+          }
+
+          const endValue =
+            prompt(
+              translate(
+                "groupBuyEndKst"
+              ),
+              isoToKstInput(
+                event.end_at
+              )
+            );
+
+          if (
+            endValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startAt =
+            kstInputToIso(
+              startValue
+            );
+
+          const endAt =
+            kstInputToIso(
+              endValue
+            );
+
+          if (
+            !titleValue.trim() ||
+            !startAt ||
+            !endAt
+          ) {
+            alert(
+              translate(
+                "groupBuyInvalidRound"
+              )
+            );
+
+            return;
+          }
+
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                title:
+                  titleValue.trim(),
+
+                start_at:
+                  startAt,
+
+                end_at:
+                  endAt,
+
+                active:
+                  event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+          } catch (error) {
+            alert(
+              error.message
+            );
+          }
+        }
+      );
+
+
+      actions.appendChild(
+        manageButton
+      );
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        editButton
+      );
+
+
+      card.appendChild(
+        title
+      );
+
+      card.appendChild(
+        meta
+      );
+
+      card.appendChild(
+        actions
+      );
+
+
+      groupBuyEventList.appendChild(
+        card
+      );
+    }
+  );
+
+
+  if (
+    selectedGroupBuyEventId
+  ) {
+    groupBuyEventSelect.value =
+      String(
+        selectedGroupBuyEventId
+      );
+  }
+}
+
+
+async function loadGroupBuyDetail(
+  id
+) {
+  selectedGroupBuyEventId =
+    Number(id);
+
+  setStatus(
+    groupBuyDetailStatus,
+    translate(
+      "groupBuyLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffGroupBuyRequest(
+        "GET",
+        null,
+        `?event_id=${
+          encodeURIComponent(id)
+        }`
+      );
+
+    groupBuyDetail = {
+      event:
+        result.event ??
+        null,
+
+      items:
+        result.items ??
+        [],
+
+      applications:
+        result.applications ??
+        [],
+    };
+
+    renderGroupBuySelectedEvent();
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+
+    clearStatus(
+      groupBuyDetailStatus
+    );
+
+  } catch (error) {
+    setStatus(
+      groupBuyDetailStatus,
+      error.message ||
+      translate(
+        "groupBuyDetailFailed"
+      ),
+      true
+    );
+  }
+}
+
+
+async function loadGroupBuyData() {
+  groupBuyRefreshButton.disabled =
+    true;
+
+  setStatus(
+    groupBuyEventStatus,
+    translate(
+      "groupBuyLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffGroupBuyRequest(
+        "GET"
+      );
+
+    groupBuyData = {
+      events:
+        result.events ??
+        [],
+    };
+
+    if (
+      selectedGroupBuyEventId &&
+      !groupBuyData.events.some(
+        (event) =>
+          Number(event.id) ===
+          Number(
+            selectedGroupBuyEventId
+          )
+      )
+    ) {
+      selectedGroupBuyEventId =
+        null;
+    }
+
+    if (
+      !selectedGroupBuyEventId &&
+      groupBuyData.events.length >
+      0
+    ) {
+      selectedGroupBuyEventId =
+        Number(
+          groupBuyData
+            .events[0]
+            .id
+        );
+    }
+
+    renderGroupBuyEvents();
+
+    if (
+      selectedGroupBuyEventId
+    ) {
+      await loadGroupBuyDetail(
+        selectedGroupBuyEventId
+      );
+
+    } else {
+      groupBuyDetail = {
+        event: null,
+        items: [],
+        applications: [],
+      };
+
+      renderGroupBuySelectedEvent();
+      renderGroupBuyItems();
+      renderGroupBuyApplications();
+    }
+
+    groupBuyLoaded =
+      true;
+
+    clearStatus(
+      groupBuyEventStatus
+    );
+
+  } catch (error) {
+    setStatus(
+      groupBuyEventStatus,
+      error.message ||
+      translate(
+        "groupBuyLoadFailed"
+      ),
+      true
+    );
+
+  } finally {
+    groupBuyRefreshButton.disabled =
+      false;
+  }
+}
+
+
     function renderGroupBuySelectedEvent() {
   const event =
     groupBuyDetail.event;
