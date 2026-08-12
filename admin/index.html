@@ -764,19 +764,15 @@
       Create Staff
     </h2>
 
-    <div class="row">
-      <input
-        id="staffDisplayName"
-        type="text"
-        maxlength="50"
-        placeholder="Display name"
-      >
-
-      <input
-        id="staffEmail"
-        type="email"
-        placeholder="Email"
-      >
+<input
+  id="staffIdInput"
+  type="text"
+  maxlength="50"
+  autocomplete="off"
+  autocapitalize="characters"
+  spellcheck="false"
+  placeholder="Staff ID"
+>
 
       <input
         id="staffPassword"
@@ -1605,14 +1601,9 @@ const refreshStaffButton =
     "refreshStaffButton"
   );
 
-const staffDisplayName =
+const staffIdInput =
   document.getElementById(
-    "staffDisplayName"
-  );
-
-const staffEmail =
-  document.getElementById(
-    "staffEmail"
+    "staffIdInput"
   );
 
 const staffPassword =
@@ -8653,34 +8644,55 @@ addGroupBuyEmailRecipientButton
     createStaffButton.addEventListener(
   "click",
   async () => {
-    const displayName =
-      staffDisplayName
-        .value
-        .trim();
+const staffId =
+  staffIdInput
+    .value
+    .trim();
 
-    const email =
-      staffEmail
-        .value
-        .trim();
+const password =
+  staffPassword.value;
 
-    const password =
-      staffPassword.value;
+if (
+  !staffId ||
+  !password
+) {
+  setStatus(
+    staffStatus,
+    "Enter a Staff ID and temporary password.",
+    true
+  );
 
-    if (
-      !displayName ||
-      !email ||
-      !password
-    ) {
-      setStatus(
-        staffStatus,
-        "이름, 이메일, 임시 비밀번호를 모두 입력하세요.",
-        true
-      );
+  return;
+}
 
-      return;
-    }
+if (
+  !/^[A-Za-z0-9._-]+$/.test(
+    staffId
+  )
+) {
+  setStatus(
+    staffStatus,
+    "Staff ID may contain only letters, numbers, periods, underscores, and hyphens.",
+    true
+  );
 
-    if (
+  return;
+}
+
+   if (
+  !staffId ||
+  !password
+) {
+  setStatus(
+    staffStatus,
+    "Staff ID와 임시 비밀번호를 모두 입력하세요.",
+    true
+  );
+
+  return;
+}
+
+if (
       password.length < 10
     ) {
       setStatus(
@@ -8703,23 +8715,18 @@ addGroupBuyEmailRecipientButton
     try {
       await staffApiRequest(
         "POST",
-        {
-          action:
-            "create_staff",
+    {
+  action:
+    "create_staff",
 
-          displayName,
+  staffId,
 
-          email,
-
-          password,
-        }
+  password,
+}
       );
 
-      staffDisplayName.value =
-        "";
-
-      staffEmail.value =
-        "";
+ staffIdInput.value =
+  "";
 
       staffPassword.value =
         "";
