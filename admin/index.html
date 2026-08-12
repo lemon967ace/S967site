@@ -654,7 +654,76 @@
     ></div>
   </section>
 
+<section class="panel">
+  <div class="row">
+    <h2 style="margin: 0;">
+      Staff Accounts
+    </h2>
 
+    <button
+      id="refreshStaffButton"
+      type="button"
+    >
+      Refresh
+    </button>
+  </div>
+
+  <p class="small">
+    Create, disable, reset, or delete Staff accounts.
+  </p>
+
+  <div
+    id="staffAccounts"
+  ></div>
+
+  <div
+    id="staffStatus"
+    class="status"
+  ></div>
+
+  <hr
+    style="
+      margin: 20px 0;
+      border: 0;
+      border-top: 1px solid var(--border);
+    "
+  >
+
+  <h2>
+    Create Staff
+  </h2>
+
+  <div class="row">
+    <input
+      id="staffDisplayName"
+      type="text"
+      maxlength="50"
+      placeholder="Display name"
+    >
+
+    <input
+      id="staffEmail"
+      type="email"
+      placeholder="Email"
+    >
+
+    <input
+      id="staffPassword"
+      type="password"
+      minlength="10"
+      autocomplete="new-password"
+      placeholder="Temporary password"
+    >
+
+    <button
+      id="createStaffButton"
+      type="button"
+    >
+      Create Staff
+    </button>
+  </div>
+</section>
+    
   <section class="panel">
     <div class="row">
       <h2 style="margin: 0;">
@@ -1404,6 +1473,9 @@
 
     const WK_EXPORT_EMAIL_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-export-email";
+
+    const STAFF_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-admin";
     
     const WK_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
