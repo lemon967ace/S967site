@@ -10,6 +10,36 @@
   <script src="/theme.js" defer></script>
 
   <style>
+    .upload-image-box {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.upload-image-box .upload-image {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+.image-delete-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  padding: 5px 8px;
+
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+
+  border-color: transparent;
+
+  font-size: 0.78rem;
+}
+    
     * {
       box-sizing: border-box;
     }
@@ -6348,17 +6378,31 @@ function getSameIpUploads(ipHash) {
 
 function createImageGrid(item) {
   const grid =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   grid.className =
     "upload-images";
+
 
   for (
     const path
     of (item.storage_paths || [])
   ) {
+    const box =
+      document.createElement(
+        "div"
+      );
+
+    box.className =
+      "upload-image-box";
+
+
     const link =
-      document.createElement("a");
+      document.createElement(
+        "a"
+      );
 
     link.className =
       "upload-image";
@@ -6374,7 +6418,9 @@ function createImageGrid(item) {
 
 
     const img =
-      document.createElement("img");
+      document.createElement(
+        "img"
+      );
 
     img.src =
       getPublicImageUrl(path);
@@ -6389,14 +6435,91 @@ function createImageGrid(item) {
     img.addEventListener(
       "error",
       () => {
-        link.remove();
+        box.remove();
       }
     );
 
 
-    link.appendChild(img);
-    grid.appendChild(link);
+    link.appendChild(
+      img
+    );
+
+
+    const deleteButton =
+      document.createElement(
+        "button"
+      );
+
+    deleteButton.type =
+      "button";
+
+    deleteButton.className =
+      "image-delete-button";
+
+    deleteButton.textContent =
+      "Delete";
+
+
+    deleteButton.addEventListener(
+      "click",
+      async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (
+          !confirm(
+            "이 이미지를 삭제하시겠습니까?"
+          )
+        ) {
+          return;
+        }
+
+        deleteButton.disabled =
+          true;
+
+        try {
+          await apiRequest(
+            "POST",
+            {
+              action:
+                "delete_image",
+
+              uploadId:
+                item.id,
+
+              storagePath:
+                path,
+            }
+          );
+
+          await loadAdminData();
+
+        } catch (error) {
+          alert(
+            error.message ||
+            "이미지를 삭제할 수 없습니다."
+          );
+
+          deleteButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    box.appendChild(
+      link
+    );
+
+    box.appendChild(
+      deleteButton
+    );
+
+    grid.appendChild(
+      box
+    );
   }
+
 
   return grid;
 }
