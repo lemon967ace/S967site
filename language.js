@@ -76,7 +76,7 @@ backHome:
   "← Back to Home",
 
 onlyImagesAllowed:
-  "Only PNG, JPG, and JPEG images are allowed.",
+  "Only images are allowed.",
 
 imageTooLarge:
   "Each image must be 5 MB or smaller.",
@@ -551,7 +551,7 @@ staffIdInvalid:
       "이미지 확인",
 
     unofficial:
-      "967 서버의 비공식 커뮤니티 사이트입니다.",
+      "967 서버의 비공식 커뮤니티 사이트.",
 
     themeSystem:
       "시스템",
@@ -590,7 +590,7 @@ backHome:
   "← 홈으로 돌아가기",
 
 onlyImagesAllowed:
-  "PNG, JPG, JPEG 이미지만 업로드할 수 있습니다.",
+  "이미지만 업로드할 수 있습니다.",
 
 imageTooLarge:
   "각 이미지는 5 MB 이하여야 합니다.",
@@ -1065,7 +1065,7 @@ staffIdInvalid:
       "画像を見る",
 
     unofficial:
-      "State 967の非公式コミュニティサイトです。",
+      "State 967の非公式コミュニティサイト。",
 
     themeSystem:
       "システム",
@@ -1104,7 +1104,7 @@ backHome:
   "← ホームに戻る",
 
 onlyImagesAllowed:
-  "PNG、JPG、JPEG画像のみアップロードできます。",
+  "画像のみアップロードできます。",
 
 imageTooLarge:
   "各画像は5 MB以下にしてください。",
@@ -1615,7 +1615,7 @@ backHome:
   "← На главную",
 
 onlyImagesAllowed:
-  "Разрешены только изображения PNG, JPG и JPEG.",
+  "Разрешены только изображения.",
 
 imageTooLarge:
   "Размер каждого изображения не должен превышать 5 МБ.",
