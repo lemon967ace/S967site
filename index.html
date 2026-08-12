@@ -36,6 +36,50 @@
   ></script>
 
   <style>
+  .operator-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.privacy-info-button {
+  border: 0;
+  padding: 0;
+  margin-left: 3px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  opacity: 0.65;
+  vertical-align: baseline;
+}
+
+.privacy-info-button:hover {
+  opacity: 1;
+}
+
+.privacy-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+
+  width: min(340px, calc(100vw - 32px));
+  padding: 10px 12px;
+
+  background: #fff;
+  color: #333;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+
+  z-index: 1000;
+}
+
     .staff-link {
   position: fixed;
   top: 18px;
@@ -546,33 +590,80 @@
       </a>
     </nav>
 
+<footer>
+  PNS · State 967
+  <br>
 
-    <footer>
-      PNS · State 967
-      <br>
+  <span
+    class="unofficial"
+    data-i18n="unofficial"
+  >
+    Unofficial community site for State 967.
+  </span>
 
-      <span
-        class="unofficial"
-        data-i18n="unofficial"
-      >
-        Unofficial community site for State 967.
-      </span>
-      
-      <br>
-        Operated by ᴬᶜᴱ⍣⃝ 레몬
-      <br>
-      <a
-        class="source-link"
-        href="https://github.com/lemon967ace/S967site"
-        target="_blank"
-        rel="noopener noreferrer"
-        data-i18n="sourceCode"
-      >
-        View source code
-      </a>
-    </footer>
+  <br>
+
+  <span class="operator-wrap">
+    <span data-i18n="operatedBy">
+      Operated by ᴬᶜᴱ⍣⃝ 레몬
+    </span>
+
+    <button
+      type="button"
+      class="privacy-info-button"
+      id="privacyInfoButton"
+      aria-label="Privacy information"
+      aria-expanded="false"
+    >
+      ⓘ
+    </button>
+
+    <span
+      class="privacy-popover"
+      id="privacyPopover"
+      role="note"
+      hidden
+      data-i18n="privacyNotice"
+    >
+      This website uses cookies and similar browser storage technologies as necessary to provide and maintain its functionality, including authentication sessions and language preferences. These technologies are not used for advertising or behavioral tracking.
+    </span>
+  </span>
+
+  <br>
+
+  <a
+    class="source-link"
+    href="https://github.com/lemon967ace/S967site"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-i18n="sourceCode"
+  >
+    View source code
+  </a>
+</footer>
+
 
   </main>
+  
+const privacyInfoButton = document.getElementById('privacyInfoButton');
+const privacyPopover = document.getElementById('privacyPopover');
 
+privacyInfoButton.addEventListener('click', (event) => {
+  event.stopPropagation();
+
+  const isOpen = !privacyPopover.hidden;
+
+  privacyPopover.hidden = isOpen;
+  privacyInfoButton.setAttribute('aria-expanded', String(!isOpen));
+});
+
+privacyPopover.addEventListener('click', (event) => {
+  event.stopPropagation();
+});
+
+document.addEventListener('click', () => {
+  privacyPopover.hidden = true;
+  privacyInfoButton.setAttribute('aria-expanded', 'false');
+});
 </body>
 </html>
