@@ -20,8 +20,9 @@
   ></script>
 
   <script
-    src="/language.js"
-  ></script>
+  src="/language.js"
+  defer
+></script>
 
   <style>
     * {
@@ -1565,14 +1566,11 @@ function updateApplicationSchedule() {
       "hidden"
     );
 
-    if (
-  !forcedMode &&
-  state.closeAt
-) {
+    if (automaticState.closeAt) {
   scheduleStatus.textContent =
     `${text.applicationsOpen} - ` +
     formatCycleSaturday(
-      state.closeAt
+      automaticState.closeAt
     );
 } else {
   scheduleStatus.textContent =
