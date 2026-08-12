@@ -31,6 +31,33 @@
   ></script>
 
   <style>
+    .application-card {
+  margin-top: 10px;
+  padding: 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-hover);
+}
+
+.manage-name {
+  font-weight: 700;
+}
+
+.manage-note {
+  margin-top: 4px;
+
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.application-items {
+  margin-top: 7px;
+  line-height: 1.55;
+}
+    
     * {
       box-sizing: border-box;
     }
@@ -706,6 +733,14 @@
     const STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
 
+    const STAFF_WK_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-wk";
+
+let wkData = {
+  applications: [],
+};
+
+let wkLoaded = false;
 
     const supabase =
       createClient(
@@ -835,7 +870,445 @@
       blocked: [],
     };
 
+async function staffWkRequest() {
+  const {
+    data: sessionData
+  } =
+    await supabase.auth
+      .getSession();
 
+  const token =
+    sessionData.session
+      ?.access_token;
+
+  if (!token) {
+    throw new Error(
+      translate(
+        "staffSessionExpired"
+      )
+    );
+  }
+
+  const response =
+    await fetch(
+      STAFF_WK_API_URL,
+      {
+        method: "GET",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      translate(
+        "wkLoadFailed"
+      )
+    );
+  }
+
+  return result;
+}
+
+
+function formatWkValue(
+  value
+) {
+  const keys = {
+    fighter:
+      "wkFighter",
+
+    shooter:
+      "wkShooter",
+
+    rider:
+      "wkRider",
+
+    all_strong:
+      "wkAllStrong",
+
+    monitor_available:
+      "wkMonitorAvailable",
+
+    monitor_unavailable:
+      "wkMonitorUnavailable",
+
+    captain:
+      "wkCaptain",
+
+    sub_captain:
+      "wkSubCaptain",
+
+    regular:
+      "wkRegular",
+
+    negotiable:
+      "wkNegotiable",
+
+    first_half:
+      "wkFirstHalf",
+
+    second_half:
+      "wkSecondHalf",
+
+    full:
+      "wkFull",
+  };
+
+  const key =
+    keys[value];
+
+  return key
+    ? translate(key)
+    : (
+        value ??
+        "—"
+      );
+}
+
+
+function formatNumber(
+  value
+) {
+  return Number(
+    value ?? 0
+  ).toLocaleString(
+    getLocale()
+  );
+}
+
+
+function renderWkApplications() {
+  wkApplications.innerHTML =
+    "";
+
+  const applications =
+    Array.isArray(
+      wkData.applications
+    )
+      ? wkData.applications
+      : [];
+
+  if (
+    applications.length === 0
+  ) {
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "small";
+
+    empty.textContent =
+      translate(
+        "wkNoApplications"
+      );
+
+    wkApplications.appendChild(
+      empty
+    );
+
+    clearStatus(
+      wkStatus
+    );
+
+    return;
+  }
+
+
+  let lastCycle =
+    null;
+
+
+  for (
+    const application
+    of applications
+  ) {
+    const cycle =
+      Number(
+        application
+          .cycle_number
+      );
+
+
+    if (
+      cycle !==
+      lastCycle
+    ) {
+      const heading =
+        document.createElement(
+          "h3"
+        );
+
+      if (
+        Number.isFinite(
+          cycle
+        )
+      ) {
+        heading.textContent =
+          translate(
+            "wkCycle"
+          ).replace(
+            "{cycle}",
+            String(cycle)
+          );
+
+      } else {
+        heading.textContent =
+          translate(
+            "wkCycleUnknown"
+          );
+      }
+
+      heading.style.margin =
+        lastCycle === null
+          ? "4px 0 10px"
+          : "24px 0 10px";
+
+      wkApplications
+        .appendChild(
+          heading
+        );
+
+      lastCycle =
+        cycle;
+    }
+
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "application-card";
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `${
+        application
+          .player_name ??
+        "—"
+      } · ${
+        application
+          .alliance_name_snapshot ??
+        "—"
+      }`;
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "manage-note";
+
+    meta.textContent =
+      `${
+        translate(
+          "wkTier"
+        )
+      } ${
+        application
+          .tier_name_snapshot ??
+        "—"
+      } · ${
+        translate(
+          "wkTroopType"
+        )
+      } ${
+        formatWkValue(
+          application
+            .troop_type
+        )
+      } · ${
+        translate(
+          "wkTroopSize"
+        )
+      } ${
+        formatNumber(
+          application
+            .troop_size
+        )
+      } · ${
+        translate(
+          "wkRallySize"
+        )
+      } ${
+        formatNumber(
+          application
+            .rally_size
+        )
+      }`;
+
+
+    const detail =
+      document.createElement(
+        "div"
+      );
+
+    detail.className =
+      "application-items";
+
+    detail.textContent =
+      `${
+        formatWkValue(
+          application
+            .realtime_response
+        )
+      } · ${
+        formatWkValue(
+          application
+            .captain_role
+        )
+      } · ${
+        formatWkValue(
+          application
+            .participation_time
+        )
+      } · ${
+        translate(
+          "wkStatus"
+        )
+      } ${
+        application.status ??
+        "new"
+      }`;
+
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+    time.className =
+      "manage-note";
+
+    time.style.marginTop =
+      "6px";
+
+    time.textContent =
+      `${
+        translate(
+          "wkSubmitted"
+        )
+      } ${
+        formatDateTime(
+          application
+            .created_at
+        )
+      } · ${
+        translate(
+          "wkLanguage"
+        )
+      } ${
+        application.language ??
+        "—"
+      }`;
+
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      detail
+    );
+
+    card.appendChild(
+      time
+    );
+
+
+    wkApplications
+      .appendChild(
+        card
+      );
+  }
+
+
+  wkStatus.textContent =
+    translate(
+      "wkTotal"
+    ).replace(
+      "{count}",
+      String(
+        applications.length
+      )
+    );
+}
+
+
+async function loadWkApplications() {
+  refreshWkButton.disabled =
+    true;
+
+  setStatus(
+    wkStatus,
+    translate(
+      "wkLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffWkRequest();
+
+    wkData = {
+      applications:
+        result.applications ??
+        [],
+    };
+
+    wkLoaded =
+      true;
+
+    renderWkApplications();
+
+  } catch (error) {
+    console.error(
+      error
+    );
+
+    setStatus(
+      wkStatus,
+      translate(
+        "wkLoadFailed"
+      ),
+      true
+    );
+
+  } finally {
+    refreshWkButton.disabled =
+      false;
+  }
+}
+    
     function translate(key) {
       if (
         typeof getTranslation ===
@@ -1971,6 +2444,11 @@
         loadImages
       );
 
+    refreshWkButton
+  .addEventListener(
+    "click",
+    loadWkApplications
+  );
 
     staffTabs.forEach(
       (button) => {
@@ -1981,6 +2459,13 @@
               button.dataset
                 .staffTab;
 
+            if (
+  target === "wk" &&
+  !wkLoaded
+) {
+  loadWkApplications();
+}
+            
             staffTabs.forEach(
               (item) => {
                 item.classList.toggle(
@@ -2032,7 +2517,10 @@
       }
     );
 
-
+if (wkLoaded) {
+  renderWkApplications();
+}
+    
     /*
       language.js의 초기 적용이 끝난 뒤에도
       탭 제목과 브라우저 제목을 맞춘다.
