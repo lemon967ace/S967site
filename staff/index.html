@@ -1339,11 +1339,6 @@ const newGroupBuyEndAt =
     "newGroupBuyEndAt"
   );
 
-const newGroupBuyEventActive =
-  document.getElementById(
-    "newGroupBuyEventActive"
-  );
-
 const addGroupBuyEventButton =
   document.getElementById(
     "addGroupBuyEventButton"
@@ -1362,11 +1357,6 @@ const newGroupBuyItemName =
 const newGroupBuyItemMax =
   document.getElementById(
     "newGroupBuyItemMax"
-  );
-
-const newGroupBuyItemActive =
-  document.getElementById(
-    "newGroupBuyItemActive"
   );
 
 const addGroupBuyItemButton =
@@ -3303,7 +3293,7 @@ function renderGroupBuyApplications() {
                 endAt,
 
               active:
-            true
+                true,
             }
           );
 
@@ -3402,7 +3392,7 @@ addGroupBuyItemButton
               maxQuantity,
 
             active:
-              true
+              true,
 
             display_order:
               groupBuyDetail
