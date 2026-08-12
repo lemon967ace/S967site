@@ -670,15 +670,41 @@ const UPLOAD_IMAGE_URL =
             );
 
 
-        if (
-          !response.ok ||
-          !result.success
-        ) {
-          throw new Error(
-            result.error ||
-            getTranslation("uploadFailed")
-          );
-        }
+  if (
+  !response.ok ||
+  !result.success
+) {
+  if (
+    response.status === 503 &&
+    result.error ===
+      "Image uploads are temporarily unavailable. Please try again later."
+  ) {
+    throw new Error(
+      getTranslation(
+        "uploadPaused"
+      )
+    );
+  }
+
+  if (
+    response.status === 403 &&
+    result.error ===
+      "Image uploads are currently unavailable."
+  ) {
+    throw new Error(
+      getTranslation(
+        "uploadBlocked"
+      )
+    );
+  }
+
+  throw new Error(
+    result.error ||
+    getTranslation(
+      "uploadFailed"
+    )
+  );
+}
 
 
         selectedFiles = [];
