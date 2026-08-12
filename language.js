@@ -456,6 +456,8 @@ groupBuySelectRoundFirst:
 
 groupBuyInvalidItem:
   "Enter a valid item name and maximum quantity.",
+
+    staffLoading: "Loading…",
   },
 
   ko: {
@@ -906,6 +908,7 @@ groupBuySelectRoundFirst:
 groupBuyInvalidItem:
   "구매항목명과 최대 수량을 정확히 입력하세요.",
 
+staffLoading: "불러오는 중…",
   },
 
   ja: {
@@ -1356,6 +1359,7 @@ groupBuySelectRoundFirst:
 groupBuyInvalidItem:
   "購入項目名と最大数量を正しく入力してください。",
 
+staffLoading: "読み込み中…",
   },
 
   ru: {
@@ -1805,6 +1809,8 @@ groupBuySelectRoundFirst:
 
 groupBuyInvalidItem:
   "Укажите корректное название товара и максимальное количество.",
+
+staffLoading: "Загрузка…",
   },
 };
 
