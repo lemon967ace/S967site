@@ -2514,12 +2514,13 @@ async function loadWkApplications() {
         ) {
           renderImages();
         }
+        if (wkLoaded) {
+  renderWkApplications();
+}
       }
     );
 
-if (wkLoaded) {
-  renderWkApplications();
-}
+
     
     /*
       language.js의 초기 적용이 끝난 뒤에도
