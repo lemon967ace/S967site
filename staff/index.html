@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
+  <title>Staff · S967</title>
+
+  <link
+    rel="stylesheet"
+    href="/theme.css"
+  >
+
+  <script
+    src="/theme.js"
+    defer
+  ></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 20px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      background: var(--surface);
+      box-shadow: var(--shadow);
+
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input {
+      min-width: 240px;
+      flex: 1;
+
+      padding: 11px 12px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+    }
+
+    button {
+      padding: 10px 13px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+      font-weight: 650;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--border-hover);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 1.4em;
+
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      color: #d75555;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .account-name {
+      margin-top: 6px;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 26px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div
+    class="theme-picker"
+    data-theme-picker
+  >
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      ◐
+    </button>
+
+    <div
+      class="theme-menu"
+      data-theme-menu
+      role="menu"
+    >
+      <button
+        type="button"
+        data-theme-choice="system"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">◐</span>
+        <span>System</span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="light"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">☀</span>
+        <span>Light</span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="dark"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">☾</span>
+        <span>Dark</span>
+      </button>
+    </div>
+  </div>
+
+
+  <main>
+    <div class="eyebrow">
+      S967
+    </div>
+
+    <h1>
+      Staff
+    </h1>
+
+
+    <section
+      id="loginPanel"
+      class="panel"
+    >
+      <h2>
+        Staff Login
+      </h2>
+
+      <div class="row">
+        <input
+          id="emailInput"
+          type="email"
+          autocomplete="username"
+          placeholder="Email"
+        >
+
+        <input
+          id="passwordInput"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Password"
+        >
+
+        <button
+          id="loginButton"
+          type="button"
+        >
+          Login
+        </button>
+      </div>
+
+      <div
+        id="loginStatus"
+        class="status"
+      ></div>
+    </section>
+
+
+    <div
+      id="staffArea"
+      class="hidden"
+    >
+      <section class="panel">
+        <div class="row">
+          <div style="flex: 1;">
+            <div class="small">
+              Signed in as
+            </div>
+
+            <div
+              id="staffName"
+              class="account-name"
+            ></div>
+
+            <div
+              id="staffEmail"
+              class="small"
+            ></div>
+          </div>
+
+          <button
+            id="logoutButton"
+            type="button"
+          >
+            Logout
+          </button>
+        </div>
+      </section>
+
+
+      <section class="panel">
+        <h2>
+          Change Password
+        </h2>
+
+        <p class="small">
+          Change your Staff account password.
+        </p>
+
+        <div class="row">
+          <input
+            id="newPasswordInput"
+            type="password"
+            minlength="10"
+            autocomplete="new-password"
+            placeholder="New password"
+          >
+
+          <input
+            id="confirmPasswordInput"
+            type="password"
+            minlength="10"
+            autocomplete="new-password"
+            placeholder="Confirm new password"
+          >
+
+          <button
+            id="changePasswordButton"
+            type="button"
+          >
+            Change Password
+          </button>
+        </div>
+
+        <div
+          id="passwordStatus"
+          class="status"
+        ></div>
+      </section>
+
+
+      <section class="panel">
+        <h2>
+          Staff Tools
+        </h2>
+
+        <p class="small">
+          Staff management tools will be added here.
+        </p>
+      </section>
+    </div>
+
+
+    <a
+      class="back"
+      href="/"
+    >
+      ← Back to Home
+    </a>
+  </main>
+
+
+  <script type="module">
+    import {
+      createClient
+    } from "https://esm.sh/@supabase/supabase-js@2";
+
+
+    const SUPABASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+
+    const loginPanel =
+      document.getElementById(
+        "loginPanel"
+      );
+
+    const staffArea =
+      document.getElementById(
+        "staffArea"
+      );
+
+    const emailInput =
+      document.getElementById(
+        "emailInput"
+      );
+
+    const passwordInput =
+      document.getElementById(
+        "passwordInput"
+      );
+
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
+
+    const loginStatus =
+      document.getElementById(
+        "loginStatus"
+      );
+
+    const logoutButton =
+      document.getElementById(
+        "logoutButton"
+      );
+
+    const staffName =
+      document.getElementById(
+        "staffName"
+      );
+
+    const staffEmail =
+      document.getElementById(
+        "staffEmail"
+      );
+
+    const newPasswordInput =
+      document.getElementById(
+        "newPasswordInput"
+      );
+
+    const confirmPasswordInput =
+      document.getElementById(
+        "confirmPasswordInput"
+      );
+
+    const changePasswordButton =
+      document.getElementById(
+        "changePasswordButton"
+      );
+
+    const passwordStatus =
+      document.getElementById(
+        "passwordStatus"
+      );
+
+
+    function setStatus(
+      element,
+      message,
+      isError = false
+    ) {
+      element.textContent =
+        message;
+
+      element.classList.toggle(
+        "error",
+        isError
+      );
+    }
+
+
+    function showLogin() {
+      loginPanel.classList.remove(
+        "hidden"
+      );
+
+      staffArea.classList.add(
+        "hidden"
+      );
+
+      staffName.textContent =
+        "";
+
+      staffEmail.textContent =
+        "";
+    }
+
+
+    function showStaff(
+      account,
+      user
+    ) {
+      loginPanel.classList.add(
+        "hidden"
+      );
+
+      staffArea.classList.remove(
+        "hidden"
+      );
+
+      staffName.textContent =
+        account.display_name;
+
+      staffEmail.textContent =
+        user.email || "";
+    }
+
+
+    async function verifyStaff(
+      user
+    ) {
+      if (!user) {
+        return null;
+      }
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            "staff_accounts"
+          )
+          .select(
+            "user_id, display_name, role, is_active"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .maybeSingle();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      if (
+        !data ||
+        data.role !== "staff" ||
+        data.is_active !== true
+      ) {
+        return null;
+      }
+
+
+      return data;
+    }
+
+
+    async function openExistingSession() {
+      const {
+        data: {
+          user
+        },
+        error
+      } =
+        await supabase.auth
+          .getUser();
+
+
+      if (
+        error ||
+        !user
+      ) {
+        showLogin();
+        return;
+      }
+
+
+      try {
+        const account =
+          await verifyStaff(
+            user
+          );
+
+
+        if (!account) {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+          showLogin();
+
+          setStatus(
+            loginStatus,
+            "This account does not have active Staff access.",
+            true
+          );
+
+          return;
+        }
+
+
+        showStaff(
+          account,
+          user
+        );
+
+      } catch (error) {
+        showLogin();
+
+        setStatus(
+          loginStatus,
+          error.message ||
+            "Could not verify Staff access.",
+          true
+        );
+      }
+    }
+
+
+    async function login() {
+      const email =
+        emailInput
+          .value
+          .trim();
+
+      const password =
+        passwordInput.value;
+
+
+      if (
+        !email ||
+        !password
+      ) {
+        setStatus(
+          loginStatus,
+          "Enter your email and password.",
+          true
+        );
+
+        return;
+      }
+
+
+      loginButton.disabled =
+        true;
+
+      setStatus(
+        loginStatus,
+        "Signing in…"
+      );
+
+
+      try {
+        const {
+          data,
+          error
+        } =
+          await supabase.auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        const user =
+          data.user;
+
+
+        const account =
+          await verifyStaff(
+            user
+          );
+
+
+        if (!account) {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+          throw new Error(
+            "This account does not have active Staff access."
+          );
+        }
+
+
+        emailInput.value =
+          "";
+
+        passwordInput.value =
+          "";
+
+        setStatus(
+          loginStatus,
+          ""
+        );
+
+
+        showStaff(
+          account,
+          user
+        );
+
+      } catch (error) {
+        setStatus(
+          loginStatus,
+          error.message ||
+            "Login failed.",
+          true
+        );
+
+      } finally {
+        loginButton.disabled =
+          false;
+      }
+    }
+
+
+    loginButton.addEventListener(
+      "click",
+      login
+    );
+
+
+    passwordInput.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key ===
+          "Enter"
+        ) {
+          login();
+        }
+      }
+    );
+
+
+    logoutButton.addEventListener(
+      "click",
+      async () => {
+        logoutButton.disabled =
+          true;
+
+        try {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+        } finally {
+          logoutButton.disabled =
+            false;
+
+          showLogin();
+        }
+      }
+    );
+
+
+    changePasswordButton
+      .addEventListener(
+        "click",
+        async () => {
+          const password =
+            newPasswordInput.value;
+
+          const confirmPassword =
+            confirmPasswordInput.value;
+
+
+          if (
+            password.length < 10
+          ) {
+            setStatus(
+              passwordStatus,
+              "Password must be at least 10 characters.",
+              true
+            );
+
+            return;
+          }
+
+
+          if (
+            password !==
+            confirmPassword
+          ) {
+            setStatus(
+              passwordStatus,
+              "Passwords do not match.",
+              true
+            );
+
+            return;
+          }
+
+
+          changePasswordButton.disabled =
+            true;
+
+          setStatus(
+            passwordStatus,
+            "Changing password…"
+          );
+
+
+          try {
+            const {
+              error
+            } =
+              await supabase.auth
+                .updateUser({
+                  password
+                });
+
+
+            if (error) {
+              throw error;
+            }
+
+
+            newPasswordInput.value =
+              "";
+
+            confirmPasswordInput.value =
+              "";
+
+
+            setStatus(
+              passwordStatus,
+              "Password changed."
+            );
+
+          } catch (error) {
+            setStatus(
+              passwordStatus,
+              error.message ||
+                "Could not change password.",
+              true
+            );
+
+          } finally {
+            changePasswordButton.disabled =
+              false;
+          }
+        }
+      );
+
+
+    openExistingSession();
+  </script>
+
+</body>
+</html>
