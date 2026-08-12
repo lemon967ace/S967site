@@ -2089,11 +2089,8 @@ async function apiRequest(
   return result;
 }
 
-    function renderStaffAccounts(
-  accounts
-) {
-  staffAccounts.innerHTML =
-    "";
+ function renderStaffAccounts(accounts) {
+  staffAccounts.innerHTML = "";
 
   if (
     !Array.isArray(accounts) ||
@@ -2105,76 +2102,275 @@ async function apiRequest(
     return;
   }
 
-  accounts.forEach(
-    (account) => {
-      const row =
-        document.createElement(
-          "div"
-        );
+  accounts.forEach((account) => {
+    const row =
+      document.createElement("div");
 
-      row.className =
-        "manage-item";
+    row.className =
+      "manage-item";
 
-      if (!account.is_active) {
-        row.classList.add(
-          "item-inactive"
-        );
-      }
-
-      const content =
-        document.createElement(
-          "div"
-        );
-
-      content.style.flex =
-        "1";
-
-      const name =
-        document.createElement(
-          "div"
-        );
-
-      name.className =
-        "manage-name";
-
-      name.textContent =
-        account.display_name;
-
-      const email =
-        document.createElement(
-          "div"
-        );
-
-      email.className =
-        "manage-note";
-
-      email.textContent =
-        account.email || "";
-
-      const state =
-        document.createElement(
-          "div"
-        );
-
-      state.className =
-        "manage-note";
-
-      state.textContent =
-        account.is_active
-          ? "Active"
-          : "Disabled";
-
-      content.appendChild(name);
-      content.appendChild(email);
-      content.appendChild(state);
-
-      row.appendChild(content);
-
-      staffAccounts.appendChild(
-        row
+    if (!account.is_active) {
+      row.classList.add(
+        "item-inactive"
       );
     }
-  );
+
+    const content =
+      document.createElement("div");
+
+    content.style.flex = "1";
+
+    const name =
+      document.createElement("div");
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      account.display_name;
+
+    const email =
+      document.createElement("div");
+
+    email.className =
+      "manage-note";
+
+    email.textContent =
+      account.email || "";
+
+    const state =
+      document.createElement("div");
+
+    state.className =
+      "manage-note";
+
+    state.textContent =
+      account.is_active
+        ? "Active"
+        : "Disabled";
+
+    content.appendChild(name);
+    content.appendChild(email);
+    content.appendChild(state);
+
+    const actions =
+      document.createElement("div");
+
+    actions.className =
+      "manage-actions";
+
+
+    /*
+      RESET PASSWORD
+    */
+
+    const resetButton =
+      document.createElement("button");
+
+    resetButton.type =
+      "button";
+
+    resetButton.textContent =
+      "Reset Password";
+
+    resetButton.addEventListener(
+      "click",
+      async () => {
+        const password =
+          prompt(
+            `Enter a new temporary password for ${account.display_name}:`
+          );
+
+        if (password === null) {
+          return;
+        }
+
+        if (password.length < 10) {
+          alert(
+            "Password must be at least 10 characters."
+          );
+
+          return;
+        }
+
+        resetButton.disabled =
+          true;
+
+        try {
+          await staffApiRequest(
+            "POST",
+            {
+              action:
+                "reset_password",
+
+              userId:
+                account.user_id,
+
+              password,
+            }
+          );
+
+          alert(
+            "Password has been reset."
+          );
+        } catch (error) {
+          alert(
+            error.message ||
+            "Could not reset password."
+          );
+        } finally {
+          resetButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    /*
+      DISABLE / ENABLE
+    */
+
+    const toggleButton =
+      document.createElement("button");
+
+    toggleButton.type =
+      "button";
+
+    toggleButton.textContent =
+      account.is_active
+        ? "Disable"
+        : "Enable";
+
+    if (account.is_active) {
+      toggleButton.classList.add(
+        "danger"
+      );
+    }
+
+    toggleButton.addEventListener(
+      "click",
+      async () => {
+        const action =
+          account.is_active
+            ? "disable_staff"
+            : "enable_staff";
+
+        const verb =
+          account.is_active
+            ? "disable"
+            : "enable";
+
+        const confirmed =
+          confirm(
+            `${verb} Staff "${account.display_name}"?`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        toggleButton.disabled =
+          true;
+
+        try {
+          await staffApiRequest(
+            "POST",
+            {
+              action,
+              userId:
+                account.user_id,
+            }
+          );
+
+          await loadStaffAccounts();
+        } catch (error) {
+          alert(
+            error.message ||
+            `Could not ${verb} Staff.`
+          );
+
+          toggleButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    /*
+      DELETE
+    */
+
+    const deleteButton =
+      document.createElement("button");
+
+    deleteButton.type =
+      "button";
+
+    deleteButton.className =
+      "danger";
+
+    deleteButton.textContent =
+      "Delete";
+
+    deleteButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed =
+          confirm(
+            `Delete Staff "${account.display_name}"?\n\nThis cannot be undone.`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        deleteButton.disabled =
+          true;
+
+        try {
+          await staffApiRequest(
+            "POST",
+            {
+              action:
+                "delete_staff",
+
+              userId:
+                account.user_id,
+            }
+          );
+
+          await loadStaffAccounts();
+        } catch (error) {
+          alert(
+            error.message ||
+            "Could not delete Staff."
+          );
+
+          deleteButton.disabled =
+            false;
+        }
+      }
+    );
+
+
+    actions.appendChild(
+      resetButton
+    );
+
+    actions.appendChild(
+      toggleButton
+    );
+
+    actions.appendChild(
+      deleteButton
+    );
+
+
+    row.appendChild(content);
+    row.appendChild(actions);
+
+    staffAccounts.appendChild(row);
+  });
 }
 
     async function loadStaffAccounts() {
