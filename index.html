@@ -36,6 +36,43 @@
   ></script>
 
   <style>
+    .staff-link {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 1100;
+
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface-hover);
+  color: var(--text);
+
+  text-decoration: none;
+  font-size: 1rem;
+
+  cursor: pointer;
+}
+
+.staff-link:hover {
+  border-color: var(--border-hover);
+}
+
+@media (max-width: 480px) {
+  .staff-link {
+    top: 14px;
+    left: 14px;
+  }
+}
+    
     * {
       box-sizing: border-box;
     }
@@ -297,6 +334,15 @@
 
 
 <body>
+
+  <a
+  class="staff-link"
+  href="/staff"
+  aria-label="Staff"
+  title="Staff"
+>
+  🛠️
+</a>
 
   <div class="top-pickers">
 
