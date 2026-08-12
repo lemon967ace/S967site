@@ -1637,40 +1637,6 @@ function renderGroupBuyEvents() {
       actions.className =
         "group-buy-actions";
 
-
-      const manageButton =
-        document.createElement(
-          "button"
-        );
-
-      manageButton.type =
-        "button";
-
-      manageButton.textContent =
-        translate(
-          "groupBuyManage"
-        );
-
-      manageButton.addEventListener(
-        "click",
-        async () => {
-          selectedGroupBuyEventId =
-            Number(
-              event.id
-            );
-
-          groupBuyEventSelect.value =
-            String(
-              event.id
-            );
-
-          await loadGroupBuyDetail(
-            event.id
-          );
-        }
-      );
-
-
       const toggleButton =
         document.createElement(
           "button"
@@ -1840,10 +1806,6 @@ function renderGroupBuyEvents() {
         }
       );
 
-
-      actions.appendChild(
-        manageButton
-      );
 
       actions.appendChild(
         toggleButton
