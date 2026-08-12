@@ -25,6 +25,12 @@
 ></script>
 
   <style>
+  @media (max-width: 480px) {
+  .schedule-date {
+    display: block;
+  }
+}
+
     * {
       box-sizing: border-box;
     }
@@ -1597,11 +1603,13 @@ function updateApplicationSchedule() {
   );
 
 if (targetSaturday) {
-  scheduleStatus.textContent =
-    `${text.applicationsOpen} - ` +
-    formatCycleSaturday(
-      targetSaturday
-    );
+ scheduleStatus.innerHTML =
+  `${text.applicationsOpen}` +
+  `<span class="schedule-date"> - ` +
+  formatCycleSaturday(
+    targetSaturday
+  ) +
+  `</span>`;
 } else {
   scheduleStatus.textContent =
     text.applicationsOpen;
