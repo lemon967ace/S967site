@@ -14,7 +14,7 @@ const S967_LANGUAGE_STORAGE_KEY =
 
   privacyNotice:
 
-    "This website uses cookies and similar browser storage technologies as necessary to provide and maintain its functionality, including authentication sessions and language preferences. These technologies are not used for advertising or behavioral tracking."
+    "This website uses cookies and similar browser storage technologies as necessary to provide and maintain its functionality, including authentication sessions and language preferences. These technologies are not used for advertising or behavioral tracking.",
     
     language: "Language",
 
@@ -528,7 +528,7 @@ staffIdInvalid:
 
   privacyNotice:
 
-    "이 사이트는 로그인 세션 및 언어 설정을 포함한 사이트 기능을 제공하고 유지하기 위해 필요한 쿠키 및 유사한 브라우저 저장 기술을 사용합니다. 이러한 기술은 광고 또는 행동 추적 목적으로 사용되지 않습니다."
+    "이 사이트는 로그인 세션 및 언어 설정을 포함한 사이트 기능을 제공하고 유지하기 위해 필요한 쿠키 및 유사한 브라우저 저장 기술을 사용합니다. 이러한 기술은 광고 또는 행동 추적 목적으로 사용되지 않습니다.",
     
     language: "언어",
 
@@ -1044,7 +1044,7 @@ staffIdInvalid:
 
   privacyNotice:
 
-    "このサイトでは、ログインセッションや言語設定など、サイトの機能を提供・維持するために必要なCookieおよび類似のブラウザ保存技術を使用しています。これらの技術を広告または行動追跡の目的で使用することはありません。"
+    "このサイトでは、ログインセッションや言語設定など、サイトの機能を提供・維持するために必要なCookieおよび類似のブラウザ保存技術を使用しています。これらの技術を広告または行動追跡の目的で使用することはありません。",
     
     language: "言語",
 
@@ -1555,7 +1555,7 @@ staffIdInvalid:
 
   privacyNotice:
 
-    "Этот сайт использует файлы cookie и аналогичные технологии хранения данных в браузере, необходимые для работы и поддержания функций сайта, включая сеансы авторизации и языковые настройки. Эти технологии не используются для рекламы или отслеживания поведения пользователей."
+    "Этот сайт использует файлы cookie и аналогичные технологии хранения данных в браузере, необходимые для работы и поддержания функций сайта, включая сеансы авторизации и языковые настройки. Эти технологии не используются для рекламы или отслеживания поведения пользователей.",
     
     language: "Язык",
 
