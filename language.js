@@ -228,7 +228,7 @@ groupBuySubmitFailed:
   "Submission failed.",
 
 groupBuyLoadFailed:
-  "Failed to load the application form.",
+  "Could not load group purchase data.",
 
 groupBuySelect:
   "Select",
@@ -261,7 +261,7 @@ groupBuyRecruitmentEnds:
   "Registration ends:",
 
     groupBuyApplication: 
-      "Group Buy Application"
+      "Group Buy Application",
 
     staffTitle: "Staff",
 staffLogin: "Staff Login",
@@ -403,12 +403,6 @@ groupBuyApplicationsReadOnly:
 groupBuyRequestFailed:
   "Group purchase request failed.",
 
-groupBuyLoading:
-  "Loading…",
-
-groupBuyLoadFailed:
-  "Could not load group purchase data.",
-
 groupBuyDetailFailed:
   "Could not load round details.",
 
@@ -441,9 +435,6 @@ groupBuyInvalidRound:
 
 groupBuyOverlap:
   "The active period overlaps with another active round.",
-
-groupBuyNoItems:
-  "No purchase items found.",
 
 groupBuyDeleteItemConfirm:
   "Delete this purchase item?",
@@ -687,7 +678,7 @@ groupBuySubmitFailed:
   "제출에 실패했습니다.",
 
 groupBuyLoadFailed:
-  "신청서를 불러오지 못했습니다.",
+  "공동구매 데이터를 불러올 수 없습니다.",
 
 groupBuySelect:
   "선택",
@@ -720,7 +711,7 @@ groupBuyRecruitmentEnds:
   "신청 마감:",
 
    groupBuyApplication: 
-     "공동구매 신청" 
+     "공동구매 신청", 
 
 staffTitle: "스태프",
 staffLogin: "스태프 로그인",
@@ -861,12 +852,6 @@ groupBuyApplicationsReadOnly:
 groupBuyRequestFailed:
   "공동구매 요청에 실패했습니다.",
 
-groupBuyLoading:
-  "불러오는 중…",
-
-groupBuyLoadFailed:
-  "공동구매 데이터를 불러올 수 없습니다.",
-
 groupBuyDetailFailed:
   "회차 상세정보를 불러올 수 없습니다.",
 
@@ -899,9 +884,6 @@ groupBuyInvalidRound:
 
 groupBuyOverlap:
   "다른 활성 회차와 모집기간이 겹칩니다.",
-
-groupBuyNoItems:
-  "등록된 구매항목이 없습니다.",
 
 groupBuyDeleteItemConfirm:
   "이 구매항목을 삭제하시겠습니까?",
@@ -1146,7 +1128,7 @@ groupBuySubmitFailed:
   "送信に失敗しました。",
 
 groupBuyLoadFailed:
-  "申請フォームを読み込めませんでした。",
+  "共同購入データを読み込めませんでした。",
 
 groupBuySelect:
   "選択",
@@ -1179,7 +1161,7 @@ groupBuyRecruitmentEnds:
   "申請締切：",
 
     groupBuyApplication: 
-      "共同購入申請"
+      "共同購入申請",
 
     staffTitle: "スタッフ",
 staffLogin: "スタッフログイン",
@@ -1320,12 +1302,6 @@ groupBuyApplicationsReadOnly:
 groupBuyRequestFailed:
   "共同購入のリクエストに失敗しました。",
 
-groupBuyLoading:
-  "読み込み中…",
-
-groupBuyLoadFailed:
-  "共同購入データを読み込めませんでした。",
-
 groupBuyDetailFailed:
   "回次の詳細情報を読み込めませんでした。",
 
@@ -1358,9 +1334,6 @@ groupBuyInvalidRound:
 
 groupBuyOverlap:
   "他の有効な回次と募集期間が重複しています。",
-
-groupBuyNoItems:
-  "登録された購入項目はありません。",
 
 groupBuyDeleteItemConfirm:
   "この購入項目を削除しますか？",
@@ -1605,7 +1578,7 @@ groupBuySubmitFailed:
   "Не удалось отправить заявку.",
 
 groupBuyLoadFailed:
-  "Не удалось загрузить форму заявки.",
+  "Не удалось загрузить данные совместной покупки.",
 
 groupBuySelect:
   "Выберите",
@@ -1638,7 +1611,7 @@ groupBuyRecruitmentEnds:
   "Окончание приёма заявок:",
 
    groupBuyApplication: 
-     "Совместная покупка" 
+     "Совместная покупка", 
 
     staffTitle: "Персонал",
 staffLogin: "Вход для персонала",
@@ -1779,12 +1752,6 @@ groupBuyApplicationsReadOnly:
 groupBuyRequestFailed:
   "Не удалось выполнить запрос совместной покупки.",
 
-groupBuyLoading:
-  "Загрузка…",
-
-groupBuyLoadFailed:
-  "Не удалось загрузить данные совместной покупки.",
-
 groupBuyDetailFailed:
   "Не удалось загрузить информацию о раунде.",
 
@@ -1817,9 +1784,6 @@ groupBuyInvalidRound:
 
 groupBuyOverlap:
   "Период пересекается с другим активным раундом.",
-
-groupBuyNoItems:
-  "Товары не добавлены.",
 
 groupBuyDeleteItemConfirm:
   "Удалить этот товар?",
@@ -1930,20 +1894,21 @@ function applyLanguage(language) {
           key,
           language
         );
-      document
-  .querySelectorAll(
-    "[data-i18n-html]"
-  )
-  .forEach((element) => {
-    const key =
-      element.dataset.i18nHtml;
+    });
 
-    element.innerHTML =
-      getTranslation(
-        key,
-        language
-      );
-  });
+  document
+    .querySelectorAll(
+      "[data-i18n-html]"
+    )
+    .forEach((element) => {
+      const key =
+        element.dataset.i18nHtml;
+
+      element.innerHTML =
+        getTranslation(
+          key,
+          language
+        );
     });
 
   document
@@ -2018,50 +1983,46 @@ function setLanguage(language) {
 }
 
 
-function initializeLanguage() {
-  applyLanguage(
-    getCurrentLanguage()
+function closeLanguagePicker(
+  picker,
+  button
+) {
+  picker.classList.remove(
+    "is-open"
   );
 
-  const picker =
-    document.querySelector(
+  button.setAttribute(
+    "aria-expanded",
+    "false"
+  );
+}
+
+
+function initializeLanguagePicker() {
+  const pickers =
+    document.querySelectorAll(
       "[data-language-picker]"
     );
 
-  const menuButton =
-    document.querySelector(
-      "[data-language-button]"
-    );
-
-  document
-    .querySelectorAll(
-      "[data-language-choice]"
-    )
-    .forEach((button) => {
-      button.addEventListener(
-        "click",
-        () => {
-          setLanguage(
-            button.dataset
-              .languageChoice
-          );
-
-          picker?.classList.remove(
-            "is-open"
-          );
-
-          menuButton?.setAttribute(
-            "aria-expanded",
-            "false"
-          );
-        }
+  pickers.forEach((picker) => {
+    const button =
+      picker.querySelector(
+        "[data-language-button]"
       );
-    });
 
-  if (picker && menuButton) {
-    menuButton.addEventListener(
+    const choices =
+      picker.querySelectorAll(
+        "[data-language-choice]"
+      );
+
+    if (!button) {
+      return;
+    }
+
+    button.addEventListener(
       "click",
       (event) => {
+        event.preventDefault();
         event.stopPropagation();
 
         const isOpen =
@@ -2069,33 +2030,70 @@ function initializeLanguage() {
             "is-open"
           );
 
-        menuButton.setAttribute(
+        button.setAttribute(
           "aria-expanded",
           String(isOpen)
         );
       }
     );
 
-    document.addEventListener(
-      "click",
-      (event) => {
-        if (
-          !picker.contains(
-            event.target
-          )
-        ) {
+    choices.forEach((choice) => {
+      choice.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+
+          const language =
+            choice.dataset
+              .languageChoice;
+
+          setLanguage(
+            language
+          );
+
+          closeLanguagePicker(
+            picker,
+            button
+          );
+        }
+      );
+    });
+  });
+
+  document.addEventListener(
+    "click",
+    () => {
+      document
+        .querySelectorAll(
+          "[data-language-picker].is-open"
+        )
+        .forEach((picker) => {
+          const button =
+            picker.querySelector(
+              "[data-language-button]"
+            );
+
           picker.classList.remove(
             "is-open"
           );
 
-          menuButton.setAttribute(
+          button?.setAttribute(
             "aria-expanded",
             "false"
           );
-        }
-      }
-    );
-  }
+        });
+    }
+  );
+}
+
+
+function initializeLanguage() {
+  applyLanguage(
+    getCurrentLanguage()
+  );
+
+  initializeLanguagePicker();
 }
 
 
