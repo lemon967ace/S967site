@@ -26,6 +26,31 @@
   ></script>
 
   <style>
+
+    .staff-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.staff-tab {
+  background: transparent;
+}
+
+.staff-tab.is-active {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+}
+
+.staff-section {
+  display: none;
+}
+
+.staff-section.is-active {
+  display: block;
+}
+    
     .upload-item {
   margin-top: 14px;
   padding: 15px;
@@ -415,34 +440,125 @@
       </section>
 
 
-      <section class="panel">
-  <div class="row">
-    <h2 style="margin: 0; flex: 1;">
-      Image Management
+     <div class="staff-tabs">
+  <button
+    type="button"
+    class="staff-tab is-active"
+    data-staff-tab="images"
+  >
+    이미지 관리
+  </button>
+
+  <button
+    type="button"
+    class="staff-tab"
+    data-staff-tab="wk"
+  >
+    황무지 신청
+  </button>
+
+  <button
+    type="button"
+    class="staff-tab"
+    data-staff-tab="groupbuy"
+  >
+    공동구매
+  </button>
+</div>
+
+
+<div
+  class="staff-section is-active"
+  data-staff-section="images"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0; flex: 1;">
+        Image Management
+      </h2>
+
+      <button
+        id="refreshImagesButton"
+        type="button"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <p class="small">
+      Review uploaded images, remove inappropriate images,
+      or block an uploader for 7 days.
+    </p>
+
+    <div
+      id="imageUploads"
+    ></div>
+
+    <div
+      id="imageStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+
+<div
+  class="staff-section"
+  data-staff-section="wk"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0; flex: 1;">
+        황무지 신청
+      </h2>
+
+      <button
+        id="refreshWkButton"
+        type="button"
+      >
+        새로고침
+      </button>
+    </div>
+
+    <p class="small">
+      황무지 신청 목록을 조회할 수 있습니다.
+    </p>
+
+    <div
+      id="wkApplications"
+    ></div>
+
+    <div
+      id="wkStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+
+<div
+  class="staff-section"
+  data-staff-section="groupbuy"
+>
+  <section class="panel">
+    <h2>
+      공동구매
     </h2>
 
-    <button
-      id="refreshImagesButton"
-      type="button"
-    >
-      Refresh
-    </button>
-  </div>
+    <p class="small">
+      공동구매 회차, 구매항목, 신청내역 관리 기능이 여기에 표시됩니다.
+    </p>
 
-  <p class="small">
-    Review uploaded images, remove inappropriate images,
-    or block an uploader for 7 days.
-  </p>
+    <div
+      id="groupBuyArea"
+    ></div>
 
-  <div
-    id="imageUploads"
-  ></div>
-
-  <div
-    id="imageStatus"
-    class="status"
-  ></div>
-</section>
+    <div
+      id="groupBuyStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
     </div>
 
 
@@ -566,6 +682,41 @@ let imageData = {
   blocked: [],
 };
 
+    const staffTabs =
+  document.querySelectorAll(
+    "[data-staff-tab]"
+  );
+
+const staffSections =
+  document.querySelectorAll(
+    "[data-staff-section]"
+  );
+
+const refreshWkButton =
+  document.getElementById(
+    "refreshWkButton"
+  );
+
+const wkApplications =
+  document.getElementById(
+    "wkApplications"
+  );
+
+const wkStatus =
+  document.getElementById(
+    "wkStatus"
+  );
+
+const groupBuyArea =
+  document.getElementById(
+    "groupBuyArea"
+  );
+
+const groupBuyStatus =
+  document.getElementById(
+    "groupBuyStatus"
+  );
+    
     async function staffImageRequest(
   method,
   body = null
@@ -1551,6 +1702,40 @@ imageData = {
 
 
     openExistingSession();
+
+    staffTabs.forEach(
+  (button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const target =
+          button.dataset
+            .staffTab;
+
+        staffTabs.forEach(
+          (item) => {
+            item.classList.toggle(
+              "is-active",
+              item === button
+            );
+          }
+        );
+
+        staffSections.forEach(
+          (section) => {
+            section.classList.toggle(
+              "is-active",
+              section.dataset
+                .staffSection ===
+                target
+            );
+          }
+        );
+      }
+    );
+  }
+);
+    
   </script>
 
 </body>
