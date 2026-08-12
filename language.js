@@ -503,6 +503,12 @@ staffEmailRequestFailed:
 
 staffSessionExpired:
   "Your login session has expired. Please sign in again.",
+
+    uploadPaused:
+  "Image uploads are temporarily unavailable. Please try again later.",
+
+uploadBlocked:
+  "Image uploads are currently unavailable. Please try again later.",
   },
 
   ko: {
@@ -999,6 +1005,12 @@ staffEmailRequestFailed:
 
 staffSessionExpired:
   "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
+
+    uploadPaused:
+  "현재 이미지 업로드가 일시 중지되어 있습니다. 잠시 후 다시 시도해 주세요.",
+
+uploadBlocked:
+  "이미지 업로드를 이용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
   },
 
   ja: {
@@ -1493,6 +1505,11 @@ staffEmailDuplicate:
 staffEmailRequestFailed:
   "メール受信者の処理に失敗しました。",
 
+    uploadPaused:
+  "現在、画像のアップロードは一時停止されています。しばらくしてからもう一度お試しください。",
+
+uploadBlocked:
+  "現在、画像をアップロードすることはできません。しばらくしてからもう一度お試しください。",
   },
 
   ru: {
@@ -1986,6 +2003,12 @@ staffEmailDuplicate:
 
 staffEmailRequestFailed:
   "Не удалось выполнить операцию с получателем email.",
+
+    uploadPaused:
+  "Загрузка изображений временно приостановлена. Повторите попытку позже.",
+
+uploadBlocked:
+  "Загрузка изображений сейчас недоступна. Повторите попытку позже.",
   },
 };
 
