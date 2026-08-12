@@ -581,11 +581,22 @@
       Staff
     </h1>
 
-
-    <section
-      id="loginPanel"
-      class="panel"
-    >
+<section
+  id="loadingPanel"
+  class="panel"
+>
+  <div
+    class="small"
+    data-i18n="staffLoading"
+  >
+    Loading…
+  </div>
+</section>
+    
+ <section
+  id="loginPanel"
+  class="panel hidden"
+>
       <h2 data-i18n="staffLogin">
         Staff Login
       </h2>
@@ -1071,7 +1082,11 @@ let wkLoaded = false;
         SUPABASE_PUBLISHABLE_KEY
       );
 
-
+const loadingPanel =
+  document.getElementById(
+    "loadingPanel"
+  );
+    
     const loginPanel =
       document.getElementById(
         "loginPanel"
@@ -3903,52 +3918,72 @@ async function loadWkApplications() {
 
 
     function showLogin() {
-      loginPanel.classList.remove(
-        "hidden"
-      );
+  loadingPanel.classList.add(
+    "hidden"
+  );
 
-      staffArea.classList.add(
-        "hidden"
-      );
+  loginPanel.classList.remove(
+    "hidden"
+  );
 
-      staffName.textContent =
-        "";
+  staffArea.classList.add(
+    "hidden"
+  );
 
-      staffEmail.textContent =
-        "";
+  staffName.textContent =
+    "";
 
-      imageUploads.innerHTML =
-        "";
+  staffEmail.textContent =
+    "";
 
-      imageData = {
-        uploads: [],
-        blocked: [],
-      };
-    }
+  imageUploads.innerHTML =
+    "";
 
+  imageData = {
+    uploads: [],
+    blocked: [],
+  };
+}
 
     function showStaff(
-      account,
-      user
-    ) {
-      loginPanel.classList.add(
-        "hidden"
-      );
+  account,
+  user
+) {
+  loadingPanel.classList.add(
+    "hidden"
+  );
 
-      staffArea.classList.remove(
-        "hidden"
-      );
+  loginPanel.classList.add(
+    "hidden"
+  );
 
-      staffName.textContent =
-        account.display_name;
+  staffArea.classList.remove(
+    "hidden"
+  );
 
-      staffEmail.textContent =
-        user.email || "";
+  staffName.textContent =
+    account.display_name;
 
-      loadImages();
-    }
+  staffEmail.textContent =
+    user.email || "";
 
+  loadImages();
+}
 
+    function showLoading() {
+  loadingPanel.classList.remove(
+    "hidden"
+  );
+
+  loginPanel.classList.add(
+    "hidden"
+  );
+
+  staffArea.classList.add(
+    "hidden"
+  );
+}
+    
     async function verifyStaff(
       user
     ) {
@@ -3990,6 +4025,7 @@ async function loadWkApplications() {
 
 
     async function openExistingSession() {
+        showLoading();
       const {
         data: {
           user
