@@ -31,59 +31,77 @@
   ></script>
 
   <style>
-    .language-picker {
-  position: fixed;
-  top: 18px;
-  right: 68px;
-  z-index: 1100;
-}
+    .top-pickers {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1100;
 
-.language-button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    .top-pickers .language-picker,
+    .top-pickers .theme-picker {
+      position: relative;
+      inset: auto;
+    }
 
-.language-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+    .language-button,
+    .top-pickers .theme-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
 
-  min-width: 140px;
-  padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  border: 1px solid var(--border);
-  border-radius: 12px;
+    .language-menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      top: auto;
 
-  background: var(--surface);
-  box-shadow: var(--shadow);
+      min-width: 140px;
+      padding: 6px;
 
-  display: none;
-}
+      border: 1px solid var(--border);
+      border-radius: 12px;
 
-.language-picker.is-open
-.language-menu {
-  display: block;
-}
+      background: var(--surface);
+      box-shadow: var(--shadow);
 
-.language-menu button {
-  width: 100%;
-  padding: 9px 10px;
+      display: none;
+    }
 
-  border: 0;
-  background: transparent;
+    .language-picker.is-open
+    .language-menu {
+      display: block;
+    }
 
-  text-align: left;
-  white-space: nowrap;
-}
+    .language-menu button {
+      width: 100%;
+      padding: 9px 10px;
 
-.language-menu button:hover {
-  background: var(--surface-hover);
-}
+      border: 0;
+      background: transparent;
+
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .language-menu button:hover {
+      background: var(--surface-hover);
+    }
+
+    .top-pickers .theme-menu {
+      top: auto;
+      bottom: calc(100% + 8px);
+      right: 0;
+    }
     
     .group-buy-form {
   display: grid;
@@ -438,10 +456,11 @@
 
 <body>
 
-  <div
-    class="language-picker"
-    data-language-picker
-  >
+  <div class="top-pickers">
+    <div
+      class="language-picker"
+      data-language-picker
+    >
     <button
       class="language-button"
       type="button"
@@ -549,6 +568,7 @@
         </span>
       </button>
     </div>
+  </div>
   </div>
 
 
@@ -1155,16 +1175,6 @@ let wkLoaded = false;
     const wkStatus =
       document.getElementById(
         "wkStatus"
-      );
-
-    const groupBuyArea =
-      document.getElementById(
-        "groupBuyArea"
-      );
-
-    const groupBuyStatus =
-      document.getElementById(
-        "groupBuyStatus"
       );
 
     const groupBuyRefreshButton =
