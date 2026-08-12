@@ -1033,7 +1033,7 @@ staffIdInvalid:
  "등록된 이메일이 없습니다.",
 
 staffEmailCount:
-  "{count} / {max}개 등록".
+  "{count} / {max}개 등록",
   },
 
   ja: {
