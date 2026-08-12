@@ -355,7 +355,116 @@ wkFirstHalf: "First Half",
 wkSecondHalf: "Second Half",
 wkFull: "Full",
 
+groupBuyRounds:
+  "Rounds",
 
+groupBuyCreateRound:
+  "Create Round",
+
+groupBuyRoundName:
+  "Round name",
+
+groupBuyStart:
+  "Start",
+
+groupBuyEnd:
+  "End",
+
+groupBuyActive:
+  "Active",
+
+groupBuyInactive:
+  "Inactive",
+
+groupBuyAddRound:
+  "Add Round",
+
+groupBuySelectedRound:
+  "Selected Round",
+
+groupBuyItems:
+  "Purchase Items",
+
+groupBuyItemName:
+  "Item name",
+
+groupBuyMaxQuantity:
+  "Max quantity",
+
+groupBuyAddItem:
+  "Add Item",
+
+groupBuyApplications:
+  "Applications",
+
+groupBuyApplicationsReadOnly:
+  "Applications are read-only.",
+
+groupBuyRequestFailed:
+  "Group purchase request failed.",
+
+groupBuyLoading:
+  "Loading…",
+
+groupBuyLoadFailed:
+  "Could not load group purchase data.",
+
+groupBuyDetailFailed:
+  "Could not load round details.",
+
+groupBuyNoRounds:
+  "No rounds found.",
+
+groupBuySelectRound:
+  "Select a round.",
+
+groupBuyManage:
+  "Manage",
+
+groupBuySetActive:
+  "Set Active",
+
+groupBuySetInactive:
+  "Set Inactive",
+
+groupBuyEdit:
+  "Edit",
+
+groupBuyStartKst:
+  "Start (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyEndKst:
+  "End (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyInvalidRound:
+  "Enter a valid round name, start time, and end time.",
+
+groupBuyOverlap:
+  "The active period overlaps with another active round.",
+
+groupBuyNoItems:
+  "No purchase items found.",
+
+groupBuyDeleteItemConfirm:
+  "Delete this purchase item?",
+
+groupBuyItemInUse:
+  "This item cannot be deleted because it has already been used in an application.",
+
+groupBuyNoApplications:
+  "No applications found.",
+
+groupBuyNoItemsSelected:
+  "No items selected.",
+
+groupBuyTotalApplications:
+  "{count} application(s)",
+
+groupBuySelectRoundFirst:
+  "Select a round first.",
+
+groupBuyInvalidItem:
+  "Enter a valid item name and maximum quantity.",
   },
 
   ko: {
@@ -704,6 +813,116 @@ wkFirstHalf: "전반부",
 wkSecondHalf: "후반부",
 wkFull: "전체",
 
+groupBuyRounds:
+  "회차 관리",
+
+groupBuyCreateRound:
+  "회차 추가",
+
+groupBuyRoundName:
+  "회차명",
+
+groupBuyStart:
+  "모집 시작",
+
+groupBuyEnd:
+  "모집 종료",
+
+groupBuyActive:
+  "활성",
+
+groupBuyInactive:
+  "비활성",
+
+groupBuyAddRound:
+  "회차 추가",
+
+groupBuySelectedRound:
+  "선택된 회차",
+
+groupBuyItems:
+  "구매항목 관리",
+
+groupBuyItemName:
+  "구매항목명",
+
+groupBuyMaxQuantity:
+  "최대 수량",
+
+groupBuyAddItem:
+  "구매항목 추가",
+
+groupBuyApplications:
+  "신청내역",
+
+groupBuyApplicationsReadOnly:
+  "신청내역은 조회만 가능합니다.",
+
+groupBuyRequestFailed:
+  "공동구매 요청에 실패했습니다.",
+
+groupBuyLoading:
+  "불러오는 중…",
+
+groupBuyLoadFailed:
+  "공동구매 데이터를 불러올 수 없습니다.",
+
+groupBuyDetailFailed:
+  "회차 상세정보를 불러올 수 없습니다.",
+
+groupBuyNoRounds:
+  "등록된 회차가 없습니다.",
+
+groupBuySelectRound:
+  "회차를 선택하세요.",
+
+groupBuyManage:
+  "관리",
+
+groupBuySetActive:
+  "활성화",
+
+groupBuySetInactive:
+  "비활성화",
+
+groupBuyEdit:
+  "수정",
+
+groupBuyStartKst:
+  "모집 시작 (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyEndKst:
+  "모집 종료 (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyInvalidRound:
+  "회차명과 모집 시작·종료 일시를 정확히 입력하세요.",
+
+groupBuyOverlap:
+  "다른 활성 회차와 모집기간이 겹칩니다.",
+
+groupBuyNoItems:
+  "등록된 구매항목이 없습니다.",
+
+groupBuyDeleteItemConfirm:
+  "이 구매항목을 삭제하시겠습니까?",
+
+groupBuyItemInUse:
+  "이미 신청내역에서 사용된 구매항목은 삭제할 수 없습니다.",
+
+groupBuyNoApplications:
+  "신청내역이 없습니다.",
+
+groupBuyNoItemsSelected:
+  "선택한 구매항목이 없습니다.",
+
+groupBuyTotalApplications:
+  "총 {count}건",
+
+groupBuySelectRoundFirst:
+  "먼저 회차를 선택하세요.",
+
+groupBuyInvalidItem:
+  "구매항목명과 최대 수량을 정확히 입력하세요.",
 
   },
 
@@ -1053,6 +1272,117 @@ wkFirstHalf: "前半",
 wkSecondHalf: "後半",
 wkFull: "全時間",
 
+groupBuyRounds:
+  "回次管理",
+
+groupBuyCreateRound:
+  "回次を追加",
+
+groupBuyRoundName:
+  "回次名",
+
+groupBuyStart:
+  "募集開始",
+
+groupBuyEnd:
+  "募集終了",
+
+groupBuyActive:
+  "有効",
+
+groupBuyInactive:
+  "無効",
+
+groupBuyAddRound:
+  "回次を追加",
+
+groupBuySelectedRound:
+  "選択中の回次",
+
+groupBuyItems:
+  "購入項目管理",
+
+groupBuyItemName:
+  "購入項目名",
+
+groupBuyMaxQuantity:
+  "最大数量",
+
+groupBuyAddItem:
+  "購入項目を追加",
+
+groupBuyApplications:
+  "申請一覧",
+
+groupBuyApplicationsReadOnly:
+  "申請内容は閲覧のみ可能です。",
+
+groupBuyRequestFailed:
+  "共同購入のリクエストに失敗しました。",
+
+groupBuyLoading:
+  "読み込み中…",
+
+groupBuyLoadFailed:
+  "共同購入データを読み込めませんでした。",
+
+groupBuyDetailFailed:
+  "回次の詳細情報を読み込めませんでした。",
+
+groupBuyNoRounds:
+  "登録された回次はありません。",
+
+groupBuySelectRound:
+  "回次を選択してください。",
+
+groupBuyManage:
+  "管理",
+
+groupBuySetActive:
+  "有効にする",
+
+groupBuySetInactive:
+  "無効にする",
+
+groupBuyEdit:
+  "編集",
+
+groupBuyStartKst:
+  "募集開始（KST、YYYY-MM-DDTHH:MM）：",
+
+groupBuyEndKst:
+  "募集終了（KST、YYYY-MM-DDTHH:MM）：",
+
+groupBuyInvalidRound:
+  "回次名と募集開始・終了日時を正しく入力してください。",
+
+groupBuyOverlap:
+  "他の有効な回次と募集期間が重複しています。",
+
+groupBuyNoItems:
+  "登録された購入項目はありません。",
+
+groupBuyDeleteItemConfirm:
+  "この購入項目を削除しますか？",
+
+groupBuyItemInUse:
+  "すでに申請で使用されている購入項目は削除できません。",
+
+groupBuyNoApplications:
+  "申請はありません。",
+
+groupBuyNoItemsSelected:
+  "選択された購入項目はありません。",
+
+groupBuyTotalApplications:
+  "合計 {count} 件",
+
+groupBuySelectRoundFirst:
+  "先に回次を選択してください。",
+
+groupBuyInvalidItem:
+  "購入項目名と最大数量を正しく入力してください。",
+
   },
 
   ru: {
@@ -1400,6 +1730,117 @@ wkNegotiable: "Можно обсудить",
 wkFirstHalf: "Первые 4 часа",
 wkSecondHalf: "Последние 4 часа",
 wkFull: "Полностью",
+
+    groupBuyRounds:
+  "Управление раундами",
+
+groupBuyCreateRound:
+  "Создать раунд",
+
+groupBuyRoundName:
+  "Название раунда",
+
+groupBuyStart:
+  "Начало приёма",
+
+groupBuyEnd:
+  "Окончание приёма",
+
+groupBuyActive:
+  "Активен",
+
+groupBuyInactive:
+  "Неактивен",
+
+groupBuyAddRound:
+  "Добавить раунд",
+
+groupBuySelectedRound:
+  "Выбранный раунд",
+
+groupBuyItems:
+  "Управление товарами",
+
+groupBuyItemName:
+  "Название товара",
+
+groupBuyMaxQuantity:
+  "Максимальное количество",
+
+groupBuyAddItem:
+  "Добавить товар",
+
+groupBuyApplications:
+  "Заявки",
+
+groupBuyApplicationsReadOnly:
+  "Заявки доступны только для просмотра.",
+
+groupBuyRequestFailed:
+  "Не удалось выполнить запрос совместной покупки.",
+
+groupBuyLoading:
+  "Загрузка…",
+
+groupBuyLoadFailed:
+  "Не удалось загрузить данные совместной покупки.",
+
+groupBuyDetailFailed:
+  "Не удалось загрузить информацию о раунде.",
+
+groupBuyNoRounds:
+  "Раундов нет.",
+
+groupBuySelectRound:
+  "Выберите раунд.",
+
+groupBuyManage:
+  "Управление",
+
+groupBuySetActive:
+  "Активировать",
+
+groupBuySetInactive:
+  "Деактивировать",
+
+groupBuyEdit:
+  "Изменить",
+
+groupBuyStartKst:
+  "Начало приёма (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyEndKst:
+  "Окончание приёма (KST, YYYY-MM-DDTHH:MM):",
+
+groupBuyInvalidRound:
+  "Укажите корректное название раунда, время начала и окончания.",
+
+groupBuyOverlap:
+  "Период пересекается с другим активным раундом.",
+
+groupBuyNoItems:
+  "Товары не добавлены.",
+
+groupBuyDeleteItemConfirm:
+  "Удалить этот товар?",
+
+groupBuyItemInUse:
+  "Этот товар нельзя удалить, поскольку он уже использован в заявке.",
+
+groupBuyNoApplications:
+  "Заявок нет.",
+
+groupBuyNoItemsSelected:
+  "Товары не выбраны.",
+
+groupBuyTotalApplications:
+  "Всего заявок: {count}",
+
+groupBuySelectRoundFirst:
+  "Сначала выберите раунд.",
+
+groupBuyInvalidItem:
+  "Укажите корректное название товара и максимальное количество.",
   },
 };
 
