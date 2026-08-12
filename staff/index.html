@@ -602,13 +602,16 @@
       </h2>
 
       <div class="row">
-        <input
-          id="emailInput"
-          type="email"
-          autocomplete="username"
-          placeholder="Email"
-          data-i18n-placeholder="email"
-        >
+   <input
+  id="staffIdInput"
+  type="text"
+  autocomplete="username"
+  maxlength="50"
+  autocapitalize="characters"
+  spellcheck="false"
+  placeholder="Staff ID"
+  data-i18n-placeholder="staffId"
+>
 
         <input
           id="passwordInput"
@@ -1225,10 +1228,10 @@ const loadingPanel =
         "staffArea"
       );
 
-    const emailInput =
-      document.getElementById(
-        "emailInput"
-      );
+const staffIdInput =
+  document.getElementById(
+    "staffIdInput"
+  );
 
     const passwordInput =
       document.getElementById(
@@ -4847,18 +4850,18 @@ async function loadWkApplications() {
 
 
     async function login() {
-      const email =
-        emailInput
-          .value
-          .trim();
+     const staffId =
+  staffIdInput
+    .value
+    .trim();
 
-      const password =
-        passwordInput.value;
+const password =
+  passwordInput.value;
 
-      if (
-        !email ||
-        !password
-      ) {
+if (
+  !staffId ||
+  !password
+) {
         setTranslatedStatus(
           loginStatus,
           "staffLoginRequired",
@@ -4867,7 +4870,25 @@ async function loadWkApplications() {
 
         return;
       }
+const normalizedStaffId =
+  staffId.toLowerCase();
 
+if (
+  !/^[a-z0-9._-]+$/.test(
+    normalizedStaffId
+  )
+) {
+  setTranslatedStatus(
+    loginStatus,
+    "staffIdInvalid",
+    true
+  );
+
+  return;
+}
+
+const internalEmail =
+  `${normalizedStaffId}@s967.org`;
       loginButton.disabled =
         true;
 
@@ -4881,11 +4902,11 @@ async function loadWkApplications() {
           data,
           error
         } =
-          await supabase.auth
-            .signInWithPassword({
-              email,
-              password
-            });
+        await supabase.auth
+  .signInWithPassword({
+    email: internalEmail,
+    password
+  });
 
         if (error) {
           throw error;
@@ -4914,8 +4935,8 @@ async function loadWkApplications() {
           return;
         }
 
-        emailInput.value =
-          "";
+      staffIdInput.value =
+  "";
 
         passwordInput.value =
           "";
