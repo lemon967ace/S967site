@@ -1320,11 +1320,6 @@ const loadingPanel =
         "wkStatus"
       );
 
-    const groupBuyRefreshButton =
-  document.getElementById(
-    "groupBuyRefreshButton"
-  );
-
 const groupBuyEventList =
   document.getElementById(
     "groupBuyEventList"
@@ -2695,8 +2690,7 @@ async function loadGroupBuyDetail(
 
 
 async function loadGroupBuyData() {
-  groupBuyRefreshButton.disabled =
-    true;
+
 
   setStatus(
     groupBuyEventStatus,
@@ -2783,8 +2777,7 @@ async function loadGroupBuyData() {
     );
 
   } finally {
-    groupBuyRefreshButton.disabled =
-      false;
+
   }
 }
 
@@ -3487,12 +3480,6 @@ groupBuyEventSelect
     }
   );
 
-
-groupBuyRefreshButton
-  .addEventListener(
-    "click",
-    loadGroupBuyData
-  );
     
 async function staffWkRequest() {
   const {
