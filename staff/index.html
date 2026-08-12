@@ -31,6 +31,60 @@
   ></script>
 
   <style>
+    .language-picker {
+  position: fixed;
+  top: 18px;
+  right: 68px;
+  z-index: 1100;
+}
+
+.language-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+
+  min-width: 140px;
+  padding: 6px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  display: none;
+}
+
+.language-picker.is-open
+.language-menu {
+  display: block;
+}
+
+.language-menu button {
+  width: 100%;
+  padding: 9px 10px;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+  white-space: nowrap;
+}
+
+.language-menu button:hover {
+  background: var(--surface-hover);
+}
+    
     .group-buy-form {
   display: grid;
   gap: 10px;
