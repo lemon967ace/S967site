@@ -262,6 +262,65 @@ groupBuyRecruitmentEnds:
 
     groupBuyApplication: 
       "Group Buy Application"
+
+    staffTitle: "Staff",
+staffLogin: "Staff Login",
+email: "Email",
+password: "Password",
+login: "Login",
+logout: "Logout",
+signedInAs: "Signed in as",
+
+changePassword: "Change Password",
+changePasswordLead: "Change your Staff account password.",
+newPassword: "New password",
+confirmNewPassword: "Confirm new password",
+
+staffTabImages: "Image Management",
+staffTabWk: "WK Applications",
+staffTabGroupBuy: "Group Purchase",
+
+staffImageTitle: "Image Management",
+staffImageLead:
+  "Review uploaded images, remove inappropriate images, or block an uploader for 7 days.",
+
+staffWkTitle: "WK Applications",
+staffWkLead: "You can view WK applications.",
+
+staffGroupBuyTitle: "Group Purchase",
+staffGroupBuyLead:
+  "Manage group purchase rounds and items, and view applications.",
+
+delete: "Delete",
+block7Days: "Block 7 days",
+unblock: "Unblock",
+notBlocked: "Not blocked",
+blockedByAdmin: "Blocked by Admin",
+noUploadsFound: "No uploads found.",
+
+staffSigningIn: "Signing in…",
+staffLoginRequired: "Enter your email and password.",
+staffAccessDenied:
+  "This account does not have active Staff access.",
+staffVerifyFailed: "Could not verify Staff access.",
+staffLoginFailed: "Login failed.",
+
+passwordMin6: "Password must be at least 6 characters.",
+passwordMismatch: "Passwords do not match.",
+passwordChanging: "Changing password…",
+passwordChanged: "Password changed.",
+passwordChangeFailed: "Could not change password.",
+
+staffSessionExpired: "Staff session expired.",
+imageRequestFailed: "Image management request failed.",
+imageLoading: "Loading…",
+imageLoadFailed: "Could not load images.",
+deleteImageConfirm: "Delete this image?",
+deleteImageFailed: "Could not delete image.",
+block7DaysConfirm: "Block this uploader for 7 days?",
+blockFailed: "Could not block uploader.",
+unblockConfirm: "Unblock this uploader?",
+unblockFailed: "Could not unblock uploader.",
   },
 
   ko: {
@@ -519,6 +578,65 @@ groupBuyRecruitmentEnds:
    groupBuyApplication: 
      "공동구매 신청" 
 
+staffTitle: "스태프",
+staffLogin: "스태프 로그인",
+email: "이메일",
+password: "비밀번호",
+login: "로그인",
+logout: "로그아웃",
+signedInAs: "로그인 계정",
+
+changePassword: "비밀번호 변경",
+changePasswordLead: "스태프 계정의 비밀번호를 변경합니다.",
+newPassword: "새 비밀번호",
+confirmNewPassword: "새 비밀번호 확인",
+
+staffTabImages: "이미지 관리",
+staffTabWk: "황무지 신청",
+staffTabGroupBuy: "공동구매",
+
+staffImageTitle: "이미지 관리",
+staffImageLead:
+  "업로드된 이미지를 확인하고, 이미지를 삭제하거나 업로더를 7일간 차단할 수 있습니다.",
+
+staffWkTitle: "황무지 신청",
+staffWkLead: "황무지 신청 목록을 조회할 수 있습니다.",
+
+staffGroupBuyTitle: "공동구매",
+staffGroupBuyLead:
+  "공동구매 회차와 구매항목을 관리하고 신청내역을 확인할 수 있습니다.",
+
+delete: "삭제",
+block7Days: "7일 차단",
+unblock: "차단 해제",
+notBlocked: "차단되지 않음",
+blockedByAdmin: "관리자가 차단함",
+noUploadsFound: "업로드 내역이 없습니다.",
+
+staffSigningIn: "로그인 중…",
+staffLoginRequired: "이메일과 비밀번호를 입력하세요.",
+staffAccessDenied: "활성화된 스태프 권한이 없는 계정입니다.",
+staffVerifyFailed: "스태프 권한을 확인할 수 없습니다.",
+staffLoginFailed: "로그인에 실패했습니다.",
+
+passwordMin6: "비밀번호는 6자 이상이어야 합니다.",
+passwordMismatch: "비밀번호가 일치하지 않습니다.",
+passwordChanging: "비밀번호 변경 중…",
+passwordChanged: "비밀번호가 변경되었습니다.",
+passwordChangeFailed: "비밀번호를 변경할 수 없습니다.",
+
+staffSessionExpired: "스태프 로그인 세션이 만료되었습니다.",
+imageRequestFailed: "이미지 관리 요청에 실패했습니다.",
+imageLoading: "불러오는 중…",
+imageLoadFailed: "이미지를 불러올 수 없습니다.",
+deleteImageConfirm: "이 이미지를 삭제하시겠습니까?",
+deleteImageFailed: "이미지를 삭제할 수 없습니다.",
+block7DaysConfirm: "이 업로더를 7일간 차단하시겠습니까?",
+blockFailed: "업로더를 차단할 수 없습니다.",
+unblockConfirm: "이 업로더의 차단을 해제하시겠습니까?",
+unblockFailed: "차단을 해제할 수 없습니다.",
+
+
   },
 
   ja: {
@@ -775,6 +893,66 @@ groupBuyRecruitmentEnds:
 
     groupBuyApplication: 
       "共同購入申請"
+
+    staffTitle: "スタッフ",
+staffLogin: "スタッフログイン",
+email: "メールアドレス",
+password: "パスワード",
+login: "ログイン",
+logout: "ログアウト",
+signedInAs: "ログイン中",
+
+changePassword: "パスワード変更",
+changePasswordLead: "スタッフアカウントのパスワードを変更します。",
+newPassword: "新しいパスワード",
+confirmNewPassword: "新しいパスワードを確認",
+
+staffTabImages: "画像管理",
+staffTabWk: "荒野申請",
+staffTabGroupBuy: "共同購入",
+
+staffImageTitle: "画像管理",
+staffImageLead:
+  "アップロードされた画像の確認、削除、アップロード者の7日間のブロックができます。",
+
+staffWkTitle: "荒野申請",
+staffWkLead: "荒野申請の一覧を確認できます。",
+
+staffGroupBuyTitle: "共同購入",
+staffGroupBuyLead:
+  "共同購入の回次と購入項目を管理し、申請内容を確認できます。",
+
+delete: "削除",
+block7Days: "7日間ブロック",
+unblock: "ブロック解除",
+notBlocked: "ブロックなし",
+blockedByAdmin: "管理者によるブロック",
+noUploadsFound: "アップロードはありません。",
+
+staffSigningIn: "ログイン中…",
+staffLoginRequired: "メールアドレスとパスワードを入力してください。",
+staffAccessDenied: "有効なスタッフ権限がありません。",
+staffVerifyFailed: "スタッフ権限を確認できませんでした。",
+staffLoginFailed: "ログインに失敗しました。",
+
+passwordMin6: "パスワードは6文字以上にしてください。",
+passwordMismatch: "パスワードが一致しません。",
+passwordChanging: "パスワードを変更しています…",
+passwordChanged: "パスワードを変更しました。",
+passwordChangeFailed: "パスワードを変更できませんでした。",
+
+staffSessionExpired: "スタッフのログインセッションが期限切れです。",
+imageRequestFailed: "画像管理リクエストに失敗しました。",
+imageLoading: "読み込み中…",
+imageLoadFailed: "画像を読み込めませんでした。",
+deleteImageConfirm: "この画像を削除しますか？",
+deleteImageFailed: "画像を削除できませんでした。",
+block7DaysConfirm: "このアップロード者を7日間ブロックしますか？",
+blockFailed: "アップロード者をブロックできませんでした。",
+unblockConfirm: "このアップロード者のブロックを解除しますか？",
+unblockFailed: "ブロックを解除できませんでした。",
+
+    
   },
 
   ru: {
@@ -1032,6 +1210,63 @@ groupBuyRecruitmentEnds:
    groupBuyApplication: 
      "Совместная покупка" 
 
+    staffTitle: "Персонал",
+staffLogin: "Вход для персонала",
+email: "Электронная почта",
+password: "Пароль",
+login: "Войти",
+logout: "Выйти",
+signedInAs: "Вы вошли как",
+
+changePassword: "Изменить пароль",
+changePasswordLead: "Измените пароль своей учётной записи персонала.",
+newPassword: "Новый пароль",
+confirmNewPassword: "Подтвердите новый пароль",
+
+staffTabImages: "Управление изображениями",
+staffTabWk: "Заявки на WK",
+staffTabGroupBuy: "Совместная покупка",
+
+staffImageTitle: "Управление изображениями",
+staffImageLead:
+  "Просматривайте и удаляйте загруженные изображения или блокируйте загрузившего их пользователя на 7 дней.",
+
+staffWkTitle: "Заявки на WK",
+staffWkLead: "Здесь можно просматривать заявки на WK.",
+
+staffGroupBuyTitle: "Совместная покупка",
+staffGroupBuyLead:
+  "Управляйте раундами и товарами совместной покупки и просматривайте заявки.",
+
+delete: "Удалить",
+block7Days: "Блокировать на 7 дней",
+unblock: "Разблокировать",
+notBlocked: "Не заблокирован",
+blockedByAdmin: "Заблокирован администратором",
+noUploadsFound: "Загрузок нет.",
+
+staffSigningIn: "Вход…",
+staffLoginRequired: "Введите электронную почту и пароль.",
+staffAccessDenied: "У этой учётной записи нет активного доступа персонала.",
+staffVerifyFailed: "Не удалось проверить права персонала.",
+staffLoginFailed: "Не удалось войти.",
+
+passwordMin6: "Пароль должен содержать не менее 6 символов.",
+passwordMismatch: "Пароли не совпадают.",
+passwordChanging: "Изменение пароля…",
+passwordChanged: "Пароль изменён.",
+passwordChangeFailed: "Не удалось изменить пароль.",
+
+staffSessionExpired: "Сеанс персонала истёк.",
+imageRequestFailed: "Не удалось выполнить запрос управления изображениями.",
+imageLoading: "Загрузка…",
+imageLoadFailed: "Не удалось загрузить изображения.",
+deleteImageConfirm: "Удалить это изображение?",
+deleteImageFailed: "Не удалось удалить изображение.",
+block7DaysConfirm: "Заблокировать этого пользователя на 7 дней?",
+blockFailed: "Не удалось заблокировать пользователя.",
+unblockConfirm: "Разблокировать этого пользователя?",
+unblockFailed: "Не удалось снять блокировку.",
   },
 };
 
