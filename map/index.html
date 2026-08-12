@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
+  <title>PNS Map Editor · S967</title>
+
+  <link
+    rel="stylesheet"
+    href="/theme.css"
+  >
+
+  <script
+    src="/theme.js"
+    defer
+  ></script>
+
+  <script
+    src="/language.js"
+    defer
+  ></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px 80px;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      color: var(--text);
+      background: var(--background);
+    }
+
+    main {
+      width: min(720px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+
+      color: var(--muted);
+
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-size: clamp(
+        2.2rem,
+        7vw,
+        4rem
+      );
+
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .intro {
+      margin: 14px 0 0;
+
+      color: var(--muted);
+
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .panel {
+      margin-top: 28px;
+      padding: 22px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      background: var(--surface);
+      box-shadow: var(--shadow);
+
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      margin: 0;
+
+      font-size: 1.15rem;
+      font-weight: 750;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    .field:first-child {
+      margin-top: 0;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 8px;
+
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+
+      padding: 12px 13px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      outline: none;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--border-hover);
+    }
+
+    button {
+      padding: 11px 15px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--border-hover);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .primary-button {
+      width: 100%;
+      margin-top: 22px;
+    }
+
+    .secondary-button {
+      background: transparent;
+    }
+
+    .danger-button {
+      color: #d75555;
+    }
+
+    .status {
+      min-height: 1.4em;
+      margin-top: 14px;
+
+      color: var(--muted);
+
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .error {
+      color: #d75555;
+    }
+
+    .success {
+      color: #3f9565;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .dialog-message {
+      margin: 0;
+
+      color: var(--text);
+
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .dialog-id {
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .dialog-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+
+      margin-top: 20px;
+    }
+
+    .account-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+
+      margin-top: 28px;
+      padding: 14px 16px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--surface);
+    }
+
+    .account-name {
+      min-width: 0;
+
+      font-size: 0.9rem;
+      font-weight: 700;
+
+      overflow-wrap: anywhere;
+    }
+
+    .map-count {
+      flex: 0 0 auto;
+
+      color: var(--muted);
+
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .map-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .map-empty {
+      padding: 30px 16px;
+
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+
+      color: var(--muted);
+
+      text-align: center;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .map-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 13px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--surface-hover);
+    }
+
+    .map-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .map-name {
+      font-weight: 750;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .map-date {
+      margin-top: 4px;
+
+      color: var(--muted);
+
+      font-size: 0.78rem;
+    }
+
+    .map-actions {
+      display: flex;
+      gap: 7px;
+      flex: 0 0 auto;
+    }
+
+    .map-actions button {
+      padding: 8px 10px;
+
+      font-size: 0.82rem;
+    }
+
+    .new-map-button {
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .back {
+      display: inline-block;
+
+      margin-top: 28px;
+
+      color: var(--muted);
+
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+
+    .back:hover {
+      color: var(--text);
+    }
+
+    /*
+      Language + Theme
+    */
+
+    .top-pickers {
+      position: fixed;
+
+      right: 18px;
+      bottom: 18px;
+
+      z-index: 1100;
+
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .top-pickers
+    .language-picker,
+    .top-pickers
+    .theme-picker {
+      position: relative;
+
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+    }
+
+    .top-pickers
+    .language-menu,
+    .top-pickers
+    .theme-menu {
+      top: auto;
+      right: 0;
+      bottom: calc(100% + 8px);
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding:
+          28px
+          16px
+          76px;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .map-item {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .map-actions {
+        display: grid;
+        grid-template-columns:
+          repeat(3, 1fr);
+      }
+
+      .map-actions button {
+        width: 100%;
+      }
+
+      .top-pickers {
+        right: 14px;
+        bottom: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-pickers">
+
+    <div
+      class="language-picker"
+      data-language-picker
+    >
+      <button
+        class="language-button"
+        type="button"
+        data-language-button
+        aria-label="Language"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        🌐
+      </button>
+
+      <div
+        class="language-menu"
+        data-language-menu
+        role="menu"
+      >
+        <button
+          type="button"
+          data-language-choice="ko"
+          role="menuitemradio"
+        >
+          한국어
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="en"
+          role="menuitemradio"
+        >
+          English
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="ja"
+          role="menuitemradio"
+        >
+          日本語
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="ru"
+          role="menuitemradio"
+        >
+          Русский
+        </button>
+      </div>
+    </div>
+
+
+    <div
+      class="theme-picker"
+      data-theme-picker
+    >
+      <button
+        class="theme-button"
+        type="button"
+        data-theme-button
+        aria-label="Theme"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        ◐
+      </button>
+
+      <div
+        class="theme-menu"
+        data-theme-menu
+        role="menu"
+      >
+        <button
+          type="button"
+          data-theme-choice="system"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ◐
+          </span>
+
+          <span data-i18n="themeSystem">
+            System
+          </span>
+        </button>
+
+        <button
+          type="button"
+          data-theme-choice="light"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ☀
+          </span>
+
+          <span data-i18n="themeLight">
+            Light
+          </span>
+        </button>
+
+        <button
+          type="button"
+          data-theme-choice="dark"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ☾
+          </span>
+
+          <span data-i18n="themeDark">
+            Dark
+          </span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+
+  <main>
+
+    <div class="eyebrow">
+      S967
+    </div>
+
+    <h1>
+      PNS Map Editor
+    </h1>
+
+    <p
+      id="pageIntro"
+      class="intro"
+    ></p>
+
+
+    <!-- LOGIN -->
+
+    <section
+      id="loginPanel"
+      class="panel"
+    >
+      <h2
+        id="loginTitle"
+        class="panel-title"
+      >
+        Login
+      </h2>
+
+      <form id="loginForm">
+
+        <div class="field">
+          <label
+            id="loginIdLabel"
+            class="label"
+            for="loginId"
+          >
+            ID
+          </label>
+
+          <input
+            id="loginId"
+            type="text"
+            maxlength="40"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label
+            id="loginPasswordLabel"
+            class="label"
+            for="loginPassword"
+          >
+            Password
+          </label>
+
+          <input
+            id="loginPassword"
+            type="password"
+            maxlength="100"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button
+          id="loginButton"
+          class="primary-button"
+          type="submit"
+        >
+          Login
+        </button>
+
+        <div
+          id="loginStatus"
+          class="status"
+        ></div>
+
+      </form>
+    </section>
+
+
+    <!-- UNKNOWN ACCOUNT -->
+
+    <section
+      id="unknownAccountPanel"
+      class="panel hidden"
+    >
+      <p
+        id="unknownAccountMessage"
+        class="dialog-message"
+      ></p>
+
+      <div class="dialog-buttons">
+
+        <button
+          id="unknownCancelButton"
+          class="secondary-button"
+          type="button"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="createAccountStartButton"
+          type="button"
+        >
+          Create Account
+        </button>
+
+      </div>
+    </section>
+
+
+    <!-- CREATE ACCOUNT -->
+
+    <section
+      id="createAccountPanel"
+      class="panel hidden"
+    >
+      <h2
+        id="createAccountTitle"
+        class="panel-title"
+      >
+        Create Account
+      </h2>
+
+      <p
+        id="createAccountId"
+        class="dialog-message"
+      ></p>
+
+      <form id="createAccountForm">
+
+        <div class="field">
+          <label
+            id="createPasswordLabel"
+            class="label"
+            for="createPassword"
+          >
+            Password
+          </label>
+
+          <input
+            id="createPassword"
+            type="password"
+            maxlength="100"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label
+            id="confirmPasswordLabel"
+            class="label"
+            for="confirmPassword"
+          >
+            Confirm Password
+          </label>
+
+          <input
+            id="confirmPassword"
+            type="password"
+            maxlength="100"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <div class="dialog-buttons">
+
+          <button
+            id="createCancelButton"
+            class="secondary-button"
+            type="button"
+          >
+            Cancel
+          </button>
+
+          <button
+            id="createAccountButton"
+            type="submit"
+          >
+            Create Account
+          </button>
+
+        </div>
+
+        <div
+          id="createStatus"
+          class="status"
+        ></div>
+
+      </form>
+    </section>
+
+
+    <!-- ACCOUNT / MAP LIST -->
+
+    <div
+      id="accountArea"
+      class="hidden"
+    >
+
+      <div class="account-bar">
+
+        <div
+          id="signedInUser"
+          class="account-name"
+        ></div>
+
+        <button
+          id="logoutButton"
+          class="secondary-button"
+          type="button"
+        >
+          Log out
+        </button>
+
+      </div>
+
+
+      <section class="panel">
+
+        <div class="panel-header">
+
+          <h2
+            id="myMapsTitle"
+            class="panel-title"
+          >
+            My Maps
+          </h2>
+
+          <div
+            id="mapCount"
+            class="map-count"
+          >
+            0 / 5
+          </div>
+
+        </div>
+
+
+        <div
+          id="mapList"
+          class="map-list"
+        ></div>
+
+
+        <button
+          id="newMapButton"
+          class="new-map-button"
+          type="button"
+        >
+          + New Map
+        </button>
+
+        <div
+          id="mapStatus"
+          class="status"
+        ></div>
+
+      </section>
+
+    </div>
+
+
+    <a
+      id="backLink"
+      class="back"
+      href="/"
+    >
+      ← Back to Home
+    </a>
+
+  </main>
+
+
+  <script>
+    /*
+      ==========================================================
+      CONFIG
+      ==========================================================
+
+      다음 단계에서 실제 서버 API 주소를 넣습니다.
+
+      예:
+      https://xxxxx.supabase.co/functions/v1/map-account
+    */
+
+    const MAP_API_URL = "";
+
+    const MAX_MAPS = 5;
+
+
+    /*
+      ==========================================================
+      TRANSLATIONS
+      ==========================================================
+    */
+
+    const TEXT = {
+
+      en: {
+        intro:
+          "Sign in to access your saved maps.",
+
+        login:
+          "Login",
+
+        id:
+          "ID",
+
+        password:
+          "Password",
+
+        loginButton:
+          "Login",
+
+        loggingIn:
+          "Logging in…",
+
+        unknownAccount:
+          "This ID is not registered. Would you like to create an account?",
+
+        cancel:
+          "Cancel",
+
+        createAccount:
+          "Create Account",
+
+        creatingAccount:
+          "Creating account…",
+
+        newAccountFor:
+          "Create a new account for:",
+
+        confirmPassword:
+          "Confirm Password",
+
+        passwordMismatch:
+          "Passwords do not match.",
+
+        signedInAs:
+          "Signed in as",
+
+        logout:
+          "Log out",
+
+        myMaps:
+          "My Maps",
+
+        noMaps:
+          "You don't have any saved maps yet.",
+
+        newMap:
+          "+ New Map",
+
+        open:
+          "Open",
+
+        rename:
+          "Rename",
+
+        delete:
+          "Delete",
+
+        updated:
+          "Updated",
+
+        mapLimit:
+          "You can save up to 5 maps per account.",
+
+        serverNotConnected:
+          "The server API has not been connected yet.",
+
+        back:
+          "← Back to Home",
+      },
+
+
+      ko: {
+        intro:
+          "저장된 맵을 이용하려면 로그인해 주세요.",
+
+        login:
+          "로그인",
+
+        id:
+          "아이디",
+
+        password:
+          "비밀번호",
+
+        loginButton:
+          "로그인",
+
+        loggingIn:
+          "로그인 중…",
+
+        unknownAccount:
+          "등록되지 않은 아이디입니다. 계정을 생성하시겠습니까?",
+
+        cancel:
+          "취소",
+
+        createAccount:
+          "계정 생성",
+
+        creatingAccount:
+          "계정 생성 중…",
+
+        newAccountFor:
+          "다음 아이디로 새 계정을 생성합니다:",
+
+        confirmPassword:
+          "비밀번호 확인",
+
+        passwordMismatch:
+          "비밀번호가 일치하지 않습니다.",
+
+        signedInAs:
+          "로그인:",
+
+        logout:
+          "로그아웃",
+
+        myMaps:
+          "내 맵",
+
+        noMaps:
+          "아직 저장된 맵이 없습니다.",
+
+        newMap:
+          "+ 새 맵",
+
+        open:
+          "열기",
+
+        rename:
+          "이름 변경",
+
+        delete:
+          "삭제",
+
+        updated:
+          "수정",
+
+        mapLimit:
+          "계정당 최대 5개의 맵을 저장할 수 있습니다.",
+
+        serverNotConnected:
+          "아직 서버 API가 연결되지 않았습니다.",
+
+        back:
+          "← 홈으로",
+      },
+
+
+      ja: {
+        intro:
+          "保存したマップを利用するにはログインしてください。",
+
+        login:
+          "ログイン",
+
+        id:
+          "ID",
+
+        password:
+          "パスワード",
+
+        loginButton:
+          "ログイン",
+
+        loggingIn:
+          "ログイン中…",
+
+        unknownAccount:
+          "登録されていないIDです。アカウントを作成しますか？",
+
+        cancel:
+          "キャンセル",
+
+        createAccount:
+          "アカウント作成",
+
+        creatingAccount:
+          "アカウントを作成中…",
+
+        newAccountFor:
+          "次のIDで新しいアカウントを作成します：",
+
+        confirmPassword:
+          "パスワード確認",
+
+        passwordMismatch:
+          "パスワードが一致しません。",
+
+        signedInAs:
+          "ログイン中：",
+
+        logout:
+          "ログアウト",
+
+        myMaps:
+          "マイマップ",
+
+        noMaps:
+          "保存されたマップはまだありません。",
+
+        newMap:
+          "+ 新しいマップ",
+
+        open:
+          "開く",
+
+        rename:
+          "名前変更",
+
+        delete:
+          "削除",
+
+        updated:
+          "更新",
+
+        mapLimit:
+          "1アカウントにつき最大5個のマップを保存できます。",
+
+        serverNotConnected:
+          "サーバーAPIはまだ接続されていません。",
+
+        back:
+          "← ホームへ",
+      },
+
+
+      ru: {
+        intro:
+          "Войдите, чтобы получить доступ к сохранённым картам.",
+
+        login:
+          "Вход",
+
+        id:
+          "ID",
+
+        password:
+          "Пароль",
+
+        loginButton:
+          "Войти",
+
+        loggingIn:
+          "Вход…",
+
+        unknownAccount:
+          "Этот ID не зарегистрирован. Создать новую учётную запись?",
+
+        cancel:
+          "Отмена",
+
+        createAccount:
+          "Создать аккаунт",
+
+        creatingAccount:
+          "Создание аккаунта…",
+
+        newAccountFor:
+          "Создать новую учётную запись для:",
+
+        confirmPassword:
+          "Подтвердите пароль",
+
+        passwordMismatch:
+          "Пароли не совпадают.",
+
+        signedInAs:
+          "Выполнен вход:",
+
+        logout:
+          "Выйти",
+
+        myMaps:
+          "Мои карты",
+
+        noMaps:
+          "У вас пока нет сохранённых карт.",
+
+        newMap:
+          "+ Новая карта",
+
+        open:
+          "Открыть",
+
+        rename:
+          "Переименовать",
+
+        delete:
+          "Удалить",
+
+        updated:
+          "Обновлено",
+
+        mapLimit:
+          "В одной учётной записи можно сохранить до 5 карт.",
+
+        serverNotConnected:
+          "API сервера пока не подключён.",
+
+        back:
+          "← На главную",
+      },
+    };
+
+
+    let language =
+      typeof getCurrentLanguage === "function"
+        ? getCurrentLanguage()
+        : "en";
+
+    let text =
+      TEXT[language] ??
+      TEXT.en;
+
+
+    /*
+      ==========================================================
+      ELEMENTS
+      ==========================================================
+    */
+
+    const loginPanel =
+      document.getElementById(
+        "loginPanel"
+      );
+
+    const loginForm =
+      document.getElementById(
+        "loginForm"
+      );
+
+    const loginId =
+      document.getElementById(
+        "loginId"
+      );
+
+    const loginPassword =
+      document.getElementById(
+        "loginPassword"
+      );
+
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
+
+    const loginStatus =
+      document.getElementById(
+        "loginStatus"
+      );
+
+
+    const unknownAccountPanel =
+      document.getElementById(
+        "unknownAccountPanel"
+      );
+
+    const unknownAccountMessage =
+      document.getElementById(
+        "unknownAccountMessage"
+      );
+
+    const unknownCancelButton =
+      document.getElementById(
+        "unknownCancelButton"
+      );
+
+    const createAccountStartButton =
+      document.getElementById(
+        "createAccountStartButton"
+      );
+
+
+    const createAccountPanel =
+      document.getElementById(
+        "createAccountPanel"
+      );
+
+    const createAccountForm =
+      document.getElementById(
+        "createAccountForm"
+      );
+
+    const createAccountId =
+      document.getElementById(
+        "createAccountId"
+      );
+
+    const createPassword =
+      document.getElementById(
+        "createPassword"
+      );
+
+    const confirmPassword =
+      document.getElementById(
+        "confirmPassword"
+      );
+
+    const createAccountButton =
+      document.getElementById(
+        "createAccountButton"
+      );
+
+    const createCancelButton =
+      document.getElementById(
+        "createCancelButton"
+      );
+
+    const createStatus =
+      document.getElementById(
+        "createStatus"
+      );
+
+
+    const accountArea =
+      document.getElementById(
+        "accountArea"
+      );
+
+    const signedInUser =
+      document.getElementById(
+        "signedInUser"
+      );
+
+    const logoutButton =
+      document.getElementById(
+        "logoutButton"
+      );
+
+    const mapList =
+      document.getElementById(
+        "mapList"
+      );
+
+    const mapCount =
+      document.getElementById(
+        "mapCount"
+      );
+
+    const newMapButton =
+      document.getElementById(
+        "newMapButton"
+      );
+
+    const mapStatus =
+      document.getElementById(
+        "mapStatus"
+      );
+
+
+    /*
+      ==========================================================
+      STATE
+      ==========================================================
+    */
+
+    let pendingId = "";
+
+    let currentUser = null;
+
+    let maps = [];
+
+
+    /*
+      ==========================================================
+      TEXT
+      ==========================================================
+    */
+
+    function setStaticText() {
+
+      document.documentElement.lang =
+        language;
+
+      document.getElementById(
+        "pageIntro"
+      ).textContent =
+        text.intro;
+
+      document.getElementById(
+        "loginTitle"
+      ).textContent =
+        text.login;
+
+      document.getElementById(
+        "loginIdLabel"
+      ).textContent =
+        text.id;
+
+      document.getElementById(
+        "loginPasswordLabel"
+      ).textContent =
+        text.password;
+
+      loginButton.textContent =
+        text.loginButton;
+
+      unknownCancelButton.textContent =
+        text.cancel;
+
+      createAccountStartButton.textContent =
+        text.createAccount;
+
+      document.getElementById(
+        "createAccountTitle"
+      ).textContent =
+        text.createAccount;
+
+      document.getElementById(
+        "createPasswordLabel"
+      ).textContent =
+        text.password;
+
+      document.getElementById(
+        "confirmPasswordLabel"
+      ).textContent =
+        text.confirmPassword;
+
+      createCancelButton.textContent =
+        text.cancel;
+
+      createAccountButton.textContent =
+        text.createAccount;
+
+      logoutButton.textContent =
+        text.logout;
+
+      document.getElementById(
+        "myMapsTitle"
+      ).textContent =
+        text.myMaps;
+
+      newMapButton.textContent =
+        text.newMap;
+
+      document.getElementById(
+        "backLink"
+      ).textContent =
+        text.back;
+
+
+      if (pendingId) {
+        renderUnknownAccount();
+        renderCreateAccountId();
+      }
+
+
+      if (currentUser) {
+        renderAccount();
+      }
+
+      renderMaps();
+    }
+
+
+    /*
+      ==========================================================
+      STATUS
+      ==========================================================
+    */
+
+    function setStatus(
+      element,
+      message,
+      type = ""
+    ) {
+
+      element.textContent =
+        message;
+
+      element.classList.remove(
+        "error",
+        "success"
+      );
+
+      if (type) {
+        element.classList.add(
+          type
+        );
+      }
+    }
+
+
+    /*
+      ==========================================================
+      PANELS
+      ==========================================================
+    */
+
+    function showLogin() {
+
+      loginPanel.classList.remove(
+        "hidden"
+      );
+
+      unknownAccountPanel.classList.add(
+        "hidden"
+      );
+
+      createAccountPanel.classList.add(
+        "hidden"
+      );
+
+      accountArea.classList.add(
+        "hidden"
+      );
+    }
+
+
+    function showUnknownAccount() {
+
+      loginPanel.classList.add(
+        "hidden"
+      );
+
+      unknownAccountPanel.classList.remove(
+        "hidden"
+      );
+
+      createAccountPanel.classList.add(
+        "hidden"
+      );
+
+      accountArea.classList.add(
+        "hidden"
+      );
+
+      renderUnknownAccount();
+    }
+
+
+    function showCreateAccount() {
+
+      loginPanel.classList.add(
+        "hidden"
+      );
+
+      unknownAccountPanel.classList.add(
+        "hidden"
+      );
+
+      createAccountPanel.classList.remove(
+        "hidden"
+      );
+
+      accountArea.classList.add(
+        "hidden"
+      );
+
+      /*
+        로그인 화면에서 입력했던 비밀번호를
+        첫 번째 비밀번호 칸에 유지합니다.
+
+        사용자는 확인 비밀번호만 다시 입력하면 됩니다.
+      */
+
+      createPassword.value =
+        loginPassword.value;
+
+      confirmPassword.value =
+        "";
+
+      renderCreateAccountId();
+
+      confirmPassword.focus();
+    }
+
+
+    function showAccount() {
+
+      loginPanel.classList.add(
+        "hidden"
+      );
+
+      unknownAccountPanel.classList.add(
+        "hidden"
+      );
+
+      createAccountPanel.classList.add(
+        "hidden"
+      );
+
+      accountArea.classList.remove(
+        "hidden"
+      );
+
+      renderAccount();
+      renderMaps();
+    }
+
+
+    /*
+      ==========================================================
+      UNKNOWN ACCOUNT
+      ==========================================================
+    */
+
+    function renderUnknownAccount() {
+
+      unknownAccountMessage.innerHTML =
+        `<span class="dialog-id"></span><br>` +
+        text.unknownAccount;
+
+      const idElement =
+        unknownAccountMessage.querySelector(
+          ".dialog-id"
+        );
+
+      idElement.textContent =
+        pendingId;
+    }
+
+
+    function renderCreateAccountId() {
+
+      createAccountId.innerHTML =
+        `${text.newAccountFor}<br>` +
+        `<span class="dialog-id"></span>`;
+
+      createAccountId.querySelector(
+        ".dialog-id"
+      ).textContent =
+        pendingId;
+    }
+
+
+    /*
+      ==========================================================
+      ACCOUNT
+      ==========================================================
+    */
+
+    function renderAccount() {
+
+      if (!currentUser) {
+        return;
+      }
+
+      signedInUser.textContent =
+        `${text.signedInAs} ` +
+        currentUser.id;
+    }
+
+
+    /*
+      ==========================================================
+      MAP LIST
+      ==========================================================
+    */
+
+    function renderMaps() {
+
+      if (!mapList) {
+        return;
+      }
+
+      mapList.innerHTML = "";
+
+      mapCount.textContent =
+        `${maps.length} / ${MAX_MAPS}`;
+
+      newMapButton.disabled =
+        maps.length >= MAX_MAPS;
+
+
+      if (
+        maps.length >= MAX_MAPS
+      ) {
+        setStatus(
+          mapStatus,
+          text.mapLimit
+        );
+      } else {
+        setStatus(
+          mapStatus,
+          ""
+        );
+      }
+
+
+      if (maps.length === 0) {
+
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "map-empty";
+
+        empty.textContent =
+          text.noMaps;
+
+        mapList.appendChild(
+          empty
+        );
+
+        return;
+      }
+
+
+      maps.forEach((map) => {
+
+        const item =
+          document.createElement(
+            "div"
+          );
+
+        item.className =
+          "map-item";
+
+
+        const info =
+          document.createElement(
+            "div"
+          );
+
+        info.className =
+          "map-info";
+
+
+        const name =
+          document.createElement(
+            "div"
+          );
+
+        name.className =
+          "map-name";
+
+        name.textContent =
+          map.name;
+
+
+        const date =
+          document.createElement(
+            "div"
+          );
+
+        date.className =
+          "map-date";
+
+        date.textContent =
+          `${text.updated}: ` +
+          formatDate(
+            map.updatedAt
+          );
+
+
+        info.appendChild(
+          name
+        );
+
+        info.appendChild(
+          date
+        );
+
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+        actions.className =
+          "map-actions";
+
+
+        const openButton =
+          document.createElement(
+            "button"
+          );
+
+        openButton.type =
+          "button";
+
+        openButton.textContent =
+          text.open;
+
+        openButton.addEventListener(
+          "click",
+          () => openMap(
+            map.id
+          )
+        );
+
+
+        const renameButton =
+          document.createElement(
+            "button"
+          );
+
+        renameButton.type =
+          "button";
+
+        renameButton.textContent =
+          text.rename;
+
+        renameButton.addEventListener(
+          "click",
+          () => renameMap(
+            map.id
+          )
+        );
+
+
+        const deleteButton =
+          document.createElement(
+            "button"
+          );
+
+        deleteButton.type =
+          "button";
+
+        deleteButton.className =
+          "danger-button";
+
+        deleteButton.textContent =
+          text.delete;
+
+        deleteButton.addEventListener(
+          "click",
+          () => deleteMap(
+            map.id
+          )
+        );
+
+
+        actions.appendChild(
+          openButton
+        );
+
+        actions.appendChild(
+          renameButton
+        );
+
+        actions.appendChild(
+          deleteButton
+        );
+
+
+        item.appendChild(
+          info
+        );
+
+        item.appendChild(
+          actions
+        );
+
+        mapList.appendChild(
+          item
+        );
+      });
+    }
+
+
+    function formatDate(
+      timestamp
+    ) {
+
+      if (!timestamp) {
+        return "";
+      }
+
+      const localeMap = {
+        ko: "ko-KR",
+        en: "en-US",
+        ja: "ja-JP",
+        ru: "ru-RU",
+      };
+
+      return new Intl.DateTimeFormat(
+        localeMap[language] ??
+        "en-US",
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      ).format(
+        new Date(timestamp)
+      );
+    }
+
+
+    /*
+      ==========================================================
+      LOGIN
+      ==========================================================
+
+      현재는 서버 API가 없기 때문에
+      실제 로그인은 수행하지 않습니다.
+
+      다음 단계에서 이 함수의 fetch 부분을 연결합니다.
+    */
+
+    loginForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        setStatus(
+          loginStatus,
+          ""
+        );
+
+        const id =
+          loginId.value.trim();
+
+        const password =
+          loginPassword.value;
+
+
+        if (
+          !id ||
+          !password
+        ) {
+          return;
+        }
+
+
+        /*
+          API 연결 전 임시 동작.
+
+          MAP_API_URL이 비어 있으면
+          서버 미연결 안내만 표시합니다.
+        */
+
+        if (!MAP_API_URL) {
+
+          pendingId = id;
+
+          /*
+            화면 테스트를 위해
+            미등록 계정 화면으로 이동합니다.
+          */
+
+          showUnknownAccount();
+
+          return;
+        }
+
+
+        loginButton.disabled =
+          true;
+
+        loginButton.textContent =
+          text.loggingIn;
+
+
+        try {
+
+          /*
+            다음 단계에서 서버 규격에 맞춰
+            구현할 부분입니다.
+
+            const response =
+              await fetch(
+                `${MAP_API_URL}/login`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type":
+                      "application/json",
+                  },
+                  credentials:
+                    "include",
+                  body:
+                    JSON.stringify({
+                      id,
+                      password,
+                    }),
+                }
+              );
+          */
+
+        } catch (error) {
+
+          setStatus(
+            loginStatus,
+            error.message,
+            "error"
+          );
+
+        } finally {
+
+          loginButton.disabled =
+            false;
+
+          loginButton.textContent =
+            text.loginButton;
+        }
+      }
+    );
+
+
+    /*
+      ==========================================================
+      CREATE ACCOUNT
+      ==========================================================
+    */
+
+    unknownCancelButton.addEventListener(
+      "click",
+      () => {
+
+        pendingId = "";
+
+        loginPassword.value =
+          "";
+
+        showLogin();
+
+        loginId.focus();
+      }
+    );
+
+
+    createAccountStartButton.addEventListener(
+      "click",
+      () => {
+
+        showCreateAccount();
+      }
+    );
+
+
+    createCancelButton.addEventListener(
+      "click",
+      () => {
+
+        createPassword.value =
+          "";
+
+        confirmPassword.value =
+          "";
+
+        showUnknownAccount();
+      }
+    );
+
+
+    createAccountForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        setStatus(
+          createStatus,
+          ""
+        );
+
+
+        if (
+          createPassword.value !==
+          confirmPassword.value
+        ) {
+
+          setStatus(
+            createStatus,
+            text.passwordMismatch,
+            "error"
+          );
+
+          confirmPassword.focus();
+
+          return;
+        }
+
+
+        /*
+          API가 아직 없으므로
+          현재는 화면 확인용으로 계정 생성이
+          성공한 것처럼 처리합니다.
+        */
+
+        if (!MAP_API_URL) {
+
+          currentUser = {
+            id: pendingId,
+          };
+
+          maps = [];
+
+          loginPassword.value =
+            "";
+
+          createPassword.value =
+            "";
+
+          confirmPassword.value =
+            "";
+
+          showAccount();
+
+          return;
+        }
+
+
+        createAccountButton.disabled =
+          true;
+
+        createAccountButton.textContent =
+          text.creatingAccount;
+
+
+        try {
+
+          /*
+            다음 단계에서 실제 API 연결.
+          */
+
+        } catch (error) {
+
+          setStatus(
+            createStatus,
+            error.message,
+            "error"
+          );
+
+        } finally {
+
+          createAccountButton.disabled =
+            false;
+
+          createAccountButton.textContent =
+            text.createAccount;
+        }
+      }
+    );
+
+
+    /*
+      ==========================================================
+      LOGOUT
+      ==========================================================
+    */
+
+    logoutButton.addEventListener(
+      "click",
+      () => {
+
+        currentUser = null;
+
+        pendingId = "";
+
+        maps = [];
+
+        loginForm.reset();
+
+        createAccountForm.reset();
+
+        showLogin();
+      }
+    );
+
+
+    /*
+      ==========================================================
+      MAP ACTIONS
+      ==========================================================
+
+      지금은 편집기를 연결하지 않았기 때문에
+      화면 테스트용 동작만 넣어둡니다.
+    */
+
+    newMapButton.addEventListener(
+      "click",
+      () => {
+
+        if (
+          maps.length >=
+          MAX_MAPS
+        ) {
+          return;
+        }
+
+        const mapNumber =
+          maps.length + 1;
+
+        maps.push({
+          id:
+            crypto.randomUUID(),
+
+          name:
+            `Map ${mapNumber}`,
+
+          updatedAt:
+            new Date()
+              .toISOString(),
+        });
+
+        renderMaps();
+      }
+    );
+
+
+    function openMap(
+      mapId
+    ) {
+
+      /*
+        편집기 완성 후:
+
+        window.location.href =
+          `/map/editor/?map=${encodeURIComponent(mapId)}`;
+      */
+
+      console.log(
+        "Open map:",
+        mapId
+      );
+    }
+
+
+    function renameMap(
+      mapId
+    ) {
+
+      const map =
+        maps.find(
+          (item) =>
+            item.id === mapId
+        );
+
+      if (!map) {
+        return;
+      }
+
+      const newName =
+        window.prompt(
+          text.rename,
+          map.name
+        );
+
+      if (
+        newName === null
+      ) {
+        return;
+      }
+
+      const trimmed =
+        newName.trim();
+
+      if (!trimmed) {
+        return;
+      }
+
+      map.name =
+        trimmed;
+
+      map.updatedAt =
+        new Date()
+          .toISOString();
+
+      renderMaps();
+    }
+
+
+    function deleteMap(
+      mapId
+    ) {
+
+      maps =
+        maps.filter(
+          (item) =>
+            item.id !== mapId
+        );
+
+      renderMaps();
+    }
+
+
+    /*
+      ==========================================================
+      LANGUAGE CHANGE
+      ==========================================================
+    */
+
+    window.addEventListener(
+      "s967languagechange",
+      (event) => {
+
+        language =
+          event.detail?.language ??
+          (
+            typeof getCurrentLanguage ===
+            "function"
+              ? getCurrentLanguage()
+              : "en"
+          );
+
+        text =
+          TEXT[language] ??
+          TEXT.en;
+
+        setStaticText();
+      }
+    );
+
+
+    /*
+      ==========================================================
+      INITIALIZE
+      ==========================================================
+    */
+
+    function initialize() {
+
+      setStaticText();
+
+      showLogin();
+    }
+
+
+    initialize();
+  </script>
+
+</body>
+</html>
