@@ -320,11 +320,15 @@ function addFixedType() {
     const id = $("typeIdInput").value.trim();
     const name = $("typeNameInput").value.trim();
     const color = validateColor($("typeColorInput").value, "건물 종류 색");
-    const size = Number($("typeSizeInput").value);
+    const width = Number($("typeWidthInput").value);
+    const height = Number($("typeHeightInput").value);
     if (!id || !name) throw new TypeError("ID와 이름을 입력하세요.");
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+      throw new RangeError("가로·세로 크기는 1 이상의 정수여야 합니다.");
+    }
 
     const before = snapshotTemplate();
-    PNSMapEngine.addFixedBuildingType({ id, name, color, width: size, height: size });
+    PNSMapEngine.addFixedBuildingType({ id, name, color, width, height });
     const after = snapshotTemplate();
     recordTemplateMutation("fixedTypeCreate", before, after);
 
