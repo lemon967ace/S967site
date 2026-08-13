@@ -32,6 +32,14 @@ export class BuildingType {
   }
 }
 
+export class FixedBuildingType extends BuildingType {
+  constructor({ width = 1, height = 1, ...data }) {
+    super(data);
+    if (!((width === 1 && height === 1) || (width === 2 && height === 2))) throw new RangeError("Fixed building type size must be 1x1 or 2x2.");
+    this.width = width; this.height = height;
+  }
+}
+
 export class Building {
   constructor({ name, typeId, type_id, x, y, width, height, affiliation = "", locked = false, id = createUniqueId() }) {
     this.id = validateNonEmptyText(id, "Building ID");
@@ -59,6 +67,10 @@ export class Building {
   }
 }
 
+export class FixedBuilding extends Building {
+  constructor(data) { super({ affiliation: "", locked: true, ...data }); this.fixed = true; }
+}
+
 export class MapRange {
   constructor({ kind, color, locked = false, cells, id = createUniqueId() }) {
     this.id = validateNonEmptyText(id, "Range ID");
@@ -75,26 +87,44 @@ export class MapRange {
   }
 }
 
+export class FixedRange extends MapRange {
+  constructor(data) { super({ ...data, locked: true }); this.fixed = true; }
+}
+
+export function buildRangeCellOwnerIndex({ fixedRanges = [], ranges = [] }, { throwOnOverlap = false } = {}) {
+  const owners = new Map();
+  for (const [layer, items] of [["fixed", fixedRanges], ["user", ranges]]) for (const range of items) for (const cell of range.cells) {
+    const key = cell.join(","), existing = owners.get(key);
+    if (existing && throwOnOverlap) throw new RangeError(`Overlapping range cell: ${key}`);
+    if (!existing) owners.set(key, { layer, rangeId: range.id, range, cell: [...cell] });
+  }
+  return owners;
+}
+
 export class MapDocument {
-  constructor({ title, buildingTypes = [], buildings = [], ranges = [], view = { centerX: 0, centerY: 0, zoom: 1 } }) {
+  constructor({ title, buildingTypes = [], buildings = [], ranges = [], fixedBuildingTypes = [], fixedBuildings = [], fixedRanges = [], view = { centerX: 0, centerY: 0, zoom: 1 } }) {
     this.title = validateNonEmptyText(title, "Map title");
     this.buildingTypes = buildingTypes.map(item => item instanceof BuildingType ? item : new BuildingType(item));
     this.buildings = buildings.map(item => item instanceof Building ? item : new Building(item));
     this.ranges = ranges.map(item => item instanceof MapRange ? item : new MapRange(item));
+    this.fixedBuildingTypes = fixedBuildingTypes.map(item => item instanceof FixedBuildingType ? item : new FixedBuildingType(item));
+    const fixedTypesById = new Map(this.fixedBuildingTypes.map(item => [item.id, item]));
+    this.fixedBuildings = fixedBuildings.map(item => { const type = fixedTypesById.get(item.typeId ?? item.type_id); return item instanceof FixedBuilding ? item : new FixedBuilding({ ...item, width: item.width ?? type?.width, height: item.height ?? type?.height }); });
+    this.fixedRanges = fixedRanges.map(item => item instanceof FixedRange ? item : new FixedRange(item));
     this.view = { centerX: view.centerX ?? view.center_x, centerY: view.centerY ?? view.center_y, zoom: view.zoom };
     this.validate();
   }
 
   validate() {
-    for (const [label, items] of [["building type", this.buildingTypes], ["building", this.buildings], ["range", this.ranges]]) {
+    for (const [label, items] of [["building type", this.buildingTypes], ["building", this.buildings], ["range", this.ranges], ["fixed building type", this.fixedBuildingTypes], ["fixed building", this.fixedBuildings], ["fixed range", this.fixedRanges]]) {
       const ids = new Set();
       for (const item of items) { if (ids.has(item.id)) throw new RangeError(`Duplicate ${label} ID: ${item.id}`); ids.add(item.id); }
     }
     const typeIds = new Set(this.buildingTypes.map(item => item.id));
     for (const building of this.buildings) if (!typeIds.has(building.typeId)) throw new RangeError(`Unknown building type ID: ${building.typeId}`);
-    const rangeCells = new Set();
-    for (const range of this.ranges) for (const cell of range.cells) {
-      const key = cell.join(","); if (rangeCells.has(key)) throw new RangeError(`Overlapping range cell: ${key}`); rangeCells.add(key);
-    }
+    const fixedTypeIds = new Set(this.fixedBuildingTypes.map(item => item.id));
+    const fixedTypes = new Map(this.fixedBuildingTypes.map(item => [item.id, item]));
+    for (const building of this.fixedBuildings) { const type = fixedTypes.get(building.typeId); if (!fixedTypeIds.has(building.typeId)) throw new RangeError(`Unknown fixed building type ID: ${building.typeId}`); if (building.width !== type.width || building.height !== type.height) throw new RangeError("Fixed building size must match its type."); }
+    buildRangeCellOwnerIndex(this, { throwOnOverlap: true });
   }
 }

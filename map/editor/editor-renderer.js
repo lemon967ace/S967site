@@ -2,6 +2,7 @@ import { MAP_MIN_X, MAP_MAX_X, MAP_MIN_Y, MAP_MAX_Y } from "./editor-model.js";
 import {
   DEFAULT_TILE_HEIGHT,
   DEFAULT_TILE_WIDTH,
+  diamondVertices,
   gridLineSceneEndpoints,
   gridToScene,
   nearestValidGridCoordinate,
@@ -9,6 +10,7 @@ import {
   sceneToGridContinuous,
   visibleGridBoundaryRanges,
 } from "./editor-coordinates.js";
+import { visibleRangeCells } from "./editor-range.js";
 import {
   BuildingInteractionState,
   buildingRenderGeometry,
@@ -23,6 +25,7 @@ import {
 export const MINIMUM_ZOOM = 0.01;
 export const MAXIMUM_ZOOM = 4;
 export const ZOOM_STEP = 1.15;
+export const RENDERER_LAYER_ORDER = Object.freeze(["grid", "fixedRanges", "userRanges", "fixedBuildings", "userBuildings", "interaction", "labels", "previews"]);
 
 export function clampZoom(value) {
   return Math.max(MINIMUM_ZOOM, Math.min(MAXIMUM_ZOOM, value));
@@ -97,17 +100,19 @@ export function viewportCenterGrid(state) {
   return nearestValidGridCoordinate(x, y);
 }
 
-export function createMapRenderer({ host, engine, controller = null, requestBuildingName = () => null, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {} }) {
+export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
   if (!(host instanceof HTMLElement)) throw new TypeError("A map canvas host is required.");
   const documentView = engine.getView();
   let state = createViewportState(documentView);
-  let frame = 0, destroyed = false, panning = null, clickCandidate = null, spacePressed = false;
+  let frame = 0, destroyed = false, panning = null, clickCandidate = null, rangeDrawing = null, bulkDrawing = null, eraseDrawing = null, spacePressed = false;
   const interaction = new BuildingInteractionState();
-  let mapDocument, buildingTypes, buildingGeometries;
+  let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
     mapDocument = engine.getDocument();
     buildingTypes = new Map(mapDocument.buildingTypes.map(type => [type.id, type]));
-    buildingGeometries = mapDocument.buildings.map(buildingRenderGeometry);
+    fixedBuildingTypes = new Map(mapDocument.fixedBuildingTypes.map(type => [type.id, type]));
+    buildingGeometries = [...mapDocument.fixedBuildings, ...mapDocument.buildings].map(buildingRenderGeometry);
+    onDocumentChange(mapDocument);
   }
   refreshDocument();
 
@@ -139,18 +144,63 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
     for (const boundary of ranges.xBoundaries) addGridLine("x", boundary);
     for (const boundary of ranges.yBoundaries) addGridLine("y", boundary);
     context.stroke();
+    drawFixedRanges();
+    drawRanges();
     drawBuildings();
     drawPreview();
+    drawBulkDeletePreview();
+    drawRangeErasePreview();
   }
+
+  function drawRanges() {
+    const bounds = visibleGridBounds(state, 1), selectedId = rangeController?.getState().selectedRangeId;
+    for (const range of mapDocument.ranges) for (const cell of visibleRangeCells(range, bounds)) {
+      traceCell(cell); context.fillStyle = withAlpha(range.color, 0.29); context.fill(); context.strokeStyle = range.color; context.lineWidth = Math.max(1, (range.locked ? 2.4 : 1.2) * state.zoom); context.stroke();
+      if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.stroke(); }
+      if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
+    }
+    const preview = rangeController?.getState().previewCells ?? [];
+    for (const cell of preview) { traceCell(cell); context.fillStyle = "rgba(124,58,237,.22)"; context.fill(); context.strokeStyle = "#7C3AED"; context.lineWidth = 2; context.stroke(); }
+  }
+
+  function drawFixedRanges() {
+    const bounds = visibleGridBounds(state, 1), selectedId = editableFixed ? rangeController?.getState().selectedRangeId : null;
+    for (const range of mapDocument.fixedRanges) for (const cell of visibleRangeCells(range, bounds)) {
+      traceCell(cell); context.fillStyle = withAlpha(range.color, range.kind === "blocked" ? 0.42 : 0.22); context.fill();
+      context.save(); context.setLineDash([Math.max(3, 5 * state.zoom), Math.max(2, 3 * state.zoom)]); context.strokeStyle = range.kind === "blocked" ? "#b91c1c" : range.color; context.lineWidth = Math.max(1.5, 2.4 * state.zoom); context.stroke(); context.restore();
+      if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.strokeStyle = "#b91c1c"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke(); }
+      if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
+    }
+  }
+
+  function traceCell(cell) { context.beginPath(); diamondVertices(...cell).forEach((point, index) => { const screen = sceneToScreen(...point, state); index ? context.lineTo(...screen) : context.moveTo(...screen); }); context.closePath(); }
 
   function drawPreview() {
     const preview = controller?.getState().preview;
     if (!preview) return;
     const geometry = buildingRenderGeometry({ id: "preview", name: "", affiliation: "", locked: false, ...preview });
-    const type = buildingTypes.get(preview.typeId);
+    const type = (editableFixed ? fixedBuildingTypes : buildingTypes).get(preview.typeId);
     context.save(); context.globalAlpha = preview.valid ? 0.55 : 0.72;
     fillAndStrokeGeometry(geometry, preview.valid ? (type?.color ?? "#4E79A7") : "#e53935", preview.valid ? "#ffffff" : "#8b0000", Math.max(1.5, 3 * state.zoom));
     context.restore();
+  }
+
+  function drawBulkDeletePreview() {
+    const bulkState = bulkDeleteController?.getState();
+    if (!bulkState?.previewCells.length) return;
+    for (const cell of bulkState.previewCells) {
+      traceCell(cell); context.fillStyle = "rgba(220,60,60,.22)"; context.fill();
+      context.strokeStyle = "rgb(255,100,100)"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke();
+    }
+  }
+
+  function drawRangeErasePreview() {
+    const eraseState = rangeEraseController?.getState();
+    if (!eraseState?.previewCells.length) return;
+    for (const cell of eraseState.previewCells) {
+      traceCell(cell); context.fillStyle = "rgba(220,60,60,.22)"; context.fill();
+      context.strokeStyle = "rgb(255,100,100)"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke();
+    }
   }
 
   function addGridLine(axis, boundary) {
@@ -166,20 +216,23 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   function drawBuildings() {
     const visible = visibleBuildingGeometries();
     const byId = new Map(visible.map(item => [item.building.id, item]));
-    const ordered = orderBuildingsForDraw(visible.map(item => item.building), interaction.selectedBuildingId);
-    for (const building of ordered) drawBuildingBody(byId.get(building.id), buildingTypes.get(building.typeId));
+    const fixedOrdered = orderBuildingsForDraw(visible.filter(item => item.building.fixed).map(item => item.building), interaction.selectedBuildingId);
+    const userOrdered = orderBuildingsForDraw(visible.filter(item => !item.building.fixed).map(item => item.building), interaction.selectedBuildingId);
+    const ordered = [...fixedOrdered, ...userOrdered];
+    for (const building of ordered) { const appearance = building.fixed ? { visible: true, bodyAlpha: 1 } : (buildingFilter?.appearance(building, interaction.selectedBuildingId) ?? { visible: true, bodyAlpha: 1 }); if (appearance.visible) { context.save(); context.globalAlpha = appearance.bodyAlpha; drawBuildingBody(byId.get(building.id), building.fixed ? fixedBuildingTypes.get(building.typeId) : buildingTypes.get(building.typeId), building.fixed); context.restore(); } }
     for (const building of ordered) {
       const geometry = byId.get(building.id);
       if (building.id === interaction.hoveredBuildingId && building.id !== interaction.selectedBuildingId) strokeGeometry(geometry, "rgba(80, 175, 255, 0.95)", Math.max(1.5, 2 * state.zoom));
       if (building.id === interaction.selectedBuildingId) strokeGeometry(geometry, "#FFD54F", Math.max(2, 5 * state.zoom));
     }
-    for (const building of ordered) drawBuildingLabel(byId.get(building.id));
+    for (const building of ordered) { const appearance = building.fixed ? { visible: true, labelAlpha: 1 } : (buildingFilter?.appearance(building, interaction.selectedBuildingId) ?? { visible: true, labelAlpha: 1 }); if (appearance.visible) { context.save(); context.globalAlpha = appearance.labelAlpha; drawBuildingLabel(byId.get(building.id)); context.restore(); } }
   }
 
-  function drawBuildingBody(geometry, buildingType) {
+  function drawBuildingBody(geometry, buildingType, fixed = false) {
     if (!geometry || !buildingType) return;
     fillAndStrokeGeometry(geometry, "rgba(0,0,0,0.31)", "transparent", 0, 1.5, 2);
     fillAndStrokeGeometry(geometry, buildingType.color, "#202020", Math.max(0.5, 3.5 * state.zoom));
+    if (fixed) { context.save(); context.setLineDash([Math.max(3, 5 * state.zoom), Math.max(2, 3 * state.zoom)]); strokeGeometry(geometry, "rgba(255,255,255,.9)", Math.max(1.5, 2 * state.zoom)); context.restore(); }
     strokeGeometry(geometry, "rgba(255,255,255,0.59)", Math.max(0.5, state.zoom));
   }
 
@@ -224,6 +277,7 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
     state = resizeViewport(state, rect.width, rect.height, dpr);
     canvas.width = Math.max(1, Math.round(rect.width * dpr));
     canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    onViewportChange({ ...state });
     invalidate();
   }
 
@@ -232,6 +286,7 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
     const result = engine.setView({ centerX, centerY, zoom: state.zoom });
     editorHost?.setZoom?.(state.zoom);
     if (result.persisted) editorHost?.markDirty?.();
+    onViewportChange({ ...state });
     invalidate();
   }
 
@@ -239,12 +294,12 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
     const rect = canvas.getBoundingClientRect();
     const [sceneX, sceneY] = screenToScene(event.clientX - rect.left, event.clientY - rect.top, state);
     const cell = sceneToGrid(sceneX, sceneY);
-    if (cell) { editorHost?.setCursor?.(...cell); controller?.updatePreview(...cell); } else editorHost?.clearCursor?.();
+    if (cell) { editorHost?.setCursor?.(...cell); controller?.updatePreview(...cell); rangeController?.hover(cell); } else editorHost?.clearCursor?.();
     if (!panning && event.pointerType !== "touch") updateHoverAt(sceneX, sceneY);
   }
 
   function updateHoverAt(sceneX, sceneY) {
-    const building = hitTestBuildings(sceneX, sceneY, visibleBuildingGeometries(), interaction.selectedBuildingId);
+    const building = hitTestBuildings(sceneX, sceneY, filterHitGeometries(visibleBuildingGeometries()), interaction.selectedBuildingId);
     if (interaction.hover(building?.id)) invalidate();
     canvas.title = building ? buildingTooltip(building) : "";
   }
@@ -262,10 +317,15 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
       if (changed) { refreshDocument(); interaction.select(changed.id); onSelectionChange(changed); invalidate(); }
       return;
     }
-    const building = hitTestBuildings(sceneX, sceneY, visibleBuildingGeometries(), interaction.selectedBuildingId);
-    controller?.selectBuilding(building?.id ?? null);
+    if (rangeController?.getState().mode === "rangeCreate" && cell) { rangeController.click(cell); onRangeStateChange(rangeController.getState()); invalidate(); return; }
+    const building = hitTestBuildings(sceneX, sceneY, filterHitGeometries(visibleBuildingGeometries()), interaction.selectedBuildingId);
+    controller?.selectBuilding(building && (!building.fixed || editableFixed) ? building.id : null);
+    if (!building && cell && rangeController) { const selectedRange = rangeController.selectAtCell(cell); onRangeSelectionChange(selectedRange); }
+    else if (building && rangeController) { rangeController.selectAtCell([-1, -1]); onRangeSelectionChange(null); }
     if (interaction.select(building?.id)) { onSelectionChange(building ?? null); invalidate(); }
   }
+
+  function filterHitGeometries(items) { return buildingFilter ? items.filter(item => item.building.fixed || buildingFilter.appearance(item.building, interaction.selectedBuildingId).hitTest) : items; }
 
   function onWheel(event) {
     if (!event.deltaY) return;
@@ -279,6 +339,15 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   function onPointerDown(event) {
     const touch = event.pointerType === "touch";
     const mousePan = event.button === 1 || (event.button === 0 && spacePressed);
+    if (!touch && !mousePan && event.button === 0 && bulkDeleteController?.getState().mode === "bulkDelete") {
+      const cell = eventCell(event); if (cell) { bulkDeleteController.begin(cell); bulkDrawing = event.pointerId; onBulkDeleteStateChange(bulkDeleteController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); invalidate(); } return;
+    }
+    if (!touch && !mousePan && event.button === 0 && rangeEraseController?.getState().mode === "rangeErase") {
+      const cell = eventCell(event); if (cell) { rangeEraseController.begin(cell); eraseDrawing = event.pointerId; onRangeEraseStateChange(rangeEraseController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); invalidate(); } return;
+    }
+    if (!touch && !mousePan && event.button === 0 && rangeController?.getState().mode === "rangeCreate") {
+      const cell = eventCell(event); if (cell) { rangeController.click(cell); rangeDrawing = event.pointerId; onRangeStateChange(rangeController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); return; }
+    }
     if (event.button === 0 || touch) clickCandidate = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false, selectionAllowed: touch || !spacePressed };
     if (!touch && !mousePan) { canvas.focus({ preventScroll: true }); canvas.setPointerCapture(event.pointerId); return; }
     event.preventDefault(); canvas.focus({ preventScroll: true }); canvas.setPointerCapture(event.pointerId);
@@ -287,6 +356,9 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   }
 
   function onPointerMove(event) {
+    if (bulkDrawing === event.pointerId) { const cell = eventCell(event); if (cell) bulkDeleteController.update(cell); onBulkDeleteStateChange(bulkDeleteController.getState()); invalidate(); return; }
+    if (eraseDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeEraseController.update(cell); onRangeEraseStateChange(rangeEraseController.getState()); invalidate(); return; }
+    if (rangeDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeController.hover(cell); invalidate(); return; }
     if (clickCandidate?.pointerId === event.pointerId && Math.hypot(event.clientX - clickCandidate.x, event.clientY - clickCandidate.y) >= 6) clickCandidate.moved = true;
     if (panning?.pointerId === event.pointerId) {
       state = panViewport(state, event.clientX - panning.x, event.clientY - panning.y);
@@ -297,6 +369,25 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   }
 
   function endPan(event) {
+    if (bulkDrawing === event.pointerId) {
+      const cell = eventCell(event); if (cell) bulkDeleteController.update(cell);
+      const summary = bulkDeleteController.summary(); bulkDrawing = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      if (!summary.deletable.length) { notifyBulkDeleteEmpty(summary.locked.length); bulkDeleteController.cancel(); }
+      else if (confirmBulkDelete({ deleteCount: summary.deletable.length, lockedCount: summary.locked.length })) { bulkDeleteController.commit(); refreshDocument(); controller?.normalizeSelection(); interaction.select(controller?.getState().selectedBuildingId ?? null); onSelectionChange(controller?.getSelectedBuilding() ?? null); }
+      else bulkDeleteController.cancel();
+      onBulkDeleteStateChange(bulkDeleteController.getState()); invalidate(); return;
+    }
+    if (eraseDrawing === event.pointerId) {
+      const cell = eventCell(event); if (cell) rangeEraseController.update(cell);
+      const summary = rangeEraseController.summary(); eraseDrawing = null;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      if (!summary.removedCount) { notifyRangeEraseEmpty(summary.lockedCount); rangeEraseController.cancel(); }
+      else if (confirmRangeErase({ cellCount: summary.removedCount, lockedCount: summary.lockedCount })) { rangeEraseController.commit(); refreshDocument(); rangeController?.normalizeSelection(); onRangeSelectionChange(rangeController?.getSelectedRange() ?? null); }
+      else rangeEraseController.cancel();
+      onRangeEraseStateChange(rangeEraseController.getState()); invalidate(); return;
+    }
+    if (rangeDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeController.click(cell); rangeDrawing = null; if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId); onRangeStateChange(rangeController.getState()); invalidate(); return; }
     const wasPanning = panning?.pointerId === event.pointerId;
     const candidate = clickCandidate?.pointerId === event.pointerId ? clickCandidate : null;
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
@@ -307,17 +398,22 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   }
 
   function cancelPointer(event) {
+    if (bulkDrawing === event.pointerId) { bulkDrawing = null; bulkDeleteController?.cancel(); onBulkDeleteStateChange(bulkDeleteController?.getState()); }
+    if (eraseDrawing === event.pointerId) { eraseDrawing = null; rangeEraseController?.cancel(); onRangeEraseStateChange(rangeEraseController?.getState()); }
+    if (rangeDrawing === event.pointerId) { rangeDrawing = null; rangeController?.cancel(); onRangeStateChange(rangeController?.getState()); }
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
     if (panning?.pointerId === event.pointerId) panning = null;
     if (clickCandidate?.pointerId === event.pointerId) clickCandidate = null;
     canvas.style.cursor = spacePressed ? "grab" : "default";
   }
 
+  function eventCell(event) { const rect = canvas.getBoundingClientRect(), scene = screenToScene(event.clientX - rect.left, event.clientY - rect.top, state); return sceneToGrid(...scene); }
+
   function onKeyDown(event) {
     if (isFormControl(event.target)) return;
     if (event.code === "Space") { spacePressed = true; canvas.style.cursor = panning ? "grabbing" : "grab"; event.preventDefault(); }
-    if (event.key === "Escape") { controller?.cancelMode(); invalidate(); }
-    if (event.key === "Delete" && controller) { try { const removed = controller.deleteSelected(); if (removed) { refreshDocument(); interaction.clearSelection(); onSelectionChange(null); invalidate(); } } catch {} }
+    if (event.key === "Escape") { controller?.cancelMode(); rangeController?.cancel(); bulkDeleteController?.cancel(); rangeEraseController?.cancel(); onBulkDeleteStateChange(bulkDeleteController?.getState()); onRangeEraseStateChange(rangeEraseController?.getState()); invalidate(); }
+    if (event.key === "Delete" && controller) { try { const removed = controller.deleteSelected(); if (removed) { refreshDocument(); interaction.clearSelection(); onSelectionChange(null); invalidate(); } else if (rangeController?.deleteSelected()) { refreshDocument(); onRangeSelectionChange(null); invalidate(); } } catch {} }
   }
   function onKeyUp(event) { if (event.code === "Space") { spacePressed = false; if (!panning) canvas.style.cursor = "default"; } }
   function onBlur() { spacePressed = false; panning = null; clickCandidate = null; canvas.style.cursor = "default"; }
@@ -343,12 +439,13 @@ export function createMapRenderer({ host, engine, controller = null, requestBuil
   return {
     canvas,
     getState: () => ({ ...state }),
+    centerAtGrid(x, y) { const [sceneCenterX, sceneCenterY] = gridToScene(...nearestValidGridCoordinate(x, y)); state = { ...state, sceneCenterX, sceneCenterY }; syncNavigation(); return { ...state }; },
     getSelectedBuildingId: () => interaction.selectedBuildingId,
     getHoveredBuildingId: () => interaction.hoveredBuildingId,
-    getSelectedBuilding: () => engine.getDocument().buildings.find(building => building.id === interaction.selectedBuildingId) ?? null,
-    selectBuilding(id) { refreshDocument(); const building = mapDocument.buildings.find(item => item.id === id) ?? null; controller?.selectBuilding(building?.id ?? null); if (interaction.select(building?.id)) { onSelectionChange(building); invalidate(); } return building; },
+    getSelectedBuilding: () => [...engine.getDocument().fixedBuildings, ...engine.getDocument().buildings].find(building => building.id === interaction.selectedBuildingId) ?? null,
+    selectBuilding(id) { refreshDocument(); const building = [...mapDocument.fixedBuildings, ...mapDocument.buildings].find(item => item.id === id) ?? null; controller?.selectBuilding(building && (!building.fixed || editableFixed) ? building.id : null); if (interaction.select(building?.id)) { onSelectionChange(building); invalidate(); } return building; },
     clearSelection() { if (interaction.clearSelection()) { onSelectionChange(null); invalidate(); } },
-    refresh() { refreshDocument(); const selected = mapDocument.buildings.find(item => item.id === interaction.selectedBuildingId) ?? null; if (!selected) interaction.clearSelection(); onSelectionChange(selected); invalidate(); },
+    refresh() { refreshDocument(); controller?.normalizeSelection(); rangeController?.normalizeSelection(); const requestedId = controller?.getState().selectedBuildingId ?? interaction.selectedBuildingId; const candidates = editableFixed ? [...mapDocument.fixedBuildings, ...mapDocument.buildings] : mapDocument.buildings; const selected = candidates.find(item => item.id === requestedId) ?? null; interaction.select(selected?.id); onSelectionChange(selected); onRangeSelectionChange(rangeController?.getSelectedRange() ?? null); invalidate(); },
     invalidate,
     destroy() {
       destroyed = true; if (frame) cancelAnimationFrame(frame);
@@ -366,3 +463,5 @@ function buildingTooltip(building) {
 function isFormControl(target) {
   return target instanceof Element && Boolean(target.closest("input, textarea, select, button, [contenteditable='true']"));
 }
+
+function withAlpha(hex, alpha) { const value = hex.replace("#", ""); const full = value.length === 3 ? [...value].map(char => char + char).join("") : value; return `rgba(${parseInt(full.slice(0,2),16)},${parseInt(full.slice(2,4),16)},${parseInt(full.slice(4,6),16)},${alpha})`; }

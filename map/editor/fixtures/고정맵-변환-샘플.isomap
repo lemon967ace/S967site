@@ -1,0 +1,155 @@
+{
+  "format": "isometric-map-editor",
+  "version": 1,
+  "title": "새 문서",
+  "map": {
+    "min_x": 0,
+    "max_x": 511,
+    "min_y": 0,
+    "max_y": 1023
+  },
+  "building_types": [
+    {
+      "id": "type-01",
+      "name": "건물 종류 1",
+      "color": "#4E79A7"
+    },
+    {
+      "id": "type-02",
+      "name": "건물 종류 2",
+      "color": "#F28E2B"
+    },
+    {
+      "id": "type-03",
+      "name": "건물 종류 3",
+      "color": "#E15759"
+    },
+    {
+      "id": "type-04",
+      "name": "건물 종류 4",
+      "color": "#76B7B2"
+    },
+    {
+      "id": "type-05",
+      "name": "건물 종류 5",
+      "color": "#59A14F"
+    },
+    {
+      "id": "type-06",
+      "name": "건물 종류 6",
+      "color": "#EDC948"
+    },
+    {
+      "id": "type-07",
+      "name": "건물 종류 7",
+      "color": "#B07AA1"
+    }
+  ],
+  "buildings": [
+    {
+      "id": "7262286c-535b-4969-a78d-cb684c5db9ff",
+      "name": "ml;",
+      "type_id": "type-01",
+      "x": 32,
+      "y": 30,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "7447d026-c65f-459b-a5a9-ad62ee415574",
+      "name": "kjbn",
+      "type_id": "type-01",
+      "x": 38,
+      "y": 38,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "4df57f81-34b3-49c1-9a4a-47acc6dfeb0b",
+      "name": "l;km",
+      "type_id": "type-01",
+      "x": 36,
+      "y": 36,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "9ddc358a-e83b-4251-8c2a-719f99501aba",
+      "name": "fliyu",
+      "type_id": "type-01",
+      "x": 40,
+      "y": 40,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "d76acfbc-8903-4a97-a98b-e02ccdce2d3a",
+      "name": "ahet",
+      "type_id": "type-01",
+      "x": 36,
+      "y": 40,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "fb37a79c-90e1-422c-a449-69129d4d8629",
+      "name": "GEWRATE",
+      "type_id": "type-01",
+      "x": 40,
+      "y": 36,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "b843e49f-a8e9-47cd-aab5-6a04ac690912",
+      "name": "areg",
+      "type_id": "type-01",
+      "x": 38,
+      "y": 34,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "e023b6e4-772d-419e-a81f-76edf1e04d96",
+      "name": "aerg",
+      "type_id": "type-01",
+      "x": 38,
+      "y": 42,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "087de373-85f6-45bc-9ca3-7ae4d076861d",
+      "name": "aerg",
+      "type_id": "type-01",
+      "x": 42,
+      "y": 38,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    },
+    {
+      "id": "f3b7b00a-909e-4000-8e50-5c4546640472",
+      "name": "aerg",
+      "type_id": "type-01",
+      "x": 34,
+      "y": 38,
+      "width": 2,
+      "height": 2,
+      "affiliation": ""
+    }
+  ],
+  "view": {
+    "center_x": 39,
+    "center_y": 41,
+    "zoom": 0.8695652173913043
+  }
+}

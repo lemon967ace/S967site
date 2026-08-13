@@ -1,17 +1,23 @@
 import { Building } from "./editor-model.js";
+import { sameBuildingState, snapshotBuilding } from "./editor-history.js";
 
 export const EDITOR_MODES = Object.freeze({ SELECT: "select", PLACE: "place", MOVE: "move" });
 
-export function createBuildingController({ engine, onChange = () => {}, onDirty = () => {} }) {
+export function createBuildingController({ engine, history = null, onChange = () => {}, onDirty = () => {} }) {
   let mode = EDITOR_MODES.SELECT, palette = null, selectedBuildingId = null, preview = null;
+  let rangePeer = null;
+  const areaPeers = new Set();
 
   function snapshot() { return { mode, palette: palette && { ...palette }, selectedBuildingId, preview: preview && { ...preview, cells: preview.cells.map(cell => [...cell]) } }; }
   function emit() { onChange(snapshot()); }
   function ensureEditable() { if (engine.isReadOnly()) throw new Error("The map is read-only."); }
   function cancelMode() { mode = EDITOR_MODES.SELECT; palette = null; preview = null; emit(); }
   function selectBuilding(id) { selectedBuildingId = id ?? null; emit(); }
+  function normalizeSelection() { if (selectedBuildingId && !selected()) selectedBuildingId = null; return selectedBuildingId; }
   function selectPalette(typeId, size = 1, defaultAffiliation = "") {
     ensureEditable();
+    for (const peer of areaPeers) peer?.cancel();
+    rangePeer?.cancel();
     if (!engine.getDocument().buildingTypes.some(type => type.id === typeId)) throw new RangeError("Unknown building type ID.");
     if (![1, 2].includes(size)) throw new RangeError("Building size must be 1 or 2.");
     palette = { typeId, size, defaultAffiliation }; mode = EDITOR_MODES.PLACE; preview = null; emit();
@@ -20,6 +26,7 @@ export function createBuildingController({ engine, onChange = () => {}, onDirty 
     ensureEditable(); const building = selected();
     if (!building) throw new RangeError("Select a building first.");
     if (building.locked) throw new RangeError("Locked buildings cannot be moved.");
+    for (const peer of areaPeers) peer?.cancel();
     mode = EDITOR_MODES.MOVE; palette = null; preview = null; emit();
   }
   function updatePreview(x, y) {
@@ -35,22 +42,36 @@ export function createBuildingController({ engine, onChange = () => {}, onDirty 
     if (!preview?.valid) return null;
     if (mode === EDITOR_MODES.PLACE) {
       const building = engine.addBuilding(new Building({ name, typeId: palette.typeId, x, y, width: palette.size, height: palette.size, affiliation: affiliation ?? palette.defaultAffiliation, locked: false }));
-      selectedBuildingId = building.id; preview = null; onDirty(); emit(); return building;
+      const state = snapshotBuilding(building);
+      history?.record({ description: "create", undo() { engine.deleteBuilding(state.id); selectedBuildingId = null; }, redo() { engine.addBuilding(state); selectedBuildingId = state.id; } });
+      selectedBuildingId = building.id; preview = null; notifyMutation(); emit(); return building;
     }
     if (mode === EDITOR_MODES.MOVE) {
-      const building = engine.moveBuilding(selectedBuildingId, x, y);
-      mode = EDITOR_MODES.SELECT; preview = null; onDirty(); emit(); return building;
+      const before = snapshotBuilding(selected());
+      if (before.x === x && before.y === y) { mode = EDITOR_MODES.SELECT; preview = null; emit(); return selected(); }
+      const building = engine.moveBuilding(selectedBuildingId, x, y), after = snapshotBuilding(building);
+      history?.record({ description: "move", undo() { engine.restoreBuildingState(before); selectedBuildingId = before.id; }, redo() { engine.restoreBuildingState(after); selectedBuildingId = after.id; } });
+      mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return building;
     }
     return null;
   }
   function deleteSelected() {
     ensureEditable(); if (!selectedBuildingId) return null;
-    const removed = engine.deleteBuilding(selectedBuildingId); selectedBuildingId = null; mode = EDITOR_MODES.SELECT; preview = null; onDirty(); emit(); return removed;
+    const state = snapshotBuilding(selected());
+    const removed = engine.deleteBuilding(selectedBuildingId);
+    history?.record({ description: "delete", undo() { engine.addBuilding(state); selectedBuildingId = state.id; }, redo() { engine.deleteBuilding(state.id); selectedBuildingId = null; } });
+    selectedBuildingId = null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return removed;
   }
   function editSelected(changes) {
     ensureEditable(); if (!selectedBuildingId) throw new RangeError("Select a building first.");
-    const edited = engine.editBuilding(selectedBuildingId, changes); onDirty(); emit(); return edited;
+    const before = snapshotBuilding(selected()), edited = engine.editBuilding(selectedBuildingId, changes), after = snapshotBuilding(edited);
+    if (sameBuildingState(before, after)) { emit(); return edited; }
+    history?.record({ description: "edit", undo() { engine.restoreBuildingState(before); selectedBuildingId = before.id; }, redo() { engine.restoreBuildingState(after); selectedBuildingId = after.id; } });
+    notifyMutation(); emit(); return edited;
   }
+  function notifyMutation() { onDirty(history ? !history.isAtSavedState() : true); }
+  function undo() { ensureEditable(); const command = history?.undo(); if (!command) return null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return command; }
+  function redo() { ensureEditable(); const command = history?.redo(); if (!command) return null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return command; }
   function selected() { return engine.getDocument().buildings.find(item => item.id === selectedBuildingId) ?? null; }
-  return { getState: snapshot, selectBuilding, selectPalette, startMove, updatePreview, commitAt, cancelMode, deleteSelected, editSelected, getSelectedBuilding: selected };
+  return { getState: snapshot, selectBuilding, normalizeSelection, selectPalette, startMove, updatePreview, commitAt, cancelMode, deleteSelected, editSelected, undo, redo, getSelectedBuilding: selected, setRangeController(value) { rangePeer = value; }, addAreaPeer(value) { areaPeers.add(value); } };
 }

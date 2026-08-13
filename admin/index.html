@@ -593,6 +593,7 @@
   class="hidden"
 >
   <div class="admin-tabs">
+    <button id="logoutButton" type="button" class="admin-tab">로그아웃</button>
     <button
       type="button"
       class="admin-tab is-active"
@@ -625,12 +626,20 @@
   공동구매
 </button>
 
-    <button
+<button
   type="button"
   class="admin-tab"
   data-admin-tab="staff"
 >
   Staff
+</button>
+
+<button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="maptemplates"
+>
+  고정맵
 </button>
   </div>
 
@@ -1500,13 +1509,64 @@
   </section>
 </div>
 
+<div
+  id="mapTemplateAdminSection"
+  class="admin-section"
+  data-admin-section="maptemplates"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">고정맵 템플릿 관리</h2>
+      <a class="admin-button" href="/map/template-editor/">고정맵 제작기 열기</a>
+      <button id="refreshMapTemplatesButton" type="button">새로고침</button>
+    </div>
+
+    <p class="small">
+      고정맵 파일을 교체해도 이미 이 고정맵으로 생성된 기존 사용자 맵은 변경되지 않습니다.
+      이후 새로 생성되는 맵에만 새 템플릿이 적용됩니다.
+    </p>
+
+    <div id="mapTemplateList" class="group-buy-grid"></div>
+    <div id="mapTemplateListStatus" class="status"></div>
+  </section>
+
+  <section class="panel">
+    <h2>고정맵 추가</h2>
+    <p class="small">
+      4개 언어 이름과 canonical <code>.isotemplate</code> 파일을 등록합니다.
+      최종 파일 유효성은 서버에서 검사합니다.
+    </p>
+
+    <div class="group-buy-form-row">
+      <input id="newMapTemplateNameKo" type="text" maxlength="100" placeholder="한국어 이름" autocomplete="off">
+      <input id="newMapTemplateNameEn" type="text" maxlength="100" placeholder="English name" autocomplete="off">
+      <input id="newMapTemplateNameJa" type="text" maxlength="100" placeholder="日本語名" autocomplete="off">
+      <input id="newMapTemplateNameRu" type="text" maxlength="100" placeholder="Русское название" autocomplete="off">
+    </div>
+
+    <div class="row add-row">
+      <input id="newMapTemplateFile" type="file" accept=".isotemplate">
+      <button id="createMapTemplateButton" type="button">고정맵 등록</button>
+    </div>
+
+    <div id="createMapTemplateStatus" class="status"></div>
+  </section>
+</div>
+
 
     <a class="back" href="/">
       ← Back to Home
     </a>
   </main>
 
+  <script src="/admin/admin-auth.js"></script>
   <script>
+    const ADMIN_LOGIN_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-login";
+    const ADMIN_SESSION_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session";
+    const ADMIN_LOGOUT_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-logout";
     const ADMIN_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/upload-admin";
 
@@ -1527,6 +1587,9 @@
 
     const GROUP_BUY_EXPORT_EMAIL_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-export-email";
+
+    const MAP_TEMPLATE_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/map-template-admin";
     
     const SUPABASE_PUBLIC_STORAGE_BASE =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
@@ -1555,6 +1618,8 @@
       document.getElementById(
         "loginStatus"
       );
+
+    const logoutButton = document.getElementById("logoutButton");
 
     const pauseStatus =
       document.getElementById(
@@ -1916,6 +1981,33 @@ const groupBuyExportStatus =
     "groupBuyExportStatus"
   );
 
+const mapTemplateList =
+  document.getElementById("mapTemplateList");
+const mapTemplateListStatus =
+  document.getElementById("mapTemplateListStatus");
+const refreshMapTemplatesButton =
+  document.getElementById("refreshMapTemplatesButton");
+const newMapTemplateNameKo =
+  document.getElementById("newMapTemplateNameKo");
+const newMapTemplateNameEn =
+  document.getElementById("newMapTemplateNameEn");
+const newMapTemplateNameJa =
+  document.getElementById("newMapTemplateNameJa");
+const newMapTemplateNameRu =
+  document.getElementById("newMapTemplateNameRu");
+const newMapTemplateFile =
+  document.getElementById("newMapTemplateFile");
+const createMapTemplateButton =
+  document.getElementById("createMapTemplateButton");
+const createMapTemplateStatus =
+  document.getElementById("createMapTemplateStatus");
+
+const MAP_TEMPLATE_MAX_FILE_BYTES =
+  8 * 1024 * 1024;
+let mapTemplates = [];
+let mapTemplatesLoaded = false;
+let mapTemplatesLoading = false;
+
 
 let groupBuyData = {
   events: [],
@@ -1986,8 +2078,28 @@ const emailExportHistory =
     "emailExportHistory"
   );
     
-    let adminSecret = "";
     let currentData = null;
+
+    function showLogin(message = "") {
+      adminArea.classList.add("hidden");
+      loginPanel.classList.remove("hidden");
+      if (message) setStatus(loginStatus, message, true);
+    }
+
+    async function authenticatedAdminFetch(url, options = {}) {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          ...S967AdminAuth.authorizationHeaders(),
+        },
+      });
+      if (response.status === 401) {
+        S967AdminAuth.clearToken();
+        showLogin("관리자 세션이 만료되었습니다. 다시 로그인하세요.");
+      }
+      return response;
+    }
 
 let wkData = {
   tiers: [],
@@ -2017,6 +2129,286 @@ let wkData = {
       );
     }
 
+async function mapTemplateApiRequest(method, body = null) {
+  const options = { method, headers: {} };
+  if (body !== null) {
+    options.headers["Content-Type"] = "application/json";
+    options.body = JSON.stringify(body);
+  }
+  const response = await authenticatedAdminFetch(
+    MAP_TEMPLATE_ADMIN_API_URL,
+    options
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(
+      result.error || result.message || "고정맵 요청에 실패했습니다."
+    );
+    error.code = result.error || "HTTP_ERROR";
+    error.status = response.status;
+    throw error;
+  }
+  return result;
+}
+
+async function readIsotemplateFile(file) {
+  if (!file) {
+    throw new Error(".isotemplate 파일을 선택하세요.");
+  }
+  if (file.size > MAP_TEMPLATE_MAX_FILE_BYTES) {
+    throw new Error("파일 크기는 8 MiB 이하여야 합니다.");
+  }
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    throw new Error(".isotemplate 파일을 읽지 못했습니다.");
+  }
+  if (!text.trim()) {
+    throw new Error(".isotemplate 파일이 비어 있습니다.");
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(".isotemplate 파일의 JSON 형식이 올바르지 않습니다.");
+  }
+}
+
+function mapTemplateNamesFromInputs(inputs) {
+  const values = inputs.map(input => input.value.trim());
+  if (values.some(value => !value)) {
+    throw new Error("4개 언어 이름을 모두 입력하세요.");
+  }
+  return {
+    name_ko: values[0],
+    name_en: values[1],
+    name_ja: values[2],
+    name_ru: values[3],
+  };
+}
+
+function mapTemplateNameField(value, placeholder) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.maxLength = 100;
+  input.placeholder = placeholder;
+  input.value = value || "";
+  input.autocomplete = "off";
+  return input;
+}
+
+function renderMapTemplates() {
+  mapTemplateList.textContent = "";
+  if (!mapTemplates.length) {
+    setStatus(mapTemplateListStatus, "등록된 고정맵이 없습니다.");
+    return;
+  }
+  setStatus(mapTemplateListStatus, "");
+  mapTemplates.forEach(template => {
+    const card = document.createElement("div");
+    card.className = "group-buy-card";
+
+    const title = document.createElement("div");
+    title.className = "group-buy-card-title";
+    title.textContent = template.name_ko;
+    if (template.is_default === true) {
+      const defaultBadge = document.createElement("span");
+      defaultBadge.className = "badge badge-active";
+      defaultBadge.style.marginLeft = "8px";
+      defaultBadge.textContent = "기본맵";
+      title.appendChild(defaultBadge);
+    }
+
+    const names = document.createElement("div");
+    names.className = "group-buy-meta";
+    const english = document.createElement("div");
+    english.textContent = `English: ${template.name_en}`;
+    const japanese = document.createElement("div");
+    japanese.textContent = `日本語: ${template.name_ja}`;
+    const russian = document.createElement("div");
+    russian.textContent = `Русский: ${template.name_ru}`;
+    names.append(english, japanese, russian);
+
+    const metadata = document.createElement("div");
+    metadata.className = "group-buy-meta";
+    metadata.textContent =
+      `등록 ${formatKstDateTime(template.created_at)} · ` +
+      `업데이트 ${formatKstDateTime(template.updated_at)}`;
+
+    const id = document.createElement("div");
+    id.className = "group-buy-meta";
+    id.textContent = `ID: ${template.id}`;
+
+    const actions = document.createElement("div");
+    actions.className = "group-buy-actions";
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.textContent = "이름 수정";
+    const replaceButton = document.createElement("button");
+    replaceButton.type = "button";
+    replaceButton.textContent = "파일 교체";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger";
+    deleteButton.textContent = "삭제";
+    const defaultButton = document.createElement("button");
+    defaultButton.type = "button";
+    defaultButton.textContent = template.is_default === true
+      ? "기본맵 해제"
+      : "기본맵으로 지정";
+    actions.append(defaultButton, editButton, replaceButton, deleteButton);
+
+    const itemStatus = document.createElement("div");
+    itemStatus.className = "status";
+
+    const editArea = document.createElement("div");
+    editArea.className = "hidden";
+    const editFields = document.createElement("div");
+    editFields.className = "group-buy-form-row";
+    const editInputs = [
+      mapTemplateNameField(template.name_ko, "한국어 이름"),
+      mapTemplateNameField(template.name_en, "English name"),
+      mapTemplateNameField(template.name_ja, "日本語名"),
+      mapTemplateNameField(template.name_ru, "Русское название"),
+    ];
+    editFields.append(...editInputs);
+    const editActions = document.createElement("div");
+    editActions.className = "group-buy-actions";
+    const saveButton = document.createElement("button");
+    saveButton.type = "button";
+    saveButton.textContent = "저장";
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.textContent = "취소";
+    editActions.append(saveButton, cancelButton);
+    editArea.append(editFields, editActions);
+
+    const replaceInput = document.createElement("input");
+    replaceInput.type = "file";
+    replaceInput.accept = ".isotemplate";
+    replaceInput.className = "hidden";
+
+    editButton.addEventListener("click", () => {
+      editArea.classList.remove("hidden");
+      editButton.disabled = true;
+      editInputs[0].focus();
+    });
+    cancelButton.addEventListener("click", () => {
+      editInputs.forEach((input, index) => {
+        input.value = [template.name_ko, template.name_en, template.name_ja, template.name_ru][index];
+      });
+      editArea.classList.add("hidden");
+      editButton.disabled = false;
+      setStatus(itemStatus, "");
+    });
+    saveButton.addEventListener("click", async () => {
+      saveButton.disabled = true;
+      setStatus(itemStatus, "이름을 저장하는 중…");
+      try {
+        const updatedNames = mapTemplateNamesFromInputs(editInputs);
+        await mapTemplateApiRequest("POST", {
+          action: "update_template_names",
+          id: template.id,
+          ...updatedNames,
+        });
+        await loadMapTemplates();
+        setStatus(mapTemplateListStatus, "고정맵 이름을 수정했습니다.");
+      } catch (error) {
+        setStatus(itemStatus, error.message || "이름을 수정하지 못했습니다.", true);
+        saveButton.disabled = false;
+      }
+    });
+
+    replaceButton.addEventListener("click", () => {
+      replaceInput.value = "";
+      replaceInput.click();
+    });
+    replaceInput.addEventListener("change", async () => {
+      const file = replaceInput.files?.[0];
+      if (!file) return;
+      replaceButton.disabled = true;
+      setStatus(itemStatus, "고정맵 파일을 교체하는 중…");
+      try {
+        const templateData = await readIsotemplateFile(file);
+        await mapTemplateApiRequest("POST", {
+          action: "replace_template_file",
+          id: template.id,
+          template_data: templateData,
+        });
+        await loadMapTemplates();
+        setStatus(mapTemplateListStatus, "고정맵 파일을 교체했습니다.");
+      } catch (error) {
+        setStatus(itemStatus, error.message || "파일을 교체하지 못했습니다.", true);
+        replaceButton.disabled = false;
+      }
+    });
+
+    defaultButton.addEventListener("click", async () => {
+      const clearing = template.is_default === true;
+      const message = clearing
+        ? "기본맵 지정을 해제하시겠습니까?\n기본맵이 없으면 새 맵 생성 화면에서 사용자가 맵 종류를 직접 선택해야 합니다."
+        : "이 고정맵을 기본맵으로 지정하시겠습니까?\n이후 새 맵을 만드는 사용자에게 이 고정맵이 기본 선택됩니다.\n이미 만들어진 사용자 맵은 변경되지 않습니다.";
+      if (!confirm(message)) return;
+      defaultButton.disabled = true;
+      setStatus(itemStatus, clearing ? "기본맵을 해제하는 중…" : "기본맵으로 지정하는 중…");
+      try {
+        await mapTemplateApiRequest("POST", clearing
+          ? { action: "clear_default_template" }
+          : { action: "set_default_template", id: template.id });
+        await loadMapTemplates();
+        setStatus(
+          mapTemplateListStatus,
+          clearing ? "기본맵 지정을 해제했습니다." : "기본맵을 변경했습니다."
+        );
+      } catch (error) {
+        setStatus(itemStatus, error.message || "기본맵 설정을 변경하지 못했습니다.", true);
+        defaultButton.disabled = false;
+      }
+    });
+
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm(
+        "이 고정맵 템플릿을 삭제하시겠습니까?\n이미 이 템플릿으로 만들어진 사용자 맵은 삭제되지 않습니다."
+      )) return;
+      deleteButton.disabled = true;
+      setStatus(itemStatus, "삭제하는 중…");
+      try {
+        await mapTemplateApiRequest("POST", {
+          action: "delete_template",
+          id: template.id,
+        });
+        await loadMapTemplates();
+        setStatus(mapTemplateListStatus, "고정맵 템플릿을 삭제했습니다.");
+      } catch (error) {
+        setStatus(itemStatus, error.message || "템플릿을 삭제하지 못했습니다.", true);
+        deleteButton.disabled = false;
+      }
+    });
+
+    card.append(title, names, metadata, id, actions, editArea, replaceInput, itemStatus);
+    mapTemplateList.appendChild(card);
+  });
+}
+
+async function loadMapTemplates() {
+  if (mapTemplatesLoading) return;
+  mapTemplatesLoading = true;
+  refreshMapTemplatesButton.disabled = true;
+  setStatus(mapTemplateListStatus, "불러오는 중…");
+  try {
+    const result = await mapTemplateApiRequest("GET");
+    mapTemplates = Array.isArray(result.templates) ? result.templates : [];
+    mapTemplatesLoaded = true;
+    renderMapTemplates();
+  } catch (error) {
+    setStatus(mapTemplateListStatus, "고정맵 목록을 불러오지 못했습니다.", true);
+    throw error;
+  } finally {
+    mapTemplatesLoading = false;
+    refreshMapTemplatesButton.disabled = false;
+  }
+}
+
 async function apiRequest(
   method,
   body = null
@@ -2024,10 +2416,7 @@ async function apiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2041,7 +2430,7 @@ async function apiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       ADMIN_API_URL,
       options
     );
@@ -2071,10 +2460,7 @@ async function apiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2088,7 +2474,7 @@ async function apiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       STAFF_ADMIN_API_URL,
       options
     );
@@ -2433,10 +2819,7 @@ async function inquiryApiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2452,7 +2835,7 @@ async function inquiryApiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       INQUIRY_ADMIN_API_URL,
       options
     );
@@ -2481,10 +2864,7 @@ async function wkApiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2498,7 +2878,7 @@ async function wkApiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       WK_ADMIN_API_URL,
       options
     );
@@ -2527,10 +2907,7 @@ async function wkApiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2546,7 +2923,7 @@ async function wkApiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       INQUIRY_ADMIN_API_URL,
       options
     );
@@ -2595,10 +2972,7 @@ async function groupBuyApiRequest(
   const options = {
     method,
 
-    headers: {
-      "x-admin-secret":
-        adminSecret,
-    },
+    headers: {},
   };
 
   if (body !== null) {
@@ -2614,7 +2988,7 @@ async function groupBuyApiRequest(
   }
 
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       GROUP_BUY_ADMIN_API_URL +
         query,
       options
@@ -2649,7 +3023,7 @@ async function groupBuyExportEmailRequest(
   eventId
 ) {
   const response =
-    await fetch(
+        await authenticatedAdminFetch(
       GROUP_BUY_EXPORT_EMAIL_API_URL,
       {
         method:
@@ -2659,8 +3033,6 @@ async function groupBuyExportEmailRequest(
           "Content-Type":
             "application/json",
 
-          "x-admin-secret":
-            adminSecret,
         },
 
         body:
@@ -3066,7 +3438,7 @@ async function groupBuyExportEmailRequest(
   type
 ) {
   const response =
-    await fetch(
+    await authenticatedAdminFetch(
       WK_EXPORT_EMAIL_API_URL,
       {
         method: "POST",
@@ -3075,8 +3447,6 @@ async function groupBuyExportEmailRequest(
           "Content-Type":
             "application/json",
 
-          "x-admin-secret":
-            adminSecret,
         },
 
         body:
@@ -7319,9 +7689,6 @@ function renderOnlyIp(ipHash) {
           return;
         }
 
-        adminSecret =
-          value;
-
         loginButton.disabled =
           true;
 
@@ -7331,6 +7698,8 @@ function renderOnlyIp(ipHash) {
         );
 
 try {
+  await S967AdminAuth.login(value, { url: ADMIN_LOGIN_API_URL });
+
   await loadAdminData();
 
   await loadStaffAccounts();
@@ -7346,7 +7715,7 @@ try {
             "hidden"
           );
         } catch (error) {
-          adminSecret = "";
+          S967AdminAuth.clearToken();
 
           setStatus(
             loginStatus,
@@ -7374,6 +7743,17 @@ try {
           }
         }
       );
+
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
+      try {
+        await S967AdminAuth.logout({ url: ADMIN_LOGOUT_API_URL });
+      } finally {
+        logoutButton.disabled = false;
+        adminSecretInput.value = "";
+        showLogin();
+      }
+    });
 
 
     refreshButton.addEventListener(
@@ -7520,6 +7900,14 @@ try {
   "staff"
 ) {
   loadStaffAccounts();
+}
+
+      if (
+  target ===
+  "maptemplates" &&
+  !mapTemplatesLoaded
+) {
+  loadMapTemplates().catch(() => {});
 }
       
       
@@ -8760,6 +9148,77 @@ refreshStaffButton.addEventListener(
     } catch {}
   }
 );
+
+refreshMapTemplatesButton.addEventListener(
+  "click",
+  async () => {
+    try {
+      await loadMapTemplates();
+    } catch {}
+  }
+);
+
+createMapTemplateButton.addEventListener(
+  "click",
+  async () => {
+    createMapTemplateButton.disabled = true;
+    setStatus(createMapTemplateStatus, "고정맵을 등록하는 중…");
+    try {
+      const templateNames = mapTemplateNamesFromInputs([
+        newMapTemplateNameKo,
+        newMapTemplateNameEn,
+        newMapTemplateNameJa,
+        newMapTemplateNameRu,
+      ]);
+      const templateData = await readIsotemplateFile(
+        newMapTemplateFile.files?.[0]
+      );
+      await mapTemplateApiRequest("POST", {
+        action: "create_template",
+        ...templateNames,
+        template_data: templateData,
+      });
+      newMapTemplateNameKo.value = "";
+      newMapTemplateNameEn.value = "";
+      newMapTemplateNameJa.value = "";
+      newMapTemplateNameRu.value = "";
+      newMapTemplateFile.value = "";
+      await loadMapTemplates();
+      setStatus(createMapTemplateStatus, "고정맵 템플릿을 등록했습니다.");
+    } catch (error) {
+      setStatus(
+        createMapTemplateStatus,
+        error.message || "고정맵 템플릿을 등록하지 못했습니다.",
+        true
+      );
+    } finally {
+      createMapTemplateButton.disabled = false;
+    }
+  }
+);
+
+(async function bootstrapAdminSession() {
+  loginButton.disabled = true;
+  setStatus(loginStatus, "관리자 세션을 확인하는 중…");
+  const valid = await S967AdminAuth.validate({ url: ADMIN_SESSION_API_URL });
+  if (!valid) {
+    showLogin();
+    setStatus(loginStatus, "");
+    loginButton.disabled = false;
+    return;
+  }
+  try {
+    await loadAdminData();
+    await loadStaffAccounts();
+    loginPanel.classList.add("hidden");
+    adminArea.classList.remove("hidden");
+  } catch (error) {
+    S967AdminAuth.clearToken();
+    showLogin("관리자 데이터를 불러오지 못했습니다. 다시 로그인하세요.");
+  } finally {
+    loginButton.disabled = false;
+  }
+})();
     
   </script>
 </body>

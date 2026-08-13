@@ -147,7 +147,8 @@
     }
 
     input[type="text"],
-    input[type="password"] {
+    input[type="password"],
+    select {
       width: 100%;
 
       padding: 12px 13px;
@@ -299,6 +300,13 @@
       line-height: 1.65;
     }
 
+    .password-notice {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.55;
+    }
+
     .dialog-id {
       font-weight: 750;
       overflow-wrap: anywhere;
@@ -428,6 +436,13 @@
     .new-map-button {
       width: 100%;
       margin-top: 14px;
+    }
+
+    .new-map-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
     }
 
     .back {
@@ -724,6 +739,11 @@
           class="status"
         ></div>
 
+        <p
+          id="newUserNotice"
+          class="password-notice"
+        ></p>
+
       </form>
 
       <div
@@ -872,6 +892,11 @@
           >
         </div>
 
+        <p
+          id="passwordSecurityNotice"
+          class="password-notice"
+        ></p>
+
         <div class="dialog-buttons">
 
           <button
@@ -967,6 +992,32 @@
 
       </section>
 
+      <section
+        id="newMapPanel"
+        class="panel hidden"
+      >
+        <h2 id="newMapTitle" class="panel-title">New Map</h2>
+
+        <div class="field">
+          <label id="newMapNameLabel" class="label" for="newMapName">Map name</label>
+          <input id="newMapName" type="text" maxlength="100" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label id="newMapTypeLabel" class="label" for="newMapType">Map type</label>
+          <select id="newMapType" disabled>
+            <option value="">Loading…</option>
+          </select>
+        </div>
+
+        <div class="new-map-actions">
+          <button id="cancelNewMapButton" class="secondary-button" type="button">Cancel</button>
+          <button id="createNewMapButton" type="button" disabled>Create</button>
+        </div>
+
+        <div id="newMapStatus" class="status"></div>
+      </section>
+
     </div>
 
 
@@ -981,6 +1032,7 @@
   </main>
 
 
+  <script src="/map/map-new-flow.js"></script>
   <script>
     /*
       ==========================================================
@@ -1006,6 +1058,12 @@
     const MAP_SAVE_URL =
       `${FUNCTIONS_BASE_URL}/map-save`;
 
+    const MAP_TEMPLATE_LIST_URL =
+      `${FUNCTIONS_BASE_URL}/map-template-list`;
+
+    const MAP_TEMPLATE_LOAD_URL =
+      `${FUNCTIONS_BASE_URL}/map-template-load`;
+
     const MAP_DELETE_URL =
       `${FUNCTIONS_BASE_URL}/map-delete`;
 
@@ -1028,6 +1086,12 @@
 
     const SESSION_EXPIRES_KEY =
       "s967-map-session-expires";
+
+    const ACCOUNT_ID_KEY =
+      "s967-map-account-id";
+
+    const NEW_MAP_TEMPLATE_KEY =
+      "s967-new-map-template";
 
 
     /*
@@ -1052,6 +1116,9 @@
 
         loginButton:
           "Login",
+
+        newUserNotice:
+          "New here? Enter the ID and password you'd like to use. If the ID isn't registered, you'll be able to create an account.",
 
         loggingIn:
           "Logging in…",
@@ -1086,6 +1153,9 @@
         confirmPassword:
           "Confirm Password",
 
+        passwordSecurityNotice:
+          "Simple or commonly used passwords may be detected by your browser or password manager as compromised or weak, which may trigger a security warning.",
+
         passwordMismatch:
           "Passwords do not match.",
 
@@ -1109,6 +1179,24 @@
 
         newMap:
           "+ New Map",
+
+        newMapTitle: "Create a new map",
+        mapName: "Map name",
+        mapType: "Map type",
+        emptyMap: "Empty map",
+        defaultMap: "Default",
+        templateLoading: "Loading fixed maps…",
+        templateListFailed: "Failed to load the fixed-map list. Select Empty map explicitly to continue.",
+        noDefaultTemplate: "No default map is configured. Select the map you want to use.",
+        selectMapType: "Select a map type",
+        createMap: "Create",
+        creatingMap: "Creating…",
+        cancelNewMap: "Cancel",
+        mapNameRequired: "Enter a map name.",
+        mapNameTooLong: "The map name must be 100 characters or fewer.",
+        mapTypeRequired: "Select a map type.",
+        selectedTemplateUnavailable: "The selected fixed map is no longer available. Select another map.",
+        templateLoadFailed: "Failed to load the selected fixed map.",
 
         open:
           "Open",
@@ -1221,6 +1309,9 @@
         loginButton:
           "로그인",
 
+        newUserNotice:
+          "처음 이용하시나요? 사용할 ID와 비밀번호를 입력해 주세요. 등록되지 않은 ID라면 계정을 생성할 수 있습니다.",
+
         loggingIn:
           "로그인 중…",
 
@@ -1254,6 +1345,9 @@
         confirmPassword:
           "비밀번호 확인",
 
+        passwordSecurityNotice:
+          "단순하거나 흔히 사용되는 비밀번호는 브라우저 또는 비밀번호 관리자에서 유출·취약 비밀번호로 감지되어 보안 경고가 표시될 수 있습니다.",
+
         passwordMismatch:
           "비밀번호가 일치하지 않습니다.",
 
@@ -1277,6 +1371,24 @@
 
         newMap:
           "+ 새 맵",
+
+        newMapTitle: "새 맵 만들기",
+        mapName: "맵 이름",
+        mapType: "맵 종류",
+        emptyMap: "빈 맵",
+        defaultMap: "기본맵",
+        templateLoading: "고정맵 목록을 불러오는 중…",
+        templateListFailed: "고정맵 목록을 불러오지 못했습니다. 계속하려면 빈 맵을 직접 선택해 주세요.",
+        noDefaultTemplate: "현재 지정된 기본맵이 없습니다. 사용할 맵을 선택해 주세요.",
+        selectMapType: "맵 종류를 선택하세요",
+        createMap: "생성",
+        creatingMap: "생성 중…",
+        cancelNewMap: "취소",
+        mapNameRequired: "맵 이름을 입력해 주세요.",
+        mapNameTooLong: "맵 이름은 100자 이하로 입력해 주세요.",
+        mapTypeRequired: "사용할 맵 종류를 선택해 주세요.",
+        selectedTemplateUnavailable: "선택한 고정맵을 더 이상 사용할 수 없습니다. 다른 맵을 선택해 주세요.",
+        templateLoadFailed: "선택한 고정맵을 불러오지 못했습니다.",
 
         open:
           "열기",
@@ -1389,6 +1501,9 @@
         loginButton:
           "ログイン",
 
+        newUserNotice:
+          "初めてご利用ですか？ 使用したいIDとパスワードを入力してください。未登録のIDの場合は、アカウントを作成できます。",
+
         loggingIn:
           "ログイン中…",
 
@@ -1422,6 +1537,9 @@
         confirmPassword:
           "パスワード確認",
 
+        passwordSecurityNotice:
+          "単純なパスワードや一般的によく使われるパスワードは、ブラウザやパスワードマネージャーによって漏洩済みまたは脆弱なパスワードとして検出され、セキュリティ警告が表示される場合があります。",
+
         passwordMismatch:
           "パスワードが一致しません。",
 
@@ -1445,6 +1563,24 @@
 
         newMap:
           "+ 新しいマップ",
+
+        newMapTitle: "新しいマップを作成",
+        mapName: "マップ名",
+        mapType: "マップの種類",
+        emptyMap: "空のマップ",
+        defaultMap: "デフォルト",
+        templateLoading: "固定マップを読み込んでいます…",
+        templateListFailed: "固定マップ一覧を読み込めませんでした。続行するには空のマップを明示的に選択してください。",
+        noDefaultTemplate: "デフォルトマップが設定されていません。使用するマップを選択してください。",
+        selectMapType: "マップの種類を選択",
+        createMap: "作成",
+        creatingMap: "作成中…",
+        cancelNewMap: "キャンセル",
+        mapNameRequired: "マップ名を入力してください。",
+        mapNameTooLong: "マップ名は100文字以内で入力してください。",
+        mapTypeRequired: "使用するマップを選択してください。",
+        selectedTemplateUnavailable: "選択した固定マップは利用できません。別のマップを選択してください。",
+        templateLoadFailed: "選択した固定マップを読み込めませんでした。",
 
         open:
           "開く",
@@ -1557,6 +1693,9 @@
         loginButton:
           "Войти",
 
+        newUserNotice:
+          "Впервые здесь? Введите ID и пароль, которые хотите использовать. Если ID ещё не зарегистрирован, вы сможете создать учётную запись.",
+
         loggingIn:
           "Вход…",
 
@@ -1590,6 +1729,9 @@
         confirmPassword:
           "Подтвердите пароль",
 
+        passwordSecurityNotice:
+          "Простые или широко используемые пароли могут быть определены браузером или менеджером паролей как скомпрометированные или слабые, из-за чего может появиться предупреждение безопасности.",
+
         passwordMismatch:
           "Пароли не совпадают.",
 
@@ -1613,6 +1755,24 @@
 
         newMap:
           "+ Новая карта",
+
+        newMapTitle: "Создать новую карту",
+        mapName: "Название карты",
+        mapType: "Тип карты",
+        emptyMap: "Пустая карта",
+        defaultMap: "По умолчанию",
+        templateLoading: "Загрузка фиксированных карт…",
+        templateListFailed: "Не удалось загрузить список фиксированных карт. Чтобы продолжить, явно выберите пустую карту.",
+        noDefaultTemplate: "Карта по умолчанию не назначена. Выберите нужную карту.",
+        selectMapType: "Выберите тип карты",
+        createMap: "Создать",
+        creatingMap: "Создание…",
+        cancelNewMap: "Отмена",
+        mapNameRequired: "Введите название карты.",
+        mapNameTooLong: "Название карты должно содержать не более 100 символов.",
+        mapTypeRequired: "Выберите тип карты.",
+        selectedTemplateUnavailable: "Выбранная фиксированная карта больше недоступна. Выберите другую карту.",
+        templateLoadFailed: "Не удалось загрузить выбранную фиксированную карту.",
 
         open:
           "Открыть",
@@ -1850,6 +2010,13 @@
         "newMapButton"
       );
 
+    const newMapPanel = document.getElementById("newMapPanel");
+    const newMapName = document.getElementById("newMapName");
+    const newMapType = document.getElementById("newMapType");
+    const cancelNewMapButton = document.getElementById("cancelNewMapButton");
+    const createNewMapButton = document.getElementById("createNewMapButton");
+    const newMapStatus = document.getElementById("newMapStatus");
+
     const mapStatus =
       document.getElementById(
         "mapStatus"
@@ -1903,6 +2070,9 @@
 
     let maps = [];
 
+    let mapTemplates = [];
+    let mapTemplatesState = "idle";
+
     const shareStates =
       new Map();
 
@@ -1923,7 +2093,8 @@
 
 
     function saveSession(
-      session
+      session,
+      accountId = ""
     ) {
       if (
         !session?.token
@@ -1935,6 +2106,8 @@
         SESSION_TOKEN_KEY,
         session.token
       );
+
+      if (accountId) localStorage.setItem(ACCOUNT_ID_KEY, String(accountId));
 
       if (
         session.expiresAt
@@ -2039,6 +2212,11 @@
       loginButton.textContent =
         text.loginButton;
 
+      document.getElementById(
+        "newUserNotice"
+      ).textContent =
+        text.newUserNotice;
+
       unknownCancelButton.textContent =
         text.cancel;
 
@@ -2060,6 +2238,11 @@
       ).textContent =
         text.confirmPassword;
 
+      document.getElementById(
+        "passwordSecurityNotice"
+      ).textContent =
+        text.passwordSecurityNotice;
+
       createCancelButton.textContent =
         text.cancel;
 
@@ -2076,6 +2259,16 @@
 
       newMapButton.textContent =
         text.newMap;
+
+      document.getElementById("newMapTitle").textContent = text.newMapTitle;
+      document.getElementById("newMapNameLabel").textContent = text.mapName;
+      document.getElementById("newMapTypeLabel").textContent = text.mapType;
+      cancelNewMapButton.textContent = text.cancelNewMap;
+      createNewMapButton.textContent = text.createMap;
+
+      if (!newMapPanel.classList.contains("hidden")) {
+        renderNewMapTypes({ preserveSelection: true });
+      }
 
       shareDivider.textContent =
         text.shareOr;
@@ -2675,6 +2868,8 @@
             "",
         };
 
+        if (currentUser.id) localStorage.setItem(ACCOUNT_ID_KEY, currentUser.id);
+
         maps =
           Array.isArray(
             result.maps
@@ -3264,7 +3459,8 @@
 
 
           saveSession(
-            result.session
+            result.session,
+            result.user?.username ?? id
           );
 
           currentUser = {
@@ -3475,7 +3671,8 @@
 
 
           saveSession(
-            result.session
+            result.session,
+            result.user?.username ?? pendingId
           );
 
           currentUser = {
@@ -3566,9 +3763,86 @@
       ==========================================================
     */
 
+    function updateNewMapCreateState() {
+      createNewMapButton.disabled =
+        mapTemplatesState === "loading" ||
+        !newMapName.value.trim() ||
+        !newMapType.value;
+    }
+
+    function renderNewMapTypes({ preserveSelection = false } = {}) {
+      const previous = preserveSelection ? newMapType.value : "";
+      newMapType.textContent = "";
+
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = mapTemplatesState === "loading"
+        ? text.templateLoading
+        : text.selectMapType;
+      newMapType.appendChild(placeholder);
+
+      const empty = document.createElement("option");
+      empty.value = "empty";
+      empty.textContent = text.emptyMap;
+      newMapType.appendChild(empty);
+
+      mapTemplates.forEach(template => {
+        const option = document.createElement("option");
+        option.value = template.id;
+        const name = S967MapNewFlow.templateName(template, language);
+        option.textContent = template.is_default === true
+          ? `${name} (${text.defaultMap})`
+          : name;
+        newMapType.appendChild(option);
+      });
+
+      newMapType.disabled = mapTemplatesState === "loading";
+      const available = [...newMapType.options].some(option => option.value === previous);
+      if (available && previous) {
+        newMapType.value = previous;
+      } else if (mapTemplatesState === "ready") {
+        const initial = S967MapNewFlow.initialSelection(mapTemplates);
+        newMapType.value = initial.value;
+        if (initial.state === "none") {
+          setStatus(newMapStatus, text.noDefaultTemplate);
+        } else if (initial.state === "multiple") {
+          console.error("Multiple default map templates were returned; no automatic selection was made.");
+          setStatus(newMapStatus, text.noDefaultTemplate, "error");
+        } else {
+          setStatus(newMapStatus, "");
+        }
+      } else if (mapTemplatesState === "error") {
+        newMapType.value = "";
+        setStatus(newMapStatus, text.templateListFailed, "error");
+      }
+      updateNewMapCreateState();
+    }
+
+    async function loadMapTemplatesForNewMap() {
+      mapTemplatesState = "loading";
+      mapTemplates = [];
+      renderNewMapTypes();
+      setStatus(newMapStatus, text.templateLoading);
+      try {
+        const response = await fetch(MAP_TEMPLATE_LIST_URL, { method: "GET" });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.ok !== true || !Array.isArray(result.templates)) {
+          throw new Error("TEMPLATE_LIST_FAILED");
+        }
+        mapTemplates = result.templates;
+        mapTemplatesState = "ready";
+        renderNewMapTypes();
+      } catch (error) {
+        console.error("Map template list failed:", error);
+        mapTemplates = [];
+        mapTemplatesState = "error";
+        renderNewMapTypes();
+      }
+    }
+
     newMapButton.addEventListener(
       "click",
-      () => {
+      async () => {
         if (
           maps.length >=
           MAX_MAPS
@@ -3576,10 +3850,75 @@
           return;
         }
 
-        window.location.href =
-          "/map/editor/?new=1";
+        newMapPanel.classList.remove("hidden");
+        newMapName.value = "";
+        newMapType.value = "";
+        newMapName.focus();
+        await loadMapTemplatesForNewMap();
       }
     );
+
+    cancelNewMapButton.addEventListener("click", () => {
+      newMapPanel.classList.add("hidden");
+      newMapName.value = "";
+      newMapType.value = "";
+      setStatus(newMapStatus, "");
+    });
+
+    newMapName.addEventListener("input", updateNewMapCreateState);
+    newMapType.addEventListener("change", updateNewMapCreateState);
+
+    createNewMapButton.addEventListener("click", async () => {
+      if (createNewMapButton.disabled) return;
+      createNewMapButton.disabled = true;
+      createNewMapButton.textContent = text.creatingMap;
+      setStatus(newMapStatus, text.creatingMap);
+      try {
+        const selection = newMapType.value;
+        const url = S967MapNewFlow.editorUrl({
+          title: newMapName.value,
+          selection,
+        });
+        if (selection === "empty") {
+          sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
+        } else {
+          const response = await fetch(
+            `${MAP_TEMPLATE_LOAD_URL}?templateId=${encodeURIComponent(selection)}`,
+            { method: "GET" }
+          );
+          const result = await response.json().catch(() => ({}));
+          if (response.status === 404) {
+            await loadMapTemplatesForNewMap();
+            setStatus(newMapStatus, text.selectedTemplateUnavailable, "error");
+            createNewMapButton.textContent = text.createMap;
+            updateNewMapCreateState();
+            return;
+          }
+          if (!response.ok || result.ok !== true || !result.template?.templateData) {
+            throw new Error("TEMPLATE_LOAD_FAILED");
+          }
+          sessionStorage.setItem(NEW_MAP_TEMPLATE_KEY, JSON.stringify({
+            templateId: selection,
+            title: newMapName.value.trim(),
+            templateData: result.template.templateData,
+          }));
+        }
+        window.location.href = url;
+      } catch (error) {
+        const message = error?.message === "MAP_NAME_TOO_LONG"
+          ? text.mapNameTooLong
+          : error?.message === "MAP_TYPE_REQUIRED"
+            ? text.mapTypeRequired
+            : error?.message === "TEMPLATE_LOAD_FAILED"
+              ? text.templateLoadFailed
+              : error?.message === "MAP_NAME_REQUIRED"
+                ? text.mapNameRequired
+                : text.templateLoadFailed;
+        setStatus(newMapStatus, message, "error");
+        createNewMapButton.disabled = false;
+        createNewMapButton.textContent = text.createMap;
+      }
+    });
 
 
     function openMap(
