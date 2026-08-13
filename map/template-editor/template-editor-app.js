@@ -10,8 +10,32 @@ else if(await S967AdminAuth.validate({url:ADMIN_SESSION_URL})){ $("gate").hidden
 else $("gateMessage").textContent="관리자 세션이 유효하지 않거나 확인할 수 없습니다. 다시 로그인하세요.";
 
 function boot(){
- const engine=new TemplateEditorEngine(), history=createHistory({onChange:update}), server=createTemplateAdminClient(); let dirty=false,renderer,serverBusy=false; history.clear({saved:true});
- const onDirty=value=>{dirty=value;update()}, building=createTemplateBuildingController({engine,history,onChange:update,onDirty}), range=createTemplateRangeController({engine,history,onChange:update,onDirty});
+ const engine=new TemplateEditorEngine(), history=createHistory({onChange:update}), server=createTemplateAdminClient(); let dirty = false;
+let renderer;
+let serverBusy = false;
+
+const onDirty = value => {
+  dirty = value;
+  update();
+};
+
+const building =
+  createTemplateBuildingController({
+    engine,
+    history,
+    onChange: update,
+    onDirty,
+  });
+
+const range =
+  createTemplateRangeController({
+    engine,
+    history,
+    onChange: update,
+    onDirty,
+  });
+
+history.clear({ saved: true });engine,history,onChange:update,onDirty}), range=createTemplateRangeController({engine,history,onChange:update,onDirty});
  renderer=createMapRenderer({host:$("canvas"),engine,controller:building,rangeController:range,editableFixed:true,requestBuildingName:()=>prompt("건물 이름")});
  function update(){const linked=server.state();$("dirty").textContent=dirty?"● 저장되지 않음":"저장됨";$("dirty").className=dirty?"dirty":"";$("undoBtn").disabled=!history.canUndo();$("redoBtn").disabled=!history.canRedo();$("replaceBtn").hidden=!linked.linkedTemplateId;$("linkStatus").textContent=linked.linkedTemplateId?`등록된 고정맵 · ${linked.linkedTemplateNames.name_ko} · Template ID: ${linked.linkedTemplateId}`:"로컬 고정맵";renderTypes();const item=building.getSelectedBuilding()||range.getSelectedRange();$("selection").textContent=item?`${item.name||item.kind} (${item.id})`:"선택된 항목이 없습니다.";renderer?.refresh()}
  function replace(raw,{saved=true,clearLink=true}={}){engine.loadTemplate(raw);history.clear({saved});dirty=!saved;if(clearLink)server.clearLink();building.cancelMode();range.cancel();update()}
