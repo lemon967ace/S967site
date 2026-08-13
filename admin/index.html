@@ -517,6 +517,33 @@
       border-top: 1px solid var(--border);
     }
 
+    .admin-pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .admin-pagination button {
+      min-width: 38px;
+      padding: 7px 9px;
+    }
+
+    .admin-pagination button.is-active {
+      border-color: var(--text);
+      background: transparent;
+      box-shadow: inset 0 0 0 1px var(--text);
+    }
+
+    .inquiry-details {
+      margin-top: 10px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+    }
+
     @media (max-width: 600px) {
       .group-buy-grid {
         grid-template-columns: 1fr;
@@ -864,6 +891,7 @@
         </p>
 
         <div id="wkApplications"></div>
+        <div id="wkApplicationsPagination" class="admin-pagination"></div>
 
         <div
           id="wkApplicationsStatus"
@@ -1127,6 +1155,21 @@
   class="admin-section"
   data-admin-section="inquiry"
 >
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">문의 내역</h2>
+      <button id="inquiryRefreshButton" type="button">새로고침</button>
+    </div>
+
+    <p class="small">
+      최신 문의부터 페이지당 5건씩 표시합니다.
+    </p>
+
+    <div id="inquirySubmissions"></div>
+    <div id="inquiryPagination" class="admin-pagination"></div>
+    <div id="inquirySubmissionsStatus" class="status"></div>
+  </section>
+
   <section class="panel">
     <h2>
       문의 이메일 수신자
@@ -1711,6 +1754,13 @@ const wkApplicationsStatus =
     "wkApplicationsStatus"
   );
 
+const wkApplicationsPagination =
+  document.getElementById(
+    "wkApplicationsPagination"
+  );
+
+let wkApplicationsPage = 1;
+
 
 const wkApplicationsRefreshButton =
   document.getElementById(
@@ -1807,12 +1857,41 @@ const inquiryOpenStatus =
     "inquiryOpenStatus"
   );
 
+const inquirySubmissions =
+  document.getElementById(
+    "inquirySubmissions"
+  );
+
+const inquiryPagination =
+  document.getElementById(
+    "inquiryPagination"
+  );
+
+const inquirySubmissionsStatus =
+  document.getElementById(
+    "inquirySubmissionsStatus"
+  );
+
+const inquiryRefreshButton =
+  document.getElementById(
+    "inquiryRefreshButton"
+  );
+
+let inquiryPage = 1;
+
 let inquiryData = {
   settings: {
     inquiry_open: true,
   },
 
   email_recipients: [],
+  inquiries: [],
+  inquiry_pagination: {
+    page: 1,
+    page_size: 5,
+    total: 0,
+    total_pages: 1,
+  },
 };
 
 
@@ -2105,6 +2184,12 @@ let wkData = {
   tiers: [],
   alliances: [],
   applications: [],
+  applications_pagination: {
+    page: 1,
+    page_size: 5,
+    total: 0,
+    total_pages: 1,
+  },
 
   settings: {
     application_mode: "auto",
@@ -2814,7 +2899,8 @@ async function apiRequest(
     
 async function inquiryApiRequest(
   method,
-  body = null
+  body = null,
+  query = ""
 ) {
   const options = {
     method,
@@ -2836,7 +2922,7 @@ async function inquiryApiRequest(
 
   const response =
     await authenticatedAdminFetch(
-      INQUIRY_ADMIN_API_URL,
+      INQUIRY_ADMIN_API_URL + query,
       options
     );
 
@@ -2859,7 +2945,8 @@ async function inquiryApiRequest(
     
 async function wkApiRequest(
   method,
-  body = null
+  body = null,
+  query = ""
 ) {
   const options = {
     method,
@@ -2879,7 +2966,7 @@ async function wkApiRequest(
 
   const response =
     await authenticatedAdminFetch(
-      WK_ADMIN_API_URL,
+      WK_ADMIN_API_URL + query,
       options
     );
 
@@ -2902,7 +2989,8 @@ async function wkApiRequest(
 
     async function inquiryApiRequest(
   method,
-  body = null
+  body = null,
+  query = ""
 ) {
   const options = {
     method,
@@ -2924,7 +3012,7 @@ async function wkApiRequest(
 
   const response =
     await authenticatedAdminFetch(
-      INQUIRY_ADMIN_API_URL,
+      INQUIRY_ADMIN_API_URL + query,
       options
     );
 
@@ -3404,7 +3492,131 @@ async function groupBuyExportEmailRequest(
   );
 }
 
-    async function loadInquiryData() {
+    function renderInquirySubmissions() {
+  if (!inquirySubmissions) return;
+
+  inquirySubmissions.innerHTML = "";
+
+  const list =
+    Array.isArray(inquiryData.inquiries)
+      ? inquiryData.inquiries
+      : [];
+
+  for (const inquiry of list) {
+    const card = document.createElement("div");
+    card.className = "application-card";
+
+    const title = document.createElement("div");
+    title.className = "manage-name";
+    title.textContent =
+      `${inquiry.category ?? "기타"} · ${formatKstDateTime(inquiry.created_at)}`;
+
+    const meta = document.createElement("div");
+    meta.className = "manage-note";
+    meta.style.marginTop = "6px";
+    meta.textContent =
+      `언어 ${inquiry.language ?? "-"} · ` +
+      `연락처 종류 ${inquiry.contact_method ?? "-"} · ` +
+      `연락처 ${inquiry.contact ?? "-"}`;
+
+    const details = document.createElement("div");
+    details.className = "inquiry-details";
+    details.textContent =
+      inquiry.details ??
+      inquiry.content ??
+      inquiry.message ??
+      "-";
+
+    const actions = document.createElement("div");
+    actions.className = "manage-actions";
+    actions.style.marginTop = "10px";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger";
+    deleteButton.textContent = "삭제";
+
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm("이 문의를 삭제할까요? 삭제 후 복구할 수 없습니다.")) {
+        return;
+      }
+
+      deleteButton.disabled = true;
+
+      try {
+        await inquiryApiRequest(
+          "POST",
+          {
+            action: "delete_inquiry",
+            id: inquiry.id,
+          }
+        );
+
+        const total =
+          Number(
+            inquiryData.inquiry_pagination?.total ?? 0
+          );
+
+        if (
+          total > 0 &&
+          (total - 1) <= (inquiryPage - 1) * 5 &&
+          inquiryPage > 1
+        ) {
+          inquiryPage -= 1;
+        }
+
+        await loadInquiryData();
+      } catch (error) {
+        setStatus(
+          inquirySubmissionsStatus,
+          error.message || "문의 삭제에 실패했습니다.",
+          true
+        );
+      } finally {
+        deleteButton.disabled = false;
+      }
+    });
+
+    actions.appendChild(deleteButton);
+    card.appendChild(title);
+    card.appendChild(meta);
+    card.appendChild(details);
+    card.appendChild(actions);
+    inquirySubmissions.appendChild(card);
+  }
+
+  if (list.length === 0) {
+    inquirySubmissions.innerHTML =
+      '<div class="small">접수된 문의가 없습니다.</div>';
+  }
+
+  const pagination =
+    inquiryData.inquiry_pagination ?? {
+      page: inquiryPage,
+      total: list.length,
+      total_pages: 1,
+    };
+
+  inquiryPage =
+    Number(pagination.page ?? inquiryPage);
+
+  renderAdminPagination(
+    inquiryPagination,
+    pagination,
+    async (page) => {
+      inquiryPage = page;
+      await loadInquiryData();
+    }
+  );
+
+  setStatus(
+    inquirySubmissionsStatus,
+    `총 ${Number(pagination.total ?? list.length)}건`
+  );
+}
+
+
+async function loadInquiryData() {
   setStatus(
     inquiryEmailRecipientStatus,
     "Loading…"
@@ -3413,11 +3625,14 @@ async function groupBuyExportEmailRequest(
   try {
     inquiryData =
       await inquiryApiRequest(
-        "GET"
+        "GET",
+        null,
+        `?page=${encodeURIComponent(inquiryPage)}`
       );
 
     renderInquiryEmailRecipients();
     renderInquiryOpenStatus();
+    renderInquirySubmissions();
 
     setStatus(
       inquiryEmailRecipientStatus,
@@ -4112,6 +4327,44 @@ function formatWkValue(value) {
 }
 
 
+function renderAdminPagination(
+  container,
+  pagination,
+  onPage
+) {
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const current =
+    Math.max(1, Number(pagination?.page ?? 1));
+  const totalPages =
+    Math.max(1, Number(pagination?.total_pages ?? 1));
+
+  if (totalPages <= 1) {
+    return;
+  }
+
+  const addButton = (label, page, disabled = false, active = false) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.disabled = disabled;
+    if (active) button.classList.add("is-active");
+    button.addEventListener("click", () => onPage(page));
+    container.appendChild(button);
+  };
+
+  addButton("‹", current - 1, current <= 1);
+
+  for (let page = 1; page <= totalPages; page += 1) {
+    addButton(String(page), page, false, page === current);
+  }
+
+  addButton("›", current + 1, current >= totalPages);
+}
+
+
 function renderWkApplications() {
   if (
     !wkApplications
@@ -4135,12 +4388,28 @@ function renderWkApplications() {
     wkApplications.innerHTML =
       '<div class="small">신청 내역이 없습니다.</div>';
 
+    const pagination =
+      wkData.applications_pagination ?? {
+        page: wkApplicationsPage,
+        total: 0,
+        total_pages: 1,
+      };
+
+    renderAdminPagination(
+      wkApplicationsPagination,
+      pagination,
+      async (page) => {
+        wkApplicationsPage = page;
+        await loadWkData();
+      }
+    );
+
     if (
       wkApplicationsStatus
     ) {
       setStatus(
         wkApplicationsStatus,
-        ""
+        `총 ${Number(pagination.total ?? 0)}건`
       );
     }
 
@@ -4264,17 +4533,104 @@ function renderWkApplications() {
       time
     );
 
+    const actions =
+      document.createElement("div");
+    actions.className = "manage-actions";
+    actions.style.marginTop = "10px";
+
+    const deleteButton =
+      document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "danger";
+    deleteButton.textContent = "삭제";
+
+    deleteButton.addEventListener(
+      "click",
+      async () => {
+        const cycleLabel =
+          Number.isFinite(cycle)
+            ? `${cycle}회차 `
+            : "";
+
+        if (
+          !confirm(
+            `${application.player_name ?? "-"}님의 ${cycleLabel}WK 신청을 삭제할까요?`
+          )
+        ) {
+          return;
+        }
+
+        deleteButton.disabled = true;
+
+        try {
+          await wkApiRequest(
+            "POST",
+            {
+              action: "delete_application",
+              id: application.id,
+            }
+          );
+
+          const total =
+            Number(
+              wkData.applications_pagination?.total ?? 0
+            );
+
+          if (
+            total > 0 &&
+            (total - 1) <=
+              (wkApplicationsPage - 1) * 5 &&
+            wkApplicationsPage > 1
+          ) {
+            wkApplicationsPage -= 1;
+          }
+
+          await loadWkData();
+        } catch (error) {
+          setStatus(
+            wkApplicationsStatus,
+            error.message || "WK 신청 삭제에 실패했습니다.",
+            true
+          );
+        } finally {
+          deleteButton.disabled = false;
+        }
+      }
+    );
+
+    actions.appendChild(deleteButton);
+    card.appendChild(actions);
+
     wkApplications.appendChild(
       card
     );
   }
+
+  const pagination =
+    wkData.applications_pagination ?? {
+      page: wkApplicationsPage,
+      total: applications.length,
+      total_pages: 1,
+    };
+
+  wkApplicationsPage =
+    Number(pagination.page ?? wkApplicationsPage);
+
+  renderAdminPagination(
+    wkApplicationsPagination,
+    pagination,
+    async (page) => {
+      wkApplicationsPage = page;
+      await loadWkData();
+    }
+  );
 
   if (
     wkApplicationsStatus
   ) {
     setStatus(
       wkApplicationsStatus,
-      `총 ${applications.length}건`
+      `총 ${Number(pagination.total ?? applications.length)}건`
     );
   }
 }
@@ -4355,7 +4711,9 @@ setupDragSort(
   try {
     wkData =
       await wkApiRequest(
-        "GET"
+        "GET",
+        null,
+        `?applications_page=${encodeURIComponent(wkApplicationsPage)}`
       );
 
     renderWkLists();
@@ -4377,14 +4735,7 @@ renderEmailExportHistory();
       ""
     );
 
-    if (
-      wkApplicationsStatus
-    ) {
-      setStatus(
-        wkApplicationsStatus,
-        `총 ${(wkData.applications ?? []).length}건`
-      );
-    }
+
   } catch (error) {
     const message =
       error.message ||
@@ -8435,6 +8786,20 @@ wkTabs.forEach((button) => {
       } finally {
         manualEmailSendButton.disabled =
           false;
+      }
+    }
+  );
+
+
+inquiryRefreshButton
+  ?.addEventListener(
+    "click",
+    async () => {
+      inquiryRefreshButton.disabled = true;
+      try {
+        await loadInquiryData();
+      } finally {
+        inquiryRefreshButton.disabled = false;
       }
     }
   );
