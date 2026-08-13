@@ -80,9 +80,10 @@
   z-index: 1000;
 }
 
-    .staff-link {
+    .staff-link,
+.map-link {
   position: fixed;
-  top: 18px;
+  top: 66px;
   left: 18px;
   z-index: 1100;
 
@@ -102,17 +103,16 @@
 
   text-decoration: none;
   font-size: 1rem;
-
   cursor: pointer;
 }
 
-.staff-link:hover {
+.map-link:hover {
   border-color: var(--border-hover);
 }
 
 @media (max-width: 480px) {
-  .staff-link {
-    top: 14px;
+  .map-link {
+    top: 62px;
     left: 14px;
   }
 }
@@ -368,6 +368,15 @@
   title="Staff"
 >
   🛠️
+</a>
+
+<a
+  class="map-link"
+  href="/map"
+  aria-label="Map"
+  title="Map"
+>
+  🏰
 </a>
 
   <div class="top-pickers">
