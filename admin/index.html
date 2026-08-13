@@ -555,6 +555,7 @@
     }
 
   </style>
+  <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
 
 <body>
@@ -743,10 +744,11 @@
     </div>
 
     <p class="small">
-      Up to 100 recent upload events are shown.
+      최신 업로드를 페이지당 5건씩 표시합니다.
     </p>
 
     <div id="uploads"></div>
+    <div id="uploadsPagination" class="admin-pagination"></div>
 
     <div
       id="uploadsStatus"
@@ -2158,6 +2160,9 @@ const emailExportHistory =
   );
     
     let currentData = null;
+    let uploadsPage = 1;
+    const uploadsPagination = document.getElementById("uploadsPagination");
+    const loadedAdminSections = new Set();
 
     function showLogin(message = "") {
       adminArea.classList.add("hidden");
@@ -2165,19 +2170,33 @@ const emailExportHistory =
       if (message) setStatus(loginStatus, message, true);
     }
 
+    const ADMIN_REQUEST_TIMEOUT_MS = 10000;
+
     async function authenticatedAdminFetch(url, options = {}) {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-          ...S967AdminAuth.authorizationHeaders(),
-        },
-      });
-      if (response.status === 401) {
-        S967AdminAuth.clearToken();
-        showLogin("관리자 세션이 만료되었습니다. 다시 로그인하세요.");
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ADMIN_REQUEST_TIMEOUT_MS);
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            ...(options.headers || {}),
+            ...S967AdminAuth.authorizationHeaders(),
+          },
+        });
+        if (response.status === 401) {
+          S967AdminAuth.clearToken();
+          showLogin("관리자 세션이 만료되었습니다. 다시 로그인하세요.");
+        }
+        return response;
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          throw new Error("요청 시간이 초과되었습니다. 다시 시도해 주세요.");
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
       }
-      return response;
     }
 
 let wkData = {
@@ -2496,7 +2515,8 @@ async function loadMapTemplates() {
 
 async function apiRequest(
   method,
-  body = null
+  body = null,
+  query = ""
 ) {
   const options = {
     method,
@@ -2516,7 +2536,7 @@ async function apiRequest(
 
   const response =
     await authenticatedAdminFetch(
-      ADMIN_API_URL,
+      ADMIN_API_URL + query,
       options
     );
 
@@ -4400,7 +4420,7 @@ function renderWkApplications() {
       pagination,
       async (page) => {
         wkApplicationsPage = page;
-        await loadWkData();
+        await loadWkData("applications");
       }
     );
 
@@ -4585,7 +4605,7 @@ function renderWkApplications() {
             wkApplicationsPage -= 1;
           }
 
-          await loadWkData();
+          await loadWkData("applications");
         } catch (error) {
           setStatus(
             wkApplicationsStatus,
@@ -4621,7 +4641,7 @@ function renderWkApplications() {
     pagination,
     async (page) => {
       wkApplicationsPage = page;
-      await loadWkData();
+      await loadWkData("applications");
     }
   );
 
@@ -4688,13 +4708,14 @@ setupDragSort(
 );
 }
 
- async function loadWkData() {
-  setStatus(
+ async function loadWkData(section = "all") {
+  const applicationsOnly = section === "applications";
+  if (!applicationsOnly) setStatus(
     tierStatus,
     "Loading…"
   );
 
-  setStatus(
+  if (!applicationsOnly) setStatus(
     allianceStatus,
     "Loading…"
   );
@@ -4709,31 +4730,32 @@ setupDragSort(
   }
 
   try {
-    wkData =
-      await wkApiRequest(
-        "GET",
-        null,
-        `?applications_page=${encodeURIComponent(wkApplicationsPage)}`
-      );
+    const result = await wkApiRequest(
+      "GET",
+      null,
+      `?section=${encodeURIComponent(section)}&applications_page=${encodeURIComponent(wkApplicationsPage)}`
+    );
 
-    renderWkLists();
+    wkData = {
+      ...wkData,
+      ...result,
+      settings: { ...wkData.settings, ...(result.settings ?? {}) },
+    };
+
+    if (!applicationsOnly) {
+      renderWkLists();
+      renderApplicationMode();
+      renderEmailRecipients();
+      renderEmailAutoSend();
+      renderEmailExportHistory();
+    }
     renderWkApplications();
-
-renderApplicationMode();
-
-renderEmailRecipients();
-renderEmailAutoSend();
-renderEmailExportHistory();
+    loadedAdminSections.add("wk");
     
-    setStatus(
-      tierStatus,
-      ""
-    );
-
-    setStatus(
-      allianceStatus,
-      ""
-    );
+    if (!applicationsOnly) {
+      setStatus(tierStatus, "");
+      setStatus(allianceStatus, "");
+    }
 
 
   } catch (error) {
@@ -4741,17 +4763,10 @@ renderEmailExportHistory();
       error.message ||
       "Failed to load WK data.";
 
-    setStatus(
-      tierStatus,
-      message,
-      true
-    );
-
-    setStatus(
-      allianceStatus,
-      message,
-      true
-    );
+    if (!applicationsOnly) {
+      setStatus(tierStatus, message, true);
+      setStatus(allianceStatus, message, true);
+    }
 
     if (
       wkApplicationsStatus
@@ -7140,8 +7155,9 @@ function createImageGrid(item) {
     img.alt =
       "Uploaded image";
 
-    img.loading =
-      "lazy";
+    img.loading = "lazy";
+    img.decoding = "async";
+    try { img.fetchPriority = "low"; } catch {}
 
 
     img.addEventListener(
@@ -7876,26 +7892,31 @@ function renderEmailAutoSend() {
 }
     
     async function loadAdminData() {
-      setStatus(
-        uploadsStatus,
-        "Loading…"
+      setStatus(uploadsStatus, "Loading…");
+
+      const result = await apiRequest(
+        "GET",
+        null,
+        `?page=${encodeURIComponent(uploadsPage)}`
       );
 
-      const result =
-        await apiRequest(
-          "GET"
-        );
-
-      currentData =
-        result;
-
+      currentData = result;
       renderControl();
       renderUploads();
-    
-      setStatus(
-        uploadsStatus,
-        ""
-      );
+
+      const pagination = result.uploads_pagination ?? {
+        page: uploadsPage,
+        total: (result.uploads ?? []).length,
+        total_pages: 1,
+      };
+      uploadsPage = Number(pagination.page ?? uploadsPage);
+      renderAdminPagination(uploadsPagination, pagination, async (page) => {
+        uploadsPage = page;
+        await loadAdminData();
+      });
+
+      setStatus(uploadsStatus, `총 ${Number(pagination.total ?? 0)}건`);
+      loadedAdminSections.add("uploads");
     }
 
     function renderApplicationMode() {
@@ -8051,20 +8072,13 @@ function renderOnlyIp(ipHash) {
 try {
   await S967AdminAuth.login(value, { url: ADMIN_LOGIN_API_URL });
 
-  await loadAdminData();
+  adminSecretInput.value = "";
+  loginPanel.classList.add("hidden");
+  adminArea.classList.remove("hidden");
+  setStatus(loginStatus, "");
 
-  await loadStaffAccounts();
-
-  adminSecretInput.value =
-    "";
-
-          loginPanel.classList.add(
-            "hidden"
-          );
-
-          adminArea.classList.remove(
-            "hidden"
-          );
+  // 로그인 성공 화면을 먼저 보여주고 현재 탭 데이터는 비동기로 불러온다.
+  loadAdminSectionData("uploads", { force: true });
         } catch (error) {
           S967AdminAuth.clearToken();
 
@@ -8223,45 +8237,28 @@ try {
         }
       }
     );
+    async function loadAdminSectionData(target, { force = false } = {}) {
+      if (!force && loadedAdminSections.has(target)) return;
+      try {
+        if (target === "uploads") await loadAdminData();
+        else if (target === "wk") await loadWkData("all");
+        else if (target === "inquiry") { await loadInquiryData(); loadedAdminSections.add("inquiry"); }
+        else if (target === "groupbuy") { await loadGroupBuyData(); loadedAdminSections.add("groupbuy"); }
+        else if (target === "staff") { await loadStaffAccounts(); loadedAdminSections.add("staff"); }
+        else if (target === "maptemplates") { await loadMapTemplates(); loadedAdminSections.add("maptemplates"); }
+      } catch (error) {
+        console.error(`Admin section load failed: ${target}`, error);
+      }
+    }
+
     adminTabs.forEach((button) => {
   button.addEventListener(
     "click",
     () => {
       const target =
         button.dataset.adminTab;
-      if (target === "wk") {
-  loadWkData();
-}
+      loadAdminSectionData(target);
 
-      if (
-  target ===
-  "inquiry"
-) {
-  loadInquiryData();
-}
-
-      if (
-  target ===
-  "groupbuy"
-) {
-  loadGroupBuyData();
-}
-      if (
-  target ===
-  "staff"
-) {
-  loadStaffAccounts();
-}
-
-      if (
-  target ===
-  "maptemplates" &&
-  !mapTemplatesLoaded
-) {
-  loadMapTemplates().catch(() => {});
-}
-      
-      
       adminTabs.forEach(
         (item) => {
           item.classList.toggle(
@@ -9573,13 +9570,14 @@ createMapTemplateButton.addEventListener(
     return;
   }
   try {
-    await loadAdminData();
-    await loadStaffAccounts();
     loginPanel.classList.add("hidden");
     adminArea.classList.remove("hidden");
+    setStatus(loginStatus, "");
+    const activeTarget = document.querySelector(".admin-tab.is-active")?.dataset.adminTab || "uploads";
+    loadAdminSectionData(activeTarget, { force: true });
   } catch (error) {
     S967AdminAuth.clearToken();
-    showLogin("관리자 데이터를 불러오지 못했습니다. 다시 로그인하세요.");
+    showLogin("관리자 세션을 복구하지 못했습니다. 다시 로그인하세요.");
   } finally {
     loginButton.disabled = false;
   }
