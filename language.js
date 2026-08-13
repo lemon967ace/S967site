@@ -1738,7 +1738,7 @@ groupBuyPlayerName:
   "Ник",
 
 groupBuyNamePlaceholder:
-  "Скопируйте и вставьте, пожалуйста 😉))",
+  "Скопируйте и вставьте, пожалуйста😉))",
 
 groupBuyPurchaseItems:
   "Планируемые покупки",
