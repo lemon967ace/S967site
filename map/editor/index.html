@@ -314,6 +314,33 @@
       line-height: 1.55;
     }
 
+    .selection-details {
+      display: grid;
+      gap: 8px;
+    }
+
+    .selection-name {
+      color: var(--text);
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .selection-row {
+      display: grid;
+      grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .selection-key {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .selection-value {
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
     .editor-stage {
       position: relative;
 
@@ -340,6 +367,13 @@
       touch-action: none;
       user-select: none;
       -webkit-user-select: none;
+    }
+
+    .pns-map-canvas {
+      position: absolute;
+      inset: 0;
+      touch-action: none;
+      outline: none;
     }
 
     .canvas-placeholder {
@@ -1010,7 +1044,11 @@
   </div>
 
 
-  <script>
+  <script type="module">
+    import PNSMapEngine from "./editor-engine.js";
+    import { createMapRenderer } from "./editor-renderer.js";
+    import { createBuildingController } from "./editor-building-controller.js";
+    import { createMapSaveManager, MapSaveError } from "./editor-save.js";
     /*
       ==========================================================
       CONFIG
@@ -1088,6 +1126,15 @@
 
         selectionPlaceholder:
           "Selected building information will appear here.",
+
+        noBuildingSelected:
+          "No building selected.",
+
+        detailName: "Name",
+        detailType: "Building type",
+        detailCoordinate: "Coordinate",
+        detailSize: "Size",
+        detailAffiliation: "Affiliation",
 
         filtersPlaceholder:
           "Filters will be connected here.",
@@ -1196,6 +1243,15 @@
         selectionPlaceholder:
           "여기에 선택한 건물 정보가 표시됩니다.",
 
+        noBuildingSelected:
+          "선택된 건물이 없습니다.",
+
+        detailName: "이름",
+        detailType: "건물 종류",
+        detailCoordinate: "좌표",
+        detailSize: "크기",
+        detailAffiliation: "소속",
+
         filtersPlaceholder:
           "여기에 필터 기능을 연결합니다.",
 
@@ -1302,6 +1358,15 @@
 
         selectionPlaceholder:
           "ここに選択した建物の情報が表示されます。",
+
+        noBuildingSelected:
+          "建物が選択されていません。",
+
+        detailName: "名前",
+        detailType: "建物種類",
+        detailCoordinate: "座標",
+        detailSize: "サイズ",
+        detailAffiliation: "所属",
 
         filtersPlaceholder:
           "ここにフィルター機能を接続します。",
@@ -1410,6 +1475,15 @@
         selectionPlaceholder:
           "Здесь будет отображаться информация о выбранном здании.",
 
+        noBuildingSelected:
+          "Здание не выбрано.",
+
+        detailName: "Название",
+        detailType: "Тип здания",
+        detailCoordinate: "Координаты",
+        detailSize: "Размер",
+        detailAffiliation: "Принадлежность",
+
         filtersPlaceholder:
           "Здесь будут подключены фильтры.",
 
@@ -1469,6 +1543,13 @@
       },
     };
 
+    const SAVE_ERROR_MESSAGES = {
+      en: { UNAUTHORIZED: "Please sign in again.", INVALID_SESSION: "Your session is no longer valid. Please sign in again.", SESSION_EXPIRED: "Your session has expired. Please sign in again.", MAP_NAME_REQUIRED: "Enter a map name.", MAP_NAME_TOO_LONG: "The map name must be 100 characters or fewer.", INVALID_DOCUMENT_DATA: "The map document is invalid.", INVALID_MAP_ID: "The map ID is invalid.", MAP_NOT_FOUND: "The map could not be found.", MAP_LIMIT_REACHED: "You can save up to 5 maps.", DATABASE_ERROR: "A database error prevented saving.", MAP_SAVE_FAILED: "The map could not be saved.", INTERNAL_SERVER_ERROR: "A server error prevented saving.", NETWORK_ERROR: "The network request failed. Your changes are still here." },
+      ko: { UNAUTHORIZED: "다시 로그인해 주세요.", INVALID_SESSION: "로그인 세션이 유효하지 않습니다. 다시 로그인해 주세요.", SESSION_EXPIRED: "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.", MAP_NAME_REQUIRED: "맵 이름을 입력해 주세요.", MAP_NAME_TOO_LONG: "맵 이름은 100자 이하여야 합니다.", INVALID_DOCUMENT_DATA: "맵 문서가 올바르지 않습니다.", INVALID_MAP_ID: "맵 ID가 올바르지 않습니다.", MAP_NOT_FOUND: "맵을 찾을 수 없습니다.", MAP_LIMIT_REACHED: "맵은 최대 5개까지 저장할 수 있습니다.", DATABASE_ERROR: "데이터베이스 오류로 저장하지 못했습니다.", MAP_SAVE_FAILED: "맵을 저장하지 못했습니다.", INTERNAL_SERVER_ERROR: "서버 오류로 저장하지 못했습니다.", NETWORK_ERROR: "네트워크 요청에 실패했습니다. 편집 내용은 유지됩니다." },
+      ja: { UNAUTHORIZED: "もう一度ログインしてください。", INVALID_SESSION: "セッションが無効です。もう一度ログインしてください。", SESSION_EXPIRED: "セッションの有効期限が切れました。", MAP_NAME_REQUIRED: "マップ名を入力してください。", MAP_NAME_TOO_LONG: "マップ名は100文字以内にしてください。", INVALID_DOCUMENT_DATA: "マップ文書が無効です。", INVALID_MAP_ID: "マップIDが無効です。", MAP_NOT_FOUND: "マップが見つかりません。", MAP_LIMIT_REACHED: "保存できるマップは最大5件です。", DATABASE_ERROR: "データベースエラーで保存できませんでした。", MAP_SAVE_FAILED: "マップを保存できませんでした。", INTERNAL_SERVER_ERROR: "サーバーエラーで保存できませんでした。", NETWORK_ERROR: "ネットワーク要求に失敗しました。編集内容は保持されています。" },
+      ru: { UNAUTHORIZED: "Войдите снова.", INVALID_SESSION: "Сеанс недействителен. Войдите снова.", SESSION_EXPIRED: "Срок действия сеанса истёк. Войдите снова.", MAP_NAME_REQUIRED: "Введите название карты.", MAP_NAME_TOO_LONG: "Название карты должно содержать не более 100 символов.", INVALID_DOCUMENT_DATA: "Документ карты недействителен.", INVALID_MAP_ID: "Недействительный ID карты.", MAP_NOT_FOUND: "Карта не найдена.", MAP_LIMIT_REACHED: "Можно сохранить не более 5 карт.", DATABASE_ERROR: "Ошибка базы данных помешала сохранению.", MAP_SAVE_FAILED: "Не удалось сохранить карту.", INTERNAL_SERVER_ERROR: "Ошибка сервера помешала сохранению.", NETWORK_ERROR: "Ошибка сети. Изменения сохранены локально." },
+    };
+
 
     /*
       ==========================================================
@@ -1500,6 +1581,15 @@
 
     let dirty =
       false;
+
+    let mutationRevision = 0;
+    let saveStatusMessage = "";
+    let saveMetadata = null;
+    let saveManager = null;
+
+    let mapRenderer =
+      null;
+    let buildingController = null;
 
 
     /*
@@ -1690,11 +1780,137 @@
       if (readOnly) {
         dirty = false;
       } else {
+        if (value) { mutationRevision += 1; saveStatusMessage = ""; }
         dirty =
           Boolean(value);
       }
 
       renderDocumentStatus();
+      updateSaveButton();
+    }
+
+    function updateSaveButton() {
+      const saving = saveManager?.getState().saving ?? false;
+      saveButton.disabled = readOnly || !dirty || saving;
+      saveButton.textContent = saving ? text.saving : text.save;
+    }
+
+
+    function renderSelectionPanel(building) {
+      selectionHost.replaceChildren();
+
+      if (!building) {
+        selectionHost.textContent =
+          text.noBuildingSelected;
+
+        return;
+      }
+
+      const buildingType =
+        PNSMapEngine.getDocument()
+          .buildingTypes
+          .find(
+            item => item.id === building.typeId
+          );
+
+      const details =
+        document.createElement("div");
+
+      details.className =
+        "selection-details";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "selection-name";
+
+      name.textContent =
+        building.name;
+
+      details.append(name);
+
+      const rows = [
+        [text.detailName, building.name],
+        [text.detailType, buildingType?.name ?? building.typeId],
+        [text.detailCoordinate, `(${building.x}, ${building.y})`],
+        [text.detailSize, `${building.width}×${building.height}`],
+      ];
+
+      if (building.affiliation) {
+        rows.push([
+          text.detailAffiliation,
+          building.affiliation,
+        ]);
+      }
+
+      for (const [label, value] of rows) {
+        const row = document.createElement("div");
+        row.className = "selection-row";
+
+        const key = document.createElement("span");
+        key.className = "selection-key";
+        key.textContent = label;
+
+        const content = document.createElement("span");
+        content.className = "selection-value";
+        content.textContent = value;
+
+        row.append(key, content);
+        details.append(row);
+      }
+
+      selectionHost.append(details);
+
+      if (!readOnly) {
+        const form = document.createElement("form");
+        form.className = "selection-edit-form";
+        const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<option value="${type.id}"${type.id === building.typeId ? " selected" : ""}>${type.name}</option>`).join("");
+        form.innerHTML = `
+          <label>${text.detailName}<input name="name" required value="${escapeAttribute(building.name)}"></label>
+          <label>${text.detailType}<select name="typeId">${typeOptions}</select></label>
+          <label>${text.detailSize}<select name="size"><option value="1"${building.width === 1 ? " selected" : ""}>1×1</option><option value="2"${building.width === 2 ? " selected" : ""}>2×2</option></select></label>
+          <label>${text.detailAffiliation}<input name="affiliation" maxlength="3" value="${escapeAttribute(building.affiliation)}"></label>
+          <label><input name="locked" type="checkbox"${building.locked ? " checked" : ""}> Locked</label>
+          <div><button type="submit">Apply</button> <button type="button" data-action="move">${text.move}</button> <button type="button" data-action="delete">Delete</button></div>`;
+        form.addEventListener("submit", event => {
+          event.preventDefault();
+          try {
+            const data = new FormData(form), size = Number(data.get("size"));
+            const edited = buildingController.editSelected({ name: data.get("name"), typeId: data.get("typeId"), width: size, height: size, affiliation: data.get("affiliation"), locked: data.get("locked") === "on" });
+            mapRenderer.refresh(); renderSelectionPanel(edited);
+          } catch (error) { window.alert(error.message); }
+        });
+        form.querySelector('[data-action="move"]').addEventListener("click", () => { try { buildingController.startMove(); mapRenderer.invalidate(); } catch (error) { window.alert(error.message); } });
+        form.querySelector('[data-action="delete"]').addEventListener("click", () => { try { buildingController.deleteSelected(); mapRenderer.refresh(); renderSelectionPanel(null); } catch (error) { window.alert(error.message); } });
+        selectionHost.append(form);
+      }
+    }
+
+    function escapeAttribute(value) {
+      return String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    function renderBuildingPalette() {
+      buildingTypesHost.replaceChildren();
+      const documentData = PNSMapEngine.getDocument();
+      const nameInput = document.createElement("input");
+      nameInput.id = "newBuildingName"; nameInput.required = true; nameInput.placeholder = text.detailName;
+      buildingTypesHost.append(nameInput);
+      const sizeRow = document.createElement("div");
+      sizeRow.innerHTML = '<label><input type="radio" name="building-size" value="1" checked>1×1</label> <label><input type="radio" name="building-size" value="2">2×2</label>';
+      buildingTypesHost.append(sizeRow);
+      for (const type of documentData.buildingTypes) {
+        const button = document.createElement("button"); button.type = "button"; button.disabled = readOnly;
+        button.style.cssText = "display:flex;align-items:center;gap:.5rem;width:100%;margin:.25rem 0";
+        button.innerHTML = `<span style="width:1rem;height:1rem;background:${type.color};border:1px solid #555"></span><span></span>`;
+        button.lastElementChild.textContent = type.name;
+        button.addEventListener("click", () => {
+          const size = Number(sizeRow.querySelector('input:checked').value);
+          buildingController.selectPalette(type.id, size); buildingTypesHost.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button)); mapRenderer.invalidate();
+        });
+        buildingTypesHost.append(button);
+      }
     }
 
 
@@ -1703,6 +1919,11 @@
         documentStatus.textContent =
           text.readOnly;
 
+        return;
+      }
+
+      if (saveStatusMessage) {
+        documentStatus.textContent = saveStatusMessage;
         return;
       }
 
@@ -1729,7 +1950,7 @@
       */
 
       const engineReady =
-        false;
+        Boolean(PNSMapEngine.getDocument);
 
       selectToolButton.disabled =
         !editable ||
@@ -1740,12 +1961,10 @@
         !engineReady;
 
       undoButton.disabled =
-        !editable ||
-        !engineReady;
+        true;
 
       redoButton.disabled =
-        !editable ||
-        !engineReady;
+        true;
 
       zoomOutButton.disabled =
         !engineReady;
@@ -1754,8 +1973,7 @@
         !engineReady;
 
       saveButton.disabled =
-        !editable ||
-        !engineReady;
+        !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
 
       mapTitleInput.disabled =
         readOnly;
@@ -1799,8 +2017,8 @@
       filtersTitle.textContent =
         text.filters;
 
-      buildingTypesHost.textContent =
-        text.buildingPlaceholder;
+      if (buildingController) renderBuildingPalette();
+      else buildingTypesHost.textContent = text.buildingPlaceholder;
 
       selectionHost.textContent =
         text.selectionPlaceholder;
@@ -1842,6 +2060,36 @@
       }
 
       renderDocumentStatus();
+
+      renderSelectionPanel(
+        mapRenderer?.getSelectedBuilding?.() ?? null
+      );
+    }
+
+
+    function mountMapRenderer() {
+      mapRenderer?.destroy();
+
+      buildingController = createBuildingController({
+        engine: PNSMapEngine,
+        onChange: () => mapRenderer?.invalidate(),
+        onDirty: () => window.S967EditorHost.markDirty(),
+      });
+
+      mapRenderer = createMapRenderer({
+        host: document.getElementById("mapCanvasHost"),
+        engine: PNSMapEngine,
+        controller: buildingController,
+        requestBuildingName: () => document.getElementById("newBuildingName")?.value.trim() || null,
+        editorHost: window.S967EditorHost,
+        onSelectionChange: renderSelectionPanel,
+      });
+
+      renderSelectionPanel(null);
+      renderBuildingPalette();
+
+      document.getElementById("canvasPlaceholder")
+        ?.classList.add("hidden");
     }
 
 
@@ -2048,7 +2296,9 @@
           result.map.id;
 
         currentDocument =
-          result.map.documentData;
+          PNSMapEngine.loadDocument(
+            result.map.documentData
+          );
 
         mapTitleInput.value =
           result.map.name ??
@@ -2060,6 +2310,8 @@
         setDirty(
           false
         );
+
+        mountMapRenderer();
 
         hideOverlay();
 
@@ -2138,7 +2390,9 @@
       */
 
       currentDocument =
-        null;
+        PNSMapEngine.createNewDocument({
+          title: text.untitled,
+        });
 
       readOnly =
         false;
@@ -2149,6 +2403,8 @@
       setDirty(
         true
       );
+
+      mountMapRenderer();
 
       hideOverlay();
 
@@ -2211,7 +2467,12 @@
           null;
 
         currentDocument =
-          shared.map.documentData;
+          PNSMapEngine.loadDocument(
+            shared.map.documentData,
+            {
+              readOnly: true,
+            }
+          );
 
         mapTitleInput.value =
           shared.map.name ??
@@ -2223,6 +2484,8 @@
         setDirty(
           false
         );
+
+        mountMapRenderer();
 
         hideOverlay();
 
@@ -2269,32 +2532,50 @@
       ==========================================================
     */
 
+    function getSaveErrorMessage(code) {
+      return SAVE_ERROR_MESSAGES[language]?.[code] ?? SAVE_ERROR_MESSAGES.en[code] ?? SAVE_ERROR_MESSAGES.en.MAP_SAVE_FAILED;
+    }
+
+    function ensureSaveManager() {
+      if (saveManager) return saveManager;
+      saveManager = createMapSaveManager({
+        url: MAP_SAVE_URL,
+        getToken: getSessionToken,
+        getMapId: () => currentMapId,
+        setMapId: id => { currentMapId = id; },
+        getName: () => mapTitleInput.value,
+        exportDocument: () => {
+          const documentData = PNSMapEngine.exportDocument();
+          documentData.title = mapTitleInput.value.trim();
+          return documentData;
+        },
+        getRevision: () => mutationRevision,
+        isReadOnly: () => readOnly,
+        onMetadata: metadata => { saveMetadata = metadata; },
+        onSessionExpired: () => { clearSession(); },
+        onStateChange: state => {
+          saveStatusMessage = state.saving ? text.saving : "";
+          renderDocumentStatus(); updateSaveButton();
+        },
+      });
+      return saveManager;
+    }
+
     saveButton.addEventListener(
       "click",
       async () => {
-        /*
-          실제 편집기 엔진이 아직 없으므로
-          현재 단계에서는 버튼이 disabled 상태다.
-
-          다음 단계에서는 엔진에서 최신 JSON을 받아:
-
-          const documentData =
-            window.PNSMapEngine.exportDocument();
-
-          POST /map-save
-
-          {
-            mapId: currentMapId,
-            name: mapTitleInput.value,
-            documentData
-          }
-
-          로 저장한다.
-        */
-
-        window.alert(
-          text.saveUnavailable
-        );
+        try {
+          const outcome = await ensureSaveManager().save();
+          if (!outcome.skipped && outcome.clean) setDirty(false);
+          else if (!outcome.skipped) { saveStatusMessage = ""; renderDocumentStatus(); }
+        } catch (error) {
+          const code = error instanceof MapSaveError ? error.code : "MAP_SAVE_FAILED";
+          saveStatusMessage = getSaveErrorMessage(code);
+          renderDocumentStatus();
+          if (["UNAUTHORIZED", "INVALID_SESSION", "SESSION_EXPIRED"].includes(code)) setOverlay(text.sessionExpired, "", true);
+        } finally {
+          updateSaveButton();
+        }
       }
     );
 
@@ -2309,6 +2590,9 @@
         }
       }
     );
+
+    selectToolButton.addEventListener("click", () => { buildingController?.cancelMode(); mapRenderer?.invalidate(); });
+    moveToolButton.addEventListener("click", () => { try { buildingController?.startMove(); mapRenderer?.invalidate(); } catch (error) { window.alert(error.message); } });
 
 
     /*
@@ -2358,7 +2642,7 @@
       },
 
       getDocument() {
-        return currentDocument;
+        return PNSMapEngine.getDocument();
       },
 
       isReadOnly() {
@@ -2387,6 +2671,13 @@
           "cursorStatus"
         ).textContent =
           `X: ${x} · Y: ${y}`;
+      },
+
+      clearCursor() {
+        document.getElementById(
+          "cursorStatus"
+        ).textContent =
+          "X: — · Y: —";
       },
 
       setZoom(
