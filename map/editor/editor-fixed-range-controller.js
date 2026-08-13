@@ -51,15 +51,41 @@ export function createFixedRangeController({
       selectAtCell(cell);
       return { complete: false };
     }
+
     if (!startCell) {
       startCell = [...cell];
       previewCells = [[...cell]];
       emit();
       return { complete: false };
     }
+
+    /*
+      Renderer는 pointerdown과 pointerup에서 모두 click()을 호출한다.
+      첫 클릭의 pointerup은 시작점과 같은 셀이므로 여기서는 무시한다.
+      이후 다른 셀을 두 번째 꼭짓점으로 클릭하거나 드래그 후 놓으면
+      즉시 범위를 확정한다.
+    */
+    const sameAsStart =
+      cell[0] === startCell[0] &&
+      cell[1] === startCell[1] &&
+      previewCells.length <= 1;
+
+    if (sameAsStart) {
+      emit();
+      return { complete: false };
+    }
+
     previewCells = rectangleCells(startCell, cell);
     emit();
-    return { complete: true, cells: previewCells.map(value => [...value]) };
+
+    const cells = previewCells.map(value => [...value]);
+    const result = commit();
+
+    return {
+      complete: Boolean(result),
+      cells,
+      result,
+    };
   }
 
   function commit() {
