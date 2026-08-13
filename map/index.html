@@ -31,9 +31,9 @@
   ></script>
 
   <style>
-  #loginTitle {
-  margin-bottom: 26px;
-}
+    #loginTitle {
+      margin-bottom: 26px;
+    }
 
     * {
       box-sizing: border-box;
@@ -124,11 +124,11 @@
     }
 
     .panel-title {
-  margin: 0;
+      margin: 0;
 
-  font-size: 1.15rem;
-  font-weight: 750;
-}
+      font-size: 1.15rem;
+      font-weight: 750;
+    }
 
     .field {
       margin-top: 18px;
@@ -194,6 +194,61 @@
     .primary-button {
       width: 100%;
       margin-top: 22px;
+    }
+
+    .share-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      margin: 26px 0 22px;
+
+      color: var(--muted);
+
+      font-size: 0.82rem;
+    }
+
+    .share-divider::before,
+    .share-divider::after {
+      content: "";
+
+      height: 1px;
+      flex: 1;
+
+      background: var(--border);
+    }
+
+    .share-section {
+      text-align: center;
+    }
+
+    .share-title {
+      margin: 0 0 6px;
+
+      font-size: 1rem;
+      font-weight: 750;
+    }
+
+    .share-description {
+      margin: 0 0 14px;
+
+      color: var(--muted);
+
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .share-code-input {
+      text-align: center;
+
+      font-size: 1.15rem !important;
+      font-weight: 750 !important;
+      letter-spacing: 0.18em;
+    }
+
+    .share-open-button {
+      width: 100%;
+      margin-top: 10px;
     }
 
     .secondary-button {
@@ -646,6 +701,55 @@
         ></div>
 
       </form>
+
+      <div
+        class="share-divider"
+        id="shareDivider"
+      >
+        OR
+      </div>
+
+      <div class="share-section">
+
+        <h3
+          id="shareTitle"
+          class="share-title"
+        >
+          View Shared Map
+        </h3>
+
+        <p
+          id="shareDescription"
+          class="share-description"
+        >
+          Enter the 6-digit share code.
+        </p>
+
+        <input
+          id="shareCode"
+          class="share-code-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="off"
+          placeholder="000000"
+          aria-label="Share Code"
+        >
+
+        <button
+          id="shareOpenButton"
+          class="share-open-button"
+          type="button"
+        >
+          Open
+        </button>
+
+        <div
+          id="shareStatus"
+          class="status"
+        ></div>
+
+      </div>
     </section>
 
 
@@ -944,6 +1048,21 @@
         serverNotConnected:
           "The server API has not been connected yet.",
 
+        shareOr:
+          "OR",
+
+        shareTitle:
+          "View Shared Map",
+
+        shareDescription:
+          "Enter the 6-digit share code.",
+
+        shareOpen:
+          "Open",
+
+        shareInvalid:
+          "Please enter a 6-digit share code.",
+
         back:
           "← Back to Home",
       },
@@ -1021,6 +1140,21 @@
 
         serverNotConnected:
           "아직 서버 API가 연결되지 않았습니다.",
+
+        shareOr:
+          "또는",
+
+        shareTitle:
+          "공유 맵 보기",
+
+        shareDescription:
+          "6자리 공유 코드를 입력해 주세요.",
+
+        shareOpen:
+          "열기",
+
+        shareInvalid:
+          "6자리 공유 코드를 입력해 주세요.",
 
         back:
           "← 홈으로",
@@ -1100,6 +1234,21 @@
         serverNotConnected:
           "サーバーAPIはまだ接続されていません。",
 
+        shareOr:
+          "または",
+
+        shareTitle:
+          "共有マップを見る",
+
+        shareDescription:
+          "6桁の共有コードを入力してください。",
+
+        shareOpen:
+          "開く",
+
+        shareInvalid:
+          "6桁の共有コードを入力してください。",
+
         back:
           "← ホームへ",
       },
@@ -1177,6 +1326,21 @@
 
         serverNotConnected:
           "API сервера пока не подключён.",
+
+        shareOr:
+          "ИЛИ",
+
+        shareTitle:
+          "Открыть общую карту",
+
+        shareDescription:
+          "Введите 6-значный код доступа.",
+
+        shareOpen:
+          "Открыть",
+
+        shareInvalid:
+          "Введите 6-значный код доступа.",
 
         back:
           "← На главную",
@@ -1328,6 +1492,36 @@
         "mapStatus"
       );
 
+    const shareDivider =
+      document.getElementById(
+        "shareDivider"
+      );
+
+    const shareTitle =
+      document.getElementById(
+        "shareTitle"
+      );
+
+    const shareDescription =
+      document.getElementById(
+        "shareDescription"
+      );
+
+    const shareCode =
+      document.getElementById(
+        "shareCode"
+      );
+
+    const shareOpenButton =
+      document.getElementById(
+        "shareOpenButton"
+      );
+
+    const shareStatus =
+      document.getElementById(
+        "shareStatus"
+      );
+
 
     /*
       ==========================================================
@@ -1413,6 +1607,18 @@
 
       newMapButton.textContent =
         text.newMap;
+
+      shareDivider.textContent =
+        text.shareOr;
+
+      shareTitle.textContent =
+        text.shareTitle;
+
+      shareDescription.textContent =
+        text.shareDescription;
+
+      shareOpenButton.textContent =
+        text.shareOpen;
 
       document.getElementById(
         "backLink"
@@ -1862,6 +2068,74 @@
         new Date(timestamp)
       );
     }
+
+
+    /*
+      ==========================================================
+      SHARED MAP
+      ==========================================================
+    */
+
+    shareCode.addEventListener(
+      "input",
+      () => {
+
+        shareCode.value =
+          shareCode.value
+            .replace(
+              /\D/g,
+              ""
+            )
+            .slice(
+              0,
+              6
+            );
+
+        setStatus(
+          shareStatus,
+          ""
+        );
+      }
+    );
+
+
+    shareOpenButton.addEventListener(
+      "click",
+      () => {
+
+        const code =
+          shareCode.value.trim();
+
+        if (
+          !/^\d{6}$/.test(
+            code
+          )
+        ) {
+          setStatus(
+            shareStatus,
+            text.shareInvalid,
+            "error"
+          );
+
+          shareCode.focus();
+
+          return;
+        }
+
+        /*
+          다음 단계에서 실제 공유 맵 조회 API를 연결합니다.
+
+          예:
+          window.location.href =
+            `/map/shared/?code=${encodeURIComponent(code)}`;
+        */
+
+        console.log(
+          "Open shared map:",
+          code
+        );
+      }
+    );
 
 
     /*
