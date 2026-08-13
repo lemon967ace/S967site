@@ -317,7 +317,6 @@ passwordChanging: "Changing password…",
 passwordChanged: "Password changed.",
 passwordChangeFailed: "Could not change password.",
 
-staffSessionExpired: "Staff session expired.",
 imageRequestFailed: "Image management request failed.",
 imageLoading: "Loading…",
 imageLoadFailed: "Could not load images.",
