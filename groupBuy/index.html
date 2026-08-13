@@ -8,12 +8,7 @@
     content="width=device-width, initial-scale=1.0"
   >
 
-  <meta
-    name="robots"
-    content="noindex, nofollow"
-  >
-
-  <title>PNS Map Editor · S967</title>
+  <title>Group Purchase · S967</title>
 
   <link
     rel="stylesheet"
@@ -27,14 +22,9 @@
 
   <script
     src="/language.js"
-    defer
   ></script>
 
   <style>
-    #loginTitle {
-      margin-bottom: 26px;
-    }
-
     * {
       box-sizing: border-box;
     }
@@ -47,7 +37,10 @@
 
     body {
       min-height: 100vh;
-      padding: 36px 20px 80px;
+
+      padding:
+        36px
+        20px;
 
       font-family:
         -apple-system,
@@ -57,477 +50,454 @@
         Helvetica,
         Arial,
         sans-serif;
-
-      color: var(--text);
-      background: var(--background);
     }
 
     main {
-      width: min(720px, 100%);
-      margin: 0 auto;
-    }
+      width:
+        min(
+          760px,
+          100%
+        );
 
-    .eyebrow {
-      margin-bottom: 10px;
-
-      color: var(--muted);
-
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      margin:
+        0
+        auto;
     }
 
     h1 {
       margin: 0;
 
-      font-size: clamp(
-        2.2rem,
-        7vw,
-        4rem
-      );
+      font-size:
+        clamp(
+          2.2rem,
+          7vw,
+          4rem
+        );
 
-      line-height: 1;
-      letter-spacing: -0.045em;
+      letter-spacing:
+        -0.04em;
     }
 
-    .intro {
-      margin: 14px 0 0;
+    .eyebrow {
+      margin-bottom:
+        10px;
 
-      color: var(--muted);
+      font-size:
+        0.82rem;
 
-      font-size: 0.95rem;
-      line-height: 1.6;
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        0.12em;
     }
 
     .panel {
-      margin-top: 28px;
-      padding: 22px;
+      margin-top:
+        24px;
 
-      border: 1px solid var(--border);
-      border-radius: 18px;
+      padding:
+        20px;
 
-      background: var(--surface);
-      box-shadow: var(--shadow);
+      border:
+        1px solid
+        var(--border);
 
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
+      border-radius:
+        18px;
 
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      background:
+        var(--surface);
 
-      margin-bottom: 20px;
-    }
+      box-shadow:
+        var(--shadow);
 
-    .panel-title {
-      margin: 0;
+      backdrop-filter:
+        blur(14px);
 
-      font-size: 1.15rem;
-      font-weight: 750;
+      -webkit-backdrop-filter:
+        blur(14px);
     }
 
     .field {
-      margin-top: 18px;
+      margin-top:
+        24px;
     }
 
     .field:first-child {
-      margin-top: 0;
+      margin-top:
+        0;
     }
 
     .label {
-      display: block;
-      margin-bottom: 8px;
+      display:
+        block;
 
-      font-size: 0.9rem;
-      font-weight: 700;
+      margin-bottom:
+        8px;
+
+      font-size:
+        0.92rem;
+
+      font-weight:
+        700;
+
+      line-height:
+        1.5;
+    }
+
+    .required {
+      color:
+        #d75555;
     }
 
     input[type="text"],
-    input[type="password"],
     select {
-      width: 100%;
+      width:
+        100%;
 
-      padding: 12px 13px;
+      padding:
+        12px
+        13px;
 
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border:
+        1px solid
+        var(--border);
 
-      outline: none;
+      border-radius:
+        10px;
 
-      background: var(--surface-hover);
-      color: var(--text);
+      background:
+        var(--surface-hover);
 
-      font: inherit;
+      color:
+        var(--text);
+
+      font:
+        inherit;
     }
 
-    input:focus {
-      border-color: var(--border-hover);
+    input[type="text"]:focus,
+    select:focus {
+      outline:
+        none;
+
+      border-color:
+        var(--border-hover);
     }
 
-    button {
-      padding: 11px 15px;
+    .small {
+      margin-top:
+        7px;
 
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      color:
+        var(--muted);
 
-      background: var(--surface-hover);
-      color: var(--text);
+      font-size:
+        0.84rem;
 
-      font: inherit;
-      font-weight: 700;
-
-      cursor: pointer;
+      line-height:
+        1.55;
     }
 
-    button:hover:not(:disabled) {
-      border-color: var(--border-hover);
+    .purchase-list {
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        9px;
     }
 
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
+    .purchase-item {
+      display:
+        grid;
+
+      grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+
+      align-items:
+        center;
+
+      gap:
+        14px;
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
     }
 
-    .primary-button {
-      width: 100%;
-      margin-top: 22px;
+    .purchase-check {
+      display:
+        flex;
+
+      align-items:
+        flex-start;
+
+      gap:
+        9px;
+
+      min-width:
+        0;
+
+      cursor:
+        pointer;
     }
 
-    .share-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .purchase-check input {
+      margin-top:
+        3px;
 
-      margin: 26px 0 22px;
-
-      color: var(--muted);
-
-      font-size: 0.82rem;
+      flex:
+        0
+        0
+        auto;
     }
 
-    .share-divider::before,
-    .share-divider::after {
-      content: "";
+    .purchase-name {
+      min-width:
+        0;
 
-      height: 1px;
-      flex: 1;
+      line-height:
+        1.5;
 
-      background: var(--border);
+      overflow-wrap:
+        anywhere;
     }
 
-    .share-section {
-      text-align: center;
+    .quantity-box {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      gap:
+        7px;
     }
 
-    .share-title {
-      margin: 0 0 6px;
+    .quantity-label {
+      color:
+        var(--muted);
 
-      font-size: 1rem;
-      font-weight: 750;
+      font-size:
+        0.82rem;
+
+      white-space:
+        nowrap;
     }
 
-    .share-description {
-      margin: 0 0 14px;
+    .quantity-select {
+      width:
+        auto;
 
-      color: var(--muted);
+      min-width:
+        72px;
 
-      font-size: 0.85rem;
-      line-height: 1.5;
+      padding:
+        9px
+        30px
+        9px
+        10px;
     }
 
-    .retention-notice {
-      margin: 18px 0 0;
+    .quantity-select:disabled {
+      opacity:
+        0.45;
 
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.55;
-      text-align: center;
+      cursor:
+        not-allowed;
     }
 
-    .share-code-input {
-      text-align: center;
+    .agreement {
+      display:
+        flex;
 
-      font-size: 1.15rem !important;
-      font-weight: 750 !important;
-      letter-spacing: 0.18em;
+      align-items:
+        flex-start;
+
+      gap:
+        9px;
+
+      padding:
+        12px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+
+      cursor:
+        pointer;
     }
 
-    .share-open-button {
-      width: 100%;
-      margin-top: 10px;
+    .agreement input {
+      margin-top:
+        3px;
+
+      flex:
+        0
+        0
+        auto;
     }
 
-    .secondary-button {
-      background: transparent;
+    .agreement span {
+      min-width:
+        0;
+
+      line-height:
+        1.55;
     }
 
-    .danger-button {
-      color: #d75555;
+    .schedule-title {
+      font-size:
+        1.1rem;
+
+      font-weight:
+        700;
     }
 
     .status {
-      min-height: 1.4em;
-      margin-top: 14px;
+      margin-top:
+        16px;
 
-      color: var(--muted);
+      min-height:
+        1.4em;
 
-      font-size: 0.88rem;
-      line-height: 1.5;
+      color:
+        var(--muted);
+
+      font-size:
+        0.9rem;
+
+      line-height:
+        1.5;
     }
 
     .error {
-      color: #d75555;
+      color:
+        #d75555;
     }
 
     .success {
-      color: #3f9565;
+      color:
+        #3f9565;
     }
 
-    .hidden {
-      display: none !important;
+    button {
+      padding:
+        11px
+        15px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        10px;
+
+      background:
+        var(--surface-hover);
+
+      color:
+        var(--text);
+
+      font:
+        inherit;
+
+      font-weight:
+        700;
+
+      cursor:
+        pointer;
     }
 
-    .dialog-message {
-      margin: 0;
-
-      color: var(--text);
-
-      font-size: 0.95rem;
-      line-height: 1.65;
+    button:hover {
+      border-color:
+        var(--border-hover);
     }
 
-    .password-notice {
-      margin: 12px 0 0;
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.55;
+    button:disabled {
+      opacity:
+        0.5;
+
+      cursor:
+        not-allowed;
     }
 
-    .dialog-id {
-      font-weight: 750;
-      overflow-wrap: anywhere;
+    .submit-row {
+      margin-top:
+        24px;
     }
 
-    .dialog-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-
-      margin-top: 20px;
-    }
-
-    .account-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-
-      margin-top: 28px;
-      padding: 14px 16px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-
-      background: var(--surface);
-    }
-
-    .account-name {
-      min-width: 0;
-
-      font-size: 0.9rem;
-      font-weight: 700;
-
-      overflow-wrap: anywhere;
-    }
-
-    .map-count {
-      flex: 0 0 auto;
-
-      color: var(--muted);
-
-      font-size: 0.88rem;
-      font-weight: 700;
-    }
-
-    .map-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .map-empty {
-      padding: 30px 16px;
-
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-
-      color: var(--muted);
-
-      text-align: center;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
-
-    .map-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-
-      padding: 13px;
-
-      border: 1px solid var(--border);
-      border-radius: 12px;
-
-      background: var(--surface-hover);
-    }
-
-    .map-info {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .map-name {
-      font-weight: 750;
-
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .map-date {
-      margin-top: 4px;
-
-      color: var(--muted);
-
-      font-size: 0.78rem;
-    }
-
-    .map-actions {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 7px;
-      flex: 0 0 auto;
-    }
-
-    .map-actions button {
-      padding: 8px 10px;
-
-      font-size: 0.82rem;
-    }
-
-    .map-share-code {
-      margin-top: 6px;
-
-      color: var(--muted);
-      font-size: 0.78rem;
-      line-height: 1.5;
-    }
-
-    .map-share-code strong {
-      color: var(--text);
-      letter-spacing: 0.08em;
-    }
-
-    .new-map-button {
-      width: 100%;
-      margin-top: 14px;
-    }
-
-    .new-map-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
+    .submit-row button {
+      width:
+        100%;
     }
 
     .back {
-      display: inline-block;
+      display:
+        inline-block;
 
-      margin-top: 28px;
+      margin-top:
+        26px;
 
-      color: var(--muted);
+      font-size:
+        0.9rem;
 
-      font-size: 0.9rem;
-      text-decoration: none;
+      text-decoration:
+        none;
     }
 
-    .back:hover {
-      color: var(--text);
+    .hidden {
+      display:
+        none !important;
     }
 
-    /*
-      Language + Theme
-    */
-
-    .top-pickers {
-      position: fixed;
-
-      right: 18px;
-      bottom: 18px;
-
-      z-index: 1100;
-
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-    }
-
-    .top-pickers
-    .language-picker,
-    .top-pickers
-    .theme-picker {
-      position: relative;
-
-      top: auto;
-      right: auto;
-      bottom: auto;
-      left: auto;
-    }
-
-    .top-pickers
-    .language-menu,
-    .top-pickers
-    .theme-menu {
-      top: auto;
-      right: 0;
-      bottom: calc(100% + 8px);
-    }
-
-    @media (max-width: 560px) {
+    @media (
+      max-width: 520px
+    ) {
       body {
         padding:
           28px
-          16px
-          76px;
+          14px;
       }
 
       .panel {
-        padding: 18px;
+        padding:
+          18px;
       }
 
-      .map-item {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .map-actions {
-        display: grid;
+      .purchase-item {
         grid-template-columns:
-          repeat(2, 1fr);
+          1fr;
       }
 
-      .map-actions button {
-        width: 100%;
+      .quantity-box {
+        padding-left:
+          27px;
       }
 
-      .top-pickers {
-        right: 14px;
-        bottom: 14px;
+      .quantity-select {
+        flex:
+          1;
       }
     }
   </style>
@@ -536,127 +506,123 @@
 
 <body>
 
-  <div class="top-pickers">
+  <div
+    class="language-picker"
+    data-language-picker
+  >
+    <button
+      class="language-button"
+      type="button"
+      data-language-button
+      aria-label="Language"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      🌐
+    </button>
 
     <div
-      class="language-picker"
-      data-language-picker
+      class="language-menu"
+      data-language-menu
+      role="menu"
     >
       <button
-        class="language-button"
         type="button"
-        data-language-button
-        aria-label="Language"
-        aria-haspopup="true"
-        aria-expanded="false"
+        data-language-choice="ko"
+        role="menuitemradio"
       >
-        🌐
+        한국어
       </button>
 
-      <div
-        class="language-menu"
-        data-language-menu
-        role="menu"
+      <button
+        type="button"
+        data-language-choice="en"
+        role="menuitemradio"
       >
-        <button
-          type="button"
-          data-language-choice="ko"
-          role="menuitemradio"
-        >
-          한국어
-        </button>
+        English
+      </button>
 
-        <button
-          type="button"
-          data-language-choice="en"
-          role="menuitemradio"
-        >
-          English
-        </button>
+      <button
+        type="button"
+        data-language-choice="ja"
+        role="menuitemradio"
+      >
+        日本語
+      </button>
 
-        <button
-          type="button"
-          data-language-choice="ja"
-          role="menuitemradio"
-        >
-          日本語
-        </button>
-
-        <button
-          type="button"
-          data-language-choice="ru"
-          role="menuitemradio"
-        >
-          Русский
-        </button>
-      </div>
+      <button
+        type="button"
+        data-language-choice="ru"
+        role="menuitemradio"
+      >
+        Русский
+      </button>
     </div>
+  </div>
 
+
+  <div
+    class="theme-picker"
+    data-theme-picker
+  >
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      ◐
+    </button>
 
     <div
-      class="theme-picker"
-      data-theme-picker
+      class="theme-menu"
+      data-theme-menu
+      role="menu"
     >
       <button
-        class="theme-button"
         type="button"
-        data-theme-button
-        aria-label="Theme"
-        aria-haspopup="true"
-        aria-expanded="false"
+        data-theme-choice="system"
+        role="menuitemradio"
       >
-        ◐
+        <span class="theme-choice-icon">
+          ◐
+        </span>
+
+        <span data-i18n="themeSystem">
+          System
+        </span>
       </button>
 
-      <div
-        class="theme-menu"
-        data-theme-menu
-        role="menu"
+      <button
+        type="button"
+        data-theme-choice="light"
+        role="menuitemradio"
       >
-        <button
-          type="button"
-          data-theme-choice="system"
-          role="menuitemradio"
-        >
-          <span class="theme-choice-icon">
-            ◐
-          </span>
+        <span class="theme-choice-icon">
+          ☀
+        </span>
 
-          <span data-i18n="themeSystem">
-            System
-          </span>
-        </button>
+        <span data-i18n="themeLight">
+          Light
+        </span>
+      </button>
 
-        <button
-          type="button"
-          data-theme-choice="light"
-          role="menuitemradio"
-        >
-          <span class="theme-choice-icon">
-            ☀
-          </span>
+      <button
+        type="button"
+        data-theme-choice="dark"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">
+          ☾
+        </span>
 
-          <span data-i18n="themeLight">
-            Light
-          </span>
-        </button>
-
-        <button
-          type="button"
-          data-theme-choice="dark"
-          role="menuitemradio"
-        >
-          <span class="theme-choice-icon">
-            ☾
-          </span>
-
-          <span data-i18n="themeDark">
-            Dark
-          </span>
-        </button>
-      </div>
+        <span data-i18n="themeDark">
+          Dark
+        </span>
+      </button>
     </div>
-
   </div>
 
 
@@ -666,360 +632,163 @@
       S967
     </div>
 
-    <h1>
-      PNS Map Editor
+    <h1 id="pageTitle">
+      Group Purchase
     </h1>
 
     <p
       id="pageIntro"
-      class="intro"
+      class="small"
     ></p>
 
 
-    <!-- LOGIN -->
-
-    <section
-      id="loginPanel"
-      class="panel"
+    <div
+      id="recruitmentScheduleStatus"
+      class="panel hidden"
     >
-      <h2
-        id="loginTitle"
-        class="panel-title"
-      >
-        Login
-      </h2>
-
-      <form id="loginForm">
-
-        <div class="field">
-          <label
-            id="loginIdLabel"
-            class="label"
-            for="loginId"
-          >
-            ID
-          </label>
-
-          <input
-            id="loginId"
-            type="text"
-            maxlength="40"
-            autocomplete="username"
-            required
-          >
-        </div>
-
-        <div class="field">
-          <label
-            id="loginPasswordLabel"
-            class="label"
-            for="loginPassword"
-          >
-            Password
-          </label>
-
-          <input
-            id="loginPassword"
-            type="password"
-            maxlength="100"
-            autocomplete="current-password"
-            required
-          >
-        </div>
-
-        <button
-          id="loginButton"
-          class="primary-button"
-          type="submit"
-        >
-          Login
-        </button>
-
-        <div
-          id="loginStatus"
-          class="status"
-        ></div>
-
-        <p
-          id="newUserNotice"
-          class="password-notice"
-        ></p>
-
-      </form>
+      <div
+        id="scheduleStatus"
+        class="schedule-title"
+      ></div>
 
       <div
-        class="share-divider"
-        id="shareDivider"
-      >
-        OR
-      </div>
+        id="scheduleDetail"
+        class="small"
+      ></div>
+    </div>
 
-      <div class="share-section">
-
-        <h3
-          id="shareTitle"
-          class="share-title"
-        >
-          View Shared Map
-        </h3>
-
-        <p
-          id="shareDescription"
-          class="share-description"
-        >
-          Enter the 6-digit share code.
-        </p>
-
-        <input
-          id="shareCode"
-          class="share-code-input"
-          type="text"
-          inputmode="numeric"
-          maxlength="6"
-          autocomplete="off"
-          placeholder="000000"
-          aria-label="Share Code"
-        >
-
-        <button
-          id="shareOpenButton"
-          class="share-open-button"
-          type="button"
-        >
-          Open
-        </button>
-
-        <div
-          id="shareStatus"
-          class="status"
-        ></div>
-
-        <p
-          id="retentionNotice"
-          class="retention-notice"
-        >
-          Saved and shared maps are stored for up to 6 months.
-        </p>
-
-      </div>
-    </section>
-
-
-    <!-- UNKNOWN ACCOUNT -->
 
     <section
-      id="unknownAccountPanel"
+      id="applicationPanel"
       class="panel hidden"
     >
-      <p
-        id="unknownAccountMessage"
-        class="dialog-message"
-      ></p>
-
-      <div class="dialog-buttons">
-
-        <button
-          id="unknownCancelButton"
-          class="secondary-button"
-          type="button"
-        >
-          Cancel
-        </button>
-
-        <button
-          id="createAccountStartButton"
-          type="button"
-        >
-          Create Account
-        </button>
-
-      </div>
-    </section>
-
-
-    <!-- CREATE ACCOUNT -->
-
-    <section
-      id="createAccountPanel"
-      class="panel hidden"
-    >
-      <h2
-        id="createAccountTitle"
-        class="panel-title"
+      <form
+        id="groupBuyForm"
+        novalidate
       >
-        Create Account
-      </h2>
-
-      <p
-        id="createAccountId"
-        class="dialog-message"
-      ></p>
-
-      <form id="createAccountForm">
 
         <div class="field">
           <label
-            id="createPasswordLabel"
+            id="allianceLabel"
             class="label"
-            for="createPassword"
+            for="alliance"
           >
-            Password
+            Alliance
+            <span class="required">*</span>
           </label>
 
-          <input
-            id="createPassword"
-            type="password"
-            maxlength="100"
-            autocomplete="new-password"
+          <select
+            id="alliance"
             required
           >
-        </div>
-
-        <div class="field">
-          <label
-            id="confirmPasswordLabel"
-            class="label"
-            for="confirmPassword"
-          >
-            Confirm Password
-          </label>
-
-          <input
-            id="confirmPassword"
-            type="password"
-            maxlength="100"
-            autocomplete="new-password"
-            required
-          >
-        </div>
-
-        <p
-          id="passwordSecurityNotice"
-          class="password-notice"
-        ></p>
-
-        <div class="dialog-buttons">
-
-          <button
-            id="createCancelButton"
-            class="secondary-button"
-            type="button"
-          >
-            Cancel
-          </button>
-
-          <button
-            id="createAccountButton"
-            type="submit"
-          >
-            Create Account
-          </button>
-
-        </div>
-
-        <div
-          id="createStatus"
-          class="status"
-        ></div>
-
-      </form>
-    </section>
-
-
-    <!-- ACCOUNT / MAP LIST -->
-
-    <div
-      id="accountArea"
-      class="hidden"
-    >
-
-      <div class="account-bar">
-
-        <div
-          id="signedInUser"
-          class="account-name"
-        ></div>
-
-        <button
-          id="logoutButton"
-          class="secondary-button"
-          type="button"
-        >
-          Log out
-        </button>
-
-      </div>
-
-
-      <section class="panel">
-
-        <div class="panel-header">
-
-          <h2
-            id="myMapsTitle"
-            class="panel-title"
-          >
-            My Maps
-          </h2>
-
-          <div
-            id="mapCount"
-            class="map-count"
-          >
-            0 / 5
-          </div>
-
-        </div>
-
-
-        <div
-          id="mapList"
-          class="map-list"
-        ></div>
-
-
-        <button
-          id="newMapButton"
-          class="new-map-button"
-          type="button"
-        >
-          + New Map
-        </button>
-
-        <div
-          id="mapStatus"
-          class="status"
-        ></div>
-
-      </section>
-
-      <section
-        id="newMapPanel"
-        class="panel hidden"
-      >
-        <h2 id="newMapTitle" class="panel-title">New Map</h2>
-
-        <div class="field">
-          <label id="newMapNameLabel" class="label" for="newMapName">Map name</label>
-          <input id="newMapName" type="text" maxlength="100" autocomplete="off">
-        </div>
-
-        <div class="field">
-          <label id="newMapTypeLabel" class="label" for="newMapType">Map type</label>
-          <select id="newMapType" disabled>
-            <option value="">Loading…</option>
+            <option value="">
+              Loading…
+            </option>
           </select>
         </div>
 
-        <div class="new-map-actions">
-          <button id="cancelNewMapButton" class="secondary-button" type="button">Cancel</button>
-          <button id="createNewMapButton" type="button" disabled>Create</button>
+
+        <div class="field">
+          <label
+            id="playerNameLabel"
+            class="label"
+            for="playerName"
+          >
+            Player Name
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="playerName"
+            type="text"
+            maxlength="100"
+            autocomplete="off"
+            required
+          >
         </div>
 
-        <div id="newMapStatus" class="status"></div>
-      </section>
 
-    </div>
+        <div class="field">
+
+          <div
+            id="purchaseItemsLabel"
+            class="label"
+          >
+            Planned Purchase
+            <span class="required">*</span>
+          </div>
+
+          <div
+            id="purchaseItemsHelp"
+            class="small"
+          ></div>
+
+          <div
+            id="purchaseItems"
+            class="purchase-list"
+          ></div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            class="agreement"
+          >
+            <input
+              id="agreementPurchase"
+              type="checkbox"
+              required
+            >
+
+            <span
+              id="agreementPurchaseText"
+            ></span>
+          </label>
+
+        </div>
+
+
+        <div class="field">
+
+          <label
+            class="agreement"
+          >
+            <input
+              id="agreementRestriction"
+              type="checkbox"
+              required
+            >
+
+            <span
+              id="agreementRestrictionText"
+            ></span>
+          </label>
+
+        </div>
+
+
+        <div class="submit-row">
+
+          <button
+            id="submitButton"
+            type="submit"
+          >
+            Submit
+          </button>
+
+        </div>
+
+
+        <div
+          id="formStatus"
+          class="status"
+          aria-live="polite"
+        ></div>
+
+      </form>
+    </section>
 
 
     <a
@@ -1033,842 +802,9 @@
   </main>
 
 
-  <script src="/map/map-new-flow.js"></script>
   <script>
-    /*
-      ==========================================================
-      CONFIG
-      ==========================================================
-    */
-
-    const FUNCTIONS_BASE_URL =
-      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1";
-
-    const MAP_LOGIN_URL =
-      `${FUNCTIONS_BASE_URL}/map-login`;
-
-    const MAP_REGISTER_URL =
-      `${FUNCTIONS_BASE_URL}/map-register`;
-
-    const MAP_LIST_URL =
-      `${FUNCTIONS_BASE_URL}/map-list`;
-
-    const MAP_LOAD_URL =
-      `${FUNCTIONS_BASE_URL}/map-load`;
-
-    const MAP_SAVE_URL =
-      `${FUNCTIONS_BASE_URL}/map-save`;
-
-    const MAP_TEMPLATE_LIST_URL =
-      `${FUNCTIONS_BASE_URL}/map-template-list`;
-
-    const MAP_TEMPLATE_LOAD_URL =
-      `${FUNCTIONS_BASE_URL}/map-template-load`;
-
-    const MAP_DELETE_URL =
-      `${FUNCTIONS_BASE_URL}/map-delete`;
-
-    const MAP_SHARE_LOAD_URL =
-      `${FUNCTIONS_BASE_URL}/map-share-load`;
-
-    const MAP_SHARE_ENABLE_URL =
-      `${FUNCTIONS_BASE_URL}/map-share-enable`;
-
-    const MAP_SHARE_DISABLE_URL =
-      `${FUNCTIONS_BASE_URL}/map-share-disable`;
-
-    const MAP_SHARE_STATUS_URL =
-      `${FUNCTIONS_BASE_URL}/map-share-status`;
-
-    const MAX_MAPS = 5;
-
-    const SESSION_TOKEN_KEY =
-      "s967-map-session-token";
-
-    const SESSION_EXPIRES_KEY =
-      "s967-map-session-expires";
-
-    const ACCOUNT_ID_KEY =
-      "s967-map-account-id";
-
-    const NEW_MAP_TEMPLATE_KEY =
-      "s967-new-map-template";
-
-
-    /*
-      ==========================================================
-      TRANSLATIONS
-      ==========================================================
-    */
-
-    const TEXT = {
-      en: {
-        intro:
-          "Sign in to access your saved maps.",
-
-        login:
-          "Login",
-
-        id:
-          "ID",
-
-        password:
-          "Password",
-
-        loginButton:
-          "Login",
-
-        newUserNotice:
-          "New here? Enter the ID and password you'd like to use. If the ID isn't registered, you'll be able to create an account.",
-
-        loggingIn:
-          "Logging in…",
-
-        unknownAccount:
-          "This ID is not registered. Would you like to create an account?",
-
-        invalidPassword:
-          "Incorrect password.",
-
-        invalidId:
-          "ID must be 3–30 characters using letters, numbers, periods, underscores, or hyphens.",
-
-        invalidNewPassword:
-          "Password must be 8–100 characters.",
-
-        loginFailed:
-          "Login failed.",
-
-        cancel:
-          "Cancel",
-
-        createAccount:
-          "Create Account",
-
-        creatingAccount:
-          "Creating account…",
-
-        newAccountFor:
-          "Create a new account for:",
-
-        confirmPassword:
-          "Confirm Password",
-
-        passwordSecurityNotice:
-          "Simple or commonly used passwords may be detected by your browser or password manager as compromised or weak, which may trigger a security warning.",
-
-        passwordMismatch:
-          "Passwords do not match.",
-
-        accountCreateFailed:
-          "Could not create the account.",
-
-        usernameExists:
-          "This ID is already registered. Please sign in instead.",
-
-        signedInAs:
-          "Signed in as",
-
-        logout:
-          "Log out",
-
-        myMaps:
-          "My Maps",
-
-        noMaps:
-          "You don't have any saved maps yet.",
-
-        newMap:
-          "+ New Map",
-
-        newMapTitle: "Create a new map",
-        mapName: "Map name",
-        mapType: "Map type",
-        emptyMap: "Empty map",
-        defaultMap: "Default",
-        templateLoading: "Loading fixed maps…",
-        templateListFailed: "Failed to load the fixed-map list. Select Empty map explicitly to continue.",
-        noDefaultTemplate: "No default map is configured. Select the map you want to use.",
-        selectMapType: "Select a map type",
-        createMap: "Create",
-        creatingMap: "Creating…",
-        cancelNewMap: "Cancel",
-        mapNameRequired: "Enter a map name.",
-        mapNameTooLong: "The map name must be 100 characters or fewer.",
-        mapTypeRequired: "Select a map type.",
-        selectedTemplateUnavailable: "The selected fixed map is no longer available. Select another map.",
-        templateLoadFailed: "Failed to load the selected fixed map.",
-
-        open:
-          "Open",
-
-        rename:
-          "Rename",
-
-        delete:
-          "Delete",
-
-        deleteConfirm:
-          "Delete this map? This cannot be undone.",
-
-        updated:
-          "Updated",
-
-        mapLimit:
-          "You can save up to 5 maps per account.",
-
-        mapsLoadFailed:
-          "Could not load your maps.",
-
-        mapDeleteFailed:
-          "Could not delete the map.",
-
-        mapRenameFailed:
-          "Could not rename the map.",
-
-        sessionExpired:
-          "Your login session has expired. Please sign in again.",
-
-        shareOr:
-          "OR",
-
-        shareTitle:
-          "View Shared Map",
-
-        shareDescription:
-          "Enter the 6-digit share code.",
-
-        shareOpen:
-          "Open",
-
-        shareInvalid:
-          "Please enter a 6-digit share code.",
-
-        shareLoading:
-          "Loading shared map…",
-
-        shareNotFound:
-          "The shared map could not be found or sharing has been disabled.",
-
-        shareLoadFailed:
-          "Failed to load the shared map.",
-
-        share:
-          "Share",
-
-        shareUpdate:
-          "Update Share",
-
-        shareStop:
-          "Stop Sharing",
-
-        shareCode:
-          "Share code",
-
-        shareChecking:
-          "Checking sharing status…",
-
-        shareCreating:
-          "Creating share…",
-
-        shareUpdating:
-          "Updating share…",
-
-        shareStopping:
-          "Stopping share…",
-
-        shareFailed:
-          "Could not share this map.",
-
-        shareStopFailed:
-          "Could not stop sharing this map.",
-
-        shareStopConfirm:
-          "Stop sharing this map? The current share code will stop working immediately.",
-
-        retentionNotice:
-          "Saved maps are retained for up to 6 months from their last update. Shared copies are retained for up to 6 months from their last share or update.",
-
-        back:
-          "← Back to Home",
-      },
-
-
-      ko: {
-        intro:
-          "저장된 맵을 이용하려면 로그인해 주세요.",
-
-        login:
-          "로그인",
-
-        id:
-          "아이디",
-
-        password:
-          "비밀번호",
-
-        loginButton:
-          "로그인",
-
-        newUserNotice:
-          "처음 이용하시나요? 사용할 ID와 비밀번호를 입력해 주세요. 등록되지 않은 ID라면 계정을 생성할 수 있습니다.",
-
-        loggingIn:
-          "로그인 중…",
-
-        unknownAccount:
-          "등록되지 않은 아이디입니다. 계정을 생성하시겠습니까?",
-
-        invalidPassword:
-          "비밀번호가 올바르지 않습니다.",
-
-        invalidId:
-          "아이디는 영문, 숫자, 마침표, 밑줄, 하이픈을 사용하여 3~30자로 입력해 주세요.",
-
-        invalidNewPassword:
-          "비밀번호는 8~100자로 입력해 주세요.",
-
-        loginFailed:
-          "로그인에 실패했습니다.",
-
-        cancel:
-          "취소",
-
-        createAccount:
-          "계정 생성",
-
-        creatingAccount:
-          "계정 생성 중…",
-
-        newAccountFor:
-          "다음 아이디로 새 계정을 생성합니다:",
-
-        confirmPassword:
-          "비밀번호 확인",
-
-        passwordSecurityNotice:
-          "단순하거나 흔히 사용되는 비밀번호는 브라우저 또는 비밀번호 관리자에서 유출·취약 비밀번호로 감지되어 보안 경고가 표시될 수 있습니다.",
-
-        passwordMismatch:
-          "비밀번호가 일치하지 않습니다.",
-
-        accountCreateFailed:
-          "계정을 생성하지 못했습니다.",
-
-        usernameExists:
-          "이미 등록된 아이디입니다. 로그인해 주세요.",
-
-        signedInAs:
-          "로그인:",
-
-        logout:
-          "로그아웃",
-
-        myMaps:
-          "내 맵",
-
-        noMaps:
-          "아직 저장된 맵이 없습니다.",
-
-        newMap:
-          "+ 새 맵",
-
-        newMapTitle: "새 맵 만들기",
-        mapName: "맵 이름",
-        mapType: "맵 종류",
-        emptyMap: "빈 맵",
-        defaultMap: "기본맵",
-        templateLoading: "고정맵 목록을 불러오는 중…",
-        templateListFailed: "고정맵 목록을 불러오지 못했습니다. 계속하려면 빈 맵을 직접 선택해 주세요.",
-        noDefaultTemplate: "현재 지정된 기본맵이 없습니다. 사용할 맵을 선택해 주세요.",
-        selectMapType: "맵 종류를 선택하세요",
-        createMap: "생성",
-        creatingMap: "생성 중…",
-        cancelNewMap: "취소",
-        mapNameRequired: "맵 이름을 입력해 주세요.",
-        mapNameTooLong: "맵 이름은 100자 이하로 입력해 주세요.",
-        mapTypeRequired: "사용할 맵 종류를 선택해 주세요.",
-        selectedTemplateUnavailable: "선택한 고정맵을 더 이상 사용할 수 없습니다. 다른 맵을 선택해 주세요.",
-        templateLoadFailed: "선택한 고정맵을 불러오지 못했습니다.",
-
-        open:
-          "열기",
-
-        rename:
-          "이름 변경",
-
-        delete:
-          "삭제",
-
-        deleteConfirm:
-          "이 맵을 삭제할까요? 삭제한 맵은 복구할 수 없습니다.",
-
-        updated:
-          "수정",
-
-        mapLimit:
-          "계정당 최대 5개의 맵을 저장할 수 있습니다.",
-
-        mapsLoadFailed:
-          "맵 목록을 불러오지 못했습니다.",
-
-        mapDeleteFailed:
-          "맵을 삭제하지 못했습니다.",
-
-        mapRenameFailed:
-          "맵 이름을 변경하지 못했습니다.",
-
-        sessionExpired:
-          "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
-
-        shareOr:
-          "또는",
-
-        shareTitle:
-          "공유 맵 보기",
-
-        shareDescription:
-          "6자리 공유 코드를 입력해 주세요.",
-
-        shareOpen:
-          "열기",
-
-        shareInvalid:
-          "6자리 공유 코드를 입력해 주세요.",
-
-        shareLoading:
-          "공유 맵을 불러오는 중…",
-
-        shareNotFound:
-          "공유 맵을 찾을 수 없거나 공유가 해제되었습니다.",
-
-        shareLoadFailed:
-          "공유 맵을 불러오지 못했습니다.",
-
-        share:
-          "공유",
-
-        shareUpdate:
-          "공유 갱신",
-
-        shareStop:
-          "공유 중지",
-
-        shareCode:
-          "공유 코드",
-
-        shareChecking:
-          "공유 상태 확인 중…",
-
-        shareCreating:
-          "공유 생성 중…",
-
-        shareUpdating:
-          "공유 갱신 중…",
-
-        shareStopping:
-          "공유 중지 중…",
-
-        shareFailed:
-          "맵을 공유하지 못했습니다.",
-
-        shareStopFailed:
-          "맵 공유를 중지하지 못했습니다.",
-
-        shareStopConfirm:
-          "이 맵의 공유를 중지할까요? 현재 공유 코드는 즉시 사용할 수 없게 됩니다.",
-
-        retentionNotice:
-          "저장된 맵은 마지막 수정일로부터 최대 6개월간, 공유본은 마지막 공유 또는 갱신일로부터 최대 6개월간 보관됩니다.",
-
-        back:
-          "← 홈으로",
-      },
-
-
-      ja: {
-        intro:
-          "保存したマップを利用するにはログインしてください。",
-
-        login:
-          "ログイン",
-
-        id:
-          "ID",
-
-        password:
-          "パスワード",
-
-        loginButton:
-          "ログイン",
-
-        newUserNotice:
-          "初めてご利用ですか？ 使用したいIDとパスワードを入力してください。未登録のIDの場合は、アカウントを作成できます。",
-
-        loggingIn:
-          "ログイン中…",
-
-        unknownAccount:
-          "登録されていないIDです。アカウントを作成しますか？",
-
-        invalidPassword:
-          "パスワードが正しくありません。",
-
-        invalidId:
-          "IDは英数字、ピリオド、アンダースコア、ハイフンを使用して3～30文字で入力してください。",
-
-        invalidNewPassword:
-          "パスワードは8～100文字で入力してください。",
-
-        loginFailed:
-          "ログインに失敗しました。",
-
-        cancel:
-          "キャンセル",
-
-        createAccount:
-          "アカウント作成",
-
-        creatingAccount:
-          "アカウントを作成中…",
-
-        newAccountFor:
-          "次のIDで新しいアカウントを作成します：",
-
-        confirmPassword:
-          "パスワード確認",
-
-        passwordSecurityNotice:
-          "単純なパスワードや一般的によく使われるパスワードは、ブラウザやパスワードマネージャーによって漏洩済みまたは脆弱なパスワードとして検出され、セキュリティ警告が表示される場合があります。",
-
-        passwordMismatch:
-          "パスワードが一致しません。",
-
-        accountCreateFailed:
-          "アカウントを作成できませんでした。",
-
-        usernameExists:
-          "このIDはすでに登録されています。ログインしてください。",
-
-        signedInAs:
-          "ログイン中：",
-
-        logout:
-          "ログアウト",
-
-        myMaps:
-          "マイマップ",
-
-        noMaps:
-          "保存されたマップはまだありません。",
-
-        newMap:
-          "+ 新しいマップ",
-
-        newMapTitle: "新しいマップを作成",
-        mapName: "マップ名",
-        mapType: "マップの種類",
-        emptyMap: "空のマップ",
-        defaultMap: "デフォルト",
-        templateLoading: "固定マップを読み込んでいます…",
-        templateListFailed: "固定マップ一覧を読み込めませんでした。続行するには空のマップを明示的に選択してください。",
-        noDefaultTemplate: "デフォルトマップが設定されていません。使用するマップを選択してください。",
-        selectMapType: "マップの種類を選択",
-        createMap: "作成",
-        creatingMap: "作成中…",
-        cancelNewMap: "キャンセル",
-        mapNameRequired: "マップ名を入力してください。",
-        mapNameTooLong: "マップ名は100文字以内で入力してください。",
-        mapTypeRequired: "使用するマップを選択してください。",
-        selectedTemplateUnavailable: "選択した固定マップは利用できません。別のマップを選択してください。",
-        templateLoadFailed: "選択した固定マップを読み込めませんでした。",
-
-        open:
-          "開く",
-
-        rename:
-          "名前変更",
-
-        delete:
-          "削除",
-
-        deleteConfirm:
-          "このマップを削除しますか？削除後は元に戻せません。",
-
-        updated:
-          "更新",
-
-        mapLimit:
-          "1アカウントにつき最大5個のマップを保存できます。",
-
-        mapsLoadFailed:
-          "マップ一覧を読み込めませんでした。",
-
-        mapDeleteFailed:
-          "マップを削除できませんでした。",
-
-        mapRenameFailed:
-          "マップ名を変更できませんでした。",
-
-        sessionExpired:
-          "ログインセッションの有効期限が切れました。もう一度ログインしてください。",
-
-        shareOr:
-          "または",
-
-        shareTitle:
-          "共有マップを見る",
-
-        shareDescription:
-          "6桁の共有コードを入力してください。",
-
-        shareOpen:
-          "開く",
-
-        shareInvalid:
-          "6桁の共有コードを入力してください。",
-
-        shareLoading:
-          "共有マップを読み込んでいます…",
-
-        shareNotFound:
-          "共有マップが見つからないか、共有が解除されています。",
-
-        shareLoadFailed:
-          "共有マップを読み込めませんでした。",
-
-        share:
-          "共有",
-
-        shareUpdate:
-          "共有を更新",
-
-        shareStop:
-          "共有停止",
-
-        shareCode:
-          "共有コード",
-
-        shareChecking:
-          "共有状態を確認しています…",
-
-        shareCreating:
-          "共有を作成しています…",
-
-        shareUpdating:
-          "共有を更新しています…",
-
-        shareStopping:
-          "共有を停止しています…",
-
-        shareFailed:
-          "マップを共有できませんでした。",
-
-        shareStopFailed:
-          "マップの共有を停止できませんでした。",
-
-        shareStopConfirm:
-          "このマップの共有を停止しますか？現在の共有コードはすぐに使用できなくなります。",
-
-        retentionNotice:
-          "保存されたマップは最終更新日から最長6か月、共有コピーは最後の共有または更新日から最長6か月保存されます。",
-
-        back:
-          "← ホームへ",
-      },
-
-
-      ru: {
-        intro:
-          "Войдите, чтобы получить доступ к сохранённым картам.",
-
-        login:
-          "Вход",
-
-        id:
-          "ID",
-
-        password:
-          "Пароль",
-
-        loginButton:
-          "Войти",
-
-        newUserNotice:
-          "Впервые здесь? Введите ID и пароль, которые хотите использовать. Если ID ещё не зарегистрирован, вы сможете создать учётную запись.",
-
-        loggingIn:
-          "Вход…",
-
-        unknownAccount:
-          "Этот ID не зарегистрирован. Создать новую учётную запись?",
-
-        invalidPassword:
-          "Неверный пароль.",
-
-        invalidId:
-          "ID должен содержать 3–30 символов: латинские буквы, цифры, точки, подчёркивания или дефисы.",
-
-        invalidNewPassword:
-          "Пароль должен содержать от 8 до 100 символов.",
-
-        loginFailed:
-          "Не удалось войти.",
-
-        cancel:
-          "Отмена",
-
-        createAccount:
-          "Создать аккаунт",
-
-        creatingAccount:
-          "Создание аккаунта…",
-
-        newAccountFor:
-          "Создать новую учётную запись для:",
-
-        confirmPassword:
-          "Подтвердите пароль",
-
-        passwordSecurityNotice:
-          "Простые или широко используемые пароли могут быть определены браузером или менеджером паролей как скомпрометированные или слабые, из-за чего может появиться предупреждение безопасности.",
-
-        passwordMismatch:
-          "Пароли не совпадают.",
-
-        accountCreateFailed:
-          "Не удалось создать учётную запись.",
-
-        usernameExists:
-          "Этот ID уже зарегистрирован. Выполните вход.",
-
-        signedInAs:
-          "Выполнен вход:",
-
-        logout:
-          "Выйти",
-
-        myMaps:
-          "Мои карты",
-
-        noMaps:
-          "У вас пока нет сохранённых карт.",
-
-        newMap:
-          "+ Новая карта",
-
-        newMapTitle: "Создать новую карту",
-        mapName: "Название карты",
-        mapType: "Тип карты",
-        emptyMap: "Пустая карта",
-        defaultMap: "По умолчанию",
-        templateLoading: "Загрузка фиксированных карт…",
-        templateListFailed: "Не удалось загрузить список фиксированных карт. Чтобы продолжить, явно выберите пустую карту.",
-        noDefaultTemplate: "Карта по умолчанию не назначена. Выберите нужную карту.",
-        selectMapType: "Выберите тип карты",
-        createMap: "Создать",
-        creatingMap: "Создание…",
-        cancelNewMap: "Отмена",
-        mapNameRequired: "Введите название карты.",
-        mapNameTooLong: "Название карты должно содержать не более 100 символов.",
-        mapTypeRequired: "Выберите тип карты.",
-        selectedTemplateUnavailable: "Выбранная фиксированная карта больше недоступна. Выберите другую карту.",
-        templateLoadFailed: "Не удалось загрузить выбранную фиксированную карту.",
-
-        open:
-          "Открыть",
-
-        rename:
-          "Переименовать",
-
-        delete:
-          "Удалить",
-
-        deleteConfirm:
-          "Удалить эту карту? Это действие нельзя отменить.",
-
-        updated:
-          "Обновлено",
-
-        mapLimit:
-          "В одной учётной записи можно сохранить до 5 карт.",
-
-        mapsLoadFailed:
-          "Не удалось загрузить список карт.",
-
-        mapDeleteFailed:
-          "Не удалось удалить карту.",
-
-        mapRenameFailed:
-          "Не удалось переименовать карту.",
-
-        sessionExpired:
-          "Срок действия сеанса истёк. Войдите снова.",
-
-        shareOr:
-          "ИЛИ",
-
-        shareTitle:
-          "Открыть общую карту",
-
-        shareDescription:
-          "Введите 6-значный код доступа.",
-
-        shareOpen:
-          "Открыть",
-
-        shareInvalid:
-          "Введите 6-значный код доступа.",
-
-        shareLoading:
-          "Загрузка общей карты…",
-
-        shareNotFound:
-          "Общая карта не найдена или доступ к ней отключён.",
-
-        shareLoadFailed:
-          "Не удалось загрузить общую карту.",
-
-        share:
-          "Поделиться",
-
-        shareUpdate:
-          "Обновить доступ",
-
-        shareStop:
-          "Закрыть доступ",
-
-        shareCode:
-          "Код доступа",
-
-        shareChecking:
-          "Проверка доступа…",
-
-        shareCreating:
-          "Создание доступа…",
-
-        shareUpdating:
-          "Обновление доступа…",
-
-        shareStopping:
-          "Отключение доступа…",
-
-        shareFailed:
-          "Не удалось поделиться картой.",
-
-        shareStopFailed:
-          "Не удалось отключить общий доступ.",
-
-        shareStopConfirm:
-          "Отключить общий доступ к этой карте? Текущий код перестанет работать сразу.",
-
-        retentionNotice:
-          "Сохранённые карты хранятся до 6 месяцев с момента последнего обновления, а общие копии — до 6 месяцев с момента последней публикации или обновления.",
-
-        back:
-          "← На главную",
-      },
-    };
+    const GROUP_BUY_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/group-buy-submit";
 
 
     let language =
@@ -1877,642 +813,684 @@
         ? getCurrentLanguage()
         : "en";
 
-    let text =
-      TEXT[language] ??
-      TEXT.en;
+
+    let currentEvent =
+      null;
+
+    let currentItems =
+      [];
+
+    let recruitmentAvailability =
+      null;
 
 
-    /*
-      ==========================================================
-      ELEMENTS
-      ==========================================================
-    */
-
-    const loginPanel =
+    const form =
       document.getElementById(
-        "loginPanel"
+        "groupBuyForm"
       );
 
-    const loginForm =
+    const applicationPanel =
       document.getElementById(
-        "loginForm"
+        "applicationPanel"
       );
 
-    const loginId =
+    const scheduleBox =
       document.getElementById(
-        "loginId"
+        "recruitmentScheduleStatus"
       );
 
-    const loginPassword =
+    const scheduleStatus =
       document.getElementById(
-        "loginPassword"
+        "scheduleStatus"
       );
 
-    const loginButton =
+    const scheduleDetail =
       document.getElementById(
-        "loginButton"
+        "scheduleDetail"
       );
 
-    const loginStatus =
+    const alliance =
       document.getElementById(
-        "loginStatus"
+        "alliance"
       );
 
-
-    const unknownAccountPanel =
+    const playerName =
       document.getElementById(
-        "unknownAccountPanel"
+        "playerName"
       );
 
-    const unknownAccountMessage =
+    const purchaseItems =
       document.getElementById(
-        "unknownAccountMessage"
+        "purchaseItems"
       );
 
-    const unknownCancelButton =
+    const agreementPurchase =
       document.getElementById(
-        "unknownCancelButton"
+        "agreementPurchase"
       );
 
-    const createAccountStartButton =
+    const agreementRestriction =
       document.getElementById(
-        "createAccountStartButton"
+        "agreementRestriction"
       );
 
-
-    const createAccountPanel =
+    const submitButton =
       document.getElementById(
-        "createAccountPanel"
+        "submitButton"
       );
 
-    const createAccountForm =
+    const formStatus =
       document.getElementById(
-        "createAccountForm"
-      );
-
-    const createAccountId =
-      document.getElementById(
-        "createAccountId"
-      );
-
-    const createPassword =
-      document.getElementById(
-        "createPassword"
-      );
-
-    const confirmPassword =
-      document.getElementById(
-        "confirmPassword"
-      );
-
-    const createAccountButton =
-      document.getElementById(
-        "createAccountButton"
-      );
-
-    const createCancelButton =
-      document.getElementById(
-        "createCancelButton"
-      );
-
-    const createStatus =
-      document.getElementById(
-        "createStatus"
+        "formStatus"
       );
 
 
-    const accountArea =
-      document.getElementById(
-        "accountArea"
-      );
-
-    const signedInUser =
-      document.getElementById(
-        "signedInUser"
-      );
-
-    const logoutButton =
-      document.getElementById(
-        "logoutButton"
-      );
-
-    const mapList =
-      document.getElementById(
-        "mapList"
-      );
-
-    const mapCount =
-      document.getElementById(
-        "mapCount"
-      );
-
-    const newMapButton =
-      document.getElementById(
-        "newMapButton"
-      );
-
-    const newMapPanel = document.getElementById("newMapPanel");
-    const newMapName = document.getElementById("newMapName");
-    const newMapType = document.getElementById("newMapType");
-    const cancelNewMapButton = document.getElementById("cancelNewMapButton");
-    const createNewMapButton = document.getElementById("createNewMapButton");
-    const newMapStatus = document.getElementById("newMapStatus");
-
-    const mapStatus =
-      document.getElementById(
-        "mapStatus"
-      );
-
-    const shareDivider =
-      document.getElementById(
-        "shareDivider"
-      );
-
-    const shareTitle =
-      document.getElementById(
-        "shareTitle"
-      );
-
-    const shareDescription =
-      document.getElementById(
-        "shareDescription"
-      );
-
-    const shareCode =
-      document.getElementById(
-        "shareCode"
-      );
-
-    const shareOpenButton =
-      document.getElementById(
-        "shareOpenButton"
-      );
-
-    const shareStatus =
-      document.getElementById(
-        "shareStatus"
-      );
-
-    const retentionNotice =
-      document.getElementById(
-        "retentionNotice"
-      );
-
-
-    /*
-      ==========================================================
-      STATE
-      ==========================================================
-    */
-
-    let pendingId = "";
-
-    let currentUser = null;
-
-    let maps = [];
-
-    let mapTemplates = [];
-    let mapTemplatesState = "idle";
-
-    const shareStates =
-      new Map();
-
-
-    /*
-      ==========================================================
-      HELPERS
-      ==========================================================
-    */
-
-    function getSessionToken() {
-      return (
-        sessionStorage.getItem(
-          SESSION_TOKEN_KEY
-        ) ?? ""
-      );
-    }
-
-
-    function saveSession(
-      session,
-      accountId = ""
+    function t(
+      key,
+      fallback = ""
     ) {
       if (
-        !session?.token
+        typeof getTranslation ===
+        "function"
       ) {
-        return;
+        const translated =
+          getTranslation(
+            key
+          );
+
+        if (
+          translated &&
+          translated !== key
+        ) {
+          return translated;
+        }
       }
 
-      sessionStorage.setItem(
-        SESSION_TOKEN_KEY,
-        session.token
-      );
-
-      if (accountId) localStorage.setItem(ACCOUNT_ID_KEY, String(accountId));
-
-      if (
-        session.expiresAt
-      ) {
-        sessionStorage.setItem(
-          SESSION_EXPIRES_KEY,
-          session.expiresAt
-        );
-      }
+      return fallback ||
+        key;
     }
 
-
-    function clearSession() {
-      sessionStorage.removeItem(
-        SESSION_TOKEN_KEY
-      );
-
-      sessionStorage.removeItem(
-        SESSION_EXPIRES_KEY
-      );
-    }
-
-
-    function authorizationHeaders() {
-      const token =
-        getSessionToken();
-
-      return {
-        Authorization:
-          `Bearer ${token}`,
-      };
-    }
-
-
-    function isSessionError(
-      response,
-      result
-    ) {
-      return (
-        response.status === 401 ||
-        result?.error ===
-          "INVALID_SESSION" ||
-        result?.error ===
-          "SESSION_EXPIRED" ||
-        result?.error ===
-          "UNAUTHORIZED"
-      );
-    }
-
-
-    function expireLogin() {
-      clearSession();
-
-      currentUser = null;
-      pendingId = "";
-      maps = [];
-      shareStates.clear();
-
-      loginForm.reset();
-      createAccountForm.reset();
-
-      showLogin();
-
-      setStatus(
-        loginStatus,
-        text.sessionExpired,
-        "error"
-      );
-    }
-
-
-    /*
-      ==========================================================
-      TEXT
-      ==========================================================
-    */
-
-    function setStaticText() {
-      document.documentElement.lang =
-        language;
-
-      document.getElementById(
-        "pageIntro"
-      ).textContent =
-        text.intro;
-
-      document.getElementById(
-        "loginTitle"
-      ).textContent =
-        text.login;
-
-      document.getElementById(
-        "loginIdLabel"
-      ).textContent =
-        text.id;
-
-      document.getElementById(
-        "loginPasswordLabel"
-      ).textContent =
-        text.password;
-
-      loginButton.textContent =
-        text.loginButton;
-
-      document.getElementById(
-        "newUserNotice"
-      ).textContent =
-        text.newUserNotice;
-
-      unknownCancelButton.textContent =
-        text.cancel;
-
-      createAccountStartButton.textContent =
-        text.createAccount;
-
-      document.getElementById(
-        "createAccountTitle"
-      ).textContent =
-        text.createAccount;
-
-      document.getElementById(
-        "createPasswordLabel"
-      ).textContent =
-        text.password;
-
-      document.getElementById(
-        "confirmPasswordLabel"
-      ).textContent =
-        text.confirmPassword;
-
-      document.getElementById(
-        "passwordSecurityNotice"
-      ).textContent =
-        text.passwordSecurityNotice;
-
-      createCancelButton.textContent =
-        text.cancel;
-
-      createAccountButton.textContent =
-        text.createAccount;
-
-      logoutButton.textContent =
-        text.logout;
-
-      document.getElementById(
-        "myMapsTitle"
-      ).textContent =
-        text.myMaps;
-
-      newMapButton.textContent =
-        text.newMap;
-
-      document.getElementById("newMapTitle").textContent = text.newMapTitle;
-      document.getElementById("newMapNameLabel").textContent = text.mapName;
-      document.getElementById("newMapTypeLabel").textContent = text.mapType;
-      cancelNewMapButton.textContent = text.cancelNewMap;
-      createNewMapButton.textContent = text.createMap;
-
-      if (!newMapPanel.classList.contains("hidden")) {
-        renderNewMapTypes({ preserveSelection: true });
-      }
-
-      shareDivider.textContent =
-        text.shareOr;
-
-      shareTitle.textContent =
-        text.shareTitle;
-
-      shareDescription.textContent =
-        text.shareDescription;
-
-      shareOpenButton.textContent =
-        text.shareOpen;
-
-      retentionNotice.textContent =
-        text.retentionNotice;
-
-      document.getElementById(
-        "backLink"
-      ).textContent =
-        text.back;
-
-      if (pendingId) {
-        renderUnknownAccount();
-        renderCreateAccountId();
-      }
-
-      if (currentUser) {
-        renderAccount();
-      }
-
-      renderMaps();
-    }
-
-
-    /*
-      ==========================================================
-      STATUS
-      ==========================================================
-    */
 
     function setStatus(
-      element,
       message,
       type = ""
     ) {
-      element.textContent =
+      formStatus.textContent =
         message;
 
-      element.classList.remove(
+      formStatus.classList.remove(
         "error",
         "success"
       );
 
       if (type) {
-        element.classList.add(
+        formStatus.classList.add(
           type
         );
       }
     }
 
 
-    /*
-      ==========================================================
-      PANELS
-      ==========================================================
-    */
+    function setStaticText() {
+      language =
+        typeof getCurrentLanguage ===
+          "function"
+          ? getCurrentLanguage()
+          : language;
 
-    function showLogin() {
-      loginPanel.classList.remove(
-        "hidden"
-      );
+      document.documentElement.lang =
+        language;
 
-      unknownAccountPanel.classList.add(
-        "hidden"
-      );
+      document.title =
+        `${t(
+          "groupBuyTitle",
+          "Group Purchase"
+        )} · S967`;
 
-      createAccountPanel.classList.add(
-        "hidden"
-      );
+      document.getElementById(
+        "pageTitle"
+      ).textContent =
+        t(
+          "groupBuyTitle",
+          "Group Purchase"
+        );
 
-      accountArea.classList.add(
-        "hidden"
-      );
+      document.getElementById(
+        "pageIntro"
+      ).textContent =
+        t(
+          "groupBuyIntro",
+          "Please complete all required fields."
+        );
+
+      document.getElementById(
+        "allianceLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyAlliance",
+          "Alliance"
+        ) + " ";
+
+      document.getElementById(
+        "playerNameLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyPlayerName",
+          "Player Name"
+        ) + " ";
+
+      document.getElementById(
+        "purchaseItemsLabel"
+      ).firstChild.textContent =
+        t(
+          "groupBuyPurchaseItems",
+          "Planned Purchase"
+        ) + " ";
+
+      document.getElementById(
+        "purchaseItemsHelp"
+      ).textContent =
+        t(
+          "groupBuyPurchaseItemsHelp",
+          "Select at least one item and choose the quantity."
+        );
+
+      document.getElementById(
+        "agreementPurchaseText"
+      ).textContent =
+        t(
+          "groupBuyAgreementPurchase",
+          "If you participate, you must purchase at least one item. To avoid unexpected problems, please purchase your coupons in advance."
+        );
+
+      document.getElementById(
+        "agreementRestrictionText"
+      ).textContent =
+        t(
+          "groupBuyAgreementRestriction",
+          "If you are found participating without making a purchase, your participation in future events may be restricted."
+        );
+
+      playerName.placeholder =
+        t(
+          "groupBuyNamePlaceholder",
+          "Please copy and paste your name 😉"
+        );
+
+      submitButton.textContent =
+        t(
+          "groupBuySubmit",
+          "Submit"
+        );
+
+      document.getElementById(
+        "backLink"
+      ).textContent =
+        t(
+          "backHome",
+          "← Back to Home"
+        );
+
+      renderSchedule();
+      renderPurchaseItems();
+      refreshAlliancePlaceholder();
     }
 
 
-    function showUnknownAccount() {
-      loginPanel.classList.add(
-        "hidden"
-      );
+    function refreshAlliancePlaceholder() {
+      const firstOption =
+        alliance.querySelector(
+          'option[value=""]'
+        );
 
-      unknownAccountPanel.classList.remove(
-        "hidden"
-      );
-
-      createAccountPanel.classList.add(
-        "hidden"
-      );
-
-      accountArea.classList.add(
-        "hidden"
-      );
-
-      renderUnknownAccount();
+      if (firstOption) {
+        firstOption.textContent =
+          t(
+            "groupBuySelect",
+            "Select"
+          );
+      }
     }
 
 
-    function showCreateAccount() {
-      loginPanel.classList.add(
-        "hidden"
-      );
+    function formatDateTime(
+      value
+    ) {
+      if (!value) {
+        return "";
+      }
 
-      unknownAccountPanel.classList.add(
-        "hidden"
-      );
+      const date =
+        new Date(value);
 
-      createAccountPanel.classList.remove(
-        "hidden"
-      );
-
-      accountArea.classList.add(
-        "hidden"
-      );
-
-      createPassword.value =
-        loginPassword.value;
-
-      confirmPassword.value =
-        "";
-
-      renderCreateAccountId();
-
-      confirmPassword.focus();
-    }
-
-
-    function showAccount() {
-      loginPanel.classList.add(
-        "hidden"
-      );
-
-      unknownAccountPanel.classList.add(
-        "hidden"
-      );
-
-      createAccountPanel.classList.add(
-        "hidden"
-      );
-
-      accountArea.classList.remove(
-        "hidden"
-      );
-
-      renderAccount();
-      renderMaps();
-    }
-
-
-    /*
-      ==========================================================
-      UNKNOWN ACCOUNT
-      ==========================================================
-    */
-
-    function renderUnknownAccount() {
-      unknownAccountMessage.innerHTML =
-        `<span class="dialog-id"></span><br>` +
-        text.unknownAccount;
-
-      unknownAccountMessage
-        .querySelector(
-          ".dialog-id"
+      if (
+        Number.isNaN(
+          date.getTime()
         )
-        .textContent =
-          pendingId;
+      ) {
+        return "";
+      }
+
+      try {
+        return new Intl.DateTimeFormat(
+          language,
+          {
+            timeZone:
+              "Asia/Seoul",
+
+            year:
+              "numeric",
+
+            month:
+              "2-digit",
+
+            day:
+              "2-digit",
+
+            hour:
+              "2-digit",
+
+            minute:
+              "2-digit",
+
+            hour12:
+              false,
+          }
+        ).format(date) +
+          " KST";
+
+      } catch {
+        return date.toLocaleString() +
+          " KST";
+      }
     }
 
 
-    function renderCreateAccountId() {
-      createAccountId.innerHTML =
-        `${text.newAccountFor}<br>` +
-        `<span class="dialog-id"></span>`;
-
-      createAccountId
-        .querySelector(
-          ".dialog-id"
-        )
-        .textContent =
-          pendingId;
-    }
+    function renderSchedule() {
+      scheduleBox.classList.remove(
+        "hidden"
+      );
 
 
-    /*
-      ==========================================================
-      ACCOUNT
-      ==========================================================
-    */
+      if (
+        recruitmentAvailability ===
+        null
+      ) {
+        applicationPanel.classList.add(
+          "hidden"
+        );
 
-    function renderAccount() {
-      if (!currentUser) {
+        scheduleStatus.textContent =
+          t(
+            "groupBuyLoading",
+            "Loading…"
+          );
+
+        scheduleDetail.textContent =
+          "";
+
         return;
       }
 
-      signedInUser.textContent =
-        `${text.signedInAs} ` +
-        currentUser.id;
+
+      const status =
+        recruitmentAvailability
+          ?.status ??
+        "closed";
+
+
+      if (
+        status ===
+        "open"
+      ) {
+        applicationPanel.classList.remove(
+          "hidden"
+        );
+
+        scheduleStatus.textContent =
+          t(
+            "groupBuyRecruitmentOpen",
+            "Recruitment is currently open."
+          );
+
+        const closeAt =
+          currentEvent
+            ?.end_at;
+
+        scheduleDetail.textContent =
+          closeAt
+            ? (
+                t(
+                  "groupBuyRecruitmentEnds",
+                  "Recruitment ends:"
+                ) +
+                " " +
+                formatDateTime(
+                  closeAt
+                )
+              )
+            : "";
+
+        return;
+      }
+
+
+      applicationPanel.classList.add(
+        "hidden"
+      );
+
+
+      if (
+        status ===
+        "before"
+      ) {
+        scheduleStatus.textContent =
+          t(
+            "groupBuyRecruitmentBefore",
+            "Recruitment has not started yet."
+          );
+
+        const startAt =
+          currentEvent
+            ?.start_at;
+
+        scheduleDetail.textContent =
+          startAt
+            ? (
+                t(
+                  "groupBuyRecruitmentStarts",
+                  "Recruitment starts:"
+                ) +
+                " " +
+                formatDateTime(
+                  startAt
+                )
+              )
+            : "";
+
+        return;
+      }
+
+
+      scheduleStatus.textContent =
+        t(
+          "groupBuyRecruitmentClosed",
+          "Recruitment has ended."
+        );
+
+      scheduleDetail.textContent =
+        "";
     }
 
 
-    /*
-      ==========================================================
-      MAP LIST
-      ==========================================================
-    */
-
-    function renderMaps() {
-      mapList.innerHTML = "";
-
-      mapCount.textContent =
-        `${maps.length} / ${MAX_MAPS}`;
-
-      newMapButton.disabled =
-        maps.length >= MAX_MAPS;
-
-      if (
-        maps.length >= MAX_MAPS
-      ) {
-        setStatus(
-          mapStatus,
-          text.mapLimit
+    function createQuantitySelect(
+      item
+    ) {
+      const select =
+        document.createElement(
+          "select"
         );
-      } else if (
-        !mapStatus.classList
-          .contains("error")
+
+      select.className =
+        "quantity-select";
+
+      select.dataset.itemId =
+        String(
+          item.id
+        );
+
+      select.disabled =
+        true;
+
+
+      const maxQuantity =
+        Math.max(
+          1,
+          Number(
+            item.max_quantity
+          ) || 1
+        );
+
+
+      for (
+        let quantity = 1;
+        quantity <= maxQuantity;
+        quantity += 1
       ) {
-        setStatus(
-          mapStatus,
-          ""
+        const option =
+          document.createElement(
+            "option"
+          );
+
+        option.value =
+          String(
+            quantity
+          );
+
+        option.textContent =
+          String(
+            quantity
+          );
+
+        select.appendChild(
+          option
         );
       }
 
+
+      return select;
+    }
+
+
+    function renderPurchaseItems() {
+      const previousSelections =
+        new Map();
+
+
+      purchaseItems
+        .querySelectorAll(
+          ".purchase-item"
+        )
+        .forEach(
+          (row) => {
+            const checkbox =
+              row.querySelector(
+                'input[type="checkbox"]'
+              );
+
+            const quantity =
+              row.querySelector(
+                ".quantity-select"
+              );
+
+
+            if (
+              checkbox &&
+              checkbox.checked
+            ) {
+              previousSelections.set(
+                checkbox.value,
+                quantity?.value ??
+                  "1"
+              );
+            }
+          }
+        );
+
+
+      purchaseItems.innerHTML =
+        "";
+
+
+      for (
+        const item
+        of currentItems
+      ) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "purchase-item";
+
+
+        const label =
+          document.createElement(
+            "label"
+          );
+
+        label.className =
+          "purchase-check";
+
+
+        const checkbox =
+          document.createElement(
+            "input"
+          );
+
+        checkbox.type =
+          "checkbox";
+
+        checkbox.name =
+          "purchase_item";
+
+        checkbox.value =
+          String(
+            item.id
+          );
+
+
+        const name =
+          document.createElement(
+            "span"
+          );
+
+        name.className =
+          "purchase-name";
+
+        name.textContent =
+          item.name;
+
+
+        label.appendChild(
+          checkbox
+        );
+
+        label.appendChild(
+          name
+        );
+
+
+        const quantityBox =
+          document.createElement(
+            "div"
+          );
+
+        quantityBox.className =
+          "quantity-box";
+
+
+        const quantityLabel =
+          document.createElement(
+            "span"
+          );
+
+        quantityLabel.className =
+          "quantity-label";
+
+        quantityLabel.textContent =
+          t(
+            "groupBuyQuantity",
+            "Qty"
+          );
+
+
+        const quantitySelect =
+          createQuantitySelect(
+            item
+          );
+
+
+        checkbox.addEventListener(
+          "change",
+          () => {
+            quantitySelect.disabled =
+              !checkbox.checked;
+
+            if (
+              checkbox.checked &&
+              !quantitySelect.value
+            ) {
+              quantitySelect.value =
+                "1";
+            }
+
+            setStatus("");
+          }
+        );
+
+
+        const previousQuantity =
+          previousSelections.get(
+            String(
+              item.id
+            )
+          );
+
+
+        if (
+          previousQuantity
+        ) {
+          checkbox.checked =
+            true;
+
+          quantitySelect.disabled =
+            false;
+
+          const quantityExists =
+            Array.from(
+              quantitySelect.options
+            ).some(
+              (option) =>
+                option.value ===
+                previousQuantity
+            );
+
+          quantitySelect.value =
+            quantityExists
+              ? previousQuantity
+              : "1";
+        }
+
+
+        quantityBox.appendChild(
+          quantityLabel
+        );
+
+        quantityBox.appendChild(
+          quantitySelect
+        );
+
+
+        row.appendChild(
+          label
+        );
+
+        row.appendChild(
+          quantityBox
+        );
+
+
+        purchaseItems.appendChild(
+          row
+        );
+      }
+
+
       if (
-        maps.length === 0
+        currentItems.length ===
+        0
       ) {
         const empty =
           document.createElement(
@@ -2520,411 +1498,83 @@
           );
 
         empty.className =
-          "map-empty";
+          "small";
 
         empty.textContent =
-          text.noMaps;
+          t(
+            "groupBuyNoItems",
+            "No purchase items are currently available."
+          );
 
-        mapList.appendChild(
+        purchaseItems.appendChild(
           empty
         );
-
-        return;
       }
-
-      maps.forEach(
-        (map) => {
-          const item =
-            document.createElement(
-              "div"
-            );
-
-          item.className =
-            "map-item";
-
-
-          const info =
-            document.createElement(
-              "div"
-            );
-
-          info.className =
-            "map-info";
-
-
-          const name =
-            document.createElement(
-              "div"
-            );
-
-          name.className =
-            "map-name";
-
-          name.textContent =
-            map.name;
-
-
-          const date =
-            document.createElement(
-              "div"
-            );
-
-          date.className =
-            "map-date";
-
-          date.textContent =
-            `${text.updated}: ` +
-            formatDate(
-              map.updatedAt
-            );
-
-
-          info.appendChild(
-            name
-          );
-
-          info.appendChild(
-            date
-          );
-
-
-          const shareState =
-            shareStates.get(
-              map.id
-            );
-
-          if (
-            shareState?.sharing
-          ) {
-            const code =
-              document.createElement(
-                "div"
-              );
-
-            code.className =
-              "map-share-code";
-
-            const label =
-              document.createTextNode(
-                `${text.shareCode}: `
-              );
-
-            const strong =
-              document.createElement(
-                "strong"
-              );
-
-            strong.textContent =
-              shareState.shareCode;
-
-            code.appendChild(
-              label
-            );
-
-            code.appendChild(
-              strong
-            );
-
-            info.appendChild(
-              code
-            );
-          }
-
-
-          const actions =
-            document.createElement(
-              "div"
-            );
-
-          actions.className =
-            "map-actions";
-
-
-          const openButton =
-            document.createElement(
-              "button"
-            );
-
-          openButton.type =
-            "button";
-
-          openButton.textContent =
-            text.open;
-
-          openButton.addEventListener(
-            "click",
-            () => openMap(
-              map.id
-            )
-          );
-
-
-          const renameButton =
-            document.createElement(
-              "button"
-            );
-
-          renameButton.type =
-            "button";
-
-          renameButton.textContent =
-            text.rename;
-
-          renameButton.addEventListener(
-            "click",
-            () => renameMap(
-              map.id
-            )
-          );
-
-
-          const shareButton =
-            document.createElement(
-              "button"
-            );
-
-          shareButton.type =
-            "button";
-
-          shareButton.textContent =
-            shareState?.sharing
-              ? text.shareUpdate
-              : text.share;
-
-          shareButton.addEventListener(
-            "click",
-            () => enableOrUpdateShare(
-              map.id
-            )
-          );
-
-
-          actions.appendChild(
-            openButton
-          );
-
-          actions.appendChild(
-            renameButton
-          );
-
-          actions.appendChild(
-            shareButton
-          );
-
-
-          if (
-            shareState?.sharing
-          ) {
-            const stopShareButton =
-              document.createElement(
-                "button"
-              );
-
-            stopShareButton.type =
-              "button";
-
-            stopShareButton.className =
-              "danger-button";
-
-            stopShareButton.textContent =
-              text.shareStop;
-
-            stopShareButton.addEventListener(
-              "click",
-              () => disableShare(
-                map.id
-              )
-            );
-
-            actions.appendChild(
-              stopShareButton
-            );
-          }
-
-
-          const deleteButton =
-            document.createElement(
-              "button"
-            );
-
-          deleteButton.type =
-            "button";
-
-          deleteButton.className =
-            "danger-button";
-
-          deleteButton.textContent =
-            text.delete;
-
-          deleteButton.addEventListener(
-            "click",
-            () => deleteMap(
-              map.id
-            )
-          );
-
-          actions.appendChild(
-            deleteButton
-          );
-
-
-          item.appendChild(
-            info
-          );
-
-          item.appendChild(
-            actions
-          );
-
-          mapList.appendChild(
-            item
-          );
-        }
-      );
     }
 
 
-    function formatDate(
-      timestamp
-    ) {
-      if (!timestamp) {
-        return "";
-      }
+    function getSelectedItems() {
+      const selected =
+        [];
 
-      const localeMap = {
-        ko: "ko-KR",
-        en: "en-US",
-        ja: "ja-JP",
-        ru: "ru-RU",
-      };
 
-      return new Intl.DateTimeFormat(
-        localeMap[language] ??
-          "en-US",
-        {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      ).format(
-        new Date(
-          timestamp
+      document
+        .querySelectorAll(
+          'input[name="purchase_item"]:checked'
         )
-      );
-    }
+        .forEach(
+          (checkbox) => {
+            const row =
+              checkbox.closest(
+                ".purchase-item"
+              );
+
+            const quantitySelect =
+              row?.querySelector(
+                ".quantity-select"
+              );
+
+            const quantity =
+              Number(
+                quantitySelect
+                  ?.value ??
+                0
+              );
 
 
-    async function loadMaps() {
-      const token =
-        getSessionToken();
+            if (
+              Number.isInteger(
+                quantity
+              ) &&
+              quantity >= 1
+            ) {
+              selected.push({
+                item_id:
+                  Number(
+                    checkbox.value
+                  ),
 
-      if (!token) {
-        return false;
-      }
-
-      try {
-        const response =
-          await fetch(
-            MAP_LIST_URL,
-            {
-              method: "GET",
-
-              headers:
-                authorizationHeaders(),
+                quantity,
+              });
             }
-          );
-
-        const result =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            response,
-            result
-          )
-        ) {
-          expireLogin();
-          return false;
-        }
-
-        if (
-          !response.ok ||
-          !result.ok
-        ) {
-          throw new Error(
-            text.mapsLoadFailed
-          );
-        }
-
-        currentUser = {
-          id:
-            result.user?.username ??
-            currentUser?.id ??
-            "",
-        };
-
-        if (currentUser.id) localStorage.setItem(ACCOUNT_ID_KEY, currentUser.id);
-
-        maps =
-          Array.isArray(
-            result.maps
-          )
-            ? result.maps
-            : [];
-
-        showAccount();
-
-        await loadShareStates();
-
-        return true;
-
-      } catch (error) {
-        setStatus(
-          mapStatus,
-          error?.message ||
-            text.mapsLoadFailed,
-          "error"
+          }
         );
 
-        return false;
-      }
+
+      return selected;
     }
 
 
-    /*
-      ==========================================================
-      SHARE STATUS / OWNER SHARING
-      ==========================================================
-    */
-
-    async function getShareStatus(
-      mapId
-    ) {
+    async function loadFormData() {
       const response =
         await fetch(
-          MAP_SHARE_STATUS_URL,
+          GROUP_BUY_API_URL,
           {
-            method: "POST",
-
-            headers: {
-              ...authorizationHeaders(),
-
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                map_id: mapId,
-              }),
+            method:
+              "GET",
           }
         );
+
 
       const result =
         await response
@@ -2933,463 +1583,182 @@
             () => ({})
           );
 
-      if (
-        isSessionError(
-          response,
-          result
-        )
-      ) {
-        expireLogin();
 
+      if (!response.ok) {
         throw new Error(
-          text.sessionExpired
-        );
-      }
-
-      if (
-        !response.ok ||
-        !result.ok
-      ) {
-        throw new Error(
-          text.shareFailed
-        );
-      }
-
-      return {
-        sharing:
-          Boolean(
-            result.sharing
-          ),
-
-        shareCode:
-          result.shareCode ??
-          null,
-
-        sharedAt:
-          result.sharedAt ??
-          null,
-
-        updatedAt:
-          result.updatedAt ??
-          null,
-      };
-    }
-
-
-    async function loadShareStates() {
-      shareStates.clear();
-
-      renderMaps();
-
-      await Promise.all(
-        maps.map(
-          async (map) => {
-            try {
-              const state =
-                await getShareStatus(
-                  map.id
-                );
-
-              shareStates.set(
-                map.id,
-                state
-              );
-            } catch (error) {
-              console.error(
-                "Share status failed:",
-                map.id,
-                error
-              );
-            }
-          }
-        )
-      );
-
-      renderMaps();
-    }
-
-
-    async function enableOrUpdateShare(
-      mapId
-    ) {
-      const existing =
-        shareStates.get(
-          mapId
-        );
-
-      setStatus(
-        mapStatus,
-        existing?.sharing
-          ? text.shareUpdating
-          : text.shareCreating
-      );
-
-      try {
-        const response =
-          await fetch(
-            MAP_SHARE_ENABLE_URL,
-            {
-              method: "POST",
-
-              headers: {
-                ...authorizationHeaders(),
-
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  map_id:
-                    mapId,
-                }),
-            }
-          );
-
-        const result =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            response,
-            result
+          result.error ||
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
           )
-        ) {
-          expireLogin();
-          return;
-        }
-
-        if (
-          !response.ok ||
-          !result.ok ||
-          !result.shareCode
-        ) {
-          throw new Error(
-            text.shareFailed
-          );
-        }
-
-        shareStates.set(
-          mapId,
-          {
-            sharing:
-              true,
-
-            shareCode:
-              result.shareCode,
-
-            sharedAt:
-              existing?.sharedAt ??
-              new Date()
-                .toISOString(),
-
-            updatedAt:
-              new Date()
-                .toISOString(),
-          }
-        );
-
-        setStatus(
-          mapStatus,
-          `${text.shareCode}: ${result.shareCode}`,
-          "success"
-        );
-
-        renderMaps();
-
-      } catch (error) {
-        setStatus(
-          mapStatus,
-          error?.message ||
-            text.shareFailed,
-          "error"
         );
       }
-    }
 
 
-    async function disableShare(
-      mapId
-    ) {
-      if (
-        !window.confirm(
-          text.shareStopConfirm
+      currentEvent =
+        result.event ??
+        null;
+
+      recruitmentAvailability =
+        result.availability ??
+        {
+          status:
+            "closed",
+        };
+
+      currentItems =
+        Array.isArray(
+          result.items
+        )
+          ? result.items
+          : [];
+
+
+      alliance.innerHTML =
+        "";
+
+
+      const placeholder =
+        document.createElement(
+          "option"
+        );
+
+      placeholder.value =
+        "";
+
+      placeholder.textContent =
+        t(
+          "groupBuySelect",
+          "Select"
+        );
+
+      alliance.appendChild(
+        placeholder
+      );
+
+
+      for (
+        const item
+        of (
+          result.alliances ??
+          []
         )
       ) {
-        return;
-      }
-
-      setStatus(
-        mapStatus,
-        text.shareStopping
-      );
-
-      try {
-        const response =
-          await fetch(
-            MAP_SHARE_DISABLE_URL,
-            {
-              method: "POST",
-
-              headers: {
-                ...authorizationHeaders(),
-
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  map_id:
-                    mapId,
-                }),
-            }
+        const option =
+          document.createElement(
+            "option"
           );
 
-        const result =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            response,
-            result
-          )
-        ) {
-          expireLogin();
-          return;
-        }
-
-        if (
-          !response.ok ||
-          !result.ok
-        ) {
-          throw new Error(
-            text.shareStopFailed
+        option.value =
+          String(
+            item.id
           );
-        }
 
-        shareStates.set(
-          mapId,
-          {
-            sharing:
-              false,
+        option.textContent =
+          item.name;
 
-            shareCode:
-              null,
-
-            sharedAt:
-              null,
-
-            updatedAt:
-              null,
-          }
-        );
-
-        setStatus(
-          mapStatus,
-          "",
-          ""
-        );
-
-        renderMaps();
-
-      } catch (error) {
-        setStatus(
-          mapStatus,
-          error?.message ||
-            text.shareStopFailed,
-          "error"
+        alliance.appendChild(
+          option
         );
       }
+
+
+      renderPurchaseItems();
+      renderSchedule();
     }
 
 
-    /*
-      ==========================================================
-      PUBLIC SHARED MAP
-      ==========================================================
-    */
-
-    shareCode.addEventListener(
-      "input",
-      () => {
-        shareCode.value =
-          shareCode.value
-            .replace(
-              /\D/g,
-              ""
-            )
-            .slice(
-              0,
-              6
-            );
-
-        setStatus(
-          shareStatus,
-          ""
-        );
-      }
-    );
-
-
-    shareOpenButton.addEventListener(
-      "click",
-      async () => {
-        const code =
-          shareCode.value.trim();
-
-        if (
-          !/^\d{6}$/.test(
-            code
-          )
-        ) {
-          setStatus(
-            shareStatus,
-            text.shareInvalid,
-            "error"
-          );
-
-          shareCode.focus();
-
-          return;
-        }
-
-        shareOpenButton.disabled =
-          true;
-
-        setStatus(
-          shareStatus,
-          text.shareLoading
-        );
-
-        try {
-          const response =
-            await fetch(
-              MAP_SHARE_LOAD_URL,
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-
-                body:
-                  JSON.stringify({
-                    share_code:
-                      code,
-                  }),
-              }
-            );
-
-          const result =
-            await response
-              .json()
-              .catch(
-                () => ({})
-              );
-
-          if (
-            response.status === 404 ||
-            result.error ===
-              "SHARED_MAP_NOT_FOUND" ||
-            result.error ===
-              "shared_map_not_found"
-          ) {
-            throw new Error(
-              text.shareNotFound
-            );
-          }
-
-          if (
-            !response.ok ||
-            !result.ok ||
-            !result.map
-          ) {
-            throw new Error(
-              text.shareLoadFailed
-            );
-          }
-
-          sessionStorage.setItem(
-            "s967_shared_map",
-            JSON.stringify({
-              map:
-                result.map,
-
-              readOnly:
-                result.readOnly ??
-                true,
-            })
-          );
-
-          window.location.href =
-            "/map/editor/?shared=1";
-
-        } catch (error) {
-          setStatus(
-            shareStatus,
-            error?.message ||
-              text.shareLoadFailed,
-            "error"
-          );
-
-          shareOpenButton.disabled =
-            false;
-        }
-      }
-    );
-
-
-    /*
-      ==========================================================
-      LOGIN
-      ==========================================================
-    */
-
-    loginForm.addEventListener(
+    form.addEventListener(
       "submit",
       async (event) => {
         event.preventDefault();
 
-        setStatus(
-          loginStatus,
-          ""
-        );
+        setStatus("");
 
-        const id =
-          loginId.value.trim();
-
-        const password =
-          loginPassword.value;
 
         if (
-          !id ||
-          !password
+          !form.reportValidity()
         ) {
+          setStatus(
+            t(
+              "groupBuyRequired",
+              "Please complete all required fields."
+            ),
+            "error"
+          );
+
           return;
         }
 
-        loginButton.disabled =
+
+        const selectedItems =
+          getSelectedItems();
+
+
+        if (
+          selectedItems.length <
+          1
+        ) {
+          setStatus(
+            t(
+              "groupBuySelectAtLeastOne",
+              "Please select at least one purchase item."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (
+          !agreementPurchase.checked ||
+          !agreementRestriction.checked
+        ) {
+          setStatus(
+            t(
+              "groupBuyAgreementsRequired",
+              "Please confirm all required agreements."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (
+          !currentEvent?.id
+        ) {
+          setStatus(
+            t(
+              "groupBuyRecruitmentClosed",
+              "Recruitment has ended."
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+
+        submitButton.disabled =
           true;
 
-        loginButton.textContent =
-          text.loggingIn;
+        submitButton.textContent =
+          t(
+            "groupBuySubmitting",
+            "Submitting…"
+          );
+
 
         try {
           const response =
             await fetch(
-              MAP_LOGIN_URL,
+              GROUP_BUY_API_URL,
               {
-                method: "POST",
+                method:
+                  "POST",
 
                 headers: {
                   "Content-Type":
@@ -3398,13 +1767,37 @@
 
                 body:
                   JSON.stringify({
-                    username:
-                      id,
+                    event_id:
+                      Number(
+                        currentEvent.id
+                      ),
 
-                    password,
+                    language,
+
+                    alliance_id:
+                      Number(
+                        alliance.value
+                      ),
+
+                    player_name:
+                      playerName
+                        .value
+                        .trim(),
+
+                    items:
+                      selectedItems,
+
+                    agreement_purchase:
+                      agreementPurchase
+                        .checked,
+
+                    agreement_restriction:
+                      agreementRestriction
+                        .checked,
                   }),
               }
             );
+
 
           const result =
             await response
@@ -3415,753 +1808,104 @@
 
 
           if (
-            response.status === 404 &&
-            result.error ===
-              "USER_NOT_FOUND"
+            !response.ok
           ) {
-            pendingId =
-              id;
-
-            showUnknownAccount();
-
-            return;
-          }
-
-
-          if (
-            result.error ===
-              "INVALID_PASSWORD"
-          ) {
-            throw new Error(
-              text.invalidPassword
-            );
-          }
-
-
-          if (
-            result.error ===
-              "INVALID_USERNAME"
-          ) {
-            throw new Error(
-              text.invalidId
-            );
-          }
-
-
-          if (
-            !response.ok ||
-            !result.ok ||
-            !result.session?.token
-          ) {
-            throw new Error(
-              text.loginFailed
-            );
-          }
-
-
-          saveSession(
-            result.session,
-            result.user?.username ?? id
-          );
-
-          currentUser = {
-            id:
-              result.user
-                ?.username ??
-              id,
-          };
-
-          maps =
-            Array.isArray(
-              result.maps
-            )
-              ? result.maps
-              : [];
-
-          pendingId = "";
-
-          loginPassword.value =
-            "";
-
-          showAccount();
-
-          await loadShareStates();
-
-        } catch (error) {
-          setStatus(
-            loginStatus,
-            error?.message ||
-              text.loginFailed,
-            "error"
-          );
-
-        } finally {
-          loginButton.disabled =
-            false;
-
-          loginButton.textContent =
-            text.loginButton;
-        }
-      }
-    );
-
-
-    /*
-      ==========================================================
-      CREATE ACCOUNT
-      ==========================================================
-    */
-
-    unknownCancelButton.addEventListener(
-      "click",
-      () => {
-        pendingId = "";
-
-        loginPassword.value =
-          "";
-
-        showLogin();
-
-        loginId.focus();
-      }
-    );
-
-
-    createAccountStartButton.addEventListener(
-      "click",
-      () => {
-        showCreateAccount();
-      }
-    );
-
-
-    createCancelButton.addEventListener(
-      "click",
-      () => {
-        createPassword.value =
-          "";
-
-        confirmPassword.value =
-          "";
-
-        showUnknownAccount();
-      }
-    );
-
-
-    createAccountForm.addEventListener(
-      "submit",
-      async (event) => {
-        event.preventDefault();
-
-        setStatus(
-          createStatus,
-          ""
-        );
-
-
-        if (
-          createPassword.value !==
-          confirmPassword.value
-        ) {
-          setStatus(
-            createStatus,
-            text.passwordMismatch,
-            "error"
-          );
-
-          confirmPassword.focus();
-
-          return;
-        }
-
-
-        if (
-          createPassword.value.length < 8 ||
-          createPassword.value.length > 100
-        ) {
-          setStatus(
-            createStatus,
-            text.invalidNewPassword,
-            "error"
-          );
-
-          createPassword.focus();
-
-          return;
-        }
-
-
-        createAccountButton.disabled =
-          true;
-
-        createAccountButton.textContent =
-          text.creatingAccount;
-
-
-        try {
-          const response =
-            await fetch(
-              MAP_REGISTER_URL,
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-
-                body:
-                  JSON.stringify({
-                    username:
-                      pendingId,
-
-                    password:
-                      createPassword.value,
-                  }),
-              }
-            );
-
-          const result =
-            await response
-              .json()
-              .catch(
-                () => ({})
+            if (
+              result.error ===
+              "RECRUITMENT_NOT_STARTED"
+            ) {
+              throw new Error(
+                t(
+                  "groupBuyRecruitmentBefore",
+                  "Recruitment has not started yet."
+                )
               );
+            }
 
 
-          if (
-            result.error ===
-              "USERNAME_ALREADY_EXISTS"
-          ) {
+            if (
+              result.error ===
+              "RECRUITMENT_CLOSED"
+            ) {
+              throw new Error(
+                t(
+                  "groupBuyRecruitmentClosed",
+                  "Recruitment has ended."
+                )
+              );
+            }
+
+
             throw new Error(
-              text.usernameExists
+              result.error ||
+              t(
+                "groupBuySubmitFailed",
+                "Submission failed."
+              )
             );
           }
 
 
-          if (
-            result.error ===
-              "INVALID_USERNAME"
-          ) {
-            throw new Error(
-              text.invalidId
-            );
-          }
+          form.reset();
+
+          renderPurchaseItems();
 
 
-          if (
-            result.error ===
-              "INVALID_PASSWORD"
-          ) {
-            throw new Error(
-              text.invalidNewPassword
-            );
-          }
-
-
-          if (
-            !response.ok ||
-            !result.ok ||
-            !result.session?.token
-          ) {
-            throw new Error(
-              text.accountCreateFailed
-            );
-          }
-
-
-          saveSession(
-            result.session,
-            result.user?.username ?? pendingId
+          setStatus(
+            result.updated ===
+              true
+              ? t(
+                  "groupBuyUpdateSuccess",
+                  "Your application has been updated."
+                )
+              : t(
+                  "groupBuySubmitSuccess",
+                  "Your application has been submitted."
+                ),
+            "success"
           );
 
-          currentUser = {
-            id:
-              result.user
-                ?.username ??
-              pendingId,
-          };
 
-          maps =
-            Array.isArray(
-              result.maps
-            )
-              ? result.maps
-              : [];
+          setTimeout(
+            () => {
+              window.location.href =
+                "/";
+            },
+            1000
+          );
 
-          pendingId = "";
-
-          loginPassword.value =
-            "";
-
-          createPassword.value =
-            "";
-
-          confirmPassword.value =
-            "";
-
-          showAccount();
-
-          await loadShareStates();
-
-        } catch (error) {
+        } catch (
+          error
+        ) {
           setStatus(
-            createStatus,
-            error?.message ||
-              text.accountCreateFailed,
+            error.message ||
+            t(
+              "groupBuySubmitFailed",
+              "Submission failed."
+            ),
             "error"
           );
 
         } finally {
-          createAccountButton.disabled =
+          submitButton.disabled =
             false;
 
-          createAccountButton.textContent =
-            text.createAccount;
+          submitButton.textContent =
+            t(
+              "groupBuySubmit",
+              "Submit"
+            );
         }
       }
     );
 
-
-    /*
-      ==========================================================
-      LOGOUT
-      ==========================================================
-    */
-
-    logoutButton.addEventListener(
-      "click",
-      () => {
-        clearSession();
-
-        currentUser = null;
-        pendingId = "";
-        maps = [];
-        shareStates.clear();
-
-        loginForm.reset();
-        createAccountForm.reset();
-
-        setStatus(
-          loginStatus,
-          ""
-        );
-
-        setStatus(
-          mapStatus,
-          ""
-        );
-
-        showLogin();
-      }
-    );
-
-
-    /*
-      ==========================================================
-      MAP ACTIONS
-      ==========================================================
-    */
-
-    function updateNewMapCreateState() {
-      createNewMapButton.disabled =
-        mapTemplatesState === "loading" ||
-        !newMapName.value.trim() ||
-        !newMapType.value;
-    }
-
-    function renderNewMapTypes({ preserveSelection = false } = {}) {
-      const previous = preserveSelection ? newMapType.value : "";
-      newMapType.textContent = "";
-
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = mapTemplatesState === "loading"
-        ? text.templateLoading
-        : text.selectMapType;
-      newMapType.appendChild(placeholder);
-
-      const empty = document.createElement("option");
-      empty.value = "empty";
-      empty.textContent = text.emptyMap;
-      newMapType.appendChild(empty);
-
-      mapTemplates.forEach(template => {
-        const option = document.createElement("option");
-        option.value = template.id;
-        const name = S967MapNewFlow.templateName(template, language);
-        option.textContent = template.is_default === true
-          ? `${name} (${text.defaultMap})`
-          : name;
-        newMapType.appendChild(option);
-      });
-
-      newMapType.disabled = mapTemplatesState === "loading";
-      const available = [...newMapType.options].some(option => option.value === previous);
-      if (available && previous) {
-        newMapType.value = previous;
-      } else if (mapTemplatesState === "ready") {
-        const initial = S967MapNewFlow.initialSelection(mapTemplates);
-        newMapType.value = initial.value;
-        if (initial.state === "none") {
-          setStatus(newMapStatus, text.noDefaultTemplate);
-        } else if (initial.state === "multiple") {
-          console.error("Multiple default map templates were returned; no automatic selection was made.");
-          setStatus(newMapStatus, text.noDefaultTemplate, "error");
-        } else {
-          setStatus(newMapStatus, "");
-        }
-      } else if (mapTemplatesState === "error") {
-        newMapType.value = "";
-        setStatus(newMapStatus, text.templateListFailed, "error");
-      }
-      updateNewMapCreateState();
-    }
-
-    async function loadMapTemplatesForNewMap() {
-      mapTemplatesState = "loading";
-      mapTemplates = [];
-      renderNewMapTypes();
-      setStatus(newMapStatus, text.templateLoading);
-      try {
-        const response = await fetch(MAP_TEMPLATE_LIST_URL, { method: "GET" });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok || result.ok !== true || !Array.isArray(result.templates)) {
-          throw new Error("TEMPLATE_LIST_FAILED");
-        }
-        mapTemplates = result.templates;
-        mapTemplatesState = "ready";
-        renderNewMapTypes();
-      } catch (error) {
-        console.error("Map template list failed:", error);
-        mapTemplates = [];
-        mapTemplatesState = "error";
-        renderNewMapTypes();
-      }
-    }
-
-    newMapButton.addEventListener(
-      "click",
-      async () => {
-        if (
-          maps.length >=
-          MAX_MAPS
-        ) {
-          return;
-        }
-
-        newMapPanel.classList.remove("hidden");
-        newMapName.value = "";
-        newMapType.value = "";
-        newMapName.focus();
-        await loadMapTemplatesForNewMap();
-      }
-    );
-
-    cancelNewMapButton.addEventListener("click", () => {
-      newMapPanel.classList.add("hidden");
-      newMapName.value = "";
-      newMapType.value = "";
-      setStatus(newMapStatus, "");
-    });
-
-    newMapName.addEventListener("input", updateNewMapCreateState);
-    newMapType.addEventListener("change", updateNewMapCreateState);
-
-    createNewMapButton.addEventListener("click", async () => {
-      if (createNewMapButton.disabled) return;
-      createNewMapButton.disabled = true;
-      createNewMapButton.textContent = text.creatingMap;
-      setStatus(newMapStatus, text.creatingMap);
-      try {
-        const selection = newMapType.value;
-        const url = S967MapNewFlow.editorUrl({
-          title: newMapName.value,
-          selection,
-        });
-        if (selection === "empty") {
-          sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
-        } else {
-          const response = await fetch(
-            `${MAP_TEMPLATE_LOAD_URL}?templateId=${encodeURIComponent(selection)}`,
-            { method: "GET" }
-          );
-          const result = await response.json().catch(() => ({}));
-          if (response.status === 404) {
-            await loadMapTemplatesForNewMap();
-            setStatus(newMapStatus, text.selectedTemplateUnavailable, "error");
-            createNewMapButton.textContent = text.createMap;
-            updateNewMapCreateState();
-            return;
-          }
-          if (!response.ok || result.ok !== true || !result.template?.templateData) {
-            throw new Error("TEMPLATE_LOAD_FAILED");
-          }
-          sessionStorage.setItem(NEW_MAP_TEMPLATE_KEY, JSON.stringify({
-            templateId: selection,
-            title: newMapName.value.trim(),
-            templateData: result.template.templateData,
-          }));
-        }
-        window.location.href = url;
-      } catch (error) {
-        const message = error?.message === "MAP_NAME_TOO_LONG"
-          ? text.mapNameTooLong
-          : error?.message === "MAP_TYPE_REQUIRED"
-            ? text.mapTypeRequired
-            : error?.message === "TEMPLATE_LOAD_FAILED"
-              ? text.templateLoadFailed
-              : error?.message === "MAP_NAME_REQUIRED"
-                ? text.mapNameRequired
-                : text.templateLoadFailed;
-        setStatus(newMapStatus, message, "error");
-        createNewMapButton.disabled = false;
-        createNewMapButton.textContent = text.createMap;
-      }
-    });
-
-
-    function openMap(
-      mapId
-    ) {
-      window.location.href =
-        `/map/editor/?map=${encodeURIComponent(mapId)}`;
-    }
-
-
-    async function renameMap(
-      mapId
-    ) {
-      const map =
-        maps.find(
-          (item) =>
-            item.id === mapId
-        );
-
-      if (!map) {
-        return;
-      }
-
-      const newName =
-        window.prompt(
-          text.rename,
-          map.name
-        );
-
-      if (
-        newName === null
-      ) {
-        return;
-      }
-
-      const trimmed =
-        newName.trim();
-
-      if (
-        !trimmed ||
-        trimmed === map.name
-      ) {
-        return;
-      }
-
-      try {
-        /*
-          map-save가 문서 데이터도 요구하므로
-          먼저 본문을 불러온 뒤 같은 데이터로
-          이름만 변경해 저장한다.
-        */
-
-        const loadResponse =
-          await fetch(
-            `${MAP_LOAD_URL}?mapId=${encodeURIComponent(mapId)}`,
-            {
-              method: "GET",
-
-              headers:
-                authorizationHeaders(),
-            }
-          );
-
-        const loadResult =
-          await loadResponse
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            loadResponse,
-            loadResult
-          )
-        ) {
-          expireLogin();
-          return;
-        }
-
-        if (
-          !loadResponse.ok ||
-          !loadResult.ok ||
-          !loadResult.map
-        ) {
-          throw new Error(
-            text.mapRenameFailed
-          );
-        }
-
-
-        const saveResponse =
-          await fetch(
-            MAP_SAVE_URL,
-            {
-              method: "POST",
-
-              headers: {
-                ...authorizationHeaders(),
-
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  mapId:
-                    mapId,
-
-                  name:
-                    trimmed,
-
-                  documentData:
-                    loadResult.map
-                      .documentData,
-                }),
-            }
-          );
-
-        const saveResult =
-          await saveResponse
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            saveResponse,
-            saveResult
-          )
-        ) {
-          expireLogin();
-          return;
-        }
-
-        if (
-          !saveResponse.ok ||
-          !saveResult.ok
-        ) {
-          throw new Error(
-            text.mapRenameFailed
-          );
-        }
-
-        await loadMaps();
-
-      } catch (error) {
-        setStatus(
-          mapStatus,
-          error?.message ||
-            text.mapRenameFailed,
-          "error"
-        );
-      }
-    }
-
-
-    async function deleteMap(
-      mapId
-    ) {
-      if (
-        !window.confirm(
-          text.deleteConfirm
-        )
-      ) {
-        return;
-      }
-
-      try {
-        const response =
-          await fetch(
-            MAP_DELETE_URL,
-            {
-              method: "POST",
-
-              headers: {
-                ...authorizationHeaders(),
-
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  map_id:
-                    mapId,
-                }),
-            }
-          );
-
-        const result =
-          await response
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (
-          isSessionError(
-            response,
-            result
-          )
-        ) {
-          expireLogin();
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            text.mapDeleteFailed
-          );
-        }
-
-        shareStates.delete(
-          mapId
-        );
-
-        await loadMaps();
-
-      } catch (error) {
-        setStatus(
-          mapStatus,
-          error?.message ||
-            text.mapDeleteFailed,
-          "error"
-        );
-      }
-    }
-
-
-    /*
-      ==========================================================
-      LANGUAGE CHANGE
-      ==========================================================
-    */
 
     window.addEventListener(
       "s967languagechange",
       (event) => {
         language =
-          event.detail?.language ??
+          event.detail
+            ?.language ??
           (
             typeof getCurrentLanguage ===
               "function"
@@ -4169,63 +1913,54 @@
               : "en"
           );
 
-        text =
-          TEXT[language] ??
-          TEXT.en;
-
         setStaticText();
       }
     );
 
 
-    /*
-      ==========================================================
-      INITIALIZE
-      ==========================================================
-    */
-
     async function initialize() {
       setStaticText();
+      renderSchedule();
 
-      const token =
-        getSessionToken();
 
-      if (!token) {
-        showLogin();
-        return;
-      }
+      try {
+        await loadFormData();
 
-      const expires =
-        sessionStorage.getItem(
-          SESSION_EXPIRES_KEY
+      } catch (
+        error
+      ) {
+        console.error(
+          error
         );
 
-      if (
-        expires &&
-        new Date(
-          expires
-        ).getTime() <=
-          Date.now()
-      ) {
-        clearSession();
-        showLogin();
-        return;
-      }
+        applicationPanel.classList.add(
+          "hidden"
+        );
 
-      /*
-        같은 탭에서 새로고침한 경우
-        저장된 세션으로 계정/맵 목록 복구.
-      */
+        scheduleBox.classList.remove(
+          "hidden"
+        );
 
-      showAccount();
+        scheduleStatus.textContent =
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
+          );
 
-      const restored =
-        await loadMaps();
+        scheduleDetail.textContent =
+          "";
 
-      if (!restored) {
-        if (!getSessionToken()) {
-          showLogin();
-        }
+        setStatus(
+          error.message ||
+          t(
+            "groupBuyLoadFailed",
+            "Failed to load the application form."
+          ),
+          "error"
+        );
+
+        submitButton.disabled =
+          true;
       }
     }
 
