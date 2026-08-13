@@ -9,15 +9,36 @@ export function editorShortcutAction({ key, ctrlKey = false, metaKey = false, al
 }
 
 export function snapshotBuilding(building) {
-  return Object.freeze({ id: building.id, name: building.name, typeId: building.typeId, x: building.x, y: building.y, width: building.width, height: building.height, affiliation: building.affiliation, locked: building.locked });
+  return Object.freeze({
+    id: building.id,
+    name: building.name,
+    typeId: building.typeId,
+    x: building.x,
+    y: building.y,
+    width: building.width,
+    height: building.height,
+    affiliation: building.affiliation,
+    locked: building.locked,
+    color: building.color,
+    priority: building.priority,
+    fixed: building.fixed,
+  });
 }
 
 export function snapshotRange(range) {
-  return Object.freeze({ id: range.id, kind: range.kind, color: range.color, locked: range.locked, cells: Object.freeze(range.cells.map(cell => Object.freeze([...cell]))) });
+  return Object.freeze({
+    id: range.id,
+    kind: range.kind,
+    color: range.color,
+    locked: range.locked,
+    priority: range.priority,
+    fixed: range.fixed,
+    cells: Object.freeze(range.cells.map(cell => Object.freeze([...cell]))),
+  });
 }
 
 export function sameBuildingState(a, b) {
-  return a.id === b.id && a.name === b.name && a.typeId === b.typeId && a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height && a.affiliation === b.affiliation && a.locked === b.locked;
+  return a.id === b.id && a.name === b.name && a.typeId === b.typeId && a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height && a.affiliation === b.affiliation && a.locked === b.locked && a.color === b.color && a.priority === b.priority;
 }
 
 export function createHistory({ limit = MAX_HISTORY_STEPS, readOnly = () => false, onChange = () => {} } = {}) {
