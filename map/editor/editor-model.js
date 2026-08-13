@@ -15,6 +15,13 @@ export function validateNonEmptyText(value, fieldName) {
   return value.trim();
 }
 
+export function validateColor(value, fieldName) {
+  if (typeof value !== "string" || !/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/.test(value.trim())) {
+    throw new TypeError(`${fieldName} must be a valid hex color.`);
+  }
+  return value.trim().toUpperCase();
+}
+
 export function isCoordinateInsideMap(x, y) {
   return Number.isInteger(x) && Number.isInteger(y) &&
     x >= MAP_MIN_X && x <= MAP_MAX_X && y >= MAP_MIN_Y && y <= MAP_MAX_Y;
@@ -28,7 +35,7 @@ export class BuildingType {
   constructor({ name, color, id = createUniqueId() }) {
     this.id = validateNonEmptyText(id, "Building type ID");
     this.name = validateNonEmptyText(name, "Building type name");
-    this.color = validateNonEmptyText(color, "Building type color");
+this.color = validateColor(color, "Building type color");
   }
 }
 
@@ -75,7 +82,7 @@ export class MapRange {
   constructor({ kind, color, locked = false, cells, id = createUniqueId() }) {
     this.id = validateNonEmptyText(id, "Range ID");
     this.kind = validateNonEmptyText(kind, "Range kind");
-    this.color = validateNonEmptyText(color, "Range color");
+this.color = validateColor(color, "Range color");
     if (!new Set(["allowed", "blocked"]).has(this.kind)) throw new RangeError("Range kind must be allowed or blocked.");
     if (!Array.isArray(cells)) throw new TypeError("Range cells must be an array.");
     const unique = new Map(cells.map(cell => {
