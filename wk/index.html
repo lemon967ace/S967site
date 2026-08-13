@@ -627,10 +627,24 @@
 
 
   <script>
-    const WK_API_URL =
-      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-submit";
+    const SUPABASE_BASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
 
-    const WK_OPTIONS_CACHE_KEY = "s967-wk-options-v1";
+    const WK_API_URL =
+      `${SUPABASE_BASE_URL}/functions/v1/wk-submit`;
+
+    const WK_OPTIONS_RPC_URL =
+      `${SUPABASE_BASE_URL}/rest/v1/rpc/wk_public_form_options`;
+
+    /*
+      Supabase Project Settings > API에서 확인할 수 있는
+      Publishable key 또는 legacy anon public key를 넣으세요.
+      이 키는 브라우저용 공개 키이며 service_role 키가 아닙니다.
+    */
+    const SUPABASE_PUBLIC_KEY =
+      "PASTE_YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY_HERE";
+
+    const WK_OPTIONS_CACHE_KEY = "s967-wk-options-v2";
     const WK_REQUEST_TIMEOUT_MS = 10000;
 
     async function fetchWithTimeout(url, options = {}, timeoutMs = WK_REQUEST_TIMEOUT_MS) {
@@ -2281,25 +2295,72 @@ function updateParticipationState() {
 
     async function loadOptions() {
       const cached = readCachedWkOptions();
+
       if (cached) {
         applyOptionLists(cached);
-        if (cached.availability && Date.now() - Number(cached.cached_at ?? 0) < 30000) {
+
+        if (cached.availability) {
           serverAvailability = cached.availability;
           updateApplicationSchedule();
         }
       }
 
-      const response = await fetchWithTimeout(WK_API_URL, { method: "GET" });
-      const result = await response.json().catch(() => ({}));
+      if (
+        !SUPABASE_PUBLIC_KEY ||
+        SUPABASE_PUBLIC_KEY.includes("PASTE_YOUR_")
+      ) {
+        if (cached) return;
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("WK 신청 서버 인증 설정 오류(401). 관리자에게 알려주세요.");
-        }
-        throw new Error(result.error || text.loadFailed);
+        throw new Error(
+          "Supabase public key is not configured."
+        );
       }
 
-      serverAvailability = result.availability ?? { mode: "auto", is_open: null };
+      /*
+        첫 화면의 Tier / Alliance / 신청 상태는 Edge Function을 거치지 않고
+        PostgREST RPC를 직접 호출한다. wk-submit은 실제 제출 POST에만 사용한다.
+      */
+      const response =
+        await fetchWithTimeout(
+          WK_OPTIONS_RPC_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "apikey":
+                SUPABASE_PUBLIC_KEY,
+
+              "Authorization":
+                `Bearer ${SUPABASE_PUBLIC_KEY}`,
+
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              "{}",
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+          result?.error ||
+          text.loadFailed
+        );
+      }
+
+      serverAvailability =
+        result.availability ?? {
+          mode: "auto",
+          is_open: null,
+        };
+
       updateApplicationSchedule();
       applyOptionLists(result);
       cacheWkOptions(result);
