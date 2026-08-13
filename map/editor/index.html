@@ -494,7 +494,7 @@
     body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
     body.shared-view .editor-stage{position:absolute;inset:0;width:100%;height:100%;}
     body.shared-view .shared-map-title{position:absolute;top:clamp(12px,2vh,22px);left:clamp(12px,1.6vw,24px);z-index:55;display:block;max-width:min(62vw,680px);padding:8px 11px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:10px;background:color-mix(in srgb,var(--surface) 24%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:var(--text);font-size:clamp(.95rem,1.35vw,1.25rem);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;}
-    body.shared-view .shared-filter-panel{position:fixed;left:clamp(12px,1.6vw,24px);bottom:var(--shared-filter-bottom,44px);z-index:55;display:block;width:clamp(210px,20vw,300px);max-height:min(46vh,430px);overflow:auto;padding:10px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 26%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:bottom .16s ease;}
+    body.shared-view .shared-filter-panel{position:fixed;left:clamp(12px,1.6vw,24px);bottom:var(--shared-filter-bottom,18px);z-index:55;display:block;width:clamp(210px,20vw,300px);max-height:min(46vh,430px);overflow:auto;padding:10px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 26%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:bottom .16s ease;}
     body.shared-view .shared-filter-panel h2{margin:0 0 8px;color:var(--muted);font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
     body.shared-view .shared-filter-panel h3{margin:0 0 8px;font-size:.82rem;}
     body.shared-view .shared-zoom-panel{position:fixed;right:calc(clamp(12px,1.6vw,24px) + 94px);bottom:44px;z-index:55;display:flex;align-items:center;gap:6px;padding:6px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 30%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
@@ -1998,12 +1998,6 @@
       ELEMENTS
       ==========================================================
     */
-
-    const mapTitleInput =
-      document.getElementById(
-        "mapTitleInput"
-      );
-
     const modeBadge =
       document.getElementById(
         "modeBadge"
