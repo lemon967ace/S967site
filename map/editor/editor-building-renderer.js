@@ -31,9 +31,16 @@ export function buildingRenderGeometry(building) {
 export function orderBuildingsForDraw(buildings, selectedBuildingId = null) {
   const normal = [], selected = [];
   buildings.forEach((building, documentIndex) => {
-    const entry = { building, documentIndex };
+    const entry = {
+      building,
+      documentIndex,
+      priority: Number.isInteger(building.priority) ? building.priority : 0,
+    };
     (building.id === selectedBuildingId ? selected : normal).push(entry);
   });
+  const sort = (a, b) => a.priority - b.priority || a.documentIndex - b.documentIndex;
+  normal.sort(sort);
+  selected.sort(sort);
   return [...normal, ...selected].map(entry => entry.building);
 }
 
