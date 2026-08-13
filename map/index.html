@@ -307,6 +307,91 @@
       line-height: 1.55;
     }
 
+    .login-action-row {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .login-action-row .primary-button {
+      flex: 1 1 auto;
+      width: auto;
+      margin-top: 0;
+    }
+
+    .login-info {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .login-info-button {
+      width: 42px;
+      height: 100%;
+      min-height: 42px;
+      padding: 0;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 10px;
+
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1;
+
+      cursor: help;
+    }
+
+    .login-info-tooltip {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 9px);
+
+      width: min(320px, calc(100vw - 48px));
+      padding: 11px 12px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+
+      font-size: 0.78rem;
+      line-height: 1.55;
+      text-align: left;
+
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      pointer-events: none;
+
+      transition:
+        opacity 0.14s ease,
+        transform 0.14s ease,
+        visibility 0.14s ease;
+
+      z-index: 20;
+    }
+
+    .login-info:hover .login-info-tooltip,
+    .login-info:focus-within .login-info-tooltip,
+    .login-info.is-open .login-info-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    @media (hover: none) {
+      .login-info-button {
+        cursor: pointer;
+      }
+    }
+
     .dialog-id {
       font-weight: 750;
       overflow-wrap: anywhere;
@@ -726,23 +811,42 @@
           >
         </div>
 
-        <button
-          id="loginButton"
-          class="primary-button"
-          type="submit"
-        >
-          Login
-        </button>
+        <div class="login-action-row">
+          <button
+            id="loginButton"
+            class="primary-button"
+            type="submit"
+          >
+            Login
+          </button>
+
+          <div
+            id="loginInfo"
+            class="login-info"
+          >
+            <button
+              id="loginInfoButton"
+              class="login-info-button"
+              type="button"
+              aria-label="New user information"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              ⓘ
+            </button>
+
+            <div
+              id="newUserNotice"
+              class="login-info-tooltip"
+              role="tooltip"
+            ></div>
+          </div>
+        </div>
 
         <div
           id="loginStatus"
           class="status"
         ></div>
-
-        <p
-          id="newUserNotice"
-          class="password-notice"
-        ></p>
 
       </form>
 
@@ -1905,6 +2009,16 @@
         "loginButton"
       );
 
+    const loginInfo =
+      document.getElementById(
+        "loginInfo"
+      );
+
+    const loginInfoButton =
+      document.getElementById(
+        "loginInfoButton"
+      );
+
     const loginStatus =
       document.getElementById(
         "loginStatus"
@@ -2208,6 +2322,16 @@
         "newUserNotice"
       ).textContent =
         text.newUserNotice;
+
+      loginInfoButton.setAttribute(
+        "aria-label",
+        {
+          ko: "처음이신가요?",
+          en: "New here?",
+          ja: "初めてですか？",
+          ru: "Впервые здесь?",
+        }[language] ?? "New here?"
+      );
 
       unknownCancelButton.textContent =
         text.cancel;
@@ -3334,6 +3458,56 @@
 
           shareOpenButton.disabled =
             false;
+        }
+      }
+    );
+
+
+    /*
+      ==========================================================
+      LOGIN HELP
+      ==========================================================
+    */
+
+    loginInfoButton.addEventListener(
+      "click",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const open =
+          !loginInfo.classList.contains(
+            "is-open"
+          );
+
+        loginInfo.classList.toggle(
+          "is-open",
+          open
+        );
+
+        loginInfoButton.setAttribute(
+          "aria-expanded",
+          String(open)
+        );
+      }
+    );
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (
+          !loginInfo.contains(
+            event.target
+          )
+        ) {
+          loginInfo.classList.remove(
+            "is-open"
+          );
+
+          loginInfoButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
         }
       }
     );
