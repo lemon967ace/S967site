@@ -312,6 +312,8 @@ staffVerifyFailed: "Could not verify Staff access.",
 staffLoginFailed: "Login failed.",
 
 passwordMin6: "Password must be at least 6 characters.",
+passwordSecurityNotice:
+  "Simple or commonly used passwords may be detected by your browser or password manager as compromised or weak, which may trigger a security warning.",
 passwordMismatch: "Passwords do not match.",
 passwordChanging: "Changing password…",
 passwordChanged: "Password changed.",
@@ -825,6 +827,8 @@ staffVerifyFailed: "스태프 권한을 확인할 수 없습니다.",
 staffLoginFailed: "로그인에 실패했습니다.",
 
 passwordMin6: "비밀번호는 6자 이상이어야 합니다.",
+passwordSecurityNotice:
+  "단순하거나 흔히 사용되는 비밀번호는 브라우저 또는 비밀번호 관리자에서 유출·취약 비밀번호로 감지되어 보안 경고가 표시될 수 있습니다.",
 passwordMismatch: "비밀번호가 일치하지 않습니다.",
 passwordChanging: "비밀번호 변경 중…",
 passwordChanged: "비밀번호가 변경되었습니다.",
@@ -1339,6 +1343,8 @@ staffVerifyFailed: "スタッフ権限を確認できませんでした。",
 staffLoginFailed: "ログインに失敗しました。",
 
 passwordMin6: "パスワードは6文字以上にしてください。",
+passwordSecurityNotice:
+  "単純なパスワードや一般的によく使われるパスワードは、ブラウザやパスワードマネージャーによって漏洩済みまたは脆弱なパスワードとして検出され、セキュリティ警告が表示される場合があります。",
 passwordMismatch: "パスワードが一致しません。",
 passwordChanging: "パスワードを変更しています…",
 passwordChanged: "パスワードを変更しました。",
@@ -1850,6 +1856,8 @@ staffVerifyFailed: "Не удалось проверить права персо
 staffLoginFailed: "Не удалось войти.",
 
 passwordMin6: "Пароль должен содержать не менее 6 символов.",
+passwordSecurityNotice:
+  "Простые или широко используемые пароли могут быть определены браузером или менеджером паролей как скомпрометированные или слабые, из-за чего может появиться предупреждение безопасности.",
 passwordMismatch: "Пароли не совпадают.",
 passwordChanging: "Изменение пароля…",
 passwordChanged: "Пароль изменён.",
