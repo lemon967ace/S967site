@@ -1914,8 +1914,7 @@
       if (!readOnly && !building.fixed) {
         const form = document.createElement("form");
         form.className = "selection-edit-form";
-        const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<option value="${type.id}"${type.id === building.typeId ? " selected" : ""}>${type.name}</option>`).join("");
-        form.innerHTML = `
+const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<option value="${escapeAttribute(type.id)}"${type.id === building.typeId ? " selected" : ""}>${escapeHtml(type.name)}</option>`).join("");        form.innerHTML = `
           <label>${text.detailName}<input name="name" required value="${escapeAttribute(building.name)}"></label>
           <label>${text.detailType}<select name="typeId">${typeOptions}</select></label>
           <label>${text.detailSize}<select name="size"><option value="1"${building.width === 1 ? " selected" : ""}>1×1</option><option value="2"${building.width === 2 ? " selected" : ""}>2×2</option></select></label>
@@ -1936,6 +1935,14 @@
       }
     }
 
+    function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
     function escapeAttribute(value) {
       return String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
     }
@@ -1952,7 +1959,16 @@
       for (const type of documentData.buildingTypes) {
         const button = document.createElement("button"); button.type = "button"; button.disabled = readOnly;
         button.style.cssText = "display:flex;align-items:center;gap:.5rem;width:100%;margin:.25rem 0";
-        button.innerHTML = `<span style="width:1rem;height:1rem;background:${type.color};border:1px solid #555"></span><span></span>`;
+       const colorBox = document.createElement("span");
+colorBox.style.width = "1rem";
+colorBox.style.height = "1rem";
+colorBox.style.backgroundColor = type.color;
+colorBox.style.border = "1px solid #555";
+
+const name = document.createElement("span");
+name.textContent = type.name;
+
+button.replaceChildren(colorBox, name);
         button.lastElementChild.textContent = type.name;
         button.addEventListener("click", () => {
           rangeController?.cancel();
