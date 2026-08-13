@@ -468,6 +468,20 @@
     }
 
 
+    .zoom-input-wrap {display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;padding:0 7px;min-height:34px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;}
+    .zoom-input {width:52px;min-width:0;padding:4px 2px;border:0;outline:none;background:transparent;color:var(--text);text-align:right;font:inherit;font-variant-numeric:tabular-nums;}
+    .shared-map-title,.shared-filter-panel,.shared-zoom-panel{display:none;}
+    body.shared-view .editor-header,body.shared-view .editor-toolbar,body.shared-view .editor-statusbar,body.shared-view .editor-sidebar{display:none!important;}
+    body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
+    body.shared-view .editor-stage{position:absolute;inset:0;width:100%;height:100%;}
+    body.shared-view .shared-map-title{position:absolute;top:clamp(12px,2vh,22px);left:clamp(12px,1.6vw,24px);z-index:55;display:block;max-width:min(62vw,680px);padding:8px 11px;border:1px solid color-mix(in srgb,var(--border) 72%,transparent);border-radius:10px;background:color-mix(in srgb,var(--surface) 76%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--text);font-size:clamp(.95rem,1.35vw,1.25rem);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;}
+    body.shared-view .shared-filter-panel{position:absolute;left:clamp(12px,1.6vw,24px);bottom:clamp(12px,2vh,24px);z-index:55;display:block;width:clamp(210px,20vw,300px);max-height:min(46vh,430px);overflow:auto;padding:10px;border:1px solid color-mix(in srgb,var(--border) 68%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+    body.shared-view .shared-filter-panel h2{margin:0 0 8px;color:var(--muted);font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+    body.shared-view .shared-filter-panel h3{margin:0 0 8px;font-size:.82rem;}
+    body.shared-view .shared-zoom-panel{position:absolute;right:clamp(12px,1.6vw,24px);bottom:clamp(12px,2vh,24px);z-index:55;display:flex;align-items:center;gap:6px;padding:6px;border:1px solid color-mix(in srgb,var(--border) 68%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+    body.shared-view .shared-zoom-panel button{min-width:34px;min-height:34px;padding:6px 9px;}
+    @media(max-width:620px){body.shared-view .shared-filter-panel{width:min(240px,calc(100vw - 24px));max-height:38vh;}body.shared-view .shared-map-title{max-width:calc(100vw - 24px);}}
+
     /*
       ==========================================================
       STATUS BAR
@@ -835,13 +849,10 @@
       −
     </button>
 
-    <span
-      id="toolbarZoomStatus"
-      class="zoom-readout"
-      aria-live="polite"
-    >
-      100%
-    </span>
+    <label class="zoom-input-wrap" aria-label="Zoom percentage">
+      <input id="zoomPercentInput" class="zoom-input" type="number" min="1" max="400" step="1" value="100" inputmode="numeric">
+      <span>%</span>
+    </label>
 
     <button
       id="zoomInButton"
@@ -923,6 +934,21 @@
     <main class="editor-stage">
 
       <div id="mapCanvasHost"></div>
+
+      <div id="sharedMapTitle" class="shared-map-title"></div>
+      <section id="sharedFilterPanel" class="shared-filter-panel" aria-label="Building filters">
+        <h2 id="sharedFiltersTitle">Building filters</h2>
+        <div id="sharedFiltersHost"></div>
+      </section>
+      <div id="sharedZoomPanel" class="shared-zoom-panel" aria-label="Map zoom">
+        <button id="sharedZoomOutButton" type="button" aria-label="Zoom out">−</button>
+        <label class="zoom-input-wrap" aria-label="Zoom percentage">
+          <input id="sharedZoomPercentInput" class="zoom-input" type="number" min="1" max="400" step="1" value="100" inputmode="numeric">
+          <span>%</span>
+        </label>
+        <button id="sharedZoomInButton" type="button" aria-label="Zoom in">+</button>
+        <button id="sharedFitMapButton" type="button">Fit</button>
+      </div>
 
     </main>
 
@@ -1838,10 +1864,14 @@
         "zoomInButton"
       );
 
-    const toolbarZoomStatus =
-      document.getElementById(
-        "toolbarZoomStatus"
-      );
+    const zoomPercentInput = document.getElementById("zoomPercentInput");
+    const sharedMapTitle = document.getElementById("sharedMapTitle");
+    const sharedFiltersTitle = document.getElementById("sharedFiltersTitle");
+    const sharedFiltersHost = document.getElementById("sharedFiltersHost");
+    const sharedZoomPercentInput = document.getElementById("sharedZoomPercentInput");
+    const sharedZoomOutButton = document.getElementById("sharedZoomOutButton");
+    const sharedZoomInButton = document.getElementById("sharedZoomInButton");
+    const sharedFitMapButton = document.getElementById("sharedFitMapButton");
 
     const fitMapButton =
       document.getElementById(
@@ -2188,15 +2218,16 @@ button.replaceChildren(colorBox, name);
       renderBuildingFilters();
     }
 
-    function renderBuildingFilters() {
-      if (!buildingFilter) return;
+    function renderBuildingFilters(targetHost = filtersHost, { replace = targetHost !== filtersHost } = {}) {
+      if (!buildingFilter || !targetHost) return;
+      if (replace) targetHost.replaceChildren();
       const labels = FILTER_TEXT[language] ?? FILTER_TEXT.en, doc = PNSMapEngine.getDocument(); buildingFilter.refreshAffiliations(doc.buildings); const state = buildingFilter.getState();
       const section = document.createElement("section"), heading = document.createElement("h3"); heading.textContent = labels.title; section.append(heading);
       const modes = document.createElement("div"); for (const [value, label] of [["dim", labels.dim], ["hide", labels.hide]]) { const item = document.createElement("label"); item.innerHTML = `<input type="radio" name="filter-mode" value="${value}"${state.mode === value ? " checked" : ""}> ${label}`; item.querySelector("input").onchange = () => { buildingFilter.set({ mode: value }); mapRenderer.invalidate(); }; modes.append(item); } section.append(modes);
       const addGroup = (title, values, selectedValues, labelFor, field) => { const group = document.createElement("fieldset"), legend = document.createElement("legend"); legend.textContent = title; group.append(legend); for (const value of values) { const item = document.createElement("label"), input = document.createElement("input"); input.type = "checkbox"; input.checked = selectedValues.has(value); input.onchange = () => { const next = new Set(buildingFilter.getState()[field]); input.checked ? next.add(value) : next.delete(value); buildingFilter.set({ [field]: next }); mapRenderer.invalidate(); }; item.append(input, document.createTextNode(` ${labelFor(value)}`)); group.append(item); } section.append(group); };
       addGroup(labels.types, doc.buildingTypes.map(item => item.id), state.typeIds, id => doc.buildingTypes.find(item => item.id === id)?.name ?? id, "typeIds");
       addGroup(labels.affiliations, [...new Set(["", ...doc.buildings.map(item => item.affiliation)])].sort(), state.affiliations, value => value || labels.none, "affiliations");
-      const reset = document.createElement("button"); reset.type = "button"; reset.textContent = labels.all; reset.onclick = () => { buildingFilter.reset(PNSMapEngine.getDocument()); renderRangePanel(); mapRenderer.invalidate(); }; section.append(reset); filtersHost.append(section);
+      const reset = document.createElement("button"); reset.type = "button"; reset.textContent = labels.all; reset.onclick = () => { buildingFilter.reset(PNSMapEngine.getDocument()); if (targetHost === filtersHost) renderRangePanel(); else renderBuildingFilters(targetHost, { replace: true }); mapRenderer.invalidate(); }; section.append(reset); targetHost.append(section);
     }
 
 
@@ -2266,6 +2297,12 @@ button.replaceChildren(colorBox, name);
 
       fitMapButton.disabled =
         !engineReady;
+
+      if (zoomPercentInput) zoomPercentInput.disabled = !engineReady;
+      if (sharedZoomPercentInput) sharedZoomPercentInput.disabled = !engineReady;
+      if (sharedZoomOutButton) sharedZoomOutButton.disabled = !engineReady;
+      if (sharedZoomInButton) sharedZoomInButton.disabled = !engineReady;
+      if (sharedFitMapButton) sharedFitMapButton.disabled = !engineReady;
 
       saveButton.disabled =
         !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
@@ -2339,6 +2376,12 @@ button.replaceChildren(colorBox, name);
 
       if (rangeController) renderRangePanel();
       else filtersHost.textContent = "";
+
+      const filterLabels = FILTER_TEXT[language] ?? FILTER_TEXT.en;
+      if (sharedFiltersTitle) sharedFiltersTitle.textContent = filterLabels.title;
+      if (sharedFitMapButton) sharedFitMapButton.textContent = text.fitMap ?? "Fit";
+      if (sharedMapTitle && editorMode === "shared") sharedMapTitle.textContent = mapTitleInput.value || text.untitled;
+      if (readOnly && buildingFilter) renderBuildingFilters(sharedFiltersHost, { replace: true });
 
       overlayBackLink.textContent =
         text.back;
@@ -2869,11 +2912,15 @@ button.replaceChildren(colorBox, name);
         readOnly =
           true;
 
+        document.body.classList.add("shared-view");
+        if (sharedMapTitle) sharedMapTitle.textContent = mapTitleInput.value || text.untitled;
+
         setDirty(
           false
         );
 
         mountMapRenderer();
+        renderBuildingFilters(sharedFiltersHost, { replace: true });
 
         hideOverlay();
 
@@ -2881,19 +2928,7 @@ button.replaceChildren(colorBox, name);
           true
         );
 
-        /*
-          다음 단계:
-          currentDocument를 실제 렌더러에
-          읽기 전용으로 전달한다.
 
-          예:
-          window.PNSMapEngine.loadDocument(
-            currentDocument,
-            {
-              readOnly: true
-            }
-          );
-        */
 
         return true;
 
@@ -3049,17 +3084,39 @@ button.replaceChildren(colorBox, name);
     undoButton.addEventListener("click", performUndo);
     redoButton.addEventListener("click", performRedo);
 
-    zoomOutButton.addEventListener("click", () => {
-      mapRenderer?.zoomBy?.(1 / 1.15);
-    });
+    function applyZoomPercentInput(input) {
+      if (!input || !mapRenderer) return;
+      const percent = Number(input.value);
+      if (!Number.isFinite(percent)) {
+        window.S967EditorHost.setZoom?.(mapRenderer.getState?.().zoom ?? 1);
+        return;
+      }
+      const clampedPercent = Math.min(400, Math.max(1, percent));
+      input.value = String(Math.round(clampedPercent));
+      mapRenderer.setZoom?.(clampedPercent / 100);
+    }
 
-    zoomInButton.addEventListener("click", () => {
-      mapRenderer?.zoomBy?.(1.15);
-    });
+    function bindZoomInput(input) {
+      if (!input) return;
+      input.addEventListener("change", () => applyZoomPercentInput(input));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          applyZoomPercentInput(input);
+          input.blur();
+        }
+      });
+    }
 
-    fitMapButton.addEventListener("click", () => {
-      mapRenderer?.fitToMap?.();
-    });
+    bindZoomInput(zoomPercentInput);
+    bindZoomInput(sharedZoomPercentInput);
+
+    zoomOutButton.addEventListener("click", () => { mapRenderer?.zoomBy?.(1 / 1.15); });
+    zoomInButton.addEventListener("click", () => { mapRenderer?.zoomBy?.(1.15); });
+    fitMapButton.addEventListener("click", () => { mapRenderer?.fitToMap?.(); });
+    sharedZoomOutButton?.addEventListener("click", () => mapRenderer?.zoomBy?.(1 / 1.15));
+    sharedZoomInButton?.addEventListener("click", () => mapRenderer?.zoomBy?.(1.15));
+    sharedFitMapButton?.addEventListener("click", () => mapRenderer?.fitToMap?.());
     window.addEventListener("keydown", event => {
       if (readOnly || event.defaultPrevented) return;
       const action = editorShortcutAction({ key: event.key, ctrlKey: event.ctrlKey, metaKey: event.metaKey, altKey: event.altKey, shiftKey: event.shiftKey, isFormControl: event.target instanceof Element && Boolean(event.target.closest("input, textarea, select, [contenteditable='true']")) });
@@ -3163,10 +3220,9 @@ button.replaceChildren(colorBox, name);
         ).textContent =
           label;
 
-        if (toolbarZoomStatus) {
-          toolbarZoomStatus.textContent =
-            label;
-        }
+        const percent = Math.round(zoom * 100);
+        if (zoomPercentInput && document.activeElement !== zoomPercentInput) zoomPercentInput.value = String(percent);
+        if (sharedZoomPercentInput && document.activeElement !== sharedZoomPercentInput) sharedZoomPercentInput.value = String(percent);
       },
     };
 
