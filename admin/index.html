@@ -9208,8 +9208,7 @@ createMapTemplateButton.addEventListener(
     return;
   }
   try {
-    await loadAdminData();
-    await loadStaffAccounts();
+    await Promise.all([loadAdminData(), loadStaffAccounts()]);
     loginPanel.classList.add("hidden");
     adminArea.classList.remove("hidden");
   } catch (error) {
