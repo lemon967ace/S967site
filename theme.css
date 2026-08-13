@@ -324,6 +324,38 @@ footer,
     height: 42px;
   }
 
+   /* Large-screen corner controls */
+@media (min-width: 1100px) and (min-height: 700px) {
+  .theme-button,
+  .language-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .theme-button {
+    font-size: 22px;
+  }
+
+  .language-button {
+    font-size: 21px;
+  }
+
+  .theme-picker {
+    right: 22px;
+    bottom: 22px;
+  }
+
+  .language-picker {
+    right: 86px;
+    bottom: 22px;
+  }
+
+  .theme-menu,
+  .language-menu {
+    bottom: 62px;
+  }
+}
+
   .language-menu {
     bottom: 52px;
   }
