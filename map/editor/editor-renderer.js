@@ -166,7 +166,8 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function drawFixedRanges() {
     const bounds = visibleGridBounds(state, 1), selectedId = editableFixed ? rangeController?.getState().selectedRangeId : null;
-    for (const range of mapDocument.fixedRanges) for (const cell of visibleRangeCells(range, bounds)) {
+    const orderedRanges = [...mapDocument.fixedRanges].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
+    for (const range of orderedRanges) for (const cell of visibleRangeCells(range, bounds)) {
       traceCell(cell); context.fillStyle = withAlpha(range.color, range.kind === "blocked" ? 0.42 : 0.22); context.fill();
       context.save(); context.setLineDash([Math.max(3, 5 * state.zoom), Math.max(2, 3 * state.zoom)]); context.strokeStyle = range.kind === "blocked" ? "#b91c1c" : range.color; context.lineWidth = Math.max(1.5, 2.4 * state.zoom); context.stroke(); context.restore();
       if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.strokeStyle = "#b91c1c"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke(); }
@@ -185,7 +186,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     context.save(); context.globalAlpha = previewValid ? 0.55 : 0.72;
     fillAndStrokeGeometry(
       geometry,
-      previewValid ? (type?.color ?? "#4E79A7") : "#e53935",
+      previewValid ? (preview.color ?? type?.color ?? "#4E79A7") : "#e53935",
       previewValid ? "#ffffff" : "#8b0000",
       Math.max(1.5, 3 * state.zoom)
     );
@@ -237,8 +238,9 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function drawBuildingBody(geometry, buildingType, fixed = false) {
     if (!geometry || !buildingType) return;
+    const bodyColor = fixed ? (geometry.building.color ?? buildingType.color) : buildingType.color;
     fillAndStrokeGeometry(geometry, "rgba(0,0,0,0.31)", "transparent", 0, 1.5, 2);
-    fillAndStrokeGeometry(geometry, buildingType.color, "#202020", Math.max(0.5, 3.5 * state.zoom));
+    fillAndStrokeGeometry(geometry, bodyColor, "#202020", Math.max(0.5, 3.5 * state.zoom));
     if (fixed) { context.save(); context.setLineDash([Math.max(3, 5 * state.zoom), Math.max(2, 3 * state.zoom)]); strokeGeometry(geometry, "rgba(255,255,255,.9)", Math.max(1.5, 2 * state.zoom)); context.restore(); }
     strokeGeometry(geometry, "rgba(255,255,255,0.59)", Math.max(0.5, state.zoom));
   }
