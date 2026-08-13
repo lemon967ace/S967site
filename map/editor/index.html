@@ -470,6 +470,25 @@
 
     .zoom-input-wrap {display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;padding:0 7px;min-height:34px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;}
     .zoom-input {width:52px;min-width:0;padding:4px 2px;border:0;outline:none;background:transparent;color:var(--text);text-align:right;font:inherit;font-variant-numeric:tabular-nums;}
+    /* Keep each building-filter option intact; wrap whole options to the next line. */
+    #sharedFiltersHost fieldset {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+    }
+
+    #sharedFiltersHost fieldset legend {
+      width: 100%;
+    }
+
+    #sharedFiltersHost fieldset label {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
     .shared-map-title,.shared-filter-panel,.shared-zoom-panel{display:none;}
     body.shared-view .editor-header,body.shared-view .editor-toolbar,body.shared-view .editor-statusbar,body.shared-view .editor-sidebar{display:none!important;}
     body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
