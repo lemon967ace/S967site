@@ -112,7 +112,9 @@
       gap: 12px;
       align-items: center;
 
-      padding: 12px 16px;
+      padding:
+        clamp(6px, 0.85vh, 10px)
+        clamp(10px, 1.25vw, 16px);
 
       border-bottom:
         1px solid var(--border);
@@ -125,11 +127,11 @@
     }
 
     .editor-eyebrow {
-      margin-bottom: 3px;
+      margin-bottom: clamp(1px, 0.18vh, 3px);
 
       color: var(--muted);
 
-      font-size: 0.72rem;
+      font-size: clamp(0.62rem, 0.72vw, 0.72rem);
       font-weight: 750;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -147,7 +149,9 @@
       width: min(380px, 100%);
       min-width: 0;
 
-      padding: 7px 9px;
+      padding:
+        clamp(4px, 0.55vh, 7px)
+        clamp(7px, 0.75vw, 9px);
 
       border: 1px solid transparent;
       border-radius: 8px;
@@ -157,7 +161,7 @@
       background: transparent;
       color: var(--text);
 
-      font-size: 1rem;
+      font-size: clamp(0.88rem, 1.05vw, 1rem);
       font-weight: 750;
     }
 
@@ -191,8 +195,10 @@
 
     .header-actions button,
     .header-actions a {
-      min-height: 38px;
-      padding: 8px 11px;
+      min-height: clamp(32px, 4.4vh, 38px);
+      padding:
+        clamp(5px, 0.7vh, 8px)
+        clamp(8px, 0.9vw, 11px);
 
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -224,8 +230,10 @@
       align-items: center;
       gap: 7px;
 
-      min-height: 48px;
-      padding: 7px 12px;
+      min-height: clamp(40px, 5.2vh, 48px);
+      padding:
+        clamp(5px, 0.65vh, 7px)
+        clamp(8px, 0.95vw, 12px);
 
       overflow-x: auto;
 
@@ -268,10 +276,13 @@
 
       display: grid;
       grid-template-columns:
-        240px
-        minmax(0, 1fr);
+        minmax(190px, 17vw)
+        minmax(0, 1fr)
+        minmax(210px, 18vw);
 
       overflow: hidden;
+      padding-bottom: clamp(6px, 1vh, 12px);
+      background: var(--background);
     }
 
     .editor-sidebar {
@@ -279,18 +290,38 @@
       z-index: 20;
 
       min-width: 0;
-      padding: 14px;
-
-      overflow-y: auto;
-
-      border-right:
-        1px solid var(--border);
+      min-height: 0;
+      padding:
+        clamp(8px, 1.1vh, 14px)
+        clamp(8px, 0.9vw, 14px);
 
       background: var(--surface);
     }
 
+    .editor-sidebar-left {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: clamp(8px, 1vh, 12px);
+
+      border-right:
+        1px solid var(--border);
+    }
+
+    .editor-sidebar-right {
+      overflow-y: auto;
+
+      border-left:
+        1px solid var(--border);
+    }
+
+    .sidebar-scroll {
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
     .sidebar-section {
-      margin-top: 18px;
+      margin-top: clamp(12px, 1.6vh, 18px);
     }
 
     .sidebar-section:first-child {
@@ -298,11 +329,11 @@
     }
 
     .sidebar-title {
-      margin: 0 0 9px;
+      margin: 0 0 clamp(6px, 0.9vh, 9px);
 
       color: var(--muted);
 
-      font-size: 0.74rem;
+      font-size: clamp(0.68rem, 0.72vw, 0.74rem);
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -364,15 +395,77 @@
       outline: none;
     }
 
-    .minimap-panel { position:absolute; left:14px; right:auto; bottom:14px; z-index:30; width:min(230px,calc(100% - 28px)); padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--surface); box-shadow:var(--shadow); }
-    .minimap-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; font-size:.78rem; font-weight:800; }
-    .minimap-host { position:relative; width:100%; aspect-ratio:1.45; overflow:hidden; border:1px solid var(--border); border-radius:8px; touch-action:none; }
-    .minimap-host canvas { position:absolute; inset:0; display:block; }
-    .minimap-viewport-canvas { cursor:crosshair; touch-action:none; }
-    .minimap-panel.collapsed { width:auto; }
-    .minimap-panel.collapsed .minimap-host { display:none; }
-    .minimap-panel.collapsed .minimap-header { margin:0; }
-    @media(max-width:700px){.minimap-panel{width:170px}.minimap-host{aspect-ratio:1.55}}
+    .minimap-panel {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      padding: 8px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--surface-hover);
+    }
+
+    .minimap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      margin-bottom: 6px;
+
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .minimap-host {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1.45;
+
+      overflow: hidden;
+
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
+      touch-action: none;
+    }
+
+    .minimap-host canvas {
+      position: absolute;
+      inset: 0;
+      display: block;
+    }
+
+    .minimap-viewport-canvas {
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .minimap-panel.collapsed .minimap-host {
+      display: none;
+    }
+
+    .minimap-panel.collapsed .minimap-header {
+      margin: 0;
+    }
+
+    .zoom-readout {
+      flex: 0 0 auto;
+      min-width: 54px;
+      padding: 6px 8px;
+
+      border: 1px solid var(--border);
+      border-radius: 9px;
+
+      color: var(--muted);
+
+      text-align: center;
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
 
 
     /*
@@ -538,21 +631,35 @@
       ==========================================================
     */
 
-    @media (max-width: 760px) {
+    @media (max-width: 1100px) {
+      .editor-shell {
+        grid-template-columns:
+          minmax(170px, 20vw)
+          minmax(0, 1fr)
+          minmax(190px, 22vw);
+      }
+    }
+
+    @media (max-width: 820px) {
       .editor-header {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+
+      .editor-eyebrow {
+        display: none;
       }
 
       .header-actions {
-        justify-content: flex-start;
         overflow-x: auto;
       }
 
       .editor-shell {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+          minmax(150px, 28vw)
+          minmax(0, 1fr);
       }
 
-      .editor-sidebar {
+      .editor-sidebar-right {
         display: none;
       }
 
@@ -561,6 +668,24 @@
       }
 
       .status-right {
+        display: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .editor-header {
+        grid-template-columns: 1fr;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .editor-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-sidebar {
         display: none;
       }
     }
@@ -705,17 +830,36 @@
       class="tool-button"
       type="button"
       disabled
+      aria-label="Zoom out"
     >
       −
     </button>
+
+    <span
+      id="toolbarZoomStatus"
+      class="zoom-readout"
+      aria-live="polite"
+    >
+      100%
+    </span>
 
     <button
       id="zoomInButton"
       class="tool-button"
       type="button"
       disabled
+      aria-label="Zoom in"
     >
       +
+    </button>
+
+    <button
+      id="fitMapButton"
+      class="tool-button"
+      type="button"
+      disabled
+    >
+      Fit
     </button>
 
   </div>
@@ -731,22 +875,62 @@
 
     <aside
       id="editorSidebar"
-      class="editor-sidebar"
+      class="editor-sidebar editor-sidebar-left"
     >
+      <div class="sidebar-scroll">
 
-      <section class="sidebar-section">
+        <section class="sidebar-section">
 
-        <h2
-          id="buildingTypesTitle"
-          class="sidebar-title"
-        >
-          Building Types
-        </h2>
+          <h2
+            id="buildingTypesTitle"
+            class="sidebar-title"
+          >
+            Building Types
+          </h2>
 
-        <div id="buildingTypesHost"></div>
+          <div id="buildingTypesHost"></div>
 
+        </section>
+
+      </div>
+
+      <section
+        id="minimapPanel"
+        class="minimap-panel"
+        aria-label="Minimap"
+        hidden
+      >
+        <div class="minimap-header">
+          <span id="minimapTitle">Minimap</span>
+          <button
+            id="minimapToggle"
+            type="button"
+            aria-expanded="true"
+          >
+            Collapse
+          </button>
+        </div>
+
+        <div
+          id="minimapHost"
+          class="minimap-host"
+        ></div>
       </section>
 
+    </aside>
+
+
+    <main class="editor-stage">
+
+      <div id="mapCanvasHost"></div>
+
+    </main>
+
+
+    <aside
+      id="editorInspector"
+      class="editor-sidebar editor-sidebar-right"
+    >
 
       <section class="sidebar-section">
 
@@ -776,21 +960,6 @@
       </section>
 
     </aside>
-
-
-    <main class="editor-stage">
-
-      <div id="mapCanvasHost">
-
-
-      </div>
-
-      <section id="minimapPanel" class="minimap-panel" aria-label="Minimap" hidden>
-        <div class="minimap-header"><span id="minimapTitle">Minimap</span><button id="minimapToggle" type="button" aria-expanded="true">Collapse</button></div>
-        <div id="minimapHost" class="minimap-host"></div>
-      </section>
-
-    </main>
 
   </div>
 
@@ -1086,6 +1255,9 @@
         redo:
           "Redo",
 
+        fitMap:
+          "Fit",
+
         buildingTypes:
           "Building Types",
 
@@ -1189,6 +1361,9 @@
 
         redo:
           "다시 실행",
+
+        fitMap:
+          "전체 보기",
 
         buildingTypes:
           "건물 종류",
@@ -1294,6 +1469,9 @@
         redo:
           "やり直す",
 
+        fitMap:
+          "全体表示",
+
         buildingTypes:
           "建物タイプ",
 
@@ -1397,6 +1575,9 @@
 
         redo:
           "Повторить",
+
+        fitMap:
+          "Вся карта",
 
         buildingTypes:
           "Типы зданий",
@@ -1655,6 +1836,16 @@
     const zoomInButton =
       document.getElementById(
         "zoomInButton"
+      );
+
+    const toolbarZoomStatus =
+      document.getElementById(
+        "toolbarZoomStatus"
+      );
+
+    const fitMapButton =
+      document.getElementById(
+        "fitMapButton"
       );
 
     const buildingTypesTitle =
@@ -2073,6 +2264,9 @@ button.replaceChildren(colorBox, name);
       zoomInButton.disabled =
         !engineReady;
 
+      fitMapButton.disabled =
+        !engineReady;
+
       saveButton.disabled =
         !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
 
@@ -2125,6 +2319,9 @@ button.replaceChildren(colorBox, name);
 
       redoButton.textContent =
         text.redo;
+
+      fitMapButton.textContent =
+        text.fitMap ?? "Fit";
 
       buildingTypesTitle.textContent =
         text.buildingTypes;
@@ -2851,6 +3048,18 @@ button.replaceChildren(colorBox, name);
     function performRedo() { const command = buildingController?.redo(); if (command) mapRenderer?.refresh(); }
     undoButton.addEventListener("click", performUndo);
     redoButton.addEventListener("click", performRedo);
+
+    zoomOutButton.addEventListener("click", () => {
+      mapRenderer?.zoomBy?.(1 / 1.15);
+    });
+
+    zoomInButton.addEventListener("click", () => {
+      mapRenderer?.zoomBy?.(1.15);
+    });
+
+    fitMapButton.addEventListener("click", () => {
+      mapRenderer?.fitToMap?.();
+    });
     window.addEventListener("keydown", event => {
       if (readOnly || event.defaultPrevented) return;
       const action = editorShortcutAction({ key: event.key, ctrlKey: event.ctrlKey, metaKey: event.metaKey, altKey: event.altKey, shiftKey: event.shiftKey, isFormControl: event.target instanceof Element && Boolean(event.target.closest("input, textarea, select, [contenteditable='true']")) });
@@ -2946,10 +3155,18 @@ button.replaceChildren(colorBox, name);
       setZoom(
         zoom
       ) {
+        const label =
+          `${Math.round(zoom * 100)}%`;
+
         document.getElementById(
           "zoomStatus"
         ).textContent =
-          `${Math.round(zoom * 100)}%`;
+          label;
+
+        if (toolbarZoomStatus) {
+          toolbarZoomStatus.textContent =
+            label;
+        }
       },
     };
 
