@@ -269,24 +269,87 @@ function bindUi() {
   });
 
   addEventListener("keydown", event => {
+    const isFormControl = Boolean(
+      event.target?.closest?.(
+        "input, textarea, select, button, [contenteditable='true']"
+      )
+    );
+
     const action = editorShortcutAction({
       key: event.key,
       ctrlKey: event.ctrlKey,
       metaKey: event.metaKey,
       altKey: event.altKey,
       shiftKey: event.shiftKey,
-      isFormControl: Boolean(event.target?.closest?.("input, textarea, select, button, [contenteditable='true']")),
+      isFormControl,
     });
+
     if (action) {
       event.preventDefault();
       buildingController[action]();
+      return;
     }
-    if (event.key === "Escape") selectTool();
-    if (event.key === "Delete" && !event.target?.closest?.("input, textarea, select, [contenteditable='true']")) {
-      const building = buildingController.getSelectedBuilding();
-      const range = rangeController.getSelectedRange();
-      if (building && confirm(`고정 건물 '${building.name}'을 삭제할까요?`)) buildingController.deleteSelected();
-      else if (range && confirm("선택한 고정 범위를 삭제할까요?")) rangeController.deleteSelected();
+
+    if (
+      !isFormControl &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      const key = event.key.toLowerCase();
+
+      // S = Select
+      if (key === "s") {
+        event.preventDefault();
+        selectTool();
+        return;
+      }
+
+      // M = Move selected fixed building
+      if (key === "m") {
+        event.preventDefault();
+
+        try {
+          rangeController.cancel();
+          bulkDeleteController.cancel();
+          rangeEraseController.cancel();
+          buildingController.startMove();
+          renderer.invalidate();
+          updateUi(false);
+        } catch (error) {
+          alert(error.message);
+        }
+        return;
+      }
+    }
+
+    if (event.key === "Escape") {
+      selectTool();
+      return;
+    }
+
+    if (
+      event.key === "Delete" &&
+      !isFormControl
+    ) {
+      const building =
+        buildingController.getSelectedBuilding();
+      const range =
+        rangeController.getSelectedRange();
+
+      if (
+        building &&
+        confirm(
+          `고정 건물 '${building.name}'을 삭제할까요?`
+        )
+      ) {
+        buildingController.deleteSelected();
+      } else if (
+        range &&
+        confirm("선택한 고정 범위를 삭제할까요?")
+      ) {
+        rangeController.deleteSelected();
+      }
     }
   });
 
