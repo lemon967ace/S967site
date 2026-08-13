@@ -2979,27 +2979,42 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       recoverySourceKind = "new"; recoveryDocumentId = newRecoveryDocumentId(); recoveryActiveKey = null;
 
       const title = entry.title || text.untitled;
+
+      /*
+        New server maps are never allowed to start as an empty map.
+        /map/ must transfer exactly one administrator-designated
+        default fixed-map template.
+      */
+      if (
+        !entry.templateId ||
+        entry.templateId === "empty"
+      ) {
+        sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
+        console.error("New map entry did not contain a default template.");
+        setOverlay(text.loadFailed, "", true);
+        return false;
+      }
+
       let template = null;
-      if (entry.templateId && entry.templateId !== "empty") {
-        const raw = sessionStorage.getItem(NEW_MAP_TEMPLATE_KEY);
-        sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
-        try {
-          const transfer = JSON.parse(raw || "null");
-          if (
-            !transfer ||
-            transfer.templateId !== entry.templateId ||
-            !transfer.templateData
-          ) {
-            throw new Error("INVALID_TEMPLATE_TRANSFER");
-          }
-          template = transfer.templateData;
-        } catch (error) {
-          console.error("New map template transfer failed:", error);
-          setOverlay(text.loadFailed, "", true);
-          return false;
+      const raw = sessionStorage.getItem(NEW_MAP_TEMPLATE_KEY);
+      sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
+
+      try {
+        const transfer = JSON.parse(raw || "null");
+
+        if (
+          !transfer ||
+          transfer.templateId !== entry.templateId ||
+          !transfer.templateData
+        ) {
+          throw new Error("INVALID_TEMPLATE_TRANSFER");
         }
-      } else {
-        sessionStorage.removeItem(NEW_MAP_TEMPLATE_KEY);
+
+        template = transfer.templateData;
+      } catch (error) {
+        console.error("New map template transfer failed:", error);
+        setOverlay(text.loadFailed, "", true);
+        return false;
       }
 
       try {
