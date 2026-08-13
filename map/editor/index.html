@@ -494,12 +494,51 @@
     body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
     body.shared-view .editor-stage{position:absolute;inset:0;width:100%;height:100%;}
     body.shared-view .shared-map-title{position:absolute;top:clamp(12px,2vh,22px);left:clamp(12px,1.6vw,24px);z-index:55;display:block;max-width:min(62vw,680px);padding:8px 11px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:10px;background:color-mix(in srgb,var(--surface) 24%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:var(--text);font-size:clamp(.95rem,1.35vw,1.25rem);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;}
-    body.shared-view .shared-filter-panel{position:fixed;left:clamp(12px,1.6vw,24px);bottom:44px;z-index:55;display:block;width:clamp(210px,20vw,300px);max-height:min(46vh,430px);overflow:auto;padding:10px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 26%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+    body.shared-view .shared-filter-panel{position:fixed;left:clamp(12px,1.6vw,24px);bottom:var(--shared-filter-bottom,44px);z-index:55;display:block;width:clamp(210px,20vw,300px);max-height:min(46vh,430px);overflow:auto;padding:10px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 26%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:bottom .16s ease;}
     body.shared-view .shared-filter-panel h2{margin:0 0 8px;color:var(--muted);font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
     body.shared-view .shared-filter-panel h3{margin:0 0 8px;font-size:.82rem;}
     body.shared-view .shared-zoom-panel{position:fixed;right:calc(clamp(12px,1.6vw,24px) + 94px);bottom:44px;z-index:55;display:flex;align-items:center;gap:6px;padding:6px;border:1px solid color-mix(in srgb,var(--border) 38%,transparent);border-radius:12px;background:color-mix(in srgb,var(--surface) 30%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
     body.shared-view .shared-zoom-panel button{min-width:34px;min-height:34px;padding:6px 9px;}
-    @media(max-width:620px){body.shared-view .shared-filter-panel{width:min(240px,calc(100vw - 24px));max-height:38vh;}body.shared-view .shared-map-title{max-width:calc(100vw - 24px);}}
+
+    .shared-ui-toggle{display:none;}
+    body.shared-view .shared-ui-toggle{
+      position:fixed;
+      right:14px;
+      bottom:6px;
+      z-index:1600;
+      display:inline-grid;
+      place-items:center;
+      min-width:32px;
+      min-height:30px;
+      padding:4px 8px;
+      border:1px solid color-mix(in srgb,var(--border) 38%,transparent);
+      border-radius:9px;
+      background:color-mix(in srgb,var(--surface) 30%,transparent);
+      color:var(--text);
+      backdrop-filter:blur(3px);
+      -webkit-backdrop-filter:blur(3px);
+      font-size:.78rem;
+      line-height:1;
+      opacity:.78;
+    }
+    body.shared-view .shared-ui-toggle:hover,
+    body.shared-view .shared-ui-toggle:focus-visible{opacity:1;}
+
+    body.shared-view.shared-controls-hidden .shared-filter-panel,
+    body.shared-view.shared-controls-hidden .shared-zoom-panel,
+    body.shared-view.shared-controls-hidden .top-pickers{
+      display:none!important;
+    }
+
+    /* 제목은 UI 숨김 상태에서도 항상 유지한다. */
+    body.shared-view.shared-controls-hidden .shared-map-title{
+      display:block!important;
+    }
+
+    @media(max-width:620px){
+      body.shared-view .shared-filter-panel{width:min(240px,calc(100vw - 24px));max-height:38vh;}
+      body.shared-view .shared-map-title{max-width:calc(100vw - 24px);}
+    }
 
     /*
       ==========================================================
@@ -968,6 +1007,17 @@
         <button id="sharedZoomInButton" type="button" aria-label="Zoom in">+</button>
         <button id="sharedFitMapButton" type="button">Fit</button>
       </div>
+
+      <button
+        id="sharedUiToggle"
+        class="shared-ui-toggle"
+        type="button"
+        aria-pressed="false"
+        aria-label="Hide map controls"
+        title="Hide map controls"
+      >
+        UI
+      </button>
 
     </main>
 
@@ -2019,8 +2069,12 @@
 
     const zoomPercentInput = document.getElementById("zoomPercentInput");
     const sharedMapTitle = document.getElementById("sharedMapTitle");
+    const sharedFilterPanel = document.getElementById("sharedFilterPanel");
     const sharedFiltersTitle = document.getElementById("sharedFiltersTitle");
     const sharedFiltersHost = document.getElementById("sharedFiltersHost");
+    const sharedZoomPanel = document.getElementById("sharedZoomPanel");
+    const sharedUiToggle = document.getElementById("sharedUiToggle");
+    const topPickers = document.querySelector(".top-pickers");
     const sharedZoomPercentInput = document.getElementById("sharedZoomPercentInput");
     const sharedZoomOutButton = document.getElementById("sharedZoomOutButton");
     const sharedZoomInButton = document.getElementById("sharedZoomInButton");
@@ -3074,6 +3128,165 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
     /*
       ==========================================================
+      SHARED MAP UI
+      ==========================================================
+    */
+
+    let sharedLayoutFrame = 0;
+
+    function sharedUiText() {
+      return {
+        ko: { hide: "지도 UI 숨기기", show: "지도 UI 표시" },
+        en: { hide: "Hide map controls", show: "Show map controls" },
+        ja: { hide: "マップUIを隠す", show: "マップUIを表示" },
+        ru: { hide: "Скрыть элементы карты", show: "Показать элементы карты" },
+      }[language] ?? { hide: "Hide map controls", show: "Show map controls" };
+    }
+
+    function updateSharedUiToggleText() {
+      if (!sharedUiToggle) return;
+
+      const hidden =
+        document.body.classList.contains(
+          "shared-controls-hidden"
+        );
+
+      const labels = sharedUiText();
+      const label = hidden ? labels.show : labels.hide;
+
+      sharedUiToggle.setAttribute(
+        "aria-pressed",
+        String(hidden)
+      );
+      sharedUiToggle.setAttribute(
+        "aria-label",
+        label
+      );
+      sharedUiToggle.title = label;
+      sharedUiToggle.textContent = hidden ? "UI+" : "UI−";
+    }
+
+    function updateSharedFilterAvoidance() {
+      if (
+        editorMode !== "shared" ||
+        !sharedFilterPanel
+      ) {
+        return;
+      }
+
+      if (
+        document.body.classList.contains(
+          "shared-controls-hidden"
+        )
+      ) {
+        sharedFilterPanel.style.removeProperty(
+          "--shared-filter-bottom"
+        );
+        return;
+      }
+
+      const baseBottom = 44;
+      const gap = 8;
+
+      if (
+        !topPickers ||
+        getComputedStyle(topPickers).display === "none"
+      ) {
+        sharedFilterPanel.style.setProperty(
+          "--shared-filter-bottom",
+          `${baseBottom}px`
+        );
+        return;
+      }
+
+      /*
+        필터와 언어/테마 UI는 기본적으로 같은 bottom(44px)을 쓴다.
+        따라서 가로 영역이 겹칠 때만 필터를 picker 높이만큼 위로 올리면
+        두 패널의 실제 겹침을 피할 수 있다.
+      */
+      const filterRect =
+        sharedFilterPanel.getBoundingClientRect();
+
+      const pickerRect =
+        topPickers.getBoundingClientRect();
+
+      const horizontalOverlap =
+        filterRect.left <
+          pickerRect.right + gap &&
+        filterRect.right >
+          pickerRect.left - gap;
+
+      const nextBottom =
+        horizontalOverlap
+          ? baseBottom +
+            Math.ceil(
+              pickerRect.height
+            ) +
+            gap
+          : baseBottom;
+
+      sharedFilterPanel.style.setProperty(
+        "--shared-filter-bottom",
+        `${nextBottom}px`
+      );
+    }
+
+    function scheduleSharedLayout() {
+      if (sharedLayoutFrame) {
+        cancelAnimationFrame(
+          sharedLayoutFrame
+        );
+      }
+
+      sharedLayoutFrame =
+        requestAnimationFrame(() => {
+          sharedLayoutFrame = 0;
+          updateSharedFilterAvoidance();
+        });
+    }
+
+    sharedUiToggle?.addEventListener(
+      "click",
+      () => {
+        document.body.classList.toggle(
+          "shared-controls-hidden"
+        );
+
+        updateSharedUiToggleText();
+        scheduleSharedLayout();
+      }
+    );
+
+    window.addEventListener(
+      "resize",
+      scheduleSharedLayout,
+      { passive: true }
+    );
+
+    if (
+      "ResizeObserver" in window
+    ) {
+      const sharedControlsObserver =
+        new ResizeObserver(
+          scheduleSharedLayout
+        );
+
+      if (sharedFilterPanel) {
+        sharedControlsObserver.observe(
+          sharedFilterPanel
+        );
+      }
+
+      if (topPickers) {
+        sharedControlsObserver.observe(
+          topPickers
+        );
+      }
+    }
+
+
+    /*
+      ==========================================================
       SHARED MAP
       ==========================================================
     */
@@ -3139,7 +3352,10 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           true;
 
         document.body.classList.add("shared-view");
+        document.body.classList.remove("shared-controls-hidden");
         if (sharedMapTitle) sharedMapTitle.textContent = mapTitleInput.value || text.untitled;
+        updateSharedUiToggleText();
+        scheduleSharedLayout();
 
         setDirty(
           false
@@ -3147,6 +3363,7 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
         mountMapRenderer();
         renderBuildingFilters(sharedFiltersHost, { replace: true });
+        scheduleSharedLayout();
 
         hideOverlay();
 
@@ -3373,6 +3590,8 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           TEXT.en;
 
         setStaticText();
+        updateSharedUiToggleText();
+        scheduleSharedLayout();
       }
     );
 
