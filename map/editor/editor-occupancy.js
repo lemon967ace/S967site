@@ -1,9 +1,18 @@
 import { isValidMapCell } from "./editor-model.js";
 
 export function calculateOccupiedCells(x, y, width, height) {
-  if (width === 1 && height === 1) return [[x, y]];
-  if (width === 2 && height === 2) return [[x - 1, y - 1], [x, y - 2], [x + 1, y - 1], [x, y]];
-  throw new RangeError("Building size must be 1x1 or 2x2.");
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+    throw new RangeError("Building width and height must be positive integers.");
+  }
+  const cells = [];
+  for (let row = 0; row < height; row++) {
+    for (let column = 0; column < width; column++) {
+      const dx = column - row;
+      const dy = -(column + row);
+      cells.push([x + dx, y + dy]);
+    }
+  }
+  return cells;
 }
 
 export class OccupancyManager {
