@@ -117,6 +117,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   refreshDocument();
 
   const canvas = document.createElement("canvas");
+  canvas.style.touchAction = "none";
   canvas.className = "pns-map-canvas";
   canvas.tabIndex = 0;
   canvas.setAttribute("aria-label", "PNS map viewport");
@@ -327,6 +328,9 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function filterHitGeometries(items) { return buildingFilter ? items.filter(item => item.building.fixed || buildingFilter.appearance(item.building, interaction.selectedBuildingId).hitTest) : items; }
 
+  const activeTouches = new Map();
+  let pinchGesture = null;
+
   function onWheel(event) {
     if (!event.deltaY) return;
     event.preventDefault();
@@ -336,39 +340,460 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     syncNavigation(); updateCursor(event);
   }
 
+  function touchPointFromEvent(event) {
+    return {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+
+  function getTouchPair() {
+    const touches = [...activeTouches.values()];
+    return touches.length >= 2
+      ? [touches[0], touches[1]]
+      : null;
+  }
+
+  function touchDistance(a, b) {
+    return Math.hypot(
+      b.x - a.x,
+      b.y - a.y
+    );
+  }
+
+  function touchMidpoint(a, b) {
+    return {
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2,
+    };
+  }
+
+  function beginPinchGesture() {
+    const pair = getTouchPair();
+
+    if (!pair) {
+      pinchGesture = null;
+      return;
+    }
+
+    const [a, b] = pair;
+    const distance = touchDistance(a, b);
+
+    if (!Number.isFinite(distance) || distance <= 0) {
+      pinchGesture = null;
+      return;
+    }
+
+    const midpoint = touchMidpoint(a, b);
+    const rect = canvas.getBoundingClientRect();
+
+    pinchGesture = {
+      startDistance: distance,
+      startZoom: state.zoom,
+      anchorScene: screenToScene(
+        midpoint.x - rect.left,
+        midpoint.y - rect.top,
+        state
+      ),
+    };
+
+    /*
+      A second finger means this is no longer a tap or a one-finger pan.
+      Cancel those candidates so pinch does not accidentally select/move.
+    */
+    clickCandidate = null;
+    panning = null;
+    canvas.style.cursor = "default";
+  }
+
+  function updatePinchGesture() {
+    const pair = getTouchPair();
+
+    if (!pair || !pinchGesture) {
+      return false;
+    }
+
+    const [a, b] = pair;
+    const distance = touchDistance(a, b);
+
+    if (!Number.isFinite(distance) || distance <= 0) {
+      return false;
+    }
+
+    const midpoint = touchMidpoint(a, b);
+    const rect = canvas.getBoundingClientRect();
+
+    const screenX =
+      midpoint.x - rect.left;
+
+    const screenY =
+      midpoint.y - rect.top;
+
+    const requestedZoom =
+      pinchGesture.startZoom *
+      (distance / pinchGesture.startDistance);
+
+    const zoom =
+      clampZoom(requestedZoom);
+
+    /*
+      Keep the original scene point under the moving midpoint.
+      This gives natural pinch-zoom + two-finger pan behavior.
+    */
+    state = {
+      ...state,
+      zoom,
+      sceneCenterX:
+        pinchGesture.anchorScene[0] -
+        (screenX - state.width / 2) / zoom,
+      sceneCenterY:
+        pinchGesture.anchorScene[1] -
+        (screenY - state.height / 2) / zoom,
+    };
+
+    syncNavigation();
+    return true;
+  }
+
   function onPointerDown(event) {
-    const touch = event.pointerType === "touch";
-    const mousePan = event.button === 1 || (event.button === 0 && spacePressed);
-    if (!touch && !mousePan && event.button === 0 && bulkDeleteController?.getState().mode === "bulkDelete") {
-      const cell = eventCell(event); if (cell) { bulkDeleteController.begin(cell); bulkDrawing = event.pointerId; onBulkDeleteStateChange(bulkDeleteController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); invalidate(); } return;
+    const touch =
+      event.pointerType === "touch";
+
+    const mousePan =
+      event.button === 1 ||
+      (
+        event.button === 0 &&
+        spacePressed
+      );
+
+    if (touch) {
+      activeTouches.set(
+        event.pointerId,
+        touchPointFromEvent(event)
+      );
+
+      canvas.setPointerCapture(
+        event.pointerId
+      );
+
+      event.preventDefault();
+      canvas.focus({
+        preventScroll: true,
+      });
+
+      if (activeTouches.size >= 2) {
+        beginPinchGesture();
+        return;
+      }
     }
-    if (!touch && !mousePan && event.button === 0 && rangeEraseController?.getState().mode === "rangeErase") {
-      const cell = eventCell(event); if (cell) { rangeEraseController.begin(cell); eraseDrawing = event.pointerId; onRangeEraseStateChange(rangeEraseController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); invalidate(); } return;
+
+    if (
+      !touch &&
+      !mousePan &&
+      event.button === 0 &&
+      bulkDeleteController?.getState().mode ===
+        "bulkDelete"
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        bulkDeleteController.begin(cell);
+        bulkDrawing =
+          event.pointerId;
+
+        onBulkDeleteStateChange(
+          bulkDeleteController.getState()
+        );
+
+        canvas.setPointerCapture(
+          event.pointerId
+        );
+
+        event.preventDefault();
+        invalidate();
+      }
+
+      return;
     }
-    if (!touch && !mousePan && event.button === 0 && rangeController?.getState().mode === "rangeCreate") {
-      const cell = eventCell(event); if (cell) { rangeController.click(cell); rangeDrawing = event.pointerId; onRangeStateChange(rangeController.getState()); canvas.setPointerCapture(event.pointerId); event.preventDefault(); return; }
+
+    if (
+      !touch &&
+      !mousePan &&
+      event.button === 0 &&
+      rangeEraseController?.getState().mode ===
+        "rangeErase"
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        rangeEraseController.begin(cell);
+        eraseDrawing =
+          event.pointerId;
+
+        onRangeEraseStateChange(
+          rangeEraseController.getState()
+        );
+
+        canvas.setPointerCapture(
+          event.pointerId
+        );
+
+        event.preventDefault();
+        invalidate();
+      }
+
+      return;
     }
-    if (event.button === 0 || touch) clickCandidate = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false, selectionAllowed: touch || !spacePressed };
-    if (!touch && !mousePan) { canvas.focus({ preventScroll: true }); canvas.setPointerCapture(event.pointerId); return; }
-    event.preventDefault(); canvas.focus({ preventScroll: true }); canvas.setPointerCapture(event.pointerId);
-    panning = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-    canvas.style.cursor = "grabbing";
+
+    if (
+      !touch &&
+      !mousePan &&
+      event.button === 0 &&
+      rangeController?.getState().mode ===
+        "rangeCreate"
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        rangeController.click(cell);
+        rangeDrawing =
+          event.pointerId;
+
+        onRangeStateChange(
+          rangeController.getState()
+        );
+
+        canvas.setPointerCapture(
+          event.pointerId
+        );
+
+        event.preventDefault();
+        return;
+      }
+    }
+
+    if (
+      event.button === 0 ||
+      touch
+    ) {
+      clickCandidate = {
+        pointerId:
+          event.pointerId,
+        x:
+          event.clientX,
+        y:
+          event.clientY,
+        moved:
+          false,
+        selectionAllowed:
+          touch ||
+          !spacePressed,
+      };
+    }
+
+    if (
+      !touch &&
+      !mousePan
+    ) {
+      canvas.focus({
+        preventScroll: true,
+      });
+
+      canvas.setPointerCapture(
+        event.pointerId
+      );
+
+      return;
+    }
+
+    event.preventDefault();
+
+    canvas.focus({
+      preventScroll: true,
+    });
+
+    canvas.setPointerCapture(
+      event.pointerId
+    );
+
+    panning = {
+      pointerId:
+        event.pointerId,
+      x:
+        event.clientX,
+      y:
+        event.clientY,
+    };
+
+    canvas.style.cursor =
+      "grabbing";
   }
 
   function onPointerMove(event) {
-    if (bulkDrawing === event.pointerId) { const cell = eventCell(event); if (cell) bulkDeleteController.update(cell); onBulkDeleteStateChange(bulkDeleteController.getState()); invalidate(); return; }
-    if (eraseDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeEraseController.update(cell); onRangeEraseStateChange(rangeEraseController.getState()); invalidate(); return; }
-    if (rangeDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeController.hover(cell); invalidate(); return; }
-    if (clickCandidate?.pointerId === event.pointerId && Math.hypot(event.clientX - clickCandidate.x, event.clientY - clickCandidate.y) >= 6) clickCandidate.moved = true;
-    if (panning?.pointerId === event.pointerId) {
-      state = panViewport(state, event.clientX - panning.x, event.clientY - panning.y);
-      panning.x = event.clientX; panning.y = event.clientY;
+    if (
+      event.pointerType === "touch" &&
+      activeTouches.has(
+        event.pointerId
+      )
+    ) {
+      activeTouches.set(
+        event.pointerId,
+        touchPointFromEvent(event)
+      );
+
+      if (
+        activeTouches.size >= 2 &&
+        pinchGesture
+      ) {
+        event.preventDefault();
+        updatePinchGesture();
+        return;
+      }
+    }
+
+    if (
+      bulkDrawing ===
+      event.pointerId
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        bulkDeleteController.update(cell);
+      }
+
+      onBulkDeleteStateChange(
+        bulkDeleteController.getState()
+      );
+
+      invalidate();
+      return;
+    }
+
+    if (
+      eraseDrawing ===
+      event.pointerId
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        rangeEraseController.update(cell);
+      }
+
+      onRangeEraseStateChange(
+        rangeEraseController.getState()
+      );
+
+      invalidate();
+      return;
+    }
+
+    if (
+      rangeDrawing ===
+      event.pointerId
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        rangeController.hover(cell);
+      }
+
+      invalidate();
+      return;
+    }
+
+    if (
+      clickCandidate?.pointerId ===
+        event.pointerId &&
+      Math.hypot(
+        event.clientX -
+          clickCandidate.x,
+        event.clientY -
+          clickCandidate.y
+      ) >= 6
+    ) {
+      clickCandidate.moved =
+        true;
+    }
+
+    if (
+      panning?.pointerId ===
+      event.pointerId
+    ) {
+      state =
+        panViewport(
+          state,
+          event.clientX -
+            panning.x,
+          event.clientY -
+            panning.y
+        );
+
+      panning.x =
+        event.clientX;
+
+      panning.y =
+        event.clientY;
+
       syncNavigation();
     }
+
     updateCursor(event);
   }
 
   function endPan(event) {
+    const touch =
+      event.pointerType === "touch";
+
+    const wasPinching =
+      touch &&
+      pinchGesture !== null;
+
+    if (touch) {
+      activeTouches.delete(
+        event.pointerId
+      );
+
+      if (
+        activeTouches.size >= 2
+      ) {
+        beginPinchGesture();
+      } else {
+        pinchGesture = null;
+
+        /*
+          Do not continue the gesture as an old one-finger drag.
+          The remaining finger must start a fresh gesture.
+        */
+        panning = null;
+        clickCandidate = null;
+      }
+
+      if (
+        canvas.hasPointerCapture(
+          event.pointerId
+        )
+      ) {
+        canvas.releasePointerCapture(
+          event.pointerId
+        );
+      }
+
+      if (wasPinching) {
+        canvas.style.cursor =
+          spacePressed
+            ? "grab"
+            : "default";
+        return;
+      }
+    }
+
     if (bulkDrawing === event.pointerId) {
       const cell = eventCell(event); if (cell) bulkDeleteController.update(cell);
       const summary = bulkDeleteController.summary(); bulkDrawing = null;
@@ -395,9 +820,26 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     clickCandidate = null; canvas.style.cursor = spacePressed ? "grab" : "default";
     if (isTapSelectionCandidate(candidate)) selectAt(event);
     updateCursor(event);
+
   }
 
   function cancelPointer(event) {
+    if (
+      event.pointerType === "touch"
+    ) {
+      activeTouches.delete(
+        event.pointerId
+      );
+
+      if (
+        activeTouches.size >= 2
+      ) {
+        beginPinchGesture();
+      } else {
+        pinchGesture = null;
+      }
+    }
+
     if (bulkDrawing === event.pointerId) { bulkDrawing = null; bulkDeleteController?.cancel(); onBulkDeleteStateChange(bulkDeleteController?.getState()); }
     if (eraseDrawing === event.pointerId) { eraseDrawing = null; rangeEraseController?.cancel(); onRangeEraseStateChange(rangeEraseController?.getState()); }
     if (rangeDrawing === event.pointerId) { rangeDrawing = null; rangeController?.cancel(); onRangeStateChange(rangeController?.getState()); }
@@ -405,6 +847,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     if (panning?.pointerId === event.pointerId) panning = null;
     if (clickCandidate?.pointerId === event.pointerId) clickCandidate = null;
     canvas.style.cursor = spacePressed ? "grab" : "default";
+
   }
 
   function eventCell(event) { const rect = canvas.getBoundingClientRect(), scene = screenToScene(event.clientX - rect.left, event.clientY - rect.top, state); return sceneToGrid(...scene); }
@@ -416,7 +859,14 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     if (event.key === "Delete" && controller) { try { const removed = controller.deleteSelected(); if (removed) { refreshDocument(); interaction.clearSelection(); onSelectionChange(null); invalidate(); } else if (rangeController?.deleteSelected()) { refreshDocument(); onRangeSelectionChange(null); invalidate(); } } catch {} }
   }
   function onKeyUp(event) { if (event.code === "Space") { spacePressed = false; if (!panning) canvas.style.cursor = "default"; } }
-  function onBlur() { spacePressed = false; panning = null; clickCandidate = null; canvas.style.cursor = "default"; }
+  function onBlur() {
+    spacePressed = false;
+    panning = null;
+    clickCandidate = null;
+    pinchGesture = null;
+    activeTouches.clear();
+    canvas.style.cursor = "default";
+  }
   function onContextMenu(event) { if (panning) event.preventDefault(); }
 
   canvas.addEventListener("wheel", onWheel, { passive: false });
