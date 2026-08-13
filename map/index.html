@@ -2508,6 +2508,18 @@
         "hidden"
       );
 
+      // 계정 생성 화면을 열 때마다 현재 언어의 보안 안내문을 확실히 표시한다.
+      const passwordNotice =
+        document.getElementById(
+          "passwordSecurityNotice"
+        );
+
+      if (passwordNotice) {
+        passwordNotice.textContent =
+          text.passwordSecurityNotice ?? "";
+        passwordNotice.hidden = false;
+      }
+
       createPassword.value =
         loginPassword.value;
 
