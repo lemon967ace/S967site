@@ -1380,8 +1380,8 @@ wkAllStrong: "全兵種",
 wkMonitorAvailable: "リアルタイム対応可能",
 wkMonitorUnavailable: "リアルタイム対応不可",
 
-wkCaptain: "キャプテン可能",
-wkSubCaptain: "サブキャプテン可能",
+wkCaptain: "リーダー可能",
+wkSubCaptain: "サブリーダー可能",
 wkRegular: "一般参加",
 wkNegotiable: "必要に応じて相談可能",
 
