@@ -3354,6 +3354,20 @@
     );
 
 
+    shareCode.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key !== "Enter") return;
+
+        event.preventDefault();
+
+        if (!shareOpenButton.disabled) {
+          shareOpenButton.click();
+        }
+      }
+    );
+
+
     shareOpenButton.addEventListener(
       "click",
       async () => {
@@ -4018,6 +4032,16 @@
     });
 
     newMapName.addEventListener("input", updateNewMapCreateState);
+
+    newMapName.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+
+      event.preventDefault();
+
+      if (!createNewMapButton.disabled) {
+        createNewMapButton.click();
+      }
+    });
 
     createNewMapButton.addEventListener("click", async () => {
       if (createNewMapButton.disabled) return;
