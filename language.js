@@ -198,7 +198,7 @@ groupBuyPlayerName:
   "Player Name",
 
 groupBuyNamePlaceholder:
-  "Please enter your name by copy & paste 😉",
+  "Please copy&paste😉",
 
 groupBuyPurchaseItems:
   "Items You Plan to Purchase",
@@ -713,7 +713,7 @@ groupBuyPlayerName:
   "이름",
 
 groupBuyNamePlaceholder:
-  "반드시 복사붙이기로 입력해주세요😉",
+  "복붙해주세용😉",
 
 groupBuyPurchaseItems:
   "구매 예정 항목",
@@ -1227,7 +1227,7 @@ groupBuyPlayerName:
   "名前",
 
 groupBuyNamePlaceholder:
-  "必ずコピー＆ペーストで入力してください😉",
+  "コピペでお願いします。😉",
 
 groupBuyPurchaseItems:
   "購入予定の商品",
@@ -1738,7 +1738,7 @@ groupBuyPlayerName:
   "Ник",
 
 groupBuyNamePlaceholder:
-  "Обязательно скопируйте и вставьте ник 😉",
+  "Скопируйте и вставьте, пожалуйста 😉))",
 
 groupBuyPurchaseItems:
   "Планируемые покупки",
