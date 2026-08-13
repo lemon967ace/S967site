@@ -56,13 +56,16 @@ this.color = validateColor(color, "Building type color");
 export class FixedBuildingType extends BuildingType {
   constructor({ width = 1, height = 1, ...data }) {
     super(data);
-    if (!((width === 1 && height === 1) || (width === 2 && height === 2))) throw new RangeError("Fixed building type size must be 1x1 or 2x2.");
-    this.width = width; this.height = height;
+    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+      throw new RangeError("Fixed building type width and height must be positive integers.");
+    }
+    this.width = width;
+    this.height = height;
   }
 }
 
 export class Building {
-  constructor({ name, typeId, type_id, x, y, width, height, affiliation = "", locked = false, id = createUniqueId() }) {
+  constructor({ name, typeId, type_id, x, y, width, height, affiliation = "", locked = false, id = createUniqueId(), allowAnySize = false }) {
     this.id = validateNonEmptyText(id, "Building ID");
     this.name = validateNonEmptyText(name, "Building name");
     this.typeId = validateNonEmptyText(typeId ?? type_id, "Building type ID");
@@ -72,8 +75,18 @@ export class Building {
       throw new RangeError("Building affiliation must be exactly three printable ASCII characters.");
     }
     if (!Number.isInteger(x) || !Number.isInteger(y)) throw new TypeError("Building coordinates must be integers.");
-    if (!((width === 1 && height === 1) || (width === 2 && height === 2))) {
-      throw new RangeError("Building size must be 1x1 or 2x2.");
+    if (
+      !Number.isInteger(width) ||
+      !Number.isInteger(height) ||
+      width < 1 ||
+      height < 1 ||
+      (!allowAnySize && !((width === 1 && height === 1) || (width === 2 && height === 2)))
+    ) {
+      throw new RangeError(
+        allowAnySize
+          ? "Building width and height must be positive integers."
+          : "Building size must be 1x1 or 2x2."
+      );
     }
     this.x = x; this.y = y; this.width = width; this.height = height; this.locked = Boolean(locked);
     const invalid = this.occupiedCells().filter(([cellX, cellY]) => !isValidMapCell(cellX, cellY));
@@ -83,8 +96,15 @@ export class Building {
   get type_id() { return this.typeId; }
 
   occupiedCells() {
-    if (this.width === 1) return [[this.x, this.y]];
-    return [[this.x - 1, this.y - 1], [this.x, this.y - 2], [this.x + 1, this.y - 1], [this.x, this.y]];
+    const cells = [];
+    for (let row = 0; row < this.height; row++) {
+      for (let column = 0; column < this.width; column++) {
+        const dx = column - row;
+        const dy = -(column + row);
+        cells.push([this.x + dx, this.y + dy]);
+      }
+    }
+    return cells;
   }
 }
 
