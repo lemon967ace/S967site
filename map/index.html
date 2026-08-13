@@ -238,6 +238,15 @@
       line-height: 1.5;
     }
 
+    .retention-notice {
+      margin: 18px 0 0;
+
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      text-align: center;
+    }
+
     .share-code-input {
       text-align: center;
 
@@ -749,6 +758,13 @@
           class="status"
         ></div>
 
+        <p
+          id="retentionNotice"
+          class="retention-notice"
+        >
+          Saved and shared maps are stored for up to 6 months.
+        </p>
+
       </div>
     </section>
 
@@ -964,6 +980,9 @@
 
     const MAP_API_URL = "";
 
+    const MAP_SHARE_LOAD_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/map-share-load";
+
     const MAX_MAPS = 5;
 
 
@@ -1063,6 +1082,18 @@
         shareInvalid:
           "Please enter a 6-digit share code.",
 
+        shareLoading:
+          "Loading shared map…",
+
+        shareNotFound:
+          "The shared map could not be found or sharing has been disabled.",
+
+        shareLoadFailed:
+          "Failed to load the shared map.",
+
+        retentionNotice:
+          "Saved and shared maps are stored for up to 6 months.",
+
         back:
           "← Back to Home",
       },
@@ -1155,6 +1186,18 @@
 
         shareInvalid:
           "6자리 공유 코드를 입력해 주세요.",
+
+        shareLoading:
+          "공유 맵을 불러오는 중…",
+
+        shareNotFound:
+          "공유 맵을 찾을 수 없거나 공유가 해제되었습니다.",
+
+        shareLoadFailed:
+          "공유 맵을 불러오지 못했습니다.",
+
+        retentionNotice:
+          "저장 및 공유된 맵은 최대 6개월간 보관됩니다.",
 
         back:
           "← 홈으로",
@@ -1249,6 +1292,18 @@
         shareInvalid:
           "6桁の共有コードを入力してください。",
 
+        shareLoading:
+          "共有マップを読み込んでいます…",
+
+        shareNotFound:
+          "共有マップが見つからないか、共有が解除されています。",
+
+        shareLoadFailed:
+          "共有マップを読み込めませんでした。",
+
+        retentionNotice:
+          "保存・共有されたマップは最長6か月間保存されます。",
+
         back:
           "← ホームへ",
       },
@@ -1341,6 +1396,18 @@
 
         shareInvalid:
           "Введите 6-значный код доступа.",
+
+        shareLoading:
+          "Загрузка общей карты…",
+
+        shareNotFound:
+          "Общая карта не найдена или доступ к ней отключён.",
+
+        shareLoadFailed:
+          "Не удалось загрузить общую карту.",
+
+        retentionNotice:
+          "Сохранённые и общие карты хранятся до 6 месяцев.",
 
         back:
           "← На главную",
@@ -1522,6 +1589,11 @@
         "shareStatus"
       );
 
+    const retentionNotice =
+      document.getElementById(
+        "retentionNotice"
+      );
+
 
     /*
       ==========================================================
@@ -1619,6 +1691,9 @@
 
       shareOpenButton.textContent =
         text.shareOpen;
+
+      retentionNotice.textContent =
+        text.retentionNotice;
 
       document.getElementById(
         "backLink"
@@ -2101,7 +2176,7 @@
 
     shareOpenButton.addEventListener(
       "click",
-      () => {
+      async () => {
 
         const code =
           shareCode.value.trim();
@@ -2122,18 +2197,87 @@
           return;
         }
 
-        /*
-          다음 단계에서 실제 공유 맵 조회 API를 연결합니다.
+        shareOpenButton.disabled =
+          true;
 
-          예:
-          window.location.href =
-            `/map/shared/?code=${encodeURIComponent(code)}`;
-        */
-
-        console.log(
-          "Open shared map:",
-          code
+        setStatus(
+          shareStatus,
+          text.shareLoading
         );
+
+        try {
+          const response =
+            await fetch(
+              MAP_SHARE_LOAD_URL,
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+
+                body:
+                  JSON.stringify({
+                    share_code: code,
+                  }),
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => ({})
+              );
+
+          if (!response.ok) {
+            if (
+              response.status === 404 ||
+              result.error ===
+                "shared_map_not_found"
+            ) {
+              throw new Error(
+                text.shareNotFound
+              );
+            }
+
+            throw new Error(
+              text.shareLoadFailed
+            );
+          }
+
+          if (
+            !result.ok ||
+            !result.map
+          ) {
+            throw new Error(
+              text.shareLoadFailed
+            );
+          }
+
+          sessionStorage.setItem(
+            "s967_shared_map",
+            JSON.stringify({
+              map: result.map,
+              read_only: true,
+            })
+          );
+
+          window.location.href =
+            "/map/editor/?shared=1";
+
+        } catch (error) {
+          setStatus(
+            shareStatus,
+            error?.message ||
+              text.shareLoadFailed,
+            "error"
+          );
+
+          shareOpenButton.disabled =
+            false;
+        }
       }
     );
 
