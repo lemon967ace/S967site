@@ -399,15 +399,38 @@ function editFixedType(type) {
   if (name === null) return;
   const colorInput = prompt("건물 종류 기본 색 (#RRGGBB 또는 255,255,255)", type.color);
   if (colorInput === null) return;
-  const sizeInput = prompt("크기 (1 또는 2)", String(type.width));
-  if (sizeInput === null) return;
+  const widthInput = prompt("가로 크기", String(type.width));
+  if (widthInput === null) return;
+
+  const heightInput = prompt("세로 크기", String(type.height));
+  if (heightInput === null) return;
 
   try {
     const color = validateColor(colorInput, "건물 종류 색");
-    const size = Number(sizeInput);
-    if (![1, 2].includes(size)) throw new RangeError("크기는 1 또는 2만 가능합니다.");
+    const width = Number(widthInput);
+    const height = Number(heightInput);
+
+    if (
+      !Number.isInteger(width) ||
+      !Number.isInteger(height) ||
+      width < 1 ||
+      height < 1
+    ) {
+      throw new RangeError("가로·세로 크기는 1 이상의 정수여야 합니다.");
+    }
+
     const before = snapshotTemplate();
-    PNSMapEngine.editFixedBuildingType(type.id, { name, color, width: size, height: size });
+
+    PNSMapEngine.editFixedBuildingType(
+      type.id,
+      {
+        name,
+        color,
+        width,
+        height,
+      }
+    );
+
     const after = snapshotTemplate();
     recordTemplateMutation("fixedTypeEdit", before, after);
     updateUi(true);
