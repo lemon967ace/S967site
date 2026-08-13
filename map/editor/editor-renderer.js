@@ -440,6 +440,41 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     canvas,
     getState: () => ({ ...state }),
     centerAtGrid(x, y) { const [sceneCenterX, sceneCenterY] = gridToScene(...nearestValidGridCoordinate(x, y)); state = { ...state, sceneCenterX, sceneCenterY }; syncNavigation(); return { ...state }; },
+    setZoom(requestedZoom) {
+      state = zoomViewportAt(state, requestedZoom, state.width / 2, state.height / 2);
+      syncNavigation();
+      return { ...state };
+    },
+    zoomBy(factor) {
+      const numericFactor = Number(factor);
+      if (!Number.isFinite(numericFactor) || numericFactor <= 0) return { ...state };
+      state = zoomViewportAt(state, state.zoom * numericFactor, state.width / 2, state.height / 2);
+      syncNavigation();
+      return { ...state };
+    },
+    fitToMap({ padding = 24 } = {}) {
+      const safePadding = Math.max(0, Number(padding) || 0);
+      const [minSceneX, minSceneY] = gridToScene(MAP_MIN_X, MAP_MIN_Y);
+      const [maxSceneX, maxSceneY] = gridToScene(MAP_MAX_X, MAP_MAX_Y);
+      const mapLeft = minSceneX - DEFAULT_TILE_WIDTH / 2;
+      const mapRight = maxSceneX + DEFAULT_TILE_WIDTH / 2;
+      const mapTop = minSceneY - DEFAULT_TILE_HEIGHT / 2;
+      const mapBottom = maxSceneY + DEFAULT_TILE_HEIGHT / 2;
+      const availableWidth = Math.max(1, state.width - safePadding * 2);
+      const availableHeight = Math.max(1, state.height - safePadding * 2);
+      const requestedZoom = Math.min(
+        availableWidth / Math.max(1, mapRight - mapLeft),
+        availableHeight / Math.max(1, mapBottom - mapTop),
+      );
+      state = {
+        ...state,
+        sceneCenterX: (mapLeft + mapRight) / 2,
+        sceneCenterY: (mapTop + mapBottom) / 2,
+        zoom: clampZoom(requestedZoom),
+      };
+      syncNavigation();
+      return { ...state };
+    },
     getSelectedBuildingId: () => interaction.selectedBuildingId,
     getHoveredBuildingId: () => interaction.hoveredBuildingId,
     getSelectedBuilding: () => [...engine.getDocument().fixedBuildings, ...engine.getDocument().buildings].find(building => building.id === interaction.selectedBuildingId) ?? null,
