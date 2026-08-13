@@ -181,8 +181,25 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     if (!preview) return;
     const geometry = buildingRenderGeometry({ id: "preview", name: "", affiliation: "", locked: false, ...preview });
     const type = (editableFixed ? fixedBuildingTypes : buildingTypes).get(preview.typeId);
-    context.save(); context.globalAlpha = preview.valid ? 0.55 : 0.72;
-    fillAndStrokeGeometry(geometry, preview.valid ? (type?.color ?? "#4E79A7") : "#e53935", preview.valid ? "#ffffff" : "#8b0000", Math.max(1.5, 3 * state.zoom));
+    const previewValid =
+  preview.valid ??
+  preview.canPlace ??
+  false;
+
+context.save();
+context.globalAlpha =
+  previewValid ? 0.55 : 0.72;
+
+fillAndStrokeGeometry(
+  geometry,
+  previewValid
+    ? (type?.color ?? "#4E79A7")
+    : "#e53935",
+  previewValid
+    ? "#ffffff"
+    : "#8b0000",
+  Math.max(1.5, 3 * state.zoom)
+);
     context.restore();
   }
 
