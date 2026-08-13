@@ -110,7 +110,12 @@ export class Building {
 
 export class FixedBuilding extends Building {
   constructor({ color = "#EEEEEE", priority = 0, ...data }) {
-    super({ ...data, affiliation: "", locked: true });
+    super({
+      ...data,
+      affiliation: "",
+      locked: true,
+      allowAnySize: true,
+    });
     this.color = validateColor(color, "Fixed building color");
     this.priority = validatePriority(priority, "Fixed building priority");
     this.fixed = true;
