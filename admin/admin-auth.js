@@ -7,6 +7,7 @@
 
   const STORAGE_KEY = "s967-admin-session-token";
   const AUTH_ERRORS = new Set(["UNAUTHORIZED", "INVALID_SESSION", "SESSION_EXPIRED"]);
+  const REQUEST_TIMEOUT_MS = 10000;
 
   function storageOrDefault(storage) {
     return storage || globalThis.sessionStorage;
@@ -27,6 +28,24 @@
   function authorizationHeaders(storage) {
     const token = getToken(storage);
     return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+
+  async function fetchWithTimeout(fetchImpl, url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetchImpl(url, { ...options, signal: controller.signal });
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        const timeoutError = new Error("REQUEST_TIMEOUT");
+        timeoutError.code = "REQUEST_TIMEOUT";
+        throw timeoutError;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function readResult(response) {
@@ -51,7 +70,7 @@
 
   async function login(password, options = {}) {
     const fetchImpl = options.fetchImpl || globalThis.fetch;
-    const response = await fetchImpl(options.url, {
+    const response = await fetchWithTimeout(fetchImpl, options.url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
@@ -66,7 +85,7 @@
     const token = getToken(options.storage);
     if (!token) return false;
     try {
-      const response = await (options.fetchImpl || globalThis.fetch)(options.url, {
+      const response = await fetchWithTimeout(options.fetchImpl || globalThis.fetch, options.url, {
         method: "GET",
         headers: authorizationHeaders(options.storage),
       });
@@ -83,7 +102,7 @@
     try {
       const token = getToken(options.storage);
       if (token) {
-        await (options.fetchImpl || globalThis.fetch)(options.url, {
+        await fetchWithTimeout(options.fetchImpl || globalThis.fetch, options.url, {
           method: "POST",
           headers: authorizationHeaders(options.storage),
         });
