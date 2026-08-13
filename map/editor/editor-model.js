@@ -16,10 +16,24 @@ export function validateNonEmptyText(value, fieldName) {
 }
 
 export function validateColor(value, fieldName) {
-  if (typeof value !== "string" || !/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/.test(value.trim())) {
-    throw new TypeError(`${fieldName} must be a valid hex color.`);
+  if (typeof value !== "string") throw new TypeError(`${fieldName} must be a color string.`);
+  const raw = value.trim();
+  if (/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/.test(raw)) {
+    return raw.toUpperCase();
   }
-  return value.trim().toUpperCase();
+  const rgbMatch = raw.match(/^(?:rgb\(\s*)?(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*\))?$/i);
+  if (rgbMatch) {
+    const channels = rgbMatch.slice(1).map(Number);
+    if (channels.every(channel => Number.isInteger(channel) && channel >= 0 && channel <= 255)) {
+      return `#${channels.map(channel => channel.toString(16).padStart(2, "0")).join("").toUpperCase()}`;
+    }
+  }
+  throw new TypeError(`${fieldName} must be HEX (#RRGGBB) or RGB (255,255,255).`);
+}
+
+export function validatePriority(value, fieldName = "Priority") {
+  if (!Number.isInteger(value)) throw new TypeError(`${fieldName} must be an integer.`);
+  return value;
 }
 
 export function isCoordinateInsideMap(x, y) {
@@ -75,7 +89,12 @@ export class Building {
 }
 
 export class FixedBuilding extends Building {
-  constructor(data) { super({ affiliation: "", locked: true, ...data }); this.fixed = true; }
+  constructor({ color = "#EEEEEE", priority = 0, ...data }) {
+    super({ ...data, affiliation: "", locked: true });
+    this.color = validateColor(color, "Fixed building color");
+    this.priority = validatePriority(priority, "Fixed building priority");
+    this.fixed = true;
+  }
 }
 
 export class MapRange {
@@ -95,7 +114,11 @@ this.color = validateColor(color, "Range color");
 }
 
 export class FixedRange extends MapRange {
-  constructor(data) { super({ ...data, locked: true }); this.fixed = true; }
+  constructor({ priority = 0, ...data }) {
+    super({ ...data, locked: true });
+    this.priority = validatePriority(priority, "Fixed range priority");
+    this.fixed = true;
+  }
 }
 
 export function buildRangeCellOwnerIndex({ fixedRanges = [], ranges = [] }, { throwOnOverlap = false } = {}) {
@@ -116,7 +139,7 @@ export class MapDocument {
     this.ranges = ranges.map(item => item instanceof MapRange ? item : new MapRange(item));
     this.fixedBuildingTypes = fixedBuildingTypes.map(item => item instanceof FixedBuildingType ? item : new FixedBuildingType(item));
     const fixedTypesById = new Map(this.fixedBuildingTypes.map(item => [item.id, item]));
-    this.fixedBuildings = fixedBuildings.map(item => { const type = fixedTypesById.get(item.typeId ?? item.type_id); return item instanceof FixedBuilding ? item : new FixedBuilding({ ...item, width: item.width ?? type?.width, height: item.height ?? type?.height }); });
+    this.fixedBuildings = fixedBuildings.map(item => { const type = fixedTypesById.get(item.typeId ?? item.type_id); return item instanceof FixedBuilding ? item : new FixedBuilding({ ...item, color: item.color ?? type?.color ?? "#EEEEEE", priority: item.priority ?? 0, width: item.width ?? type?.width, height: item.height ?? type?.height }); });
     this.fixedRanges = fixedRanges.map(item => item instanceof FixedRange ? item : new FixedRange(item));
     this.view = { centerX: view.centerX ?? view.center_x, centerY: view.centerY ?? view.center_y, zoom: view.zoom };
     this.validate();
