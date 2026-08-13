@@ -228,6 +228,7 @@
       display: none !important;
     }
   </style>
+  <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
 
 <body>
@@ -628,6 +629,45 @@
   <script>
     const WK_API_URL =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-submit";
+
+    const WK_OPTIONS_CACHE_KEY = "s967-wk-options-v1";
+    const WK_REQUEST_TIMEOUT_MS = 10000;
+
+    async function fetchWithTimeout(url, options = {}, timeoutMs = WK_REQUEST_TIMEOUT_MS) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          throw new Error(text?.loadFailed || "The request timed out. Please try again.");
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function readCachedWkOptions() {
+      try {
+        const parsed = JSON.parse(sessionStorage.getItem(WK_OPTIONS_CACHE_KEY) || "null");
+        if (!parsed || !Array.isArray(parsed.tiers) || !Array.isArray(parsed.alliances)) return null;
+        return parsed;
+      } catch {
+        return null;
+      }
+    }
+
+    function cacheWkOptions(result) {
+      try {
+        sessionStorage.setItem(WK_OPTIONS_CACHE_KEY, JSON.stringify({
+          tiers: result.tiers ?? [],
+          alliances: result.alliances ?? [],
+          availability: result.availability ?? null,
+          cached_at: Date.now(),
+        }));
+      } catch {}
+    }
 
 
     const TEXT = {
@@ -2007,37 +2047,7 @@ function updateRadioGroupLabels() {
   }
 );
     
-    async function loadOptions() {
-      const response =
-        await fetch(
-          WK_API_URL,
-          {
-            method: "GET",
-          }
-        );
-
-      const result =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (!response.ok) {
-        throw new Error(
-          result.error ||
-          text.loadFailed
-        );
-      }
-
-serverAvailability =
-  result.availability ?? {
-    mode: "auto",
-    is_open: null,
-  };
-
-updateApplicationSchedule();
-      
+    function applyOptionLists(result) {
       tier.innerHTML = "";
 
       const tierPlaceholder =
@@ -2268,6 +2278,33 @@ function updateParticipationState() {
     );
 
 
+
+    async function loadOptions() {
+      const cached = readCachedWkOptions();
+      if (cached) {
+        applyOptionLists(cached);
+        if (cached.availability && Date.now() - Number(cached.cached_at ?? 0) < 30000) {
+          serverAvailability = cached.availability;
+          updateApplicationSchedule();
+        }
+      }
+
+      const response = await fetchWithTimeout(WK_API_URL, { method: "GET" });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("WK 신청 서버 인증 설정 오류(401). 관리자에게 알려주세요.");
+        }
+        throw new Error(result.error || text.loadFailed);
+      }
+
+      serverAvailability = result.availability ?? { mode: "auto", is_open: null };
+      updateApplicationSchedule();
+      applyOptionLists(result);
+      cacheWkOptions(result);
+    }
+
     form.addEventListener(
       "submit",
       async (event) => {
@@ -2331,7 +2368,7 @@ function updateParticipationState() {
 
         try {
           const response =
-            await fetch(
+            await fetchWithTimeout(
               WK_API_URL,
               {
                 method:
