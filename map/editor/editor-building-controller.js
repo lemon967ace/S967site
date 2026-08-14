@@ -1,5 +1,5 @@
 import { Building } from "./editor-model.js";
-import { sameBuildingState, snapshotBuilding } from "./editor-history.js";
+import { sameBuildingState, snapshotBuilding, snapshotRange } from "./editor-history.js";
 
 export const EDITOR_MODES = Object.freeze({ SELECT: "select", PLACE: "place", MOVE: "move" });
 
