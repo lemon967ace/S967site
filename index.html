@@ -36,13 +36,12 @@
   ></script>
 
   <style>
+
     /* =========================================================
-       BASE
+       BASIC / PRIVACY
        ========================================================= */
 
-    *,
-    *::before,
-    *::after {
+    * {
       box-sizing: border-box;
     }
 
@@ -86,9 +85,72 @@
         sans-serif;
     }
 
+    .operator-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .privacy-info-button {
+      border: 0;
+      padding: 0;
+      margin-left: 3px;
+
+      background: none;
+      color: inherit;
+
+      font: inherit;
+      font-size: .85em;
+
+      cursor: pointer;
+      opacity: .65;
+
+      vertical-align: baseline;
+    }
+
+    .privacy-info-button:hover {
+      opacity: 1;
+    }
+
+    .privacy-popover {
+      position: absolute;
+
+      left: 50%;
+      bottom: calc(100% + 8px);
+
+      transform: translateX(-50%);
+
+      width:
+        min(
+          340px,
+          calc(100vw - 32px)
+        );
+
+      padding: 10px 12px;
+
+      background: #fff;
+      color: #333;
+
+      border:
+        1px solid
+        rgba(0,0,0,.15);
+
+      border-radius: 8px;
+
+      box-shadow:
+        0 4px 16px
+        rgba(0,0,0,.15);
+
+      font-size: 12px;
+      line-height: 1.5;
+
+      text-align: left;
+
+      z-index: 1000;
+    }
+
 
     /* =========================================================
-       CORNER LINKS
+       TOP CORNER LINKS
        ========================================================= */
 
     .corner-links {
@@ -169,77 +231,7 @@
 
 
     /* =========================================================
-       PRIVACY INFO
-       ========================================================= */
-
-    .operator-wrap {
-      position: relative;
-      display: inline-block;
-    }
-
-    .privacy-info-button {
-      border: 0;
-      padding: 0;
-      margin-left: 3px;
-
-      background: none;
-      color: inherit;
-
-      font: inherit;
-      font-size: .85em;
-
-      cursor: pointer;
-      opacity: .65;
-
-      vertical-align: baseline;
-    }
-
-    .privacy-info-button:hover {
-      opacity: 1;
-    }
-
-    .privacy-popover {
-      position: absolute;
-
-      left: 50%;
-      bottom: calc(100% + 8px);
-
-      transform:
-        translateX(-50%);
-
-      width:
-        min(
-          340px,
-          calc(100vw - 32px)
-        );
-
-      padding:
-        10px 12px;
-
-      background: #fff;
-      color: #333;
-
-      border:
-        1px solid
-        rgba(0,0,0,.15);
-
-      border-radius: 8px;
-
-      box-shadow:
-        0 4px 16px
-        rgba(0,0,0,.15);
-
-      font-size: 12px;
-      line-height: 1.5;
-
-      text-align: left;
-
-      z-index: 1000;
-    }
-
-
-    /* =========================================================
-       LANGUAGE / THEME PICKERS
+       LANGUAGE / THEME
        ========================================================= */
 
     .top-pickers {
@@ -290,10 +282,6 @@
         clamp(14px, 4vw, 40px)
         clamp(10px, 1.6svh, 18px);
 
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-
       overflow: hidden;
     }
 
@@ -303,9 +291,9 @@
        ========================================================= */
 
     .announcement-ticker {
-      flex: 0 0 auto;
-
       position: relative;
+
+      flex: 0 0 auto;
 
       width: 100vw;
 
@@ -343,13 +331,9 @@
         0 4px 14px
         rgba(0,0,0,.12);
 
-      backdrop-filter:
-        blur(10px);
-
-      -webkit-backdrop-filter:
-        blur(10px);
-
       overflow: hidden;
+
+      z-index: 10;
     }
 
     .announcement-ticker[hidden] {
@@ -377,11 +361,16 @@
 
       font-weight: 850;
       letter-spacing: .1em;
+
+      text-transform: uppercase;
     }
 
     .announcement-viewport {
       position: relative;
+
+      width: 100%;
       height: 100%;
+
       overflow: hidden;
     }
 
@@ -391,6 +380,7 @@
       inset: 0;
 
       display: -webkit-box;
+      display: flex;
 
       align-items: center;
       justify-content: center;
@@ -450,22 +440,12 @@
        ========================================================= */
 
     .home-content {
-      flex: 1 1 auto;
-
-      min-height: 0;
+      width: 100%;
+      height: calc(100% - 0px);
 
       display: grid;
 
       grid-template-columns: 1fr;
-
-      /*
-        TOP SPACE
-        HERO
-        SPACE
-        BUTTONS
-        SPACE
-        FOOTER
-      */
 
       grid-template-rows:
         clamp(20px,3.2svh,48px)
@@ -484,7 +464,7 @@
       align-items: center;
       justify-items: center;
 
-      width: 100%;
+      min-height: 0;
     }
 
 
@@ -495,9 +475,9 @@
     .home-hero {
       grid-row: 2;
 
-      align-self: start;
-
       width: 100%;
+
+      align-self: start;
 
       margin: 0;
 
@@ -563,7 +543,7 @@
 
 
     /* =========================================================
-       BUTTON AREA
+       BUTTON GROUP
        ========================================================= */
 
     .buttons {
@@ -579,33 +559,23 @@
           minmax(0,1fr)
         );
 
-      /*
-        기본 데스크톱 크기
-
-        예전보다 그룹 자체가 조금 넓고,
-        버튼 사이 간격도 조금 더 넓음.
-      */
-
       width:
         min(
-          460px,
+          440px,
           calc(100vw - 32px)
         );
 
-      max-width: 460px;
+      max-width: 440px;
 
       margin: 0;
 
       /*
-        첫 번째 값 = 세로 간격
-        두 번째 값 = 가로 간격
-
-        화면이 클수록 자연스럽게 증가
+        기본 데스크톱 간격.
+        기존보다 조금 넓게 설정.
       */
-
       gap:
-        clamp(10px,1.35svh,16px)
-        clamp(14px,1.25vw,20px);
+        clamp(12px,1.35vw,20px)
+        clamp(14px,1.8vw,24px);
     }
 
     .button {
@@ -613,9 +583,16 @@
 
       width: 100%;
 
+      min-height: 48px;
+
       padding:
-        clamp(10px,1.3svh,14px)
+        clamp(10px,1.35svh,14px)
         clamp(14px,2vw,22px);
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
 
       border:
         1px solid
@@ -623,16 +600,16 @@
 
       border-radius: 12px;
 
-      color: #f7f7f8;
-
       background:
         rgba(255,255,255,.07);
+
+      color: #f7f7f8;
 
       text-decoration: none;
 
       font-size:
         clamp(
-          .82rem,
+          .86rem,
           min(2.1vw,1.55svh),
           .98rem
         );
@@ -649,6 +626,9 @@
         border-color 160ms ease;
 
       backdrop-filter:
+        blur(10px);
+
+      -webkit-backdrop-filter:
         blur(10px);
     }
 
@@ -689,6 +669,8 @@
 
       text-align: center;
 
+      color: #626875;
+
       font-size:
         clamp(
           .58rem,
@@ -697,8 +679,6 @@
         );
 
       line-height: 1.24;
-
-      color: #626875;
 
       letter-spacing: .08em;
 
@@ -739,309 +719,212 @@
 
 
     /* =========================================================
-       MOBILE
+       LARGE DESKTOP
+       1440px+
+       버튼 그룹을 조금 넓히고 간격을 확실히 확보
        ========================================================= */
 
-    @media (max-width: 600px) {
-
-      main {
-        padding:
-          clamp(48px,6svh,64px)
-          14px
-          clamp(8px,1.2svh,14px);
-      }
-
-      .home-content {
-        grid-template-rows:
-          clamp(10px,1.7svh,20px)
-          auto
-          minmax(
-            clamp(18px,3.2svh,34px),
-            .55fr
-          )
-          auto
-          minmax(
-            clamp(8px,1.2svh,16px),
-            .22fr
-          )
-          auto;
-      }
+    @media (min-width: 1440px) and (min-height: 800px) {
 
       .buttons {
-        display: flex;
-
-        flex-direction: column;
-
-        flex-wrap: nowrap;
-
         width:
-          min(
-            360px,
-            calc(100vw - 28px)
+          clamp(
+            440px,
+            30vw,
+            500px
           );
 
-        max-width: 360px;
-
-        /*
-          모바일은 기존처럼 촘촘하게.
-        */
+        max-width: 500px;
 
         gap:
-          clamp(5px,.8svh,8px);
+          clamp(16px,1.35vw,24px)
+          clamp(20px,1.8vw,30px);
       }
 
-      .button,
-      .group-buy-button {
-        flex: 0 0 auto;
-
-        width: 100%;
+      .button {
+        min-height: 52px;
 
         padding:
-          clamp(7px,1svh,10px)
-          12px;
+          12px
+          22px;
 
         font-size:
           clamp(
-            .74rem,
-            1.45svh,
-            .88rem
+            .92rem,
+            1vw,
+            1.05rem
+          );
+      }
+    }
+
+
+    /* =========================================================
+       QHD
+       2560px+
+       화면이 충분히 크면 버튼 사이를 더 넓게
+       ========================================================= */
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+
+      .server {
+        font-size:
+          clamp(
+            6.2rem,
+            min(6vw,10svh),
+            8.4rem
+          );
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            1.45rem,
+            min(1.55vw,2.35svh),
+            2rem
+          );
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            .95rem,
+            min(1vw,1.55svh),
+            1.25rem
+          );
+      }
+
+      .buttons {
+        width:
+          clamp(
+            500px,
+            25vw,
+            620px
+          );
+
+        max-width: 620px;
+
+        /*
+          화면이 커질수록 버튼 사이 공간도 증가
+        */
+        gap:
+          clamp(20px,1.1vw,32px)
+          clamp(24px,1.6vw,38px);
+      }
+
+      .button {
+        min-height: 58px;
+
+        padding:
+          14px
+          26px;
+
+        font-size:
+          clamp(
+            1rem,
+            min(.9vw,1.45svh),
+            1.18rem
           );
       }
 
       footer {
         font-size:
           clamp(
-            .52rem,
-            .92svh,
-            .62rem
+            .68rem,
+            min(.6vw,.95svh),
+            .82rem
           );
-
-        line-height: 1.17;
       }
 
       .source-link {
-        margin-top: 2px;
-
         font-size:
           clamp(
-            .5rem,
-            .84svh,
-            .58rem
+            .62rem,
+            min(.53vw,.85svh),
+            .76rem
           );
       }
 
-      .announcement-ticker {
-        height:
-          clamp(
-            36px,
-            4.8svh,
-            42px
-          );
-
-        margin-top:
-          calc(
-            -1 *
-            clamp(
-              48px,
-              6svh,
-              64px
-            )
-          );
-      }
-
-      .announcement-slide {
-        padding:
-          9px
-          12px
-          3px;
-
-        font-size:
-          clamp(
-            .64rem,
-            1.2svh,
-            .78rem
-          );
-      }
-
-      body.has-announcement .corner-links {
-        top:
-          clamp(
-            50px,
-            7svh,
-            62px
-          );
+      .home-content {
+        grid-template-rows:
+          clamp(28px,3.8svh,72px)
+          auto
+          minmax(
+            clamp(84px,8svh,150px),
+            1fr
+          )
+          auto
+          minmax(
+            clamp(28px,2.8svh,50px),
+            .34fr
+          )
+          auto;
       }
     }
 
 
     /* =========================================================
-       LARGE DESKTOP
+       4K
+       2560px+
        ========================================================= */
 
-    /*
-      1440px ~ 1919px
+    @media (min-width: 2560px) and (min-height: 1200px) {
 
-      화면이 넓어지면 버튼 그룹도 조금 넓어지고
-      버튼 사이 간격도 눈에 띄게 증가.
-    */
-
-    @media
-      (min-width: 1400px)
-      and (min-height: 721px) {
-
-      .buttons {
-        width:
-          clamp(
-            460px,
-            30vw,
-            520px
-          );
-
-        max-width: 520px;
-
-        gap:
-          clamp(
-            12px,
-            1.4svh,
-            18px
-          )
-          clamp(
-            18px,
-            1.5vw,
-            24px
-          );
-      }
-
-      .button {
-        min-height: 50px;
-
-        padding:
-          12px 20px;
-
+      .server {
         font-size:
           clamp(
-            .9rem,
-            1vw,
-            1.04rem
-          );
-      }
-    }
-
-
-    /* =========================================================
-       FULL HD / 1920+
-       ========================================================= */
-
-    /*
-      여기부터 확실하게 차이가 보이도록 설정.
-
-      1920px 이상의 큰 화면에서는
-      버튼들이 중앙에 너무 작게 몰리지 않도록
-      그룹 폭 + 버튼 간격을 동시에 키움.
-    */
-
-    @media
-      (min-width: 1920px)
-      and (min-height: 900px) {
-
-      .buttons {
-        width:
-          clamp(
-            520px,
-            30vw,
-            600px
-          );
-
-        max-width: 600px;
-
-        gap:
-          clamp(
-            16px,
-            1.35svh,
-            22px
-          )
-          clamp(
-            22px,
-            1.4vw,
-            30px
+            8rem,
+            min(6.2vw,10.5svh),
+            11rem
           );
       }
 
-      .button {
-        min-height: 56px;
-
-        padding:
-          14px 24px;
-
+      .headline {
         font-size:
           clamp(
-            1rem,
-            .9vw,
-            1.18rem
+            1.8rem,
+            min(1.4vw,2.4svh),
+            2.55rem
           );
+      }
 
-        border-radius:
+      .tagline {
+        font-size:
           clamp(
-            12px,
-            .55vw,
-            16px
+            1.15rem,
+            min(.9vw,1.5svh),
+            1.55rem
           );
       }
-
-      .group-buy-button {
-        min-height: 56px;
-      }
-    }
-
-
-    /* =========================================================
-       QHD / 2560+
-       ========================================================= */
-
-    /*
-      2560px 이상에서는 버튼 그룹을 확실하게 넓힌다.
-
-      목적:
-      "버튼들이 화면 한가운데 좁게 몰려 있는 느낌" 제거.
-    */
-
-    @media
-      (min-width: 2560px)
-      and (min-height: 1200px) {
 
       .buttons {
         width:
           clamp(
-            620px,
-            27vw,
-            740px
+            600px,
+            24vw,
+            760px
           );
 
-        max-width: 740px;
+        max-width: 760px;
 
+        /*
+          4K에서는 버튼끼리 확실하게 분리
+        */
         gap:
-          clamp(
-            20px,
-            1.5svh,
-            28px
-          )
-          clamp(
-            28px,
-            1.6vw,
-            38px
-          );
+          clamp(24px,1vw,38px)
+          clamp(28px,1.35vw,44px);
       }
 
       .button {
         min-height: 68px;
 
         padding:
-          17px 28px;
+          16px
+          30px;
 
         font-size:
           clamp(
             1.12rem,
-            .78vw,
+            min(.75vw,1.35svh),
             1.42rem
           );
 
@@ -1053,94 +936,61 @@
           );
       }
 
-      .group-buy-button {
-        min-height: 68px;
+      footer {
+        font-size:
+          clamp(
+            .78rem,
+            min(.48vw,.9svh),
+            .96rem
+          );
       }
 
-      .home-content {
-        grid-template-rows:
+      .source-link {
+        font-size:
           clamp(
-            34px,
-            3.8svh,
-            72px
-          )
-          auto
-          minmax(
-            clamp(
-              84px,
-              8svh,
-              150px
-            ),
-            1fr
-          )
-          auto
-          minmax(
-            clamp(
-              28px,
-              2.8svh,
-              50px
-            ),
-            .34fr
-          )
-          auto;
+            .7rem,
+            min(.43vw,.78svh),
+            .88rem
+          );
       }
     }
 
 
     /* =========================================================
-       4K / ULTRA LARGE
+       ULTRA LARGE
+       3400px+
        ========================================================= */
 
-    @media
-      (min-width: 3400px)
-      and (min-height: 1600px) {
+    @media (min-width: 3400px) and (min-height: 1600px) {
 
       .buttons {
         width:
           clamp(
             720px,
-            23vw,
-            860px
+            20vw,
+            900px
           );
 
-        max-width: 860px;
+        max-width: 900px;
 
         gap:
-          clamp(
-            24px,
-            1.6svh,
-            34px
-          )
-          clamp(
-            34px,
-            1.7vw,
-            46px
-          );
+          clamp(30px,.9vw,48px)
+          clamp(34px,1.2vw,54px);
       }
 
       .button {
         min-height: 78px;
 
         padding:
-          20px 34px;
+          18px
+          34px;
 
         font-size:
           clamp(
             1.3rem,
-            .68vw,
+            min(.68vw,1.25svh),
             1.62rem
           );
-
-        border-radius:
-          clamp(
-            14px,
-            .55vw,
-            20px
-          );
-      }
-
-      .group-buy-button {
-        min-height: 78px;
       }
 
       .server {
@@ -1178,42 +1028,229 @@
             1.08rem
           );
       }
+    }
+
+
+    /* =========================================================
+       MOBILE
+       600px 이하
+       
+       여기서 버튼을 확실하게 키움.
+       ========================================================= */
+
+    @media (max-width: 600px) {
+
+      main {
+        padding:
+          clamp(48px,6svh,64px)
+          14px
+          clamp(8px,1.2svh,14px);
+      }
+
+      .corner-links {
+        top:
+          clamp(
+            14px,
+            2svh,
+            20px
+          );
+
+        left:
+          14px;
+
+        gap: 8px;
+      }
+
+      .staff-link,
+      .map-link,
+      .chat-link {
+        width: 40px;
+        height: 40px;
+
+        font-size: 1rem;
+
+        border-radius: 10px;
+      }
+
+      .top-pickers {
+        right: 14px;
+        bottom: 14px;
+
+        gap: 8px;
+      }
 
       .home-content {
         grid-template-rows:
-          clamp(
-            46px,
-            4svh,
-            90px
+          clamp(10px,1.7svh,20px)
+          auto
+          minmax(
+            clamp(18px,3.2svh,34px),
+            .55fr
           )
           auto
           minmax(
-            clamp(
-              110px,
-              8.5svh,
-              190px
-            ),
-            1fr
-          )
-          auto
-          minmax(
-            clamp(
-              34px,
-              3svh,
-              62px
-            ),
-            .32fr
+            clamp(8px,1.2svh,16px),
+            .22fr
           )
           auto;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            3.35rem,
+            15vw,
+            5rem
+          );
+      }
+
+      .headline {
+        margin-top: 12px;
+
+        font-size:
+          clamp(
+            1.05rem,
+            4.4vw,
+            1.35rem
+          );
+      }
+
+      .tagline {
+        margin-top: 6px;
+
+        font-size:
+          clamp(
+            .78rem,
+            3.2vw,
+            .95rem
+          );
+      }
+
+
+      /* =====================================================
+         MOBILE BUTTONS
+         ===================================================== */
+
+      .buttons {
+        display: flex;
+
+        flex-direction: column;
+        flex-wrap: nowrap;
+
+        width:
+          min(
+            370px,
+            calc(100vw - 28px)
+          );
+
+        max-width: 370px;
+
+        gap:
+          8px;
+
+        margin: 0;
+      }
+
+      .button,
+      .group-buy-button {
+        flex: 0 0 auto;
+
+        width: 100%;
+
+        /*
+          모바일에서 얇아 보이지 않도록
+          버튼 자체 높이를 확실히 확보
+        */
+        min-height: 48px;
+
+        padding:
+          11px
+          14px;
+
+        font-size:
+          clamp(
+            .92rem,
+            2.1svh,
+            1.06rem
+          );
+
+        font-weight: 700;
+
+        line-height: 1.2;
+
+        border-radius: 12px;
+      }
+
+      .group-buy-button {
+        grid-column: auto;
+      }
+
+
+      footer {
+        width: 100%;
+
+        font-size:
+          clamp(
+            .52rem,
+            .92svh,
+            .62rem
+          );
+
+        line-height: 1.17;
+      }
+
+      .source-link {
+        margin-top: 2px;
+
+        font-size:
+          clamp(
+            .5rem,
+            .84svh,
+            .58rem
+          );
+      }
+
+
+      .announcement-ticker {
+        height:
+          clamp(
+            36px,
+            4.8svh,
+            42px
+          );
+
+        margin-top:
+          calc(
+            -1 *
+            clamp(
+              48px,
+              6svh,
+              64px
+            )
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          9px
+          12px
+          3px;
+
+        font-size:
+          clamp(
+            .64rem,
+            1.2svh,
+            .78rem
+          );
       }
     }
 
 
     /* =========================================================
-       SHORT SCREENS
+       VERY SHORT MOBILE
        ========================================================= */
 
-    @media (max-height: 720px) {
+    @media (max-width: 600px) and (max-height: 720px) {
 
       main {
         padding-top:
@@ -1224,19 +1261,6 @@
           );
 
         padding-bottom: 5px;
-      }
-
-      .home-content {
-        grid-template-rows:
-          6px
-          auto
-          minmax(
-            10px,
-            .32fr
-          )
-          auto
-          6px
-          auto;
       }
 
       .server {
@@ -1271,17 +1295,28 @@
       }
 
       .buttons {
-        gap:
-          5px 8px;
+        gap: 6px;
       }
 
-      .button {
+      .button,
+      .group-buy-button {
+        min-height: 44px;
+
         padding:
-          7px 10px;
+          9px
+          12px;
+
+        font-size:
+          clamp(
+            .86rem,
+            1.8svh,
+            .98rem
+          );
       }
 
       footer {
         font-size: .54rem;
+
         line-height: 1.14;
       }
 
@@ -1301,7 +1336,9 @@
 
       .announcement-slide {
         padding:
-          7px 10px 2px;
+          7px
+          10px
+          2px;
 
         font-size: .62rem;
       }
@@ -1309,7 +1346,7 @@
 
 
     /* =========================================================
-       VERY SHORT SCREENS
+       EXTREMELY SHORT SCREEN
        ========================================================= */
 
     @media (max-height: 600px) {
@@ -1317,16 +1354,6 @@
       main {
         padding-top: 36px;
         padding-bottom: 3px;
-      }
-
-      .home-content {
-        grid-template-rows:
-          3px
-          auto
-          6px
-          auto
-          3px
-          auto;
       }
 
       .server {
@@ -1340,28 +1367,34 @@
 
       .headline {
         margin-top: 5px;
+
         font-size: .82rem;
       }
 
       .tagline {
         margin-top: 2px;
+
         font-size: .62rem;
       }
 
       .buttons {
-        gap:
-          4px 7px;
+        gap: 5px;
       }
 
-      .button {
-        padding:
-          6px 9px;
+      .button,
+      .group-buy-button {
+        min-height: 40px;
 
-        font-size: .7rem;
+        padding:
+          7px
+          10px;
+
+        font-size: .78rem;
       }
 
       footer {
         font-size: .48rem;
+
         line-height: 1.1;
       }
 
@@ -1371,12 +1404,15 @@
 
       .announcement-ticker {
         height: 30px;
+
         margin-top: -36px;
       }
 
       .announcement-slide {
         padding:
-          6px 9px 1px;
+          6px
+          9px
+          1px;
 
         font-size: .58rem;
       }
@@ -1384,94 +1420,23 @@
 
 
     /* =========================================================
-       MOBILE OVERRIDE
-       ========================================================= */
-
-    /*
-      위의 큰 화면 설정이 모바일에 절대 영향을 주지 않도록
-      마지막에 모바일 규칙을 한 번 더 확정.
-    */
-
-    @media (max-width: 600px) {
-
-      .buttons {
-        width:
-          min(
-            360px,
-            calc(100vw - 28px)
-          );
-
-        max-width: 360px;
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap:
-          clamp(
-            5px,
-            .8svh,
-            8px
-          );
-      }
-
-      .button,
-      .group-buy-button {
-        min-height: 0;
-
-        width: 100%;
-
-        padding:
-          clamp(
-            7px,
-            1svh,
-            10px
-          )
-          12px;
-
-        font-size:
-          clamp(
-            .74rem,
-            1.45svh,
-            .88rem
-          );
-
-        border-radius: 12px;
-      }
-
-      .group-buy-button {
-        grid-column: auto;
-      }
-    }
-
-
-    /* =========================================================
-       PICKERS MOBILE
+       MOBILE SAFE AREA
        ========================================================= */
 
     @media (max-width: 480px) {
 
-      .corner-links {
-        top: 14px;
-        left: 14px;
-
-        gap: 8px;
-      }
-
-      .staff-link,
-      .map-link,
-      .chat-link {
-        width: 40px;
-        height: 40px;
-
-        font-size: 1rem;
-
-        border-radius: 10px;
-      }
-
       .top-pickers {
         right: 14px;
-        bottom: 14px;
+        bottom:
+          max(
+            14px,
+            env(safe-area-inset-bottom)
+          );
+      }
+
+      .privacy-popover {
+        width:
+          calc(100vw - 32px);
       }
     }
 
@@ -1769,7 +1734,9 @@
       </nav>
 
 
-      <!-- FOOTER -->
+      <!-- ===================================================
+           FOOTER
+           =================================================== -->
 
       <footer>
 
@@ -1809,7 +1776,11 @@
             hidden
             data-i18n="privacyNotice"
           >
-            This website uses cookies and similar browser storage technologies as necessary to provide and maintain its functionality, including authentication sessions and language preferences. These technologies are not used for advertising or behavioral tracking.
+            This website uses cookies and similar browser
+            storage technologies as necessary to provide and
+            maintain its functionality, including authentication
+            sessions and language preferences. These technologies
+            are not used for advertising or behavioral tracking.
           </span>
 
         </span>
@@ -1838,6 +1809,7 @@
        ======================================================= -->
 
   <script>
+
     const privacyInfoButton =
       document.getElementById(
         "privacyInfoButton"
@@ -1847,6 +1819,7 @@
       document.getElementById(
         "privacyPopover"
       );
+
 
     privacyInfoButton.addEventListener(
       "click",
@@ -1864,8 +1837,10 @@
           "aria-expanded",
           String(!isOpen)
         );
+
       }
     );
+
 
     privacyPopover.addEventListener(
       "click",
@@ -1873,6 +1848,7 @@
         event.stopPropagation();
       }
     );
+
 
     document.addEventListener(
       "click",
@@ -1885,35 +1861,42 @@
           "aria-expanded",
           "false"
         );
+
       }
     );
+
   </script>
 
 
   <!-- =======================================================
-       ANNOUNCEMENT API
+       ANNOUNCEMENT SYSTEM
        ======================================================= -->
 
   <script>
+
     (() => {
 
       const ANNOUNCEMENT_API =
         "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
+
 
       const ticker =
         document.getElementById(
           "announcementTicker"
         );
 
+
       const viewport =
         document.getElementById(
           "announcementViewport"
         );
 
+
       const label =
         document.getElementById(
           "announcementLabel"
         );
+
 
       if (
         !ticker ||
@@ -1922,25 +1905,36 @@
         return;
       }
 
+
       let pages = [];
+
       let pageIndex = 0;
+
       let timer = null;
 
 
       const LABELS = {
+
         ko: "공지",
+
         en: "Notice",
+
         ja: "お知らせ",
+
         ru: "Объявление",
+
       };
 
 
       function language() {
 
         const value =
+
           typeof getCurrentLanguage ===
-          "function"
+            "function"
+
             ? getCurrentLanguage()
+
             : (
                 localStorage.getItem(
                   "s967_language"
@@ -1948,27 +1942,29 @@
                 "en"
               );
 
+
         const resolved =
+
           [
             "ko",
             "en",
             "ja",
             "ru",
           ].includes(value)
+
             ? value
+
             : "en";
+
 
         document.documentElement.lang =
           resolved;
 
+
         return resolved;
+
       }
 
-
-      /*
-        Long notices are split only between
-        whitespace-separated words.
-      */
 
       function splitByWords(text) {
 
@@ -1976,26 +1972,32 @@
           String(text ?? "")
             .trim();
 
+
         if (!value) {
           return [];
         }
 
+
         const width =
           window.innerWidth;
 
+
         const limit =
+
           width <= 480
+
             ? 44
+
             : width <= 800
+
               ? 72
+
               : 112;
+
 
         const words =
           value.split(/\s+/);
 
-        /*
-          Japanese etc. may not use spaces.
-        */
 
         if (
           words.length <= 1
@@ -2003,9 +2005,11 @@
           return [value];
         }
 
+
         const chunks = [];
 
         let current = "";
+
 
         for (
           const word of words
@@ -2016,10 +2020,10 @@
               ? `${current} ${word}`
               : word;
 
+
           if (
             current &&
-            candidate.length >
-              limit
+            candidate.length > limit
           ) {
 
             chunks.push(
@@ -2033,14 +2037,19 @@
 
             current =
               candidate;
+
           }
+
         }
+
 
         if (current) {
           chunks.push(current);
         }
 
+
         return chunks;
+
       }
 
 
@@ -2051,7 +2060,9 @@
           clearInterval(timer);
 
           timer = null;
+
         }
+
       }
 
 
@@ -2071,6 +2082,7 @@
           viewport.replaceChildren();
 
           return;
+
         }
 
 
@@ -2110,15 +2122,19 @@
                 "is-leaving"
               );
 
+
               setTimeout(
                 () => old.remove(),
                 480
               );
+
             }
+
 
             next.classList.add(
               "is-active"
             );
+
           }
         );
 
@@ -2129,12 +2145,15 @@
 
         if (initial) {
 
-          ticker.hidden = false;
+          ticker.hidden =
+            false;
 
           document.body.classList.add(
             "has-announcement"
           );
+
         }
+
       }
 
 
@@ -2142,11 +2161,13 @@
 
         clearTimer();
 
+
         if (
           pages.length <= 1
         ) {
           return;
         }
+
 
         timer =
           setInterval(
@@ -2162,6 +2183,7 @@
             },
             5000
           );
+
       }
 
 
@@ -2183,6 +2205,7 @@
             throw new Error(
               "ANNOUNCEMENT_LOAD_FAILED"
             );
+
           }
 
 
@@ -2236,6 +2259,7 @@
             );
 
             return;
+
           }
 
 
@@ -2243,6 +2267,7 @@
             0,
             true
           );
+
 
           start();
 
@@ -2253,6 +2278,7 @@
             error
           );
 
+
           clearTimer();
 
           ticker.hidden = true;
@@ -2260,7 +2286,9 @@
           document.body.classList.remove(
             "has-announcement"
           );
+
         }
+
       }
 
 
@@ -2269,16 +2297,16 @@
         () => {
 
           clearTimeout(
-            window
-              .__s967AnnouncementResizeTimer
+            window.__s967AnnouncementResizeTimer
           );
 
-          window
-            .__s967AnnouncementResizeTimer =
+
+          window.__s967AnnouncementResizeTimer =
             setTimeout(
               load,
               180
             );
+
         },
         {
           passive: true,
@@ -2305,7 +2333,9 @@
           } else {
 
             load();
+
           }
+
         }
       );
 
@@ -2313,6 +2343,7 @@
       load();
 
     })();
+
   </script>
 
 </body>
