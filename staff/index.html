@@ -1367,6 +1367,20 @@
         <button id="staffAnnCancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
       </div>
       <div id="staffAnnAnnouncementStatus" class="status"></div>
+
+      <div style="margin-top:16px">
+        <strong id="staffAnnAnnouncementListTitle">
+          공지사항 목록
+        </strong>
+        <div
+          id="staffAnnAnnouncementListNote"
+          class="meta"
+          style="margin-top:4px"
+        >
+          활성·비활성 공지를 모두 표시하며, 종료된 공지는 최근 7일까지만 표시합니다.
+        </div>
+      </div>
+
       <div id="staffAnnAnnouncementList" class="cards"></div>
     </section>
 
@@ -6053,7 +6067,12 @@ groupBuyEmailAddButton.addEventListener(
         permissionDenied:"공지사항 권한이 없습니다.", staffLogin:"Staff 로그인",
         admin:"관리자", staff:"Staff", home:"홈", main:"메인 페이지",
         languageKo:"한국어", languageEn:"English", languageJa:"日本語", languageRu:"Русский",
-        noAnnouncements:"등록된 공지사항이 없습니다.", noRoutines:"등록된 반복 공지 루틴이 없습니다.",
+        noAnnouncements:"표시할 공지사항이 없습니다.", noRoutines:"등록된 반복 공지 루틴이 없습니다.",
+        listTitle:"공지사항 목록",
+        listNote:"활성·비활성 공지를 모두 표시하며, 종료된 공지는 최근 7일까지만 표시합니다.",
+        stateActive:"활성",
+        stateInactive:"비활성",
+        stateEnded:"종료됨",
         roleStaff:"Staff", roleMember:"Member",
         presetWkName:"황무지 모집", presetPeriodName:"기간 안내",
         requestFailed:"공지사항 요청에 실패했습니다.",
@@ -6076,7 +6095,12 @@ groupBuyEmailAddButton.addEventListener(
         permissionDenied:"You do not have announcement permission.", staffLogin:"Staff Login",
         admin:"Admin", staff:"Staff", home:"Home", main:"Main Page",
         languageKo:"Korean", languageEn:"English", languageJa:"Japanese", languageRu:"Russian",
-        noAnnouncements:"No announcements have been registered.", noRoutines:"No recurring announcement routines have been registered.",
+        noAnnouncements:"No announcements to display.", noRoutines:"No recurring announcement routines have been registered.",
+        listTitle:"Announcement List",
+        listNote:"Shows both active and inactive announcements. Ended announcements remain visible for 7 days.",
+        stateActive:"Active",
+        stateInactive:"Inactive",
+        stateEnded:"Ended",
         roleStaff:"Staff", roleMember:"Member",
         presetWkName:"Wasteland Recruitment", presetPeriodName:"Period Notice",
         requestFailed:"Announcement request failed.",
@@ -6099,7 +6123,12 @@ groupBuyEmailAddButton.addEventListener(
         permissionDenied:"お知らせの権限がありません。", staffLogin:"Staffログイン",
         admin:"管理者", staff:"Staff", home:"ホーム", main:"メインページ",
         languageKo:"韓国語", languageEn:"英語", languageJa:"日本語", languageRu:"ロシア語",
-        noAnnouncements:"登録されたお知らせはありません。", noRoutines:"登録された繰り返しお知らせルーチンはありません。",
+        noAnnouncements:"表示するお知らせはありません。", noRoutines:"登録された繰り返しお知らせルーチンはありません。",
+        listTitle:"お知らせ一覧",
+        listNote:"有効・無効のお知らせをすべて表示し、終了したお知らせは終了後7日間のみ表示します。",
+        stateActive:"有効",
+        stateInactive:"無効",
+        stateEnded:"終了",
         roleStaff:"Staff", roleMember:"Member",
         presetWkName:"荒野募集", presetPeriodName:"期間案内",
         requestFailed:"お知らせのリクエストに失敗しました。",
@@ -6122,7 +6151,12 @@ groupBuyEmailAddButton.addEventListener(
         permissionDenied:"Нет доступа к объявлениям.", staffLogin:"Вход Staff",
         admin:"Администратор", staff:"Staff", home:"Главная", main:"Главная страница",
         languageKo:"Корейский", languageEn:"Английский", languageJa:"Японский", languageRu:"Русский",
-        noAnnouncements:"Объявлений пока нет.", noRoutines:"Повторяющихся объявлений пока нет.",
+        noAnnouncements:"Нет объявлений для отображения.", noRoutines:"Повторяющихся объявлений пока нет.",
+        listTitle:"Список объявлений",
+        listNote:"Показываются активные и неактивные объявления. Завершённые объявления отображаются ещё 7 дней.",
+        stateActive:"Активно",
+        stateInactive:"Неактивно",
+        stateEnded:"Завершено",
         roleStaff:"Staff", roleMember:"Member",
         presetWkName:"Набор в Пустошь", presetPeriodName:"Уведомление о периоде",
         requestFailed:"Не удалось выполнить запрос объявлений.",
@@ -6167,6 +6201,8 @@ groupBuyEmailAddButton.addEventListener(
       set("staffAnnAnnMainLink",t.main);
       set("staffAnnAnnGeneralTitle",t.generalTitle);
       set("staffAnnAnnGeneralLead",t.generalLead);
+      set("staffAnnAnnouncementListTitle",t.listTitle);
+      set("staffAnnAnnouncementListNote",t.listNote);
       set("staffAnnAnnStartLabel",t.start);
       set("staffAnnAnnEndLabel",t.end);
       set("staffAnnCancelAnnouncementEdit",t.cancelEdit);
@@ -6256,7 +6292,21 @@ groupBuyEmailAddButton.addEventListener(
           ? `${data.actor.name} · ${announcementRoleLabel(data.actor.kind)}`
           : "";
 
-      const announcements=data.announcements??[];
+      const nowMs=Date.now();
+      const sevenDaysMs=7*24*60*60*1000;
+
+      const announcements=(data.announcements??[])
+        .filter(item=>{
+          const endMs=new Date(item.ends_at).getTime();
+          if(!Number.isFinite(endMs))return true;
+
+          return endMs>=nowMs-sevenDaysMs;
+        })
+        .sort((a,b)=>{
+          const aEnd=new Date(a.ends_at).getTime();
+          const bEnd=new Date(b.ends_at).getTime();
+          return bEnd-aEnd;
+        });
 
       if(!announcements.length){
         const empty=document.createElement("div");
@@ -6278,9 +6328,27 @@ groupBuyEmailAddButton.addEventListener(
           meta.className="meta";
           meta.textContent=`${item.author_name} · ${announcementRoleLabel(item.author_kind)}`;
 
-          head.append(title,meta);
-          card.append(head,textBlock(item));
+          const endMs=new Date(item.ends_at).getTime();
+          const enabled=item.enabled!==false;
+          const ended=Number.isFinite(endMs)&&endMs<=nowMs;
 
+          const state=document.createElement("span");
+          state.className="badge";
+          state.style.marginTop="8px";
+
+          if(ended){
+            state.textContent=annText().stateEnded;
+          }else if(!enabled){
+            state.textContent=annText().stateInactive;
+          }else{
+            state.textContent=annText().stateActive;
+          }
+
+          head.append(title,meta);
+          card.append(head,state,textBlock(item));
+
+          // 서버가 can_edit=true로 내려준 본인 작성 공지에만
+          // 수정/활성화·비활성화/삭제 버튼을 표시한다.
           if(item.can_edit){
             const actions=document.createElement("div");
             actions.className="row";
@@ -6290,8 +6358,6 @@ groupBuyEmailAddButton.addEventListener(
             edit.textContent=annText().edit;
             edit.onclick=()=>editAnnouncement(item);
 
-            const endMs=new Date(item.ends_at).getTime();
-            const enabled=item.enabled!==false;
             const toggle=document.createElement("button");
 
             if(!enabled){
