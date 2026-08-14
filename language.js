@@ -1833,7 +1833,7 @@ confirmNewPassword: "Подтвердите новый пароль",
 staffTabImages: "Управление изображениями",
 staffTabWk: "Заявки на WK",
 staffTabGroupBuy: "Совместная покупка",
-staffTabAnnouncements: "объявление", 
+staffTabAnnouncements: "Объявления", 
 
 staffImageTitle: "Управление изображениями",
 staffImageLead:
