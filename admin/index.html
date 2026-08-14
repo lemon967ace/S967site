@@ -959,6 +959,33 @@
       "
     >
 
+    <h3 style="margin-bottom: 6px;">
+      Staff Email Recipients
+    </h3>
+
+    <p class="small">
+      Staff가 직접 등록한 업무 알림 이메일입니다.
+      Admin은 조회·수정·활성화/비활성화·삭제할 수 있습니다.
+    </p>
+
+    <div
+      id="staffEmailRecipients"
+      class="manage-list"
+    ></div>
+
+    <div
+      id="staffEmailRecipientsStatus"
+      class="status"
+    ></div>
+
+    <hr
+      style="
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
     <h2>
       Create Account
     </h2>
@@ -1983,6 +2010,9 @@
     const STAFF_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-admin";
 
+    const STAFF_EMAIL_RECIPIENTS_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-email-recipients-admin";
+
     const CHAT_ROOM_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
 
@@ -2077,6 +2107,16 @@ const staffStatus =
 const refreshStaffButton =
   document.getElementById(
     "refreshStaffButton"
+  );
+
+const staffEmailRecipients =
+  document.getElementById(
+    "staffEmailRecipients"
+  );
+
+const staffEmailRecipientsStatus =
+  document.getElementById(
+    "staffEmailRecipientsStatus"
   );
 
 const staffIdInput =
@@ -3952,6 +3992,313 @@ function renderChatOnlyAccounts(accounts) {
   }
 }
 
+async function staffEmailRecipientsAdminRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+    headers: {},
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] = "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await authenticatedAdminFetch(
+      STAFF_EMAIL_RECIPIENTS_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "Staff email request failed."
+    );
+  }
+
+  return result;
+}
+
+function staffEmailTypeLabel(type) {
+  if (type === "wk") return "WK";
+  if (type === "inquiry") return "문의";
+  if (type === "group_buy") return "공동구매";
+  return String(type ?? "");
+}
+
+function renderStaffEmailRecipients(
+  recipients
+) {
+  staffEmailRecipients.innerHTML = "";
+
+  const items =
+    Array.isArray(recipients)
+      ? recipients
+      : [];
+
+  if (!items.length) {
+    staffEmailRecipients.innerHTML =
+      '<div class="small">Staff가 등록한 이메일이 없습니다.</div>';
+    return;
+  }
+
+  for (const recipient of items) {
+    const row =
+      document.createElement("div");
+
+    row.className = "manage-item";
+
+    if (!recipient.active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement("div");
+
+    content.style.flex = "1";
+    content.style.minWidth = "0";
+
+    const name =
+      document.createElement("div");
+
+    name.className = "manage-name";
+    name.textContent =
+      `${recipient.staff_id || "알 수 없는 Staff"} · ${staffEmailTypeLabel(recipient.type)} · ${recipient.nickname || "이름 없음"}`;
+
+    const email =
+      document.createElement("div");
+
+    email.className = "manage-note";
+    email.textContent =
+      `${recipient.email} · ${recipient.active ? "Active" : "Inactive"}`;
+
+    content.append(
+      name,
+      email
+    );
+
+    const actions =
+      document.createElement("div");
+
+    actions.className =
+      "manage-actions";
+
+    const toggleButton =
+      document.createElement("button");
+
+    toggleButton.type = "button";
+    toggleButton.textContent =
+      recipient.active
+        ? "Deactivate"
+        : "Activate";
+
+    toggleButton.addEventListener(
+      "click",
+      async () => {
+        toggleButton.disabled = true;
+
+        try {
+          await staffEmailRecipientsAdminRequest(
+            "PATCH",
+            {
+              type: recipient.type,
+              id: recipient.id,
+              active: !recipient.active,
+            }
+          );
+
+          await loadStaffEmailRecipients();
+        } catch (error) {
+          setStatus(
+            staffEmailRecipientsStatus,
+            error.message ||
+              "이메일 상태 변경에 실패했습니다.",
+            true
+          );
+        } finally {
+          toggleButton.disabled = false;
+        }
+      }
+    );
+
+    const editButton =
+      document.createElement("button");
+
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+
+    editButton.addEventListener(
+      "click",
+      async () => {
+        const nickname =
+          prompt(
+            "별명:",
+            recipient.nickname ?? ""
+          );
+
+        if (nickname === null) {
+          return;
+        }
+
+        const email =
+          prompt(
+            "이메일 주소:",
+            recipient.email ?? ""
+          );
+
+        if (email === null) {
+          return;
+        }
+
+        if (
+          !nickname.trim() ||
+          !email.trim()
+        ) {
+          setStatus(
+            staffEmailRecipientsStatus,
+            "별명과 이메일을 모두 입력하세요.",
+            true
+          );
+          return;
+        }
+
+        editButton.disabled = true;
+
+        try {
+          await staffEmailRecipientsAdminRequest(
+            "PATCH",
+            {
+              type: recipient.type,
+              id: recipient.id,
+              nickname:
+                nickname.trim(),
+              email:
+                email.trim(),
+            }
+          );
+
+          await loadStaffEmailRecipients();
+        } catch (error) {
+          setStatus(
+            staffEmailRecipientsStatus,
+            error.message ||
+              "이메일 수정에 실패했습니다.",
+            true
+          );
+        } finally {
+          editButton.disabled = false;
+        }
+      }
+    );
+
+    const deleteButton =
+      document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.classList.add(
+      "danger"
+    );
+    deleteButton.textContent =
+      "Delete";
+
+    deleteButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed =
+          confirm(
+            `Delete Staff email?\n\n${recipient.staff_id || ""} · ${recipient.email}\n\nThis removes the address from the Staff account's notification recipients.`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        deleteButton.disabled = true;
+
+        try {
+          await staffEmailRecipientsAdminRequest(
+            "DELETE",
+            {
+              type: recipient.type,
+              id: recipient.id,
+            }
+          );
+
+          await loadStaffEmailRecipients();
+        } catch (error) {
+          setStatus(
+            staffEmailRecipientsStatus,
+            error.message ||
+              "이메일 삭제에 실패했습니다.",
+            true
+          );
+          deleteButton.disabled = false;
+        }
+      }
+    );
+
+    actions.append(
+      toggleButton,
+      editButton,
+      deleteButton
+    );
+
+    row.append(
+      content,
+      actions
+    );
+
+    staffEmailRecipients.appendChild(
+      row
+    );
+  }
+}
+
+async function loadStaffEmailRecipients() {
+  setStatus(
+    staffEmailRecipientsStatus,
+    "Loading…"
+  );
+
+  try {
+    const result =
+      await staffEmailRecipientsAdminRequest(
+        "GET"
+      );
+
+    renderStaffEmailRecipients(
+      result.recipients ?? []
+    );
+
+    setStatus(
+      staffEmailRecipientsStatus,
+      ""
+    );
+  } catch (error) {
+    setStatus(
+      staffEmailRecipientsStatus,
+      error.message ||
+        "Staff 이메일을 불러오지 못했습니다.",
+      true
+    );
+    throw error;
+  }
+}
+
     async function loadStaffAccounts() {
   setStatus(
     staffStatus,
@@ -3962,6 +4309,7 @@ function renderChatOnlyAccounts(accounts) {
     const [
       staffResult,
       chatResult,
+      staffEmailResult,
     ] =
       await Promise.all([
         staffApiRequest(
@@ -3970,7 +4318,14 @@ function renderChatOnlyAccounts(accounts) {
         chatRoomAdminApiRequest(
           "GET"
         ),
+        staffEmailRecipientsAdminRequest(
+          "GET"
+        ),
       ]);
+
+    renderStaffEmailRecipients(
+      staffEmailResult.recipients ?? []
+    );
 
     const chatAccountIds =
       new Set(
@@ -4053,6 +4408,11 @@ function renderChatOnlyAccounts(accounts) {
 
     setStatus(
       staffStatus,
+      ""
+    );
+
+    setStatus(
+      staffEmailRecipientsStatus,
       ""
     );
   } catch (error) {
