@@ -92,7 +92,8 @@
 }
 
 .staff-link,
-.map-link {
+.map-link,
+.chat-link {
   width: var(--corner-control-size, clamp(40px, 2.9vw, 70px));
   height: var(--corner-control-size, clamp(40px, 2.9vw, 70px));
   padding: 0;
@@ -113,7 +114,8 @@
 }
 
 .staff-link:hover,
-.map-link:hover {
+.map-link:hover,
+.chat-link:hover {
   border-color: var(--border-hover);
 }
 
@@ -125,7 +127,8 @@
   }
 
   .staff-link,
-  .map-link {
+  .map-link,
+  .chat-link {
     width: 40px;
     height: 40px;
     font-size: 1rem;
@@ -478,6 +481,15 @@
     title="Map"
   >
     🏰
+  </a>
+
+  <a
+    class="chat-link"
+    href="/staff/chat/"
+    aria-label="Chat"
+    title="Chat"
+  >
+    💬
   </a>
 </div>
 
