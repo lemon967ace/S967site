@@ -913,7 +913,19 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
             controller가 무시한다.
             두 번째 클릭의 pointerup은 다른 셀이므로 여기서 즉시 확정된다.
           */
-          rangeController.click(cell);
+          const rangeResult =
+            rangeController.click(cell);
+
+          if (
+            rangeResult?.complete
+          ) {
+            refreshDocument();
+            rangeController?.normalizeSelection();
+            onRangeSelectionChange(
+              rangeController?.getSelectedRange?.() ??
+              null
+            );
+          }
         } catch (error) {
           globalThis.alert?.(
             error?.message ??
