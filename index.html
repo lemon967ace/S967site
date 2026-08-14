@@ -2004,6 +2004,78 @@
       }
     }
 
+  
+    /* =========================================================
+       MOBILE HERO → BUTTON SPACING
+       모바일에서 제목 3줄과 버튼 그룹 사이의 빈 공간만 줄입니다.
+       ========================================================= */
+
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(24px,4.2svh,52px)
+          auto
+          minmax(
+            clamp(6px,1.2svh,14px),
+            .16fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (min-height: 780px) {
+      .home-content {
+        grid-template-rows:
+          clamp(34px,5.2svh,66px)
+          auto
+          minmax(
+            clamp(8px,1.4svh,16px),
+            .18fr
+          )
+          auto
+          minmax(
+            clamp(10px,1.5svh,20px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          clamp(18px,3svh,32px)
+          auto
+          minmax(
+            4px,
+            .08fr
+          )
+          auto
+          minmax(
+            5px,
+            .12fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(12px,2.2svh,22px)
+          auto
+          3px
+          auto
+          4px
+          auto;
+      }
+    }
+
   </style>
 </head>
 
