@@ -10330,7 +10330,7 @@ createMapTemplateButton.addEventListener(
     const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
     const REPORT_API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-report-admin";
     const $=id=>document.getElementById(id);
-    const gate=$("gate"),gateMessage=$("gateMessage"),app=$("app"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports");
+    const gate=$("embeddedChatGate"),gateMessage=$("embeddedChatGateMessage"),app=$("embeddedChatApp"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports");
     let data={rooms:[],staff:[],chat_users:[],memberships:[]};
 
     function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
@@ -10515,7 +10515,7 @@ createMapTemplateButton.addEventListener(
     const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
     const $=id=>document.getElementById(id);
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),staffLogin=$("staffLogin"),staffId=$("staffId"),staffPassword=$("staffPassword"),staffLoginButton=$("staffLoginButton"),app=$("app"),actorHost=$("embeddedAnnActor");
+    const gate=$("embeddedAnnGate"),gateMessage=$("embeddedAnnGateMessage"),staffLogin=$("embeddedAnnStaffLogin"),staffId=$("embeddedAnnStaffId"),staffPassword=$("embeddedAnnStaffPassword"),staffLoginButton=$("embeddedAnnStaffLoginButton"),app=$("embeddedAnnApp"),actorHost=$("embeddedAnnActor");
     const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList");
     const rId=$("embeddedAnnRoutineId"),rName=$("embeddedAnnRName"),rAnchor=$("embeddedAnnRAnchor"),rRepeat=$("embeddedAnnRRepeat"),rHours=$("embeddedAnnRHours"),rOffset=$("embeddedAnnROffset"),rEnabled=$("embeddedAnnREnabled"),rKo=$("embeddedAnnRKo"),rEn=$("embeddedAnnREn"),rJa=$("embeddedAnnRJa"),rRu=$("embeddedAnnRRu"),saveRoutine=$("embeddedAnnSaveRoutine"),cancelRoutineEdit=$("embeddedAnnCancelRoutineEdit"),routineStatus=$("embeddedAnnRoutineStatus"),routineList=$("embeddedAnnRoutineList"),wkPreset=$("embeddedAnnWkPreset"),periodPreset=$("embeddedAnnPeriodPreset");
 
@@ -10540,7 +10540,7 @@ createMapTemplateButton.addEventListener(
       if(body!==null){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
       const response=await fetch(`${API}?manage=1`,options);
       const result=await response.json().catch(()=>({}));
-      if(!response.ok)throw Object.assign(new Error(result.error||`HTTP_${response.status}`),{status:response.status});
+      if(!response.ok)throw Object.assign(new Error(result.detail||result.error||`HTTP_${response.status}`),{status:response.status});
       return result;
     }
 
@@ -10606,8 +10606,8 @@ createMapTemplateButton.addEventListener(
       }catch{gateMessage.textContent="Staff 로그인에 실패했습니다.";}
       finally{staffLoginButton.disabled=false;}
     }
-    staffLoginButton.onclick=staffSignIn;
-    staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+    if(staffLoginButton)staffLoginButton.onclick=staffSignIn;
+    if(staffPassword)staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
 
     (async()=>{
       try{
