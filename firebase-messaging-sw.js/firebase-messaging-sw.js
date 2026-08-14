@@ -34,7 +34,7 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = event.notification?.data?.url || "/staff/chat/";
+  const target = event.notification?.data?.url || "/chat/";
   event.waitUntil((async () => {
     const allClients = await clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of allClients) {
