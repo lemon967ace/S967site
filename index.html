@@ -394,9 +394,9 @@
 
       font-size:
         clamp(
-          .70rem,
-          min(2.05vw,1.38svh),
-          .92rem
+          .78rem,
+          min(2.2vw,1.5svh),
+          1rem
         );
 
       font-weight: 800;
@@ -1238,9 +1238,9 @@
 
         font-size:
           clamp(
-            .68rem,
-            1.28svh,
-            .84rem
+            .74rem,
+            1.42svh,
+            .92rem
           );
       }
     }
@@ -1340,7 +1340,7 @@
           10px
           2px;
 
-        font-size: .65rem;
+        font-size: .69rem;
       }
     }
 
@@ -1414,7 +1414,7 @@
           9px
           1px;
 
-        font-size: .61rem;
+        font-size: .65rem;
       }
     }
 
@@ -1551,9 +1551,9 @@
 
         font-size:
           clamp(
-            .84rem,
-            min(.78vw,1.22svh),
-            1rem
+            .94rem,
+            min(.86vw,1.32svh),
+            1.12rem
           );
       }
 
@@ -1602,9 +1602,9 @@
 
         font-size:
           clamp(
-            1rem,
-            min(.68vw,1.18svh),
-            1.22rem
+            1.12rem,
+            min(.76vw,1.28svh),
+            1.36rem
           );
       }
 
@@ -1653,9 +1653,9 @@
 
         font-size:
           clamp(
-            1.15rem,
-            min(.58vw,1.08svh),
-            1.38rem
+            1.28rem,
+            min(.64vw,1.18svh),
+            1.52rem
           );
       }
 
@@ -1684,6 +1684,36 @@
             9px
           );
       }
+    }
+
+  
+    /* =========================================================
+       ROOT SCROLL / MOBILE PULL-TO-REFRESH
+       콘텐츠는 여전히 한 화면 안에 맞추되,
+       브라우저의 세로 스크롤/오버스크롤 제스처는 막지 않습니다.
+       ========================================================= */
+
+    html {
+      height: auto !important;
+      min-height: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+    }
+
+    body {
+      height: auto !important;
+      min-height: 100svh !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+      touch-action: pan-y !important;
+    }
+
+    main {
+      min-height: 100svh !important;
+      height: 100svh !important;
+      overflow: hidden !important;
     }
 
   </style>
