@@ -2275,6 +2275,60 @@
         blur(18px) !important;
     }
 
+  
+    /* =========================================================
+       PURE TRANSPARENT BLACK / WHITE ANNOUNCEMENT GLASS
+       회색 RGB 혼합 없이 검정/흰색 알파만 사용
+       ========================================================= */
+
+    .announcement-ticker {
+      background:
+        rgba(0, 0, 0, .46) !important;
+
+      border-top:
+        1px solid
+        rgba(255, 255, 255, .06) !important;
+
+      border-bottom:
+        1px solid
+        rgba(0, 0, 0, .12) !important;
+
+      box-shadow:
+        0 6px 20px
+        rgba(0, 0, 0, .10) !important;
+
+      backdrop-filter:
+        blur(18px) !important;
+
+      -webkit-backdrop-filter:
+        blur(18px) !important;
+    }
+
+    html[data-theme="dark"] .announcement-ticker,
+    body[data-theme="dark"] .announcement-ticker,
+    [data-theme="dark"] .announcement-ticker {
+      background:
+        rgba(255, 255, 255, .16) !important;
+
+      border-top:
+        1px solid
+        rgba(255, 255, 255, .15) !important;
+
+      border-bottom:
+        1px solid
+        rgba(255, 255, 255, .08) !important;
+
+      box-shadow:
+        0 6px 20px
+        rgba(0, 0, 0, .06) !important;
+
+      backdrop-filter:
+        blur(18px) !important;
+
+      -webkit-backdrop-filter:
+        blur(18px) !important;
+    }
+
   </style>
 </head>
 
