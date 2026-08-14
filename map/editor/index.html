@@ -1358,6 +1358,8 @@
         renameBuildingType: "Rename",
         buildingTypeNamePrompt: "Enter a new building type name.",
         buildingTypeNameRequired: "Building type name cannot be empty.",
+        buildingNamePrompt: "Enter a building name.",
+        buildingNameRequired: "Building name cannot be empty.",
 
         selection:
           "Selection",
@@ -1468,6 +1470,8 @@
         renameBuildingType: "이름 변경",
         buildingTypeNamePrompt: "새 건물 종류 이름을 입력하세요.",
         buildingTypeNameRequired: "건물 종류 이름은 비워 둘 수 없습니다.",
+        buildingNamePrompt: "건물 이름을 입력하세요.",
+        buildingNameRequired: "건물 이름은 비워 둘 수 없습니다.",
 
         selection:
           "선택 정보",
@@ -1578,6 +1582,8 @@
         renameBuildingType: "名前変更",
         buildingTypeNamePrompt: "新しい建物タイプ名を入力してください。",
         buildingTypeNameRequired: "建物タイプ名は空にできません。",
+        buildingNamePrompt: "建物名を入力してください。",
+        buildingNameRequired: "建物名は空にできません。",
 
         selection:
           "選択情報",
@@ -1688,6 +1694,8 @@
         renameBuildingType: "Переименовать",
         buildingTypeNamePrompt: "Введите новое название типа здания.",
         buildingTypeNameRequired: "Название типа здания не может быть пустым.",
+        buildingNamePrompt: "Введите название здания.",
+        buildingNameRequired: "Название здания не может быть пустым.",
 
         selection:
           "Выбранный объект",
@@ -2380,20 +2388,6 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
       const documentData = PNSMapEngine.getDocument();
 
-      const nameInput = document.createElement("input");
-      nameInput.id = "newBuildingName";
-      nameInput.required = true;
-      nameInput.placeholder = text.detailName;
-      nameInput.title =
-        language === "ko"
-          ? "건물을 배치하려면 이름을 먼저 입력해야 합니다."
-          : language === "ja"
-            ? "建物を配置するには、先に名前を入力してください。"
-            : language === "ru"
-              ? "Чтобы разместить здание, сначала введите его название."
-              : "Enter a name before placing a building.";
-      buildingTypesHost.append(nameInput);
-
       const sizeRow = document.createElement("div");
       sizeRow.innerHTML =
         '<label><input type="radio" name="building-size" value="1" checked>1×1</label> ' +
@@ -2725,30 +2719,27 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         rangeEraseController,
         buildingFilter,
         requestBuildingName: () => {
-          const input =
-            document.getElementById(
-              "newBuildingName"
+          const value =
+            window.prompt(
+              text.buildingNamePrompt,
+              ""
             );
 
-          const name =
-            input?.value.trim() ?? "";
-
-          if (name) {
-            return name;
+          if (value === null) {
+            return null;
           }
 
-          const message =
-            language === "ko"
-              ? "건물 이름을 먼저 입력하세요."
-              : language === "ja"
-                ? "先に建物名を入力してください。"
-                : language === "ru"
-                  ? "Сначала введите название здания."
-                  : "Enter a building name first.";
+          const name =
+            value.trim();
 
-          window.alert(message);
-          input?.focus();
-          return null;
+          if (!name) {
+            window.alert(
+              text.buildingNameRequired
+            );
+            return null;
+          }
+
+          return name;
         },
         editorHost: window.S967EditorHost,
         confirmBulkDelete: ({ deleteCount, lockedCount }) => {
