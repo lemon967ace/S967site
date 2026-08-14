@@ -451,6 +451,23 @@
     .badge-blocked {
       color: #d75555;
     }
+
+    .announcements-inner-frame {
+      width: 100%;
+      min-height: 78vh;
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 600px) {
+      .announcements-inner-frame {
+        min-height: 82vh;
+      }
+    }
+
   </style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
@@ -1155,6 +1172,19 @@
     ></div>
   </section>
 </div>
+
+      <div
+        class="staff-section"
+        data-staff-section="announcements"
+      >
+        <iframe
+          class="announcements-inner-frame"
+          src="/announcements/"
+          title="Announcements"
+          loading="lazy"
+        ></iframe>
+      </div>
+
      
     </div>
 
