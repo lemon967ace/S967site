@@ -7,6 +7,7 @@
   <title>공지사항 관리 | S967</title>
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js"></script>
+  <script src="/language.js" defer></script>
   <script src="/admin/admin-auth.js"></script>
   <style>
     *{box-sizing:border-box}
@@ -37,9 +38,85 @@
     .preset{border-style:dashed}
     code{font-size:.78em}
     @media(max-width:700px){.grid,.lang-grid{grid-template-columns:1fr}}
+
+    /* Shared bottom-right Language + Theme controls */
+    .top-pickers{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      z-index:1400;
+      display:flex;
+      align-items:flex-end;
+      gap:8px;
+    }
+    .top-pickers .language-picker,
+    .top-pickers .theme-picker{
+      position:relative;
+      inset:auto;
+    }
+    .top-pickers .language-menu,
+    .top-pickers .theme-menu{
+      top:auto;
+      right:0;
+      bottom:calc(100% + 8px);
+    }
+    @media(max-width:480px){
+      .top-pickers{
+        right:14px;
+        bottom:14px;
+      }
+    }
+
   </style>
 </head>
 <body>
+
+  <div class="top-pickers">
+    <div class="language-picker" data-language-picker>
+      <button
+        class="language-button"
+        type="button"
+        data-language-button
+        aria-label="Language"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >🌐</button>
+
+      <div class="language-menu" data-language-menu role="menu">
+        <button type="button" data-language-choice="ko" role="menuitemradio">한국어</button>
+        <button type="button" data-language-choice="en" role="menuitemradio">English</button>
+        <button type="button" data-language-choice="ja" role="menuitemradio">日本語</button>
+        <button type="button" data-language-choice="ru" role="menuitemradio">Русский</button>
+      </div>
+    </div>
+
+    <div class="theme-picker" data-theme-picker>
+      <button
+        class="theme-button"
+        type="button"
+        data-theme-button
+        aria-label="Theme"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >◐</button>
+
+      <div class="theme-menu" data-theme-menu role="menu">
+        <button type="button" data-theme-choice="system" role="menuitemradio">
+          <span class="theme-choice-icon">◐</span>
+          <span data-i18n="themeSystem">System</span>
+        </button>
+        <button type="button" data-theme-choice="light" role="menuitemradio">
+          <span class="theme-choice-icon">☀</span>
+          <span data-i18n="themeLight">Light</span>
+        </button>
+        <button type="button" data-theme-choice="dark" role="menuitemradio">
+          <span class="theme-choice-icon">☾</span>
+          <span data-i18n="themeDark">Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <section id="gate" class="gate">
     <h1>공지사항 관리</h1>
     <p id="gateMessage">로그인 상태를 확인하고 있습니다.</p>
@@ -49,7 +126,7 @@
       <button id="staffLoginButton" type="button">Staff 로그인</button>
     </div>
     <div class="row" style="margin-top:10px">
-      <a class="btn" href="/admin/" target="_top">관리자</a>
+      <a class="btn" href="/admin/">관리자</a>
       <a class="btn" href="/staff/">Staff</a>
       <a class="btn" href="/">홈</a>
     </div>
@@ -235,12 +312,12 @@
     (async()=>{
       try{
         const t=await token();
-        if(!t){gateMessage.textContent="관리자 또는 Staff로 로그인하세요.";return;}
+        if(!t){gateMessage.textContent="Staff로 로그인하세요.";return;}
         await load();
         gate.classList.add("hidden");
         app.classList.remove("hidden");
       }catch(e){
-        gateMessage.textContent=e.status===403?"공지사항 권한이 없습니다.":"관리자 또는 Staff로 로그인하세요.";
+        gateMessage.textContent=e.status===403?"공지사항 권한이 없습니다.":"Staff로 로그인하세요.";
       }
     })();
   </script>
