@@ -4,113 +4,599 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>채팅 관리 | S967</title>
+  <title>번역 용어집 | S967</title>
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js"></script>
   <script src="/admin/admin-auth.js"></script>
   <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100dvh;font-family:system-ui,sans-serif}
-    main{width:min(1100px,calc(100% - 28px));margin:28px auto 60px}.hidden{display:none!important}
-    .panel{margin-top:15px;padding:15px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
-    .row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.row>*{min-width:0}
-    input,select,button{font:inherit}input,select{padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
-    button,a.btn{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);color:var(--text);text-decoration:none;cursor:pointer}
-    .status{min-height:1.2em;color:var(--muted);font-size:.78rem}.error{color:#c2410c}
-    .cards{display:grid;gap:10px}.card{padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover)}
-    .card h3{margin:0 0 7px}.small{color:var(--muted);font-size:.76rem;line-height:1.5}
-    .members{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.member{padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.72rem}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;font-family:system-ui,sans-serif}
+    main{width:min(1120px,calc(100% - 28px));margin:28px auto 60px}
+    h1{margin:0 0 8px}
+    .muted{color:var(--muted);line-height:1.55}
+    .panel{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    button,.button-link,input{font:inherit}
+    button,.button-link{padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);color:var(--text);text-decoration:none;cursor:pointer}
+    input[type=file]{max-width:100%}
+    .status{min-height:1.4em;margin-top:8px;color:var(--muted)}
+    .status.error{color:#c2410c}
+    .table-wrap{margin-top:12px;overflow:auto;max-height:60vh;border:1px solid var(--border);border-radius:10px}
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;font-size:.84rem}
+    th{position:sticky;top:0;background:var(--surface-hover);z-index:1}
+    td input{width:100%;min-width:120px;padding:7px;border:1px solid var(--border);border-radius:7px;background:var(--surface-hover)}
+    .key{min-width:150px}
+    .notes{min-width:230px}
+    .danger{color:#c2410c}
     .gate{width:min(520px,calc(100% - 28px));margin:12vh auto;padding:24px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+    .hidden{display:none!important}
   </style>
 </head>
 <body>
   <section id="gate" class="gate">
-    <h1>채팅 관리</h1>
+    <h1>번역 용어집</h1>
     <p id="gateMessage">관리자 세션을 확인하고 있습니다.</p>
-    <a class="btn" href="/admin/">관리자 페이지</a>
+    <a class="button-link" href="/admin/">관리자 페이지</a>
   </section>
 
   <main id="app" class="hidden">
     <div class="row">
-      <div style="flex:1"><h1>채팅 관리</h1><p class="small">채팅 전용 계정·채팅방·초대를 관리합니다.</p></div>
-      <a class="btn" href="/admin/">← 관리자</a>
-      <a class="btn" href="/staff/chat/">채팅 열기</a>
+      <div style="flex:1 1 360px">
+        <h1>번역 용어집</h1>
+        <p class="muted">
+          KO / EN / JA / RU 대응어를 관리합니다.
+          저장하면 기존 AI 번역 캐시는 자동으로 무효화됩니다.
+        </p>
+      </div>
+      <a class="button-link" href="/admin/">← 관리자</a>
     </div>
 
     <section class="panel">
-      <h2>채팅 전용 계정</h2>
       <div class="row">
-        <input id="newChatId" placeholder="Chat ID">
-        <input id="newChatPassword" type="password" placeholder="초기 비밀번호">
-        <button id="createChatUser" type="button">계정 생성</button>
+        <input id="csvFile" type="file" accept=".csv,text/csv">
+        <button id="importButton" type="button">CSV 불러오기</button>
+        <button id="addRowButton" type="button">행 추가</button>
+        <button id="exportButton" type="button">현재 용어집 CSV 저장</button>
+        <button id="saveButton" type="button">서버에 저장</button>
       </div>
-      <div id="userStatus" class="status"></div>
-      <div id="users" class="cards"></div>
-    </section>
+      <div id="revision" class="muted" style="margin-top:8px"></div>
+      <div id="status" class="status"></div>
 
-    <section class="panel">
-      <h2>채팅방</h2>
-      <div class="row">
-        <input id="newRoomName" placeholder="채팅방 이름">
-        <input id="newRoomId" placeholder="room-id (선택)">
-        <label><input id="staffAutoJoin" type="checkbox" checked> 모든 활성 스태프 자동 참여</label>
-        <button id="createRoom" type="button">방 생성</button>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>canonical_key</th>
+              <th>한국어</th>
+              <th>English</th>
+              <th>日本語</th>
+              <th>Русский</th>
+              <th>notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
       </div>
-      <div id="roomStatus" class="status"></div>
-      <div id="rooms" class="cards"></div>
     </section>
   </main>
 
   <script>
-    const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
-    const $=id=>document.getElementById(id);
-    const gate=$("gate"),gateMessage=$("gateMessage"),app=$("app"),newChatId=$("newChatId"),newChatPassword=$("newChatPassword"),createChatUser=$("createChatUser"),userStatus=$("userStatus"),usersHost=$("users"),newRoomName=$("newRoomName"),newRoomId=$("newRoomId"),staffAutoJoin=$("staffAutoJoin"),createRoom=$("createRoom"),roomStatus=$("roomStatus"),roomsHost=$("rooms");
-    let data={rooms:[],staff:[],chat_users:[],memberships:[]};
+    const API =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-glossary-admin";
 
-    function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
-    async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
-    async function load(){data=await request("GET");renderUsers();renderRooms();}
+    const $ = (id) =>
+      document.getElementById(id);
 
-    function renderUsers(){
-      usersHost.replaceChildren(...data.chat_users.map(u=>{
-        const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
-        const row=document.createElement("div");row.className="row";
-        const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
-        const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
-        row.append(toggle,reset);card.append(h,row);return card;
-      }));
+    const gate = $("gate");
+    const gateMessage = $("gateMessage");
+    const app = $("app");
+    const csvFile = $("csvFile");
+    const importButton = $("importButton");
+    const addRowButton = $("addRowButton");
+    const exportButton = $("exportButton");
+    const saveButton = $("saveButton");
+    const tbody = $("rows");
+    const status = $("status");
+    const revision = $("revision");
+
+    let rows = [];
+
+    function setStatus(
+      message = "",
+      error = false,
+    ) {
+      status.textContent = message;
+      status.classList.toggle(
+        "error",
+        error,
+      );
     }
 
-    function membershipActive(roomId,userId,kind){return data.memberships.some(m=>m.room_id===roomId&&m.user_id===userId&&m.member_kind===kind&&m.is_active);}
-    function renderRooms(){
-      roomsHost.replaceChildren(...data.rooms.map(room=>{
-        const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${room.name} · ${room.id}`;
-        const small=document.createElement("div");small.className="small";small.textContent=room.staff_auto_join?"활성 스태프 전체 자동 참여":"초대된 사용자만 참여";
-        const controls=document.createElement("div");controls.className="row";
-        const auto=document.createElement("button");auto.textContent=room.staff_auto_join?"스태프 자동참여 끄기":"스태프 자동참여 켜기";auto.onclick=async()=>{await request("POST",{action:"update_room",room_id:room.id,staff_auto_join:!room.staff_auto_join});await load();};
-        controls.append(auto);
-        if(room.id!=="general"){const del=document.createElement("button");del.textContent="방 삭제";del.onclick=async()=>{if(!confirm("채팅방과 메시지를 모두 삭제할까요?"))return;await request("POST",{action:"delete_room",room_id:room.id});await load();};controls.append(del);}
-        const members=document.createElement("div");members.className="members";
+    async function request(
+      method,
+      body = null,
+    ) {
+      const token =
+        S967AdminAuth.getToken();
 
-        const candidates=[
-          ...data.staff.map(u=>({id:u.user_id,name:u.display_name,kind:"staff",active:u.is_active})),
-          ...data.chat_users.map(u=>({id:u.user_id,name:u.display_name,kind:"chat",active:u.is_active})),
-        ].filter(x=>x.active);
+      if (!token) {
+        throw new Error(
+          "관리자 로그인이 필요합니다.",
+        );
+      }
 
-        for(const c of candidates){
-          if(c.kind==="staff"&&room.staff_auto_join){const s=document.createElement("span");s.className="member";s.textContent=`${c.name} · Staff 자동`;members.append(s);continue;}
-          const active=membershipActive(room.id,c.id,c.kind);
-          const b=document.createElement("button");b.className="member";b.textContent=`${active?"✓ ":"＋ "}${c.name} · ${c.kind==="staff"?"Staff":"Chat"}`;b.onclick=async()=>{await request("POST",{action:"set_membership",room_id:room.id,user_id:c.id,member_kind:c.kind,is_active:!active});await load();};members.append(b);
+      const options = {
+        method,
+        headers: {
+          Authorization:
+            `Bearer ${token}`,
+        },
+      };
+
+      if (body !== null) {
+        options.headers[
+          "Content-Type"
+        ] = "application/json";
+        options.body =
+          JSON.stringify(body);
+      }
+
+      const response =
+        await fetch(API, options);
+
+      const result =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          `HTTP_${response.status}`,
+        );
+      }
+
+      return result;
+    }
+
+    function blankRow() {
+      return {
+        canonical_key: "",
+        ko: "",
+        en: "",
+        ja: "",
+        ru: "",
+        notes: "",
+      };
+    }
+
+    function render() {
+      tbody.replaceChildren(
+        ...rows.map(
+          (row, index) => {
+            const tr =
+              document.createElement(
+                "tr",
+              );
+
+            for (
+              const key of [
+                "canonical_key",
+                "ko",
+                "en",
+                "ja",
+                "ru",
+                "notes",
+              ]
+            ) {
+              const td =
+                document.createElement(
+                  "td",
+                );
+              const input =
+                document.createElement(
+                  "input",
+                );
+              input.value =
+                row[key] ?? "";
+              input.className =
+                key === "canonical_key"
+                  ? "key"
+                  : key === "notes"
+                    ? "notes"
+                    : "";
+              input.addEventListener(
+                "input",
+                () => {
+                  rows[index][key] =
+                    input.value;
+                },
+              );
+              td.append(input);
+              tr.append(td);
+            }
+
+            const action =
+              document.createElement(
+                "td",
+              );
+            const del =
+              document.createElement(
+                "button",
+              );
+            del.type = "button";
+            del.textContent = "삭제";
+            del.className = "danger";
+            del.addEventListener(
+              "click",
+              () => {
+                rows.splice(index, 1);
+                render();
+              },
+            );
+            action.append(del);
+            tr.append(action);
+
+            return tr;
+          },
+        ),
+      );
+    }
+
+    function parseCsv(text) {
+      const records = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+
+      for (
+        let i = 0;
+        i < text.length;
+        i++
+      ) {
+        const char = text[i];
+
+        if (quoted) {
+          if (char === '"') {
+            if (text[i + 1] === '"') {
+              field += '"';
+              i++;
+            } else {
+              quoted = false;
+            }
+          } else {
+            field += char;
+          }
+          continue;
         }
-        card.append(h,small,controls,members);return card;
-      }));
+
+        if (char === '"') {
+          quoted = true;
+        } else if (char === ",") {
+          row.push(field);
+          field = "";
+        } else if (
+          char === "\n" ||
+          char === "\r"
+        ) {
+          if (
+            char === "\r" &&
+            text[i + 1] === "\n"
+          ) {
+            i++;
+          }
+          row.push(field);
+          records.push(row);
+          row = [];
+          field = "";
+        } else {
+          field += char;
+        }
+      }
+
+      if (
+        field.length ||
+        row.length
+      ) {
+        row.push(field);
+        records.push(row);
+      }
+
+      return records;
     }
 
-    createChatUser.onclick=async()=>{try{status(userStatus,"생성 중…");await request("POST",{action:"create_chat_user",chat_id:newChatId.value.trim(),password:newChatPassword.value});newChatId.value="";newChatPassword.value="";await load();status(userStatus,"생성 완료");}catch(e){status(userStatus,e.message,true);}};
-    createRoom.onclick=async()=>{try{status(roomStatus,"생성 중…");await request("POST",{action:"create_room",name:newRoomName.value.trim(),id:newRoomId.value.trim(),staff_auto_join:staffAutoJoin.checked});newRoomName.value="";newRoomId.value="";await load();status(roomStatus,"생성 완료");}catch(e){status(roomStatus,e.message,true);}};
+    function rowsFromCsv(text) {
+      const records =
+        parseCsv(
+          text.replace(/^\uFEFF/, ""),
+        );
 
-    (async()=>{const valid=await S967AdminAuth.validate({url:"https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session"});if(!valid){gateMessage.textContent="관리자 로그인이 필요하거나 세션이 만료되었습니다.";return;}gate.classList.add("hidden");app.classList.remove("hidden");try{await load();}catch(e){status(roomStatus,e.message,true);}})();
+      if (!records.length) {
+        return [];
+      }
+
+      const header =
+        records[0].map(
+          (value) =>
+            value.trim()
+              .toLowerCase(),
+        );
+
+      const required = [
+        "canonical_key",
+        "ko",
+        "en",
+        "ja",
+        "ru",
+        "notes",
+      ];
+
+      for (const key of required) {
+        if (!header.includes(key)) {
+          throw new Error(
+            `CSV 헤더 누락: ${key}`,
+          );
+        }
+      }
+
+      return records
+        .slice(1)
+        .filter(
+          (record) =>
+            record.some(
+              (value) =>
+                value.trim() !== "",
+            ),
+        )
+        .map(
+          (record) =>
+            Object.fromEntries(
+              required.map(
+                (key) => [
+                  key,
+                  record[
+                    header.indexOf(key)
+                  ] ?? "",
+                ],
+              ),
+            ),
+        );
+    }
+
+    function csvEscape(value) {
+      const text =
+        String(value ?? "");
+
+      return /[",\r\n]/.test(text)
+        ? `"${text.replaceAll(
+            '"',
+            '""',
+          )}"`
+        : text;
+    }
+
+    function exportCsv() {
+      const header = [
+        "canonical_key",
+        "ko",
+        "en",
+        "ja",
+        "ru",
+        "notes",
+      ];
+
+      const content = [
+        header.join(","),
+        ...rows.map(
+          (row) =>
+            header
+              .map(
+                (key) =>
+                  csvEscape(
+                    row[key],
+                  ),
+              )
+              .join(","),
+        ),
+      ].join("\r\n");
+
+      const blob =
+        new Blob(
+          ["\uFEFF", content],
+          {
+            type:
+              "text/csv;charset=utf-8",
+          },
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+      const a =
+        document.createElement("a");
+      a.href = url;
+      a.download =
+        "s967-translation-glossary.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function load() {
+      setStatus(
+        "용어집을 불러오는 중…",
+      );
+
+      const result =
+        await request("GET");
+
+      rows =
+        (result.rows ?? []).map(
+          (row) => ({
+            canonical_key:
+              row.canonical_key ?? "",
+            ko: row.ko ?? "",
+            en: row.en ?? "",
+            ja: row.ja ?? "",
+            ru: row.ru ?? "",
+            notes: row.notes ?? "",
+          }),
+        );
+
+      revision.textContent =
+        `Glossary revision: ${
+          result.glossary_revision ?? 1
+        }`;
+
+      render();
+      setStatus("");
+    }
+
+    importButton.addEventListener(
+      "click",
+      async () => {
+        const file =
+          csvFile.files?.[0];
+
+        if (!file) {
+          setStatus(
+            "CSV 파일을 선택하세요.",
+            true,
+          );
+          return;
+        }
+
+        try {
+          rows =
+            rowsFromCsv(
+              await file.text(),
+            );
+          render();
+          setStatus(
+            `${rows.length}개 행을 불러왔습니다. 서버 저장 전까지는 적용되지 않습니다.`,
+          );
+        } catch (error) {
+          setStatus(
+            error.message,
+            true,
+          );
+        }
+      },
+    );
+
+    addRowButton.addEventListener(
+      "click",
+      () => {
+        rows.push(blankRow());
+        render();
+      },
+    );
+
+    exportButton.addEventListener(
+      "click",
+      exportCsv,
+    );
+
+    saveButton.addEventListener(
+      "click",
+      async () => {
+        const cleaned =
+          rows
+            .map((row) => ({
+              canonical_key:
+                row.canonical_key.trim(),
+              ko: row.ko.trim(),
+              en: row.en.trim(),
+              ja: row.ja.trim(),
+              ru: row.ru.trim(),
+              notes: row.notes.trim(),
+            }))
+            .filter(
+              (row) =>
+                Object.values(row)
+                  .some(Boolean),
+            );
+
+        if (
+          cleaned.some(
+            (row) =>
+              !row.canonical_key,
+          )
+        ) {
+          setStatus(
+            "canonical_key가 빈 행이 있습니다.",
+            true,
+          );
+          return;
+        }
+
+        if (
+          !confirm(
+            `용어집 ${cleaned.length}개를 서버에 저장할까요?\n기존 번역 캐시는 무효화됩니다.`,
+          )
+        ) {
+          return;
+        }
+
+        saveButton.disabled = true;
+        setStatus("저장 중…");
+
+        try {
+          const result =
+            await request(
+              "POST",
+              {
+                action:
+                  "replace_all",
+                rows:
+                  cleaned,
+              },
+            );
+
+          revision.textContent =
+            `Glossary revision: ${
+              result.glossary_revision
+            }`;
+
+          setStatus(
+            `저장 완료 · ${result.count}개 · 기존 번역 캐시 무효화 완료`,
+          );
+        } catch (error) {
+          setStatus(
+            error.message,
+            true,
+          );
+        } finally {
+          saveButton.disabled = false;
+        }
+      },
+    );
+
+    (async () => {
+      const valid =
+        await S967AdminAuth.validate({
+          url:
+            "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session",
+        });
+
+      if (!valid) {
+        gateMessage.textContent =
+          "관리자 로그인이 필요하거나 세션이 만료되었습니다.";
+        return;
+      }
+
+      gate.classList.add("hidden");
+      app.classList.remove("hidden");
+
+      try {
+        await load();
+      } catch (error) {
+        setStatus(
+          error.message,
+          true,
+        );
+      }
+    })();
   </script>
 </body>
 </html>
