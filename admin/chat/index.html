@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>채팅 관리 | S967</title>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <script src="/admin/admin-auth.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100dvh;font-family:system-ui,sans-serif}
+    main{width:min(1100px,calc(100% - 28px));margin:28px auto 60px}.hidden{display:none!important}
+    .panel{margin-top:15px;padding:15px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+    .row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.row>*{min-width:0}
+    input,select,button{font:inherit}input,select{padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
+    button,a.btn{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);color:var(--text);text-decoration:none;cursor:pointer}
+    .status{min-height:1.2em;color:var(--muted);font-size:.78rem}.error{color:#c2410c}
+    .cards{display:grid;gap:10px}.card{padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover)}
+    .card h3{margin:0 0 7px}.small{color:var(--muted);font-size:.76rem;line-height:1.5}
+    .members{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.member{padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.72rem}
+    .gate{width:min(520px,calc(100% - 28px));margin:12vh auto;padding:24px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+  </style>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <h1>채팅 관리</h1>
+    <p id="gateMessage">관리자 세션을 확인하고 있습니다.</p>
+    <a class="btn" href="/admin/">관리자 페이지</a>
+  </section>
+
+  <main id="app" class="hidden">
+    <div class="row">
+      <div style="flex:1"><h1>채팅 관리</h1><p class="small">채팅 전용 계정·채팅방·초대를 관리합니다.</p></div>
+      <a class="btn" href="/admin/">← 관리자</a>
+      <a class="btn" href="/staff/chat/">채팅 열기</a>
+    </div>
+
+    <section class="panel">
+      <h2>채팅 전용 계정</h2>
+      <div class="row">
+        <input id="newChatId" placeholder="Chat ID">
+        <input id="newChatPassword" type="password" placeholder="초기 비밀번호">
+        <button id="createChatUser" type="button">계정 생성</button>
+      </div>
+      <div id="userStatus" class="status"></div>
+      <div id="users" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>채팅방</h2>
+      <div class="row">
+        <input id="newRoomName" placeholder="채팅방 이름">
+        <input id="newRoomId" placeholder="room-id (선택)">
+        <label><input id="staffAutoJoin" type="checkbox" checked> 모든 활성 스태프 자동 참여</label>
+        <button id="createRoom" type="button">방 생성</button>
+      </div>
+      <div id="roomStatus" class="status"></div>
+      <div id="rooms" class="cards"></div>
+    </section>
+  </main>
+
+  <script>
+    const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
+    const $=id=>document.getElementById(id);
+    const gate=$("gate"),gateMessage=$("gateMessage"),app=$("app"),newChatId=$("newChatId"),newChatPassword=$("newChatPassword"),createChatUser=$("createChatUser"),userStatus=$("userStatus"),usersHost=$("users"),newRoomName=$("newRoomName"),newRoomId=$("newRoomId"),staffAutoJoin=$("staffAutoJoin"),createRoom=$("createRoom"),roomStatus=$("roomStatus"),roomsHost=$("rooms");
+    let data={rooms:[],staff:[],chat_users:[],memberships:[]};
+
+    function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
+    async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
+    async function load(){data=await request("GET");renderUsers();renderRooms();}
+
+    function renderUsers(){
+      usersHost.replaceChildren(...data.chat_users.map(u=>{
+        const card=document.createElement("div");card.className="card";
+        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
+        const row=document.createElement("div");row.className="row";
+        const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
+        const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
+        row.append(toggle,reset);card.append(h,row);return card;
+      }));
+    }
+
+    function membershipActive(roomId,userId,kind){return data.memberships.some(m=>m.room_id===roomId&&m.user_id===userId&&m.member_kind===kind&&m.is_active);}
+    function renderRooms(){
+      roomsHost.replaceChildren(...data.rooms.map(room=>{
+        const card=document.createElement("div");card.className="card";
+        const h=document.createElement("h3");h.textContent=`${room.name} · ${room.id}`;
+        const small=document.createElement("div");small.className="small";small.textContent=room.staff_auto_join?"활성 스태프 전체 자동 참여":"초대된 사용자만 참여";
+        const controls=document.createElement("div");controls.className="row";
+        const auto=document.createElement("button");auto.textContent=room.staff_auto_join?"스태프 자동참여 끄기":"스태프 자동참여 켜기";auto.onclick=async()=>{await request("POST",{action:"update_room",room_id:room.id,staff_auto_join:!room.staff_auto_join});await load();};
+        controls.append(auto);
+        if(room.id!=="general"){const del=document.createElement("button");del.textContent="방 삭제";del.onclick=async()=>{if(!confirm("채팅방과 메시지를 모두 삭제할까요?"))return;await request("POST",{action:"delete_room",room_id:room.id});await load();};controls.append(del);}
+        const members=document.createElement("div");members.className="members";
+
+        const candidates=[
+          ...data.staff.map(u=>({id:u.user_id,name:u.display_name,kind:"staff",active:u.is_active})),
+          ...data.chat_users.map(u=>({id:u.user_id,name:u.display_name,kind:"chat",active:u.is_active})),
+        ].filter(x=>x.active);
+
+        for(const c of candidates){
+          if(c.kind==="staff"&&room.staff_auto_join){const s=document.createElement("span");s.className="member";s.textContent=`${c.name} · Staff 자동`;members.append(s);continue;}
+          const active=membershipActive(room.id,c.id,c.kind);
+          const b=document.createElement("button");b.className="member";b.textContent=`${active?"✓ ":"＋ "}${c.name} · ${c.kind==="staff"?"Staff":"Chat"}`;b.onclick=async()=>{await request("POST",{action:"set_membership",room_id:room.id,user_id:c.id,member_kind:c.kind,is_active:!active});await load();};members.append(b);
+        }
+        card.append(h,small,controls,members);return card;
+      }));
+    }
+
+    createChatUser.onclick=async()=>{try{status(userStatus,"생성 중…");await request("POST",{action:"create_chat_user",chat_id:newChatId.value.trim(),password:newChatPassword.value});newChatId.value="";newChatPassword.value="";await load();status(userStatus,"생성 완료");}catch(e){status(userStatus,e.message,true);}};
+    createRoom.onclick=async()=>{try{status(roomStatus,"생성 중…");await request("POST",{action:"create_room",name:newRoomName.value.trim(),id:newRoomId.value.trim(),staff_auto_join:staffAutoJoin.checked});newRoomName.value="";newRoomId.value="";await load();status(roomStatus,"생성 완료");}catch(e){status(roomStatus,e.message,true);}};
+
+    (async()=>{const valid=await S967AdminAuth.validate({url:"https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session"});if(!valid){gateMessage.textContent="관리자 로그인이 필요하거나 세션이 만료되었습니다.";return;}gate.classList.add("hidden");app.classList.remove("hidden");try{await load();}catch(e){status(roomStatus,e.message,true);}})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://esm.sh; style-src 'self' 'unsafe-inline'; connect-src 'self' https://dpmjwsnqkuzetyvfcmfr.supabase.co wss://dpmjwsnqkuzetyvfcmfr.supabase.co https://esm.sh; img-src 'self' blob: data:; object-src 'none'; base-uri 'none'; form-action 'self';">
+  <meta name="referrer" content="no-referrer">
+  <title>Staff Chat | S967</title>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js" defer></script>
+  <script src="/language.js" defer></script>
+  <script src="/admin/admin-auth.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%}
+    body{min-height:100dvh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--page-bg);color:var(--text)}
+    button,input,textarea{font:inherit;color:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    .app{width:min(1180px,100%);height:100dvh;margin:0 auto;padding:12px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px}
+    .panel{border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:15px}
+    .sidebar{min-height:0;padding:10px;display:flex;flex-direction:column;gap:8px}
+    .side-head{display:flex;align-items:center;gap:6px}
+    .side-head strong{flex:1}
+    .rooms{min-height:0;overflow:auto;display:grid;align-content:start;gap:5px}
+    .room-button{width:100%;display:flex;align-items:center;gap:7px;padding:9px;border:1px solid transparent;border-radius:9px;background:transparent;text-align:left}
+    .room-button:hover,.room-button.active{background:var(--surface-hover);border-color:var(--border)}
+    .room-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .badge{min-width:20px;height:20px;padding:0 5px;display:grid;place-items:center;border-radius:999px;background:var(--text);color:var(--page-bg);font-size:.68rem;font-weight:800}
+    .main{min-width:0;min-height:0;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:8px}
+    .bar{display:flex;align-items:center;gap:8px;padding:10px 12px}
+    .bar h1{margin:0;font-size:1.02rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar button,.bar a,.notify-button{border:1px solid var(--border);background:var(--surface-hover);border-radius:8px;padding:7px 9px;text-decoration:none}
+    .actor{font-size:.74rem;color:var(--muted);white-space:nowrap}
+    .searchbar{padding:8px;display:grid;grid-template-columns:minmax(130px,1fr) auto auto auto auto;gap:6px;align-items:end}
+    .searchbar label{display:grid;gap:3px;color:var(--muted);font-size:.7rem}
+    .searchbar input{min-height:34px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
+    .searchbar button{min-height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:6px 9px}
+    .older{justify-self:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 11px;color:var(--muted)}
+    .messages{min-height:0;overflow:auto;padding:12px;scroll-behavior:smooth}
+    .empty{min-height:180px;display:grid;place-items:center;color:var(--muted)}
+    .message{max-width:min(76%,620px);margin:0 0 12px;padding:9px 11px;border:1px solid var(--border);border-radius:13px;background:var(--surface-hover)}
+    .message.mine{margin-left:auto}
+    .message.admin{border-style:double}
+    .message-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:.7rem}
+    .message-author{color:var(--text);font-weight:750}
+    .message-time{margin-left:auto}
+    .message-action{border:0;background:transparent;padding:1px 3px;color:var(--muted);font-size:.7rem}
+    .reply-preview{margin-bottom:6px;padding:6px 8px;border-left:3px solid var(--border-hover);background:var(--surface);border-radius:6px;color:var(--muted);font-size:.76rem;overflow:hidden}
+    .reply-preview strong{color:var(--text)}
+    .reply-preview .snippet{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .message-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.48;font-size:.92rem}
+    .reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.reaction-chip,.reaction-add{border:1px solid var(--border);border-radius:999px;background:var(--surface);padding:3px 7px;font-size:.75rem}.reaction-chip.mine{background:var(--surface-hover);border-color:var(--border-hover);font-weight:800}.reaction-picker{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;padding:6px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}.reaction-picker button{border:0;background:transparent;padding:4px;font-size:1.15rem}
+    .message-foot{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:5px;min-height:16px}
+    .unread-number{font-size:.68rem;font-weight:800;color:var(--muted)}
+    .attachments{display:grid;gap:6px;margin-top:7px}
+    .image-preview{width:min(100%,420px);max-height:300px;object-fit:contain;border:1px solid var(--border);border-radius:9px;cursor:pointer}
+    .attachment{display:flex;gap:8px;align-items:center;padding:6px 7px;border:1px solid var(--border);border-radius:9px;background:var(--surface);text-decoration:none}
+    .attachment-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem}
+    .attachment-size{font-size:.7rem;color:var(--muted)}
+    .translate-button{border:1px solid var(--border);border-radius:999px;background:transparent;padding:3px 7px;color:var(--muted);font-size:.69rem}
+    .translation{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);white-space:pre-wrap;font-size:.84rem;line-height:1.45}
+    .translation-label{display:block;margin-bottom:3px;color:var(--muted);font-size:.68rem}
+    .composer{padding:9px}
+    .replying{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);font-size:.76rem;color:var(--muted)}
+    .replying span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .replying button{border:0;background:transparent;color:var(--muted)}
+    .file-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+    .file-chip{max-width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .compose-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px;align-items:end}
+    .file-button,.send-button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:7px 11px;font-weight:700}
+    textarea{min-height:40px;max-height:150px;resize:none;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:9px 10px;outline:none;line-height:1.4}
+    .status{min-height:1.1em;margin-top:5px;color:var(--muted);font-size:.72rem}
+    .status.error{color:#c2410c}
+    .gate{width:min(520px,calc(100% - 28px));margin:10vh auto;padding:22px;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow)}
+    .gate h1{margin-top:0}
+    .chat-login{display:grid;gap:8px;margin-top:14px}
+    .chat-login input{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover)}
+    .chat-login button{padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);font-weight:700}
+    .gate-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .gate-links a{padding:7px 9px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none}
+    @media(max-width:760px){
+      .app{height:100dvh;padding:7px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+      .sidebar{min-height:auto;padding:7px}
+      .rooms{display:flex;overflow:auto;gap:5px}
+      .room-button{width:auto;min-width:max-content}
+      .main{min-height:0}
+      .searchbar{grid-template-columns:1fr 1fr}
+      .search-text-label{grid-column:1/-1}
+      .message{max-width:88%}
+      .actor{display:none}
+    }
+  </style>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <h1 id="gateTitle">Staff Chat</h1>
+    <p id="gateMessage">Checking access…</p>
+    <div id="chatLogin" class="chat-login">
+      <input id="chatId" type="text" autocomplete="username" placeholder="Chat ID">
+      <input id="chatPassword" type="password" autocomplete="current-password" placeholder="Password">
+      <button id="chatLoginButton" type="button">Chat login</button>
+    </div>
+    <div class="gate-links">
+      <a href="/staff/">Staff</a>
+      <a href="/admin/">Admin</a>
+      <a href="/">Home</a>
+    </div>
+  </section>
+
+  <main id="app" class="app hidden">
+    <aside class="sidebar panel">
+      <div class="side-head">
+        <strong id="roomsTitle">Rooms</strong>
+        <button id="roomRefreshButton" type="button">↻</button>
+      </div>
+      <div id="rooms" class="rooms"></div>
+    </aside>
+
+    <section class="main">
+      <header class="bar panel">
+        <h1 id="chatTitle">Staff Chat</h1>
+        <span id="actor" class="actor"></span>
+        <button id="notifyButton" type="button">🔔</button>
+        <button id="refreshButton" type="button">↻</button>
+        <a id="backButton" href="/staff/">Back</a>
+      </header>
+
+      <section class="searchbar panel">
+        <label class="search-text-label">
+          <span id="searchTextLabel">Text</span>
+          <input id="searchText" type="search" maxlength="100">
+        </label>
+        <label>
+          <span id="dateFromLabel">From</span>
+          <input id="dateFrom" type="date">
+        </label>
+        <label>
+          <span id="dateToLabel">To</span>
+          <input id="dateTo" type="date">
+        </label>
+        <button id="searchButton" type="button">Search</button>
+        <button id="clearSearchButton" type="button">Clear</button>
+      </section>
+
+      <button id="olderButton" class="older hidden" type="button">Load older</button>
+
+      <section id="messages" class="messages panel" aria-live="polite"></section>
+
+      <section class="composer panel">
+        <div id="replying" class="replying hidden">
+          <span id="replyingText"></span>
+          <button id="cancelReplyButton" type="button">×</button>
+        </div>
+        <div id="fileList" class="file-list hidden"></div>
+        <div class="compose-row">
+          <button id="fileButton" class="file-button" type="button">＋</button>
+          <textarea id="messageInput" maxlength="4000" rows="1" placeholder="Message"></textarea>
+          <button id="sendButton" class="send-button" type="button">Send</button>
+        </div>
+        <input id="fileInput" type="file" multiple hidden accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.csv,.xlsx,.docx,.zip,image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip">
+        <div id="status" class="status"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
+    const API = {
+      list: `${FUNCTIONS_BASE}/staff-chat-list`,
+      send: `${FUNCTIONS_BASE}/staff-chat-send`,
+      upload: `${FUNCTIONS_BASE}/staff-chat-upload`,
+      file: `${FUNCTIONS_BASE}/staff-chat-file`,
+      delete: `${FUNCTIONS_BASE}/staff-chat-delete`,
+      translate: `${FUNCTIONS_BASE}/staff-chat-translate`,
+      read: `${FUNCTIONS_BASE}/staff-chat-read`,
+      react: `${FUNCTIONS_BASE}/staff-chat-react`,
+    };
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const $ = id => document.getElementById(id);
+    const FALLBACK_POLL_MS = 15000;
+    const MAX_FILES = 5;
+    const MAX_FILE_BYTES = 10 * 1024 * 1024;
+    const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
+
+    const TEXT = {
+      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"관리자·스태프 또는 초대된 채팅 계정으로 로그인하세요.",chatLogin:"채팅 로그인",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",from:"시작 날짜",to:"종료 날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다."},
+      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Admin, Staff, or an invited chat account.",chatLogin:"Chat login",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",from:"From",to:"To",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed."},
+      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"管理者・スタッフまたは招待されたチャットアカウントでログインしてください。",chatLogin:"チャットログイン",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",from:"開始日",to:"終了日",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。"},
+      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как администратор, сотрудник или приглашённый пользователь чата.",chatLogin:"Войти в чат",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",from:"С даты",to:"По дату",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены."},
+    };
+
+    let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
+    let text = TEXT[language] ?? TEXT.en;
+    let actor = null;
+    let rooms = [];
+    let currentRoomId = null;
+    let currentSignalTopic = null;
+    const attachmentObjectUrls = new Set();
+    let replyTarget = null;
+    let selectedFiles = [];
+    let hasMore = false;
+    let loading = false;
+    let sending = false;
+    let realtimeChannel = null;
+    let fallbackTimer = null;
+    let refreshTimer = null;
+    let notificationBaseline = null;
+    const messageMap = new Map();
+    let currentSearch = {q:"",dateFrom:"",dateTo:""};
+
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status");
+
+    function setText(){
+      document.documentElement.lang=language;
+      document.title=`${text.title} | S967`;
+      $("gateTitle").textContent=text.title;
+      gateMessage.textContent=text.checking;
+      chatLoginButton.textContent=text.chatLogin;
+      roomsTitle.textContent=text.rooms;
+      messageInput.placeholder=text.message;
+      sendButton.textContent=text.send;
+      searchTextLabel.textContent=text.text;
+      dateFromLabel.textContent=text.from;
+      dateToLabel.textContent=text.to;
+      searchButton.textContent=text.search;
+      clearSearchButton.textContent=text.clear;
+      olderButton.textContent=text.older;
+      notifyButton.title=text.notification;
+      renderRooms();
+      renderMessages();
+      renderReplyTarget();
+    }
+
+    function setStatus(message="",error=false){
+      statusHost.textContent=message;
+      statusHost.classList.toggle("error",error);
+    }
+
+    async function accessToken(){
+      const adminToken=globalThis.S967AdminAuth?.getToken?.();
+      if(adminToken) return {token:adminToken,kind:"admin"};
+      const {data}=await supabase.auth.getSession();
+      const token=data.session?.access_token;
+      return token?{token,kind:"auth"}:null;
+    }
+
+    async function request(url,options={}){
+      const auth=await accessToken();
+      if(!auth?.token){const e=new Error("UNAUTHORIZED");e.status=401;throw e;}
+      const headers=new Headers(options.headers??{});
+      headers.set("Authorization",`Bearer ${auth.token}`);
+      const response=await fetch(url,{...options,headers});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok){const e=new Error(result.error||`HTTP_${response.status}`);e.status=response.status;throw e;}
+      return result;
+    }
+
+    async function requestBlob(url){
+      const auth=await accessToken();
+      if(!auth?.token){const e=new Error("UNAUTHORIZED");e.status=401;throw e;}
+      const response=await fetch(url,{headers:{Authorization:`Bearer ${auth.token}`},cache:"no-store"});
+      if(!response.ok){const result=await response.json().catch(()=>({}));const e=new Error(result.error||`HTTP_${response.status}`);e.status=response.status;throw e;}
+      return response.blob();
+    }
+
+    function rememberObjectUrl(blob){
+      const url=URL.createObjectURL(blob);
+      attachmentObjectUrls.add(url);
+      return url;
+    }
+
+    function releaseAttachmentUrls(){
+      for(const url of attachmentObjectUrls)URL.revokeObjectURL(url);
+      attachmentObjectUrls.clear();
+    }
+
+    async function loadImagePreview(img,attachment){
+      try{
+        const blob=await requestBlob(`${API.file}?id=${encodeURIComponent(attachment.id)}`);
+        if(!img.isConnected)return;
+        img.src=rememberObjectUrl(blob);
+      }catch{
+        img.remove();
+      }
+    }
+
+    function formatDate(value){
+      try{return new Intl.DateTimeFormat(language==="ko"?"ko-KR":language==="ja"?"ja-JP":language==="ru"?"ru-RU":"en-US",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "";}
+    }
+    function formatBytes(bytes){const n=Number(bytes)||0;if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(1)} MB`;}
+    function nearBottom(){return messagesHost.scrollHeight-messagesHost.scrollTop-messagesHost.clientHeight<120;}
+    function newestMessage(){return [...messageMap.values()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]??null;}
+
+    function renderRooms(){
+      if(!roomsHost)return;
+      roomsHost.replaceChildren(...rooms.map(room=>{
+        const b=document.createElement("button");b.type="button";b.className="room-button";b.classList.toggle("active",room.id===currentRoomId);
+        const n=document.createElement("span");n.className="room-name";n.textContent=room.name;
+        b.append(n);
+        if((room.unread_count??0)>0){const badge=document.createElement("span");badge.className="badge";badge.textContent=String(room.unread_count);b.append(badge);}
+        b.onclick=()=>selectRoom(room.id);
+        return b;
+      }));
+    }
+
+    async function loadRooms(){
+      const result=await request(`${API.list}?view=rooms`);
+      actor=result.actor;
+      actorLabel.textContent=actor?.name?`${actor.name} · ${actor.kind}`:"";
+      rooms=result.rooms??[];
+      if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)) currentRoomId=rooms[0]?.id??null;
+      renderRooms();
+      return currentRoomId;
+    }
+
+    function buildListUrl({before="",limit=30}={}){
+      const p=new URLSearchParams({room_id:currentRoomId??"",limit:String(limit)});
+      if(before)p.set("before",before);
+      if(currentSearch.q)p.set("q",currentSearch.q);
+      if(currentSearch.dateFrom)p.set("date_from",currentSearch.dateFrom);
+      if(currentSearch.dateTo)p.set("date_to",currentSearch.dateTo);
+      return`${API.list}?${p.toString()}`;
+    }
+
+    async function openAttachment(a){
+      try{
+        const blob=await requestBlob(`${API.file}?id=${encodeURIComponent(a.id)}`);
+        const url=rememberObjectUrl(blob);
+        if(String(a.mime_type??"").startsWith("image/")){
+          window.open(url,"_blank","noopener,noreferrer");
+          setTimeout(()=>{URL.revokeObjectURL(url);attachmentObjectUrls.delete(url);},60000);
+        }else{
+          const link=document.createElement("a");
+          link.href=url;
+          link.download=a.original_name||"file";
+          link.rel="noopener noreferrer";
+          document.body.append(link);
+          link.click();
+          link.remove();
+          setTimeout(()=>{URL.revokeObjectURL(url);attachmentObjectUrls.delete(url);},10000);
+        }
+      }catch(e){setStatus(e.message,true);}
+    }
+
+    function renderMessage(message){
+      const article=document.createElement("article");article.className="message";
+      if(message.author_actor_key===actor?.actor_key)article.classList.add("mine");
+      if(message.author_kind==="admin")article.classList.add("admin");
+
+      const head=document.createElement("div");head.className="message-head";
+      const author=document.createElement("span");author.className="message-author";author.textContent=message.author_name;
+      const time=document.createElement("span");time.className="message-time";time.textContent=formatDate(message.created_at);
+      const reply=document.createElement("button");reply.type="button";reply.className="message-action";reply.textContent=text.reply;reply.onclick=()=>{replyTarget={id:message.id,author_name:message.author_name,body:message.body};renderReplyTarget();messageInput.focus();};
+      head.append(author,time,reply);
+      if(message.can_delete){const del=document.createElement("button");del.type="button";del.className="message-action";del.textContent=text.delete;del.onclick=()=>deleteMessage(message.id);head.append(del);}
+      article.append(head);
+
+      if(message.reply_to){const rp=document.createElement("div");rp.className="reply-preview";if(message.reply_to.deleted){rp.textContent=text.deletedReply;}else{const strong=document.createElement("strong");strong.textContent=message.reply_to.author_name;const sn=document.createElement("div");sn.className="snippet";sn.textContent=message.reply_to.body;rp.append(strong,sn);}article.append(rp);}
+
+      if(message.body){const body=document.createElement("div");body.className="message-body";body.textContent=message.body;article.append(body);}
+
+      if(message.attachments?.length){const host=document.createElement("div");host.className="attachments";for(const a of message.attachments){if(String(a.mime_type??"").startsWith("image/")){const img=document.createElement("img");img.className="image-preview";img.alt=a.original_name;img.loading="lazy";img.onclick=()=>openAttachment(a);host.append(img);loadImagePreview(img,a);}const link=document.createElement("a");link.className="attachment";link.href="#";const name=document.createElement("span");name.className="attachment-name";name.textContent=a.original_name;const size=document.createElement("span");size.className="attachment-size";size.textContent=formatBytes(a.size_bytes);link.append(name,size);link.onclick=e=>{e.preventDefault();openAttachment(a);};host.append(link);}article.append(host);}
+
+      if(String(message.body??"").trim()){const tr=document.createElement("button");tr.type="button";tr.className="translate-button";tr.textContent=`🌐 ${text.translate}`;const th=document.createElement("div");th.className="translation hidden";tr.onclick=()=>translateMessage(message,tr,th);article.append(tr,th);}
+
+      const reactions=document.createElement("div");reactions.className="reactions";
+      const reactionData=message.reactions??{counts:{},my_reaction:null};
+      for(const emoji of REACTIONS){const count=Number(reactionData.counts?.[emoji]??0);if(!count)continue;const b=document.createElement("button");b.type="button";b.className="reaction-chip";if(reactionData.my_reaction===emoji)b.classList.add("mine");b.textContent=`${emoji} ${count}`;b.onclick=()=>reactToMessage(message.id,emoji);reactions.append(b);}
+      const add=document.createElement("button");add.type="button";add.className="reaction-add";add.textContent="☺+";add.title="Reaction";
+      const picker=document.createElement("div");picker.className="reaction-picker hidden";for(const emoji of REACTIONS){const b=document.createElement("button");b.type="button";b.textContent=emoji;b.onclick=()=>reactToMessage(message.id,emoji);picker.append(b);}
+      add.onclick=()=>picker.classList.toggle("hidden");reactions.append(add);article.append(reactions,picker);
+
+      const foot=document.createElement("div");foot.className="message-foot";
+      if((message.unread_count??0)>0){const u=document.createElement("span");u.className="unread-number";u.textContent=String(message.unread_count);u.title="Unread people";foot.append(u);}
+      article.append(foot);
+      return article;
+    }
+
+    function renderMessages(){
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      if(!items.length){messagesHost.innerHTML=`<div class="empty">${text.empty}</div>`;olderButton.classList.add("hidden");return;}
+      messagesHost.replaceChildren(...items.map(renderMessage));
+      olderButton.classList.toggle("hidden",!hasMore);
+    }
+
+    async function translateMessage(message,button,host){
+      if(button.disabled)return;const old=button.textContent;button.disabled=true;button.textContent=text.translating;
+      try{const r=await request(API.translate,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:message.id,target_language:["ko","en","ja","ru"].includes(language)?language:"en"})});host.replaceChildren();const lab=document.createElement("span");lab.className="translation-label";lab.textContent=`${text.translation} · ${(["ko","en","ja","ru"].includes(language)?language:"en").toUpperCase()}`;const c=document.createElement("span");c.textContent=r.translation??"";host.append(lab,c);host.classList.remove("hidden");}catch{host.textContent=text.translationFailed;host.classList.remove("hidden");}finally{button.disabled=false;button.textContent=old;}
+    }
+
+    async function markRead(){
+      if(!currentRoomId||document.hidden||!nearBottom())return;
+      try{await request(API.read,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId})});await loadRooms();}catch{}
+    }
+
+    function maybeNotify(items,previousNewestId){
+      if(document.visibilityState!=="hidden"||Notification.permission!=="granted")return;
+      const fresh=items.filter(m=>m.author_actor_key!==actor?.actor_key&&m.id!==previousNewestId).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+      if(!fresh)return;
+      new Notification(`${fresh.author_name} · ${rooms.find(r=>r.id===currentRoomId)?.name??text.title}`,{body:String(fresh.body||"📎").slice(0,160),tag:`staff-chat-${currentRoomId}`,renotify:true});
+    }
+
+    async function loadLatest(forceScroll=false,notify=false){
+      if(loading||!currentRoomId)return;loading=true;const shouldScroll=forceScroll||nearBottom();const previous=newestMessage()?.id??notificationBaseline;
+      try{const r=await request(buildListUrl({limit:30}));actor=r.actor;currentSignalTopic=r.room?.signal_topic??null;chatTitle.textContent=r.room?.name??text.title;for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();if(shouldScroll)messagesHost.scrollTop=messagesHost.scrollHeight;if(notify)maybeNotify(r.messages??[],previous);notificationBaseline=newestMessage()?.id??notificationBaseline;gate.classList.add("hidden");app.classList.remove("hidden");renderRooms();if(shouldScroll)await markRead();}catch(e){if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);throw e;}finally{loading=false;}
+    }
+
+    async function loadOlder(){
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const earliest=items[0];if(!earliest)return;olderButton.disabled=true;
+      try{const r=await request(buildListUrl({limit:30,before:earliest.created_at}));for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();}catch{setStatus(text.loadFailed,true);}finally{olderButton.disabled=false;}
+    }
+
+    async function selectRoom(id){
+      if(id===currentRoomId)return;stopRealtime();releaseAttachmentUrls();currentSignalTopic=null;currentRoomId=id;messageMap.clear();replyTarget=null;renderReplyTarget();currentSearch={q:"",dateFrom:"",dateTo:""};searchText.value="";dateFrom.value="";dateTo.value="";renderRooms();await loadLatest(true).catch(()=>{});startRealtime();
+    }
+
+    function renderReplyTarget(){
+      replying.classList.toggle("hidden",!replyTarget);
+      replyingText.textContent=replyTarget?`${text.replying} · ${replyTarget.author_name}: ${String(replyTarget.body??"").replace(/\s+/g," ").slice(0,100)}`:"";
+    }
+
+    function renderFiles(){
+      fileList.classList.toggle("hidden",!selectedFiles.length);fileList.replaceChildren(...selectedFiles.map(f=>{const s=document.createElement("span");s.className="file-chip";s.textContent=`${f.name} · ${formatBytes(f.size)}`;return s;}));
+    }
+
+    async function uploadFile(messageId,file){const form=new FormData();form.append("message_id",messageId);form.append("file",file,file.name);return request(API.upload,{method:"POST",body:form});}
+
+    async function sendMessage(){
+      if(sending||!currentRoomId)return;const body=messageInput.value;if(!body.trim()&&!selectedFiles.length)return;sending=true;sendButton.disabled=true;
+      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
+    }
+
+    async function reactToMessage(messageId,emoji){
+      try{
+        await request(API.react,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:messageId,emoji})});
+        await loadLatest(false);
+      }catch(e){setStatus(e.message,true);}
+    }
+
+    async function deleteMessage(id){
+      if(!confirm(text.deleteConfirm))return;
+      try{await request(API.delete,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:id})});messageMap.delete(id);renderMessages();}catch(e){setStatus(e.message,true);}
+    }
+
+    function scheduleRefresh(){
+      clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadLatest(false,true).then(loadRooms).catch(()=>{}),120);
+    }
+
+    function startRealtime(){
+      stopRealtime();if(!currentRoomId)return;
+      if(!currentSignalTopic)return;realtimeChannel=supabase.channel(currentSignalTopic,{config:{private:false}}).on("broadcast",{event:"changed"},scheduleRefresh).subscribe();
+    }
+    function stopRealtime(){if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null;}if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}}
+    function startFallback(){stopFallback();fallbackTimer=setInterval(()=>{if(!document.hidden)loadLatest(false).then(loadRooms).catch(()=>{});},FALLBACK_POLL_MS);}
+    function stopFallback(){if(fallbackTimer){clearInterval(fallbackTimer);fallbackTimer=null;}}
+
+    function showGate(message){stopRealtime();stopFallback();app.classList.add("hidden");gate.classList.remove("hidden");gateMessage.textContent=message;chatLogin.classList.remove("hidden");}
+
+    async function bootstrap(){
+      setText();
+      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(true);startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
+    }
+
+    async function doChatLogin(){
+      const id=chatId.value.trim();const password=chatPassword.value;if(!id||!password)return;
+      chatLoginButton.disabled=true;
+      try{const email=`chat-${id.toLowerCase()}@s967.org`;const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;gate.classList.add("hidden");await bootstrap();}catch{gateMessage.textContent=text.denied;}finally{chatLoginButton.disabled=false;}
+    }
+
+    chatLoginButton.onclick=doChatLogin;
+    chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
+    roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
+    refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
+    notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
+    searchButton.onclick=async()=>{currentSearch={q:searchText.value.trim(),dateFrom:dateFrom.value,dateTo:dateTo.value};messageMap.clear();await loadLatest(true).catch(()=>{});};
+    clearSearchButton.onclick=async()=>{searchText.value="";dateFrom.value="";dateTo.value="";currentSearch={q:"",dateFrom:"",dateTo:""};messageMap.clear();await loadLatest(true).catch(()=>{});};
+    searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
+    dateFrom.onchange=()=>searchButton.click();
+    dateTo.onchange=()=>searchButton.click();
+    olderButton.onclick=loadOlder;
+    cancelReplyButton.onclick=()=>{replyTarget=null;renderReplyTarget();};
+    fileButton.onclick=()=>fileInput.click();
+    fileInput.onchange=()=>{const files=[...(fileInput.files??[])];if(files.length>MAX_FILES){setStatus(text.tooManyFiles,true);return;}if(files.some(f=>f.size>MAX_FILE_BYTES)){setStatus(text.fileTooLarge,true);return;}selectedFiles=files;setStatus("");renderFiles();};
+    sendButton.onclick=sendMessage;
+    messageInput.addEventListener("input",()=>{messageInput.style.height="auto";messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;});
+    messageInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendMessage();}});
+    messagesHost.addEventListener("scroll",()=>{if(nearBottom())markRead();},{passive:true});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(()=>{markRead();loadRooms();}).catch(()=>{});} });
+    window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
+    window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();releaseAttachmentUrls();});
+
+    bootstrap();
+  </script>
+</body>
+</html>

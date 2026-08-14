@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>공지사항 관리 | S967</title>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <script src="/admin/admin-auth.js"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;font-family:system-ui,sans-serif}
+    main{width:min(1080px,calc(100% - 28px));margin:26px auto 60px}
+    h1,h2,h3{margin-top:0}
+    .hidden{display:none!important}
+    .panel{margin-top:14px;padding:15px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .lang-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    label{display:grid;gap:4px;color:var(--muted);font-size:.77rem}
+    input,textarea,button,select{font:inherit;color:inherit}
+    input,textarea,select{width:100%;padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
+    textarea{min-height:78px;resize:vertical;line-height:1.45}
+    button,.btn{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);color:var(--text);text-decoration:none;cursor:pointer}
+    .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+    .row .grow{flex:1}
+    .status{min-height:1.2em;margin-top:7px;color:var(--muted);font-size:.76rem}
+    .status.error{color:#c2410c}
+    .cards{display:grid;gap:9px;margin-top:10px}
+    .card{padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover)}
+    .card-head{display:flex;gap:7px;align-items:flex-start}
+    .card-head strong{flex:1}
+    .meta{color:var(--muted);font-size:.72rem;line-height:1.5}
+    .texts{display:grid;gap:3px;margin-top:7px;font-size:.79rem}
+    .gate{width:min(520px,calc(100% - 28px));margin:10vh auto;padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+    .login{display:grid;gap:7px;margin-top:12px}
+    .preset{border-style:dashed}
+    code{font-size:.78em}
+    @media(max-width:700px){.grid,.lang-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <section id="gate" class="gate">
+    <h1>공지사항 관리</h1>
+    <p id="gateMessage">로그인 상태를 확인하고 있습니다.</p>
+    <div id="staffLogin" class="login">
+      <input id="staffId" placeholder="Staff ID" autocomplete="username">
+      <input id="staffPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="staffLoginButton" type="button">Staff 로그인</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <a class="btn" href="/admin/">관리자</a>
+      <a class="btn" href="/staff/">Staff</a>
+      <a class="btn" href="/">홈</a>
+    </div>
+  </section>
+
+  <main id="app" class="hidden">
+    <div class="row">
+      <div class="grow">
+        <h1 style="margin-bottom:4px">공지사항 관리</h1>
+        <div id="actor" class="meta"></div>
+      </div>
+      <a class="btn" href="/">메인 페이지</a>
+    </div>
+
+    <section class="panel">
+      <h2>일반 공지사항</h2>
+      <p class="meta">4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.</p>
+
+      <input id="announcementId" type="hidden">
+
+      <div class="lang-grid">
+        <label>한국어<textarea id="aKo"></textarea></label>
+        <label>English<textarea id="aEn"></textarea></label>
+        <label>日本語<textarea id="aJa"></textarea></label>
+        <label>Русский<textarea id="aRu"></textarea></label>
+      </div>
+
+      <div class="grid" style="margin-top:9px">
+        <label>표시 시작<input id="aStart" type="datetime-local"></label>
+        <label>표시 종료<input id="aEnd" type="datetime-local"></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="saveAnnouncement" type="button">공지 저장</button>
+        <button id="cancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="announcementStatus" class="status"></div>
+      <div id="announcementList" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>반복 공지 루틴</h2>
+      <p class="meta">
+        첫 표시 기간을 기준으로 N일마다 자동 반복합니다.
+        문구에는 <code>{date}</code>, <code>{start}</code>, <code>{end}</code>를 쓸 수 있습니다.
+      </p>
+
+      <div class="row">
+        <button id="wkPreset" type="button" class="preset">황무지 모집 프리셋</button>
+        <button id="periodPreset" type="button" class="preset">일반 기간 공지 프리셋</button>
+      </div>
+
+      <input id="routineId" type="hidden">
+
+      <div class="grid" style="margin-top:9px">
+        <label>루틴 이름<input id="rName"></label>
+        <label>첫 표시 시작<input id="rAnchor" type="datetime-local"></label>
+        <label>반복 주기(일)<input id="rRepeat" type="number" min="1" value="14"></label>
+        <label>한 번 표시되는 시간(시간)<input id="rHours" type="number" min="1" value="72"></label>
+        <label>{date} 기준일: 표시 시작일부터 며칠 뒤<input id="rOffset" type="number" value="3"></label>
+        <label><span>활성화</span><select id="rEnabled"><option value="true">사용</option><option value="false">중지</option></select></label>
+      </div>
+
+      <div class="lang-grid" style="margin-top:9px">
+        <label>한국어<textarea id="rKo"></textarea></label>
+        <label>English<textarea id="rEn"></textarea></label>
+        <label>日本語<textarea id="rJa"></textarea></label>
+        <label>Русский<textarea id="rRu"></textarea></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="saveRoutine" type="button">루틴 저장</button>
+        <button id="cancelRoutineEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="routineStatus" class="status"></div>
+      <div id="routineList" class="cards"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const API=`${SUPABASE_URL}/functions/v1/site-announcements`;
+    const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const $=id=>document.getElementById(id);
+
+    const gate=$("gate"),gateMessage=$("gateMessage"),staffLogin=$("staffLogin"),staffId=$("staffId"),staffPassword=$("staffPassword"),staffLoginButton=$("staffLoginButton"),app=$("app"),actorHost=$("actor");
+    const aId=$("announcementId"),aKo=$("aKo"),aEn=$("aEn"),aJa=$("aJa"),aRu=$("aRu"),aStart=$("aStart"),aEnd=$("aEnd"),saveAnnouncement=$("saveAnnouncement"),cancelAnnouncementEdit=$("cancelAnnouncementEdit"),announcementStatus=$("announcementStatus"),announcementList=$("announcementList");
+    const rId=$("routineId"),rName=$("rName"),rAnchor=$("rAnchor"),rRepeat=$("rRepeat"),rHours=$("rHours"),rOffset=$("rOffset"),rEnabled=$("rEnabled"),rKo=$("rKo"),rEn=$("rEn"),rJa=$("rJa"),rRu=$("rRu"),saveRoutine=$("saveRoutine"),cancelRoutineEdit=$("cancelRoutineEdit"),routineStatus=$("routineStatus"),routineList=$("routineList"),wkPreset=$("wkPreset"),periodPreset=$("periodPreset");
+
+    let data={announcements:[],routines:[]};
+
+    function status(host,message="",error=false){host.textContent=message;host.classList.toggle("error",error);}
+    function localInputValue(value){if(!value)return"";const d=new Date(value);const offset=d.getTimezoneOffset()*60000;return new Date(d.getTime()-offset).toISOString().slice(0,16);}
+    function isoFromLocal(value){return value?new Date(value).toISOString():"";}
+    function fmt(value){try{return new Intl.DateTimeFormat("ko-KR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}catch{return value??"";}}
+
+    async function token(){
+      const admin=S967AdminAuth?.getToken?.();
+      if(admin)return admin;
+      const {data}=await supabase.auth.getSession();
+      return data.session?.access_token??null;
+    }
+
+    async function request(method="GET",body=null){
+      const t=await token();
+      if(!t)throw Object.assign(new Error("로그인이 필요합니다."),{status:401});
+      const options={method,headers:{Authorization:`Bearer ${t}`}};
+      if(body!==null){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
+      const response=await fetch(`${API}?manage=1`,options);
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw Object.assign(new Error(result.error||`HTTP_${response.status}`),{status:response.status});
+      return result;
+    }
+
+    function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
+
+    function render(){
+      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+
+      announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);card.append(head,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+
+      routineList.replaceChildren(...(data.routines??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);
+        const detail=document.createElement("div");detail.className="meta";detail.textContent=`첫 시작 ${fmt(item.anchor_start)} · ${item.repeat_every_days}일마다 · ${item.active_hours}시간 표시 · {date}=+${item.event_offset_days}일`;
+        card.append(head,detail,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editRoutine(item);const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>deleteRoutine(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+    }
+
+    async function load(){
+      data=await request();
+      render();
+    }
+
+    function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent="공지 저장";cancelAnnouncementEdit.classList.add("hidden");}
+    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent="공지 수정 저장";cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    async function deleteAnnouncement(item){if(!confirm("이 공지사항을 삭제할까요?"))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
+
+    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,"저장 중…");const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,"저장했습니다.");}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
+    cancelAnnouncementEdit.onclick=clearAnnouncement;
+
+    function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent="루틴 저장";cancelRoutineEdit.classList.add("hidden");}
+    function editRoutine(item){rId.value=item.id;rName.value=item.name;rAnchor.value=localInputValue(item.anchor_start);rRepeat.value=item.repeat_every_days;rHours.value=item.active_hours;rOffset.value=item.event_offset_days;rEnabled.value=String(item.enabled);rKo.value=item.text_ko;rEn.value=item.text_en;rJa.value=item.text_ja;rRu.value=item.text_ru;saveRoutine.textContent="루틴 수정 저장";cancelRoutineEdit.classList.remove("hidden");}
+    async function deleteRoutine(item){if(!confirm("이 반복 루틴을 삭제할까요?"))return;await request("POST",{action:"delete_routine",id:item.id});await load();}
+
+    wkPreset.onclick=()=>{rName.value="황무지 모집";rRepeat.value="14";rHours.value="72";rOffset.value="3";rKo.value="현재 {date} 황무지 모집 기간입니다.";rEn.value="Recruitment is now open for the {date} Wasteland event.";rJa.value="現在、{date}の荒野イベントの募集期間です。";rRu.value="Сейчас идёт набор на событие «Пустошь» {date}.";status(routineStatus,"반복 주기·표시 시간·기준일은 실제 일정에 맞게 확인해서 입력하세요.");};
+    periodPreset.onclick=()=>{rName.value="기간 안내";rRepeat.value="7";rHours.value="24";rOffset.value="0";rKo.value="{start}~{end} 안내 기간입니다.";rEn.value="The notice period is {start}–{end}.";rJa.value="{start}～{end}は案内期間です。";rRu.value="Период объявления: {start}–{end}.";};
+
+    saveRoutine.onclick=async()=>{saveRoutine.disabled=true;try{status(routineStatus,"저장 중…");const payload={action:rId.value?"update_routine":"create_routine",id:rId.value||undefined,name:rName.value,anchor_start:isoFromLocal(rAnchor.value),repeat_every_days:Number(rRepeat.value),active_hours:Number(rHours.value),event_offset_days:Number(rOffset.value),enabled:rEnabled.value==="true",text_ko:rKo.value,text_en:rEn.value,text_ja:rJa.value,text_ru:rRu.value};await request("POST",payload);clearRoutine();await load();status(routineStatus,"저장했습니다.");}catch(e){status(routineStatus,e.message,true);}finally{saveRoutine.disabled=false;}};
+    cancelRoutineEdit.onclick=clearRoutine;
+
+    async function staffSignIn(){
+      const id=staffId.value.trim();
+      const password=staffPassword.value;
+      if(!id||!password)return;
+      staffLoginButton.disabled=true;
+      try{
+        const {error}=await supabase.auth.signInWithPassword({email:`${id.toLowerCase()}@s967.org`,password});
+        if(error)throw error;
+        gate.classList.add("hidden");app.classList.remove("hidden");await load();
+      }catch{gateMessage.textContent="Staff 로그인에 실패했습니다.";}
+      finally{staffLoginButton.disabled=false;}
+    }
+    staffLoginButton.onclick=staffSignIn;
+    staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+
+    (async()=>{
+      try{
+        const t=await token();
+        if(!t){gateMessage.textContent="관리자 또는 Staff로 로그인하세요.";return;}
+        await load();
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+      }catch(e){
+        gateMessage.textContent=e.status===403?"공지사항 권한이 없습니다.":"관리자 또는 Staff로 로그인하세요.";
+      }
+    })();
+  </script>
+</body>
+</html>

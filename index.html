@@ -371,6 +371,90 @@
     bottom: 14px;
   }
 }
+  
+    /* Active announcements: hidden completely when there is nothing to show. */
+    .announcement-ticker {
+      width: min(680px, calc(100vw - 40px));
+      margin: 0 auto 22px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .announcement-ticker[hidden] {
+      display: none !important;
+    }
+
+    .announcement-label {
+      padding: 6px 12px 0;
+      color: var(--subtle);
+      font-size: .68rem;
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .announcement-viewport {
+      position: relative;
+      height: 50px;
+      overflow: hidden;
+    }
+
+    .announcement-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 14px 10px;
+      color: var(--text);
+      font-size: clamp(.82rem, 2vw, .96rem);
+      font-weight: 650;
+      line-height: 1.45;
+      text-align: center;
+
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: normal;
+
+      opacity: 0;
+      transform: translateY(110%);
+      transition:
+        transform 420ms ease,
+        opacity 420ms ease;
+    }
+
+    .announcement-slide.is-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .announcement-slide.is-leaving {
+      opacity: 0;
+      transform: translateY(-110%);
+    }
+
+    @media (max-width: 480px) {
+      .announcement-ticker {
+        width: min(100%, calc(100vw - 28px));
+        margin-bottom: 16px;
+      }
+
+      .announcement-viewport {
+        height: 58px;
+      }
+
+      .announcement-slide {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: .8rem;
+      }
+    }
+
   </style>
 </head>
 
@@ -535,6 +619,25 @@
 
   <main>
 
+
+    <section
+      id="announcementTicker"
+      class="announcement-ticker"
+      aria-live="polite"
+      hidden
+    >
+      <div
+        class="announcement-label"
+        id="announcementLabel"
+      >
+        Notice
+      </div>
+      <div
+        class="announcement-viewport"
+        id="announcementViewport"
+      ></div>
+    </section>
+
     <h1 class="server">
       S967
     </h1>
@@ -675,5 +778,340 @@ document.addEventListener('click', () => {
   privacyInfoButton.setAttribute('aria-expanded', 'false');
 });
 </script>
+
+  <script>
+    (() => {
+      const ANNOUNCEMENT_API =
+        "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
+
+      const ticker =
+        document.getElementById(
+          "announcementTicker"
+        );
+
+      const viewport =
+        document.getElementById(
+          "announcementViewport"
+        );
+
+      const label =
+        document.getElementById(
+          "announcementLabel"
+        );
+
+      if (
+        !ticker ||
+        !viewport
+      ) {
+        return;
+      }
+
+      let pages = [];
+      let pageIndex = 0;
+      let timer = null;
+
+      const LABELS = {
+        ko: "공지",
+        en: "Notice",
+        ja: "お知らせ",
+        ru: "Объявление",
+      };
+
+      function language() {
+        const value =
+          typeof getCurrentLanguage ===
+            "function"
+            ? getCurrentLanguage()
+            : (
+                localStorage.getItem(
+                  "s967_language"
+                ) ||
+                "en"
+              );
+
+        return [
+          "ko",
+          "en",
+          "ja",
+          "ru",
+        ].includes(value)
+          ? value
+          : "en";
+      }
+
+      /*
+        Long notices are split only between whitespace-separated words.
+        A word itself is never cut in the middle.
+      */
+      function splitByWords(
+        text
+      ) {
+        const value =
+          String(text ?? "")
+            .trim();
+
+        if (!value) {
+          return [];
+        }
+
+        const width =
+          window.innerWidth;
+
+        const limit =
+          width <= 480
+            ? 44
+            : width <= 800
+              ? 72
+              : 112;
+
+        const words =
+          value.split(/\s+/);
+
+        /*
+          Languages such as Japanese often do not use spaces.
+          Leave them intact and let the browser's native CJK
+          line-breaking rules render the notice.
+        */
+        if (
+          words.length <= 1
+        ) {
+          return [value];
+        }
+
+        const chunks = [];
+        let current = "";
+
+        for (
+          const word of words
+        ) {
+          const candidate =
+            current
+              ? `${current} ${word}`
+              : word;
+
+          if (
+            current &&
+            candidate.length >
+              limit
+          ) {
+            chunks.push(current);
+            current = word;
+          } else {
+            current =
+              candidate;
+          }
+        }
+
+        if (current) {
+          chunks.push(current);
+        }
+
+        return chunks;
+      }
+
+      function clearTimer() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function showPage(
+        nextIndex,
+        initial = false
+      ) {
+        if (!pages.length) {
+          ticker.hidden = true;
+          viewport.replaceChildren();
+          return;
+        }
+
+        const old =
+          viewport.querySelector(
+            ".announcement-slide.is-active"
+          );
+
+        const next =
+          document.createElement(
+            "div"
+          );
+
+        next.className =
+          "announcement-slide";
+
+        next.textContent =
+          pages[nextIndex];
+
+        viewport.append(next);
+
+        requestAnimationFrame(
+          () => {
+            if (old) {
+              old.classList.remove(
+                "is-active"
+              );
+
+              old.classList.add(
+                "is-leaving"
+              );
+
+              setTimeout(
+                () => old.remove(),
+                480
+              );
+            }
+
+            next.classList.add(
+              "is-active"
+            );
+          }
+        );
+
+        pageIndex =
+          nextIndex;
+
+        if (initial) {
+          ticker.hidden =
+            false;
+        }
+      }
+
+      function start() {
+        clearTimer();
+
+        if (
+          pages.length <= 1
+        ) {
+          return;
+        }
+
+        timer =
+          setInterval(
+            () => {
+              showPage(
+                (
+                  pageIndex + 1
+                ) %
+                pages.length
+              );
+            },
+            5000
+          );
+      }
+
+      async function load() {
+        try {
+          const response =
+            await fetch(
+              ANNOUNCEMENT_API,
+              {
+                cache: "no-store",
+              }
+            );
+
+          if (!response.ok) {
+            throw new Error(
+              "ANNOUNCEMENT_LOAD_FAILED"
+            );
+          }
+
+          const result =
+            await response.json();
+
+          const lang =
+            language();
+
+          label.textContent =
+            LABELS[lang] ??
+            LABELS.en;
+
+          pages =
+            (
+              result
+                .announcements ??
+              []
+            )
+              .flatMap(
+                (item) =>
+                  splitByWords(
+                    item
+                      ?.texts
+                      ?.[lang] ??
+                    item
+                      ?.texts
+                      ?.en ??
+                    ""
+                  )
+              )
+              .filter(Boolean);
+
+          pageIndex = 0;
+          viewport.replaceChildren();
+          clearTimer();
+
+          if (!pages.length) {
+            ticker.hidden = true;
+            return;
+          }
+
+          showPage(
+            0,
+            true
+          );
+
+          start();
+        } catch (error) {
+          console.error(
+            "Announcement load failed:",
+            error
+          );
+
+          clearTimer();
+          ticker.hidden = true;
+        }
+      }
+
+      window.addEventListener(
+        "resize",
+        () => {
+          clearTimeout(
+            window
+              .__s967AnnouncementResizeTimer
+          );
+
+          window
+            .__s967AnnouncementResizeTimer =
+            setTimeout(
+              load,
+              180
+            );
+        },
+        {
+          passive: true,
+        }
+      );
+
+      window.addEventListener(
+        "s967languagechange",
+        load
+      );
+
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (
+            document.hidden
+          ) {
+            clearTimer();
+          } else {
+            load();
+          }
+        }
+      );
+
+      load();
+    })();
+  </script>
+
 </body>
 </html>
