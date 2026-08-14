@@ -554,28 +554,7 @@
       }
     }
 
-
-    .embedded-admin-tools {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .embedded-admin-frame {
-      width: 100%;
-      height: min(72vh, 820px);
-      min-height: 560px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface-hover);
-    }
-
     @media (max-width: 700px) {
-      .embedded-admin-frame {
-        height: 76vh;
-        min-height: 520px;
-      }
     }
 
   
@@ -632,7 +611,29 @@
       }
     }
 
-  </style>
+  
+  #chatAdminSection .cards,#announcementAdminSection .cards{display:grid;gap:10px;margin-top:10px}
+  #chatAdminSection .card,#announcementAdminSection .card,#chatAdminSection .report-card{padding:11px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover)}
+  #chatAdminSection .members{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  #chatAdminSection .member{padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.72rem}
+  #chatAdminSection .report-card.pending{border-width:2px}
+  #chatAdminSection .report-meta{color:var(--muted);font-size:.72rem;line-height:1.5}
+  #chatAdminSection .report-message{margin-top:8px;padding:9px;border:1px solid var(--border);border-radius:8px;white-space:pre-wrap;word-break:break-word}
+  #chatAdminSection .report-context{display:grid;gap:5px;margin-top:8px}
+  #chatAdminSection .context-line{padding:6px 8px;border-left:3px solid var(--border);font-size:.78rem;white-space:pre-wrap}
+  #chatAdminSection .context-line.reported{border-left-color:var(--text);font-weight:650}
+  #chatAdminSection .evidence-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  #announcementAdminSection .grid,#announcementAdminSection .lang-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #announcementAdminSection label{display:grid;gap:5px;font-size:.78rem}
+  #announcementAdminSection textarea{min-height:78px;resize:vertical;line-height:1.45}
+  #announcementAdminSection .card-head{display:flex;gap:7px;align-items:flex-start}
+  #announcementAdminSection .card-head strong{flex:1}
+  #announcementAdminSection .meta{color:var(--muted);font-size:.72rem;line-height:1.5}
+  #announcementAdminSection .texts{display:grid;gap:3px;margin-top:7px;font-size:.79rem}
+  #announcementAdminSection .preset{border-style:dashed}
+  @media(max-width:700px){#announcementAdminSection .grid,#announcementAdminSection .lang-grid{grid-template-columns:1fr}}
+
+</style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
 
@@ -1669,53 +1670,131 @@
   </section>
 </div>
 
-<div
-  id="chatAdminSection"
-  class="admin-section"
-  data-admin-section="chat"
->
+<div id="chatAdminSection" class="admin-section" data-admin-section="chat">
   <section class="panel">
-    <div class="row">
-      <h2 style="margin: 0;">채팅 관리</h2>
-      <a class="admin-button" href="/admin/chat/" target="_blank" rel="noopener">새 창에서 열기</a>
-      <a class="admin-button" href="/staff/chat/" target="_blank" rel="noopener">채팅방 열기</a>
-    </div>
-
-    <p class="small">
-      채팅 전용 계정, 채팅방, Staff 자동 참여, 초대/퇴장을 관리합니다.
-    </p>
-
-    <iframe
-      class="embedded-admin-frame"
-      src="/admin/chat/"
-      title="채팅 관리"
-      loading="lazy"
-    ></iframe>
+    <div class="row"><h2 style="margin:0">채팅 관리</h2><a class="admin-button" href="/staff/chat/">채팅방 열기</a></div>
+    <p class="small">채팅 전용 계정, 채팅방, 초대·퇴장, 신고를 이 탭에서 직접 관리합니다.</p>
   </section>
+  <div id="embeddedChatGate" class="hidden"><span id="embeddedChatGateMessage"></span></div>
+  <div id="embeddedChatApp">
+
+
+    <section class="panel">
+      <h2>신고함</h2>
+      <p class="small">
+        참가하지 않은 사설방의 대화는 여기에서 신고가 접수된 경우에만,
+        신고 메시지와 앞뒤 최대 5개 문맥으로 제한하여 확인합니다.
+        신고 증거 내용은 기본 90일 후 삭제됩니다.
+      </p>
+      <button id="embeddedChatRefreshReports" type="button">신고 새로고침</button>
+      <div id="embeddedChatReportStatus" class="status"></div>
+      <div id="embeddedChatReports" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>채팅 전용 계정</h2>
+      <div class="row">
+        <input id="embeddedChatNewChatId" placeholder="Chat ID">
+        <input id="embeddedChatNewChatPassword" type="password" minlength="10" autocomplete="new-password" placeholder="초기 비밀번호 (10자 이상)">
+        <button id="embeddedChatGeneratePassword" type="button">강한 비밀번호 생성</button>
+        <button id="embeddedChatCreateChatUser" type="button">계정 생성</button>
+      </div>
+      <div id="embeddedChatUserStatus" class="status"></div>
+      <div id="embeddedChatUsers" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>채팅방</h2>
+      <div class="row">
+        <input id="embeddedChatNewRoomName" placeholder="채팅방 이름">
+        <input id="embeddedChatNewRoomId" placeholder="room-id (선택)">
+        <label><input id="embeddedChatStaffAutoJoin" type="checkbox" checked> 모든 활성 스태프 자동 참여</label>
+        <button id="embeddedChatCreateRoom" type="button">방 생성</button>
+      </div>
+      <div id="embeddedChatRoomStatus" class="status"></div>
+      <div id="embeddedChatRooms" class="cards"></div>
+    </section>
+  </div>
 </div>
 
-<div
-  id="announcementAdminSection"
-  class="admin-section"
-  data-admin-section="announcements"
->
+<div id="announcementAdminSection" class="admin-section" data-admin-section="announcements">
   <section class="panel">
-    <div class="row">
-      <h2 style="margin: 0;">공지사항 관리</h2>
-      <a class="admin-button" href="/announcements/" target="_blank" rel="noopener">새 창에서 열기</a>
-    </div>
-
-    <p class="small">
-      4개 언어 공지, 표시 기간, 반복 공지 루틴을 관리합니다. Staff도 /announcements/에서 본인 공지를 작성·수정할 수 있습니다.
-    </p>
-
-    <iframe
-      class="embedded-admin-frame"
-      src="/announcements/"
-      title="공지사항 관리"
-      loading="lazy"
-    ></iframe>
+    <div class="row"><h2 style="margin:0">공지사항 관리</h2><a class="admin-button" href="/">메인 페이지 보기</a></div>
+    <p class="small">4개 언어 공지, 표시 기간, 반복 공지 루틴을 이 탭에서 직접 관리합니다.</p>
   </section>
+  <div id="embeddedAnnGate" class="hidden">
+    <span id="embeddedAnnGateMessage"></span>
+    <div id="embeddedAnnStaffLogin" class="hidden">
+      <input id="embeddedAnnStaffId"><input id="embeddedAnnStaffPassword" type="password">
+      <button id="embeddedAnnStaffLoginButton" type="button"></button>
+    </div>
+  </div>
+  <div id="embeddedAnnApp">
+
+    <section class="panel">
+      <h2>일반 공지사항</h2>
+      <p class="meta">4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.</p>
+
+      <input id="embeddedAnnAnnouncementId" type="hidden">
+
+      <div class="lang-grid">
+        <label>한국어<textarea id="embeddedAnnAKo"></textarea></label>
+        <label>English<textarea id="embeddedAnnAEn"></textarea></label>
+        <label>日本語<textarea id="embeddedAnnAJa"></textarea></label>
+        <label>Русский<textarea id="embeddedAnnARu"></textarea></label>
+      </div>
+
+      <div class="grid" style="margin-top:9px">
+        <label>표시 시작<input id="embeddedAnnAStart" type="datetime-local"></label>
+        <label>표시 종료<input id="embeddedAnnAEnd" type="datetime-local"></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="embeddedAnnSaveAnnouncement" type="button">공지 저장</button>
+        <button id="embeddedAnnCancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="embeddedAnnAnnouncementStatus" class="status"></div>
+      <div id="embeddedAnnAnnouncementList" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>반복 공지 루틴</h2>
+      <p class="meta">
+        첫 표시 기간을 기준으로 N일마다 자동 반복합니다.
+        문구에는 <code>{date}</code>, <code>{start}</code>, <code>{end}</code>를 쓸 수 있습니다.
+      </p>
+
+      <div class="row">
+        <button id="embeddedAnnWkPreset" type="button" class="preset">황무지 모집 프리셋</button>
+        <button id="embeddedAnnPeriodPreset" type="button" class="preset">일반 기간 공지 프리셋</button>
+      </div>
+
+      <input id="embeddedAnnRoutineId" type="hidden">
+
+      <div class="grid" style="margin-top:9px">
+        <label>루틴 이름<input id="embeddedAnnRName"></label>
+        <label>첫 표시 시작<input id="embeddedAnnRAnchor" type="datetime-local"></label>
+        <label>반복 주기(일)<input id="embeddedAnnRRepeat" type="number" min="1" value="14"></label>
+        <label>한 번 표시되는 시간(시간)<input id="embeddedAnnRHours" type="number" min="1" value="72"></label>
+        <label>{date} 기준일: 표시 시작일부터 며칠 뒤<input id="embeddedAnnROffset" type="number" value="3"></label>
+        <label><span>활성화</span><select id="embeddedAnnREnabled"><option value="true">사용</option><option value="false">중지</option></select></label>
+      </div>
+
+      <div class="lang-grid" style="margin-top:9px">
+        <label>한국어<textarea id="embeddedAnnRKo"></textarea></label>
+        <label>English<textarea id="embeddedAnnREn"></textarea></label>
+        <label>日本語<textarea id="embeddedAnnRJa"></textarea></label>
+        <label>Русский<textarea id="embeddedAnnRRu"></textarea></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="embeddedAnnSaveRoutine" type="button">루틴 저장</button>
+        <button id="embeddedAnnCancelRoutineEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="embeddedAnnRoutineStatus" class="status"></div>
+      <div id="embeddedAnnRoutineList" class="cards"></div>
+    </section>
+  </div>
 </div>
 
 <div
@@ -3007,7 +3086,7 @@ async function applyAccountPermission(
     setStatus(
       accountPermissionStatus,
       error.message ||
-        "권한 변경에 실패했습니다. 서버 상태를 다시 확인하세요.",
+        "권한 변경에 실패했습니다.",
       true
     );
 
@@ -10246,5 +10325,302 @@ createMapTemplateButton.addEventListener(
 })();
     
   </script>
+<script>
+
+    const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
+    const REPORT_API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-report-admin";
+    const $=id=>document.getElementById(id);
+    const gate=$("gate"),gateMessage=$("gateMessage"),app=$("app"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports");
+    let data={rooms:[],staff:[],chat_users:[],memberships:[]};
+
+    function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
+    async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
+    async function reportRequest(method="GET",body=null){
+      const token=S967AdminAuth.getToken();
+      if(!token)throw new Error("관리자 로그인이 필요합니다.");
+      const opt={method,headers:{Authorization:`Bearer ${token}`}};
+      if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}
+      const r=await fetch(REPORT_API,opt);
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);
+      return j;
+    }
+
+    function fmtReportTime(value){
+      try{return new Intl.DateTimeFormat("ko-KR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}
+      catch{return value??"";}
+    }
+
+    async function handleReport(report,action){
+      const label=action==="no_action"?"문제없음":action==="delete_message"?"메시지 삭제":"메시지 삭제 + 계정 정지";
+      if(!confirm(`${label} 처리할까요?`))return;
+      const note=prompt("처리 메모 (선택)")??"";
+      try{
+        status(reportStatus,"처리 중…");
+        await reportRequest("POST",{report_id:report.id,action,note});
+        await loadReports();
+        status(reportStatus,"처리했습니다.");
+      }catch(e){status(reportStatus,e.message,true);}
+    }
+
+    function renderReports(reports){
+      reportsHost.replaceChildren(...reports.map(report=>{
+        const card=document.createElement("div");
+        card.className=`report-card ${report.status==="pending"?"pending":""}`;
+
+        const h=document.createElement("h3");
+        h.textContent=`${report.status==="pending"?"● ":""}${report.reported_author_name} · ${report.status}`;
+
+        const meta=document.createElement("div");
+        meta.className="report-meta";
+        meta.textContent=`신고자 ${report.reporter_name} · 신고 ${fmtReportTime(report.created_at)} · 메시지 ${fmtReportTime(report.message_created_at)} · 증거 만료 ${fmtReportTime(report.evidence_expires_at)}`;
+
+        const reason=document.createElement("div");
+        reason.className="report-meta";
+        reason.textContent=`사유: ${report.reason||"(없음)"}`;
+
+        card.append(h,meta,reason);
+
+        if(report.evidence_purged_at){
+          const purged=document.createElement("div");
+          purged.className="report-message";
+          purged.textContent="90일 보존기간이 지나 증거 내용이 삭제되었습니다.";
+          card.append(purged);
+        }else{
+          const message=document.createElement("div");
+          message.className="report-message";
+          message.textContent=report.message_body_snapshot||"(본문 없음)";
+          card.append(message);
+
+          const context=document.createElement("div");
+          context.className="report-context";
+          for(const item of report.context_snapshot??[]){
+            const line=document.createElement("div");
+            line.className=`context-line ${item.reported?"reported":""}`;
+            line.textContent=`${item.author_name} · ${fmtReportTime(item.created_at)}\n${item.is_deleted?"[삭제된 메시지]":item.body}`;
+            context.append(line);
+          }
+          card.append(context);
+
+          const evidence=document.createElement("div");
+          evidence.className="evidence-links";
+          for(const item of report.attachment_evidence??[]){
+            if(!item.signed_url)continue;
+            const a=document.createElement("a");
+            a.className="btn";
+            a.href=item.signed_url;
+            a.target="_blank";
+            a.rel="noopener noreferrer";
+            a.textContent=`첨부 증거 · ${item.original_name}`;
+            evidence.append(a);
+          }
+          if(evidence.childNodes.length)card.append(evidence);
+        }
+
+        if(report.status==="pending"){
+          const actions=document.createElement("div");
+          actions.className="row";
+          actions.style.marginTop="9px";
+
+          const noAction=document.createElement("button");
+          noAction.textContent="문제없음";
+          noAction.onclick=()=>handleReport(report,"no_action");
+
+          const del=document.createElement("button");
+          del.textContent="메시지 삭제";
+          del.onclick=()=>handleReport(report,"delete_message");
+
+          const suspend=document.createElement("button");
+          suspend.textContent="삭제 + 계정 정지";
+          suspend.onclick=()=>handleReport(report,"suspend_account");
+
+          actions.append(noAction,del,suspend);
+          card.append(actions);
+        }else if(report.resolution_note){
+          const resolved=document.createElement("div");
+          resolved.className="report-meta";
+          resolved.textContent=`처리 메모: ${report.resolution_note}`;
+          card.append(resolved);
+        }
+
+        return card;
+      }));
+    }
+
+    async function loadReports(){
+      try{
+        const result=await reportRequest();
+        renderReports(result.reports??[]);
+        status(reportStatus,"");
+      }catch(e){status(reportStatus,e.message,true);}
+    }
+
+    async function load(){data=await request("GET");renderUsers();renderRooms();await loadReports();}
+
+    function renderUsers(){
+      usersHost.replaceChildren(...data.chat_users.map(u=>{
+        const card=document.createElement("div");card.className="card";
+        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
+        const row=document.createElement("div");row.className="row";
+        const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
+        const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
+        row.append(toggle,reset);card.append(h,row);return card;
+      }));
+    }
+
+    function membershipActive(roomId,userId,kind){return data.memberships.some(m=>m.room_id===roomId&&m.user_id===userId&&m.member_kind===kind&&m.is_active);}
+    function renderRooms(){
+      roomsHost.replaceChildren(...data.rooms.map(room=>{
+        const card=document.createElement("div");card.className="card";
+        const h=document.createElement("h3");h.textContent=`${room.name} · ${room.id}`;
+        const small=document.createElement("div");small.className="small";small.textContent=room.staff_auto_join?"활성 스태프 전체 자동 참여":"초대된 사용자만 참여";
+        const controls=document.createElement("div");controls.className="row";
+        const auto=document.createElement("button");auto.textContent=room.staff_auto_join?"스태프 자동참여 끄기":"스태프 자동참여 켜기";auto.onclick=async()=>{await request("POST",{action:"update_room",room_id:room.id,staff_auto_join:!room.staff_auto_join});await load();};
+        controls.append(auto);
+        if(room.id!=="general"){const del=document.createElement("button");del.textContent="방 삭제";del.onclick=async()=>{if(!confirm("채팅방과 메시지를 모두 삭제할까요?"))return;await request("POST",{action:"delete_room",room_id:room.id});await load();};controls.append(del);}
+        const members=document.createElement("div");members.className="members";
+
+        const candidates=[
+          ...data.staff.map(u=>({id:u.user_id,name:u.display_name,kind:"staff",active:u.is_active})),
+          ...data.chat_users.map(u=>({id:u.user_id,name:u.display_name,kind:"chat",active:u.is_active})),
+        ].filter(x=>x.active);
+
+        for(const c of candidates){
+          if(c.kind==="staff"&&room.staff_auto_join){const s=document.createElement("span");s.className="member";s.textContent=`${c.name} · Staff 자동`;members.append(s);continue;}
+          const active=membershipActive(room.id,c.id,c.kind);
+          const b=document.createElement("button");b.className="member";b.textContent=`${active?"✓ ":"＋ "}${c.name} · ${c.kind==="staff"?"Staff":"Chat"}`;b.onclick=async()=>{await request("POST",{action:"set_membership",room_id:room.id,user_id:c.id,member_kind:c.kind,is_active:!active});await load();};members.append(b);
+        }
+        card.append(h,small,controls,members);return card;
+      }));
+    }
+
+    function strongPassword(){const bytes=new Uint8Array(18);crypto.getRandomValues(bytes);return Array.from(bytes,b=>("0"+b.toString(16)).slice(-2)).join("");}
+    if(generatePassword)generatePassword.onclick=()=>{newChatPassword.value=strongPassword();newChatPassword.type="text";newChatPassword.select();};
+
+    refreshReports.onclick=loadReports;
+
+    createChatUser.onclick=async()=>{try{status(userStatus,"생성 중…");await request("POST",{action:"create_chat_user",chat_id:newChatId.value.trim(),password:newChatPassword.value});newChatId.value="";newChatPassword.value="";await load();status(userStatus,"생성 완료");}catch(e){status(userStatus,e.message,true);}};
+    createRoom.onclick=async()=>{try{status(roomStatus,"생성 중…");await request("POST",{action:"create_room",name:newRoomName.value.trim(),id:newRoomId.value.trim(),staff_auto_join:staffAutoJoin.checked});newRoomName.value="";newRoomId.value="";await load();status(roomStatus,"생성 완료");}catch(e){status(roomStatus,e.message,true);}};
+
+    (async()=>{const valid=await S967AdminAuth.validate({url:"https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session"});if(!valid){gateMessage.textContent="관리자 로그인이 필요하거나 세션이 만료되었습니다.";return;}gate.classList.add("hidden");app.classList.remove("hidden");try{await load();}catch(e){status(roomStatus,e.message,true);}})();
+  
+</script>
+<script type="module">
+
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const API=`${SUPABASE_URL}/functions/v1/site-announcements`;
+    const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const $=id=>document.getElementById(id);
+
+    const gate=$("gate"),gateMessage=$("gateMessage"),staffLogin=$("staffLogin"),staffId=$("staffId"),staffPassword=$("staffPassword"),staffLoginButton=$("staffLoginButton"),app=$("app"),actorHost=$("embeddedAnnActor");
+    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList");
+    const rId=$("embeddedAnnRoutineId"),rName=$("embeddedAnnRName"),rAnchor=$("embeddedAnnRAnchor"),rRepeat=$("embeddedAnnRRepeat"),rHours=$("embeddedAnnRHours"),rOffset=$("embeddedAnnROffset"),rEnabled=$("embeddedAnnREnabled"),rKo=$("embeddedAnnRKo"),rEn=$("embeddedAnnREn"),rJa=$("embeddedAnnRJa"),rRu=$("embeddedAnnRRu"),saveRoutine=$("embeddedAnnSaveRoutine"),cancelRoutineEdit=$("embeddedAnnCancelRoutineEdit"),routineStatus=$("embeddedAnnRoutineStatus"),routineList=$("embeddedAnnRoutineList"),wkPreset=$("embeddedAnnWkPreset"),periodPreset=$("embeddedAnnPeriodPreset");
+
+    let data={announcements:[],routines:[]};
+
+    function status(host,message="",error=false){host.textContent=message;host.classList.toggle("error",error);}
+    function localInputValue(value){if(!value)return"";const d=new Date(value);const offset=d.getTimezoneOffset()*60000;return new Date(d.getTime()-offset).toISOString().slice(0,16);}
+    function isoFromLocal(value){return value?new Date(value).toISOString():"";}
+    function fmt(value){try{return new Intl.DateTimeFormat("ko-KR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}catch{return value??"";}}
+
+    async function token(){
+      const admin=S967AdminAuth?.getToken?.();
+      if(admin)return admin;
+      const {data}=await supabase.auth.getSession();
+      return data.session?.access_token??null;
+    }
+
+    async function request(method="GET",body=null){
+      const t=await token();
+      if(!t)throw Object.assign(new Error("로그인이 필요합니다."),{status:401});
+      const options={method,headers:{Authorization:`Bearer ${t}`}};
+      if(body!==null){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
+      const response=await fetch(`${API}?manage=1`,options);
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw Object.assign(new Error(result.error||`HTTP_${response.status}`),{status:response.status});
+      return result;
+    }
+
+    function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
+
+    function render(){
+      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+
+      announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);card.append(head,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+
+      routineList.replaceChildren(...(data.routines??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);
+        const detail=document.createElement("div");detail.className="meta";detail.textContent=`첫 시작 ${fmt(item.anchor_start)} · ${item.repeat_every_days}일마다 · ${item.active_hours}시간 표시 · {date}=+${item.event_offset_days}일`;
+        card.append(head,detail,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editRoutine(item);const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>deleteRoutine(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+    }
+
+    async function load(){
+      data=await request();
+      render();
+    }
+
+    function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent="공지 저장";cancelAnnouncementEdit.classList.add("hidden");}
+    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent="공지 수정 저장";cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    async function deleteAnnouncement(item){if(!confirm("이 공지사항을 삭제할까요?"))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
+
+    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,"저장 중…");const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,"저장했습니다.");}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
+    cancelAnnouncementEdit.onclick=clearAnnouncement;
+
+    function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent="루틴 저장";cancelRoutineEdit.classList.add("hidden");}
+    function editRoutine(item){rId.value=item.id;rName.value=item.name;rAnchor.value=localInputValue(item.anchor_start);rRepeat.value=item.repeat_every_days;rHours.value=item.active_hours;rOffset.value=item.event_offset_days;rEnabled.value=String(item.enabled);rKo.value=item.text_ko;rEn.value=item.text_en;rJa.value=item.text_ja;rRu.value=item.text_ru;saveRoutine.textContent="루틴 수정 저장";cancelRoutineEdit.classList.remove("hidden");}
+    async function deleteRoutine(item){if(!confirm("이 반복 루틴을 삭제할까요?"))return;await request("POST",{action:"delete_routine",id:item.id});await load();}
+
+    wkPreset.onclick=()=>{rName.value="황무지 모집";rRepeat.value="14";rHours.value="72";rOffset.value="3";rKo.value="현재 {date} 황무지 모집 기간입니다.";rEn.value="Recruitment is now open for the {date} Wasteland event.";rJa.value="現在、{date}の荒野イベントの募集期間です。";rRu.value="Сейчас идёт набор на событие «Пустошь» {date}.";status(routineStatus,"반복 주기·표시 시간·기준일은 실제 일정에 맞게 확인해서 입력하세요.");};
+    periodPreset.onclick=()=>{rName.value="기간 안내";rRepeat.value="7";rHours.value="24";rOffset.value="0";rKo.value="{start}~{end} 안내 기간입니다.";rEn.value="The notice period is {start}–{end}.";rJa.value="{start}～{end}は案内期間です。";rRu.value="Период объявления: {start}–{end}.";};
+
+    saveRoutine.onclick=async()=>{saveRoutine.disabled=true;try{status(routineStatus,"저장 중…");const payload={action:rId.value?"update_routine":"create_routine",id:rId.value||undefined,name:rName.value,anchor_start:isoFromLocal(rAnchor.value),repeat_every_days:Number(rRepeat.value),active_hours:Number(rHours.value),event_offset_days:Number(rOffset.value),enabled:rEnabled.value==="true",text_ko:rKo.value,text_en:rEn.value,text_ja:rJa.value,text_ru:rRu.value};await request("POST",payload);clearRoutine();await load();status(routineStatus,"저장했습니다.");}catch(e){status(routineStatus,e.message,true);}finally{saveRoutine.disabled=false;}};
+    cancelRoutineEdit.onclick=clearRoutine;
+
+    async function staffSignIn(){
+      const id=staffId.value.trim();
+      const password=staffPassword.value;
+      if(!id||!password)return;
+      staffLoginButton.disabled=true;
+      try{
+        const {error}=await supabase.auth.signInWithPassword({email:`${id.toLowerCase()}@s967.org`,password});
+        if(error)throw error;
+        gate.classList.add("hidden");app.classList.remove("hidden");await load();
+      }catch{gateMessage.textContent="Staff 로그인에 실패했습니다.";}
+      finally{staffLoginButton.disabled=false;}
+    }
+    staffLoginButton.onclick=staffSignIn;
+    staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+
+    (async()=>{
+      try{
+        const t=await token();
+        if(!t){gateMessage.textContent="관리자 또는 Staff로 로그인하세요.";return;}
+        await load();
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+      }catch(e){
+        gateMessage.textContent=e.status===403?"공지사항 권한이 없습니다.":"관리자 또는 Staff로 로그인하세요.";
+      }
+    })();
+  
+</script>
 </body>
 </html>
