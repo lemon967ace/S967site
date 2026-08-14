@@ -37,7 +37,62 @@ export function createRangeController({ engine, history, buildingController = nu
   function ensureWritable() { if (engine.isReadOnly()) throw new Error("The map is read-only."); }
   function startCreate(next) { ensureWritable(); for (const peer of areaPeers) peer?.cancel(); buildingController?.cancelMode(); settings = { kind: next.kind, color: next.color, locked: Boolean(next.locked) }; new MapRange({ ...settings, cells: [[0, 0]] }); mode = "rangeCreate"; startCell = null; previewCells = []; selectedRangeId = null; emit(); }
   function hover(cell) { if (mode !== "rangeCreate" || !startCell) return null; previewCells = rectangleCells(startCell, cell); emit(); return previewCells; }
-  function click(cell) { if (mode !== "rangeCreate") { selectAtCell(cell); return { complete: false }; } if (!startCell) { startCell = [...cell]; previewCells = [[...cell]]; emit(); return { complete: false }; } previewCells = rectangleCells(startCell, cell); emit(); return { complete: true, cells: previewCells.map(value => [...value]) }; }
+  function click(cell) {
+    if (mode !== "rangeCreate") {
+      selectAtCell(cell);
+      return { complete: false };
+    }
+
+    /*
+      첫 번째 클릭: 시작점만 저장.
+      Renderer가 같은 실제 클릭의 pointerdown / pointerup 양쪽에서
+      click()을 호출하므로, 첫 클릭의 pointerup은 확정으로 보지 않는다.
+    */
+    if (!startCell) {
+      startCell = [...cell];
+      previewCells = [[...cell]];
+      emit();
+      return { complete: false };
+    }
+
+    const sameAsStart =
+      cell[0] === startCell[0] &&
+      cell[1] === startCell[1] &&
+      previewCells.length <= 1;
+
+    if (sameAsStart) {
+      emit();
+      return { complete: false };
+    }
+
+    /*
+      두 번째 클릭: 시작점부터 두 번째 점까지의 직사각형을 만든 뒤
+      별도의 '확정' 버튼 없이 즉시 범위를 생성한다.
+      고정맵 제작기의 범위 생성 동작과 동일한 방식이다.
+    */
+    previewCells =
+      rectangleCells(
+        startCell,
+        cell
+      );
+
+    emit();
+
+    const cells =
+      previewCells.map(
+        value => [...value]
+      );
+
+    const result =
+      commit();
+
+    return {
+      complete:
+        Boolean(result),
+      cells,
+      result,
+    };
+  }
   function commit() {
     ensureWritable(); if (mode !== "rangeCreate" || !startCell || !previewCells.length) return null;
     const before = engine.getDocument().ranges.map(snapshotRange), result = engine.commitRange({ ...settings, cells: previewCells }), after = engine.getDocument().ranges.map(snapshotRange);
