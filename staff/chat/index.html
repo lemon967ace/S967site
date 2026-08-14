@@ -5,4820 +5,840 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
-
   <title>Staff Chat | S967</title>
-
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js" defer></script>
   <script src="/language.js" defer></script>
   <script src="/admin/admin-auth.js"></script>
-
   <style>
     *{box-sizing:border-box}
-
-    html,body{
-      margin:0;
-      min-height:100%;
-    }
-
-    body{
-      min-height:100dvh;
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-      background:var(--page-bg);
-      color:var(--text);
-    }
-
-    button,input,textarea{
-      font:inherit;
-      color:inherit;
-    }
-
-    button{
-      cursor:pointer;
-    }
-
-    button:disabled{
-      cursor:not-allowed;
-      opacity:.55;
-    }
-
-    .hidden{
-      display:none!important;
-    }
-
-    .app{
-      width:min(1180px,100%);
-      height:100dvh;
-      margin:0 auto;
-      padding:12px;
-      display:grid;
-      grid-template-columns:230px minmax(0,1fr);
-      gap:10px;
-    }
-
-    .panel{
-      border:1px solid var(--border);
-      background:var(--surface);
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      border-radius:15px;
-    }
-
-    /* SIDEBAR */
-
-    .sidebar{
-      min-height:0;
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .side-head{
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .side-head strong{
-      flex:1;
-    }
-
-    .rooms{
-      min-height:0;
-      overflow:auto;
-      display:grid;
-      align-content:start;
-      gap:5px;
-    }
-
-    .room-button{
-      width:100%;
-      display:flex;
-      align-items:center;
-      gap:7px;
-      padding:9px;
-      border:1px solid transparent;
-      border-radius:9px;
-      background:transparent;
-      text-align:left;
-    }
-
-    .room-button:hover,
-    .room-button.active{
-      background:var(--surface-hover);
-      border-color:var(--border);
-    }
-
-    .room-name{
-      min-width:0;
-      flex:1;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .badge{
-      min-width:20px;
-      height:20px;
-      padding:0 5px;
-      display:grid;
-      place-items:center;
-      border-radius:999px;
-      background:var(--text);
-      color:var(--page-bg);
-      font-size:.68rem;
-      font-weight:800;
-    }
-
-    .room-tools{
-      display:flex;
-      gap:5px;
-    }
-
-    .room-tools button{
-      min-width:30px;
-      height:30px;
-      border:1px solid var(--border);
-      border-radius:8px;
-      background:var(--surface-hover);
-      padding:0 7px;
-    }
-
-    /* MAIN */
-
-    .main{
-      min-width:0;
-      min-height:0;
-      display:grid;
-      grid-template-rows:auto auto auto minmax(0,1fr) auto;
-      gap:8px;
-    }
-
-    .bar{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-    }
-
-    .bar h1{
-      margin:0;
-      font-size:1.02rem;
-      flex:1;
-      min-width:0;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .bar button,
-    .bar a,
-    .notify-button{
-      border:1px solid var(--border);
-      background:var(--surface-hover);
-      border-radius:8px;
-      padding:7px 9px;
-      text-decoration:none;
-    }
-
-    .actor{
-      font-size:.74rem;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-
-    /* SEARCH */
-
-    .searchbar{
-      padding:8px;
-      display:grid;
-      grid-template-columns:minmax(130px,1fr) auto auto auto;
-      gap:6px;
-      align-items:end;
-    }
-
-    .searchbar label{
-      display:grid;
-      gap:3px;
-      color:var(--muted);
-      font-size:.7rem;
-    }
-
-    .searchbar input{
-      min-height:34px;
-      padding:6px 8px;
-      border:1px solid var(--border);
-      border-radius:8px;
-      background:var(--surface-hover);
-    }
-
-    .searchbar button{
-      min-height:34px;
-      border:1px solid var(--border);
-      border-radius:8px;
-      background:var(--surface-hover);
-      padding:6px 9px;
-    }
-
-    .older{
-      justify-self:center;
-      border:1px solid var(--border);
-      background:var(--surface);
-      border-radius:999px;
-      padding:6px 11px;
-      color:var(--muted);
-    }
-
-    /* MESSAGES */
-
-    .messages{
-      min-height:0;
-      overflow:auto;
-      padding:12px;
-      scroll-behavior:smooth;
-    }
-
-    .empty{
-      min-height:180px;
-      display:grid;
-      place-items:center;
-      color:var(--muted);
-    }
-
-    .message{
-      max-width:min(76%,620px);
-      margin:0 0 12px;
-      padding:9px 11px;
-      border:1px solid var(--border);
-      border-radius:13px;
-      background:var(--surface-hover);
-    }
-
-    .message.mine{
-      margin-left:auto;
-    }
-
-    .message.admin{
-      border-style:double;
-    }
-
-    .message-head{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      margin-bottom:5px;
-      color:var(--muted);
-      font-size:.7rem;
-    }
-
-    .message-author{
-      color:var(--text);
-      font-weight:750;
-    }
-
-    .message-time{
-      margin-left:auto;
-    }
-
-    .message-action{
-      border:0;
-      background:transparent;
-      padding:1px 3px;
-      color:var(--muted);
-      font-size:.7rem;
-    }
-
-    .message-action:hover{
-      color:var(--text);
-    }
-
-    .reply-preview{
-      margin-bottom:6px;
-      padding:6px 8px;
-      border-left:3px solid var(--border-hover);
-      background:var(--surface);
-      border-radius:6px;
-      color:var(--muted);
-      font-size:.76rem;
-      overflow:hidden;
-    }
-
-    .reply-preview strong{
-      color:var(--text);
-    }
-
-    .reply-preview .snippet{
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .message-body{
-      white-space:pre-wrap;
-      overflow-wrap:anywhere;
-      line-height:1.48;
-      font-size:.92rem;
-    }
-
-    /* REACTIONS */
-
-    .reactions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      margin-top:7px;
-    }
-
-    .reaction-chip,
-    .reaction-add{
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:var(--surface);
-      padding:3px 7px;
-      font-size:.75rem;
-    }
-
-    .reaction-chip.mine{
-      background:var(--surface-hover);
-      border-color:var(--border-hover);
-      font-weight:800;
-    }
-
-    .reaction-picker{
-      display:flex;
-      flex-wrap:wrap;
-      gap:4px;
-      margin-top:5px;
-      padding:6px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      background:var(--surface);
-    }
-
-    .reaction-picker button{
-      border:0;
-      background:transparent;
-      padding:4px;
-      font-size:1.15rem;
-    }
-
-    .message-foot{
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:6px;
-      margin-top:5px;
-      min-height:16px;
-    }
-
-    .unread-number{
-      font-size:.68rem;
-      font-weight:800;
-      color:var(--muted);
-    }
-
-    /* ATTACHMENTS */
-
-    .attachments{
-      display:grid;
-      gap:6px;
-      margin-top:7px;
-    }
-
-    .image-preview{
-      width:min(100%,420px);
-      max-height:300px;
-      object-fit:contain;
-      border:1px solid var(--border);
-      border-radius:9px;
-      cursor:pointer;
-    }
-
-    .attachment{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      padding:6px 7px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface);
-      text-decoration:none;
-    }
-
-    .attachment-name{
-      min-width:0;
-      flex:1;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      font-size:.8rem;
-    }
-
-    .attachment-size{
-      font-size:.7rem;
-      color:var(--muted);
-    }
-
-    /* TRANSLATION */
-
-    .translate-button{
-      margin-top:7px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:transparent;
-      padding:3px 7px;
-      color:var(--muted);
-      font-size:.69rem;
-    }
-
-    .translation{
-      margin-top:6px;
-      padding-top:6px;
-      border-top:1px dashed var(--border);
-      white-space:pre-wrap;
-      font-size:.84rem;
-      line-height:1.45;
-    }
-
-    .translation-label{
-      display:block;
-      margin-bottom:3px;
-      color:var(--muted);
-      font-size:.68rem;
-    }
-
-    /* COMPOSER */
-
-    .composer{
-      padding:9px;
-    }
-
-    .replying{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:7px;
-      padding:6px 8px;
-      border:1px solid var(--border);
-      border-radius:8px;
-      background:var(--surface-hover);
-      font-size:.76rem;
-      color:var(--muted);
-    }
-
-    .replying span{
-      min-width:0;
-      flex:1;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .replying button{
-      border:0;
-      background:transparent;
-      color:var(--muted);
-    }
-
-    .file-list{
-      display:flex;
-      flex-wrap:wrap;
-      gap:5px;
-      margin-bottom:6px;
-    }
-
-    .file-chip{
-      max-width:100%;
-      padding:4px 7px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      font-size:.7rem;
-      color:var(--muted);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .compose-row{
-      display:grid;
-      grid-template-columns:auto minmax(0,1fr) auto;
-      gap:7px;
-      align-items:end;
-    }
-
-    .file-button,
-    .send-button{
-      min-height:40px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface-hover);
-      padding:7px 11px;
-      font-weight:700;
-    }
-
-    textarea{
-      min-height:40px;
-      max-height:150px;
-      resize:none;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface-hover);
-      padding:9px 10px;
-      outline:none;
-      line-height:1.4;
-    }
-
-    .status{
-      min-height:1.1em;
-      margin-top:5px;
-      color:var(--muted);
-      font-size:.72rem;
-    }
-
-    .status.error{
-      color:#c2410c;
-    }
-
-    /* LOGIN */
-
-    .gate{
-      width:min(520px,calc(100% - 28px));
-      margin:10vh auto;
-      padding:22px;
-      border:1px solid var(--border);
-      border-radius:15px;
-      background:var(--surface);
-      box-shadow:var(--shadow);
-    }
-
-    .gate h1{
-      margin-top:0;
-    }
-
-    .chat-login{
-      display:grid;
-      gap:8px;
-      margin-top:14px;
-    }
-
-    .chat-login input{
-      padding:9px 10px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface-hover);
-    }
-
-    .chat-login button{
-      padding:9px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface-hover);
-      font-weight:700;
-    }
-
-    .gate-links{
-      display:flex;
-      gap:7px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-
-    .gate-links a{
-      padding:7px 9px;
-      border:1px solid var(--border);
-      border-radius:8px;
-      color:var(--text);
-      text-decoration:none;
-    }
-
-    /* DIALOG */
-
-    .room-dialog{
-      width:min(520px,calc(100vw - 28px));
-      border:1px solid var(--border);
-      border-radius:15px;
-      padding:0;
-      background:var(--surface-hover);
-      color:var(--text);
-      box-shadow:var(--menu-shadow);
-    }
-
-    .room-dialog::backdrop{
-      background:rgba(0,0,0,.5);
-      backdrop-filter:blur(2px);
-    }
-
-    .room-dialog-inner{
-      padding:17px;
-    }
-
-    .room-dialog h2{
-      margin:0 0 10px;
-      font-size:1.05rem;
-    }
-
-    .room-dialog input{
-      width:100%;
-      padding:9px 10px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface);
-    }
-
-    .room-dialog-actions{
-      display:flex;
-      justify-content:flex-end;
-      gap:7px;
-      margin-top:10px;
-    }
-
-    .room-dialog-actions button,
-    .member-row button{
-      border:1px solid var(--border);
-      border-radius:8px;
-      background:var(--surface);
-      padding:7px 9px;
-    }
-
-    .member-list,
-    .invite-list{
-      display:grid;
-      gap:6px;
-      margin-top:9px;
-      max-height:240px;
-      overflow:auto;
-    }
-
-    .member-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 8px;
-      border:1px solid var(--border);
-      border-radius:9px;
-      background:var(--surface);
-    }
-
-    .member-row .member-name{
-      min-width:0;
-      flex:1;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-
-    .member-kind{
-      font-size:.68rem;
-      color:var(--muted);
-    }
-
-    .room-note{
-      color:var(--muted);
-      font-size:.76rem;
-      line-height:1.45;
-    }
-
-    .danger-button{
-      color:#c2410c;
-    }
-
-    /* MOBILE */
+    html,body{margin:0;min-height:100%}
+    body{min-height:100dvh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--page-bg);color:var(--text)}
+    button,input,textarea{font:inherit;color:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    .app{width:min(1180px,100%);height:100dvh;margin:0 auto;padding:12px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px}
+    .panel{border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:15px}
+    .sidebar{min-height:0;padding:10px;display:flex;flex-direction:column;gap:8px}
+    .side-head{display:flex;align-items:center;gap:6px}
+    .side-head strong{flex:1}
+    .rooms{min-height:0;overflow:auto;display:grid;align-content:start;gap:5px}
+    .room-button{width:100%;display:flex;align-items:center;gap:7px;padding:9px;border:1px solid transparent;border-radius:9px;background:transparent;text-align:left}
+    .room-button:hover,.room-button.active{background:var(--surface-hover);border-color:var(--border)}
+    .room-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .badge{min-width:20px;height:20px;padding:0 5px;display:grid;place-items:center;border-radius:999px;background:var(--text);color:var(--page-bg);font-size:.68rem;font-weight:800}
+    .main{min-width:0;min-height:0;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:8px}
+    .bar{display:flex;align-items:center;gap:8px;padding:10px 12px}
+    .bar h1{margin:0;font-size:1.02rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar button,.bar a,.notify-button{border:1px solid var(--border);background:var(--surface-hover);border-radius:8px;padding:7px 9px;text-decoration:none}
+    .actor{font-size:.74rem;color:var(--muted);white-space:nowrap}
+    .searchbar{padding:8px;display:grid;grid-template-columns:minmax(130px,1fr) auto auto auto auto;gap:6px;align-items:end}
+    .searchbar label{display:grid;gap:3px;color:var(--muted);font-size:.7rem}
+    .searchbar input{min-height:34px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
+    .searchbar button{min-height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:6px 9px}
+    .older{justify-self:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 11px;color:var(--muted)}
+    .messages{min-height:0;overflow:auto;padding:12px;scroll-behavior:smooth}
+    .empty{min-height:180px;display:grid;place-items:center;color:var(--muted)}
+    .message{max-width:min(76%,620px);margin:0 0 12px;padding:9px 11px;border:1px solid var(--border);border-radius:13px;background:var(--surface-hover)}
+    .message.mine{margin-left:auto}
+    .message.admin{border-style:double}
+    .message-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:.7rem}
+    .message-author{color:var(--text);font-weight:750}
+    .message-time{margin-left:auto}
+    .message-action{border:0;background:transparent;padding:1px 3px;color:var(--muted);font-size:.7rem}
+    .reply-preview{margin-bottom:6px;padding:6px 8px;border-left:3px solid var(--border-hover);background:var(--surface);border-radius:6px;color:var(--muted);font-size:.76rem;overflow:hidden}
+    .reply-preview strong{color:var(--text)}
+    .reply-preview .snippet{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .message-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.48;font-size:.92rem}
+    .reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.reaction-chip,.reaction-add{border:1px solid var(--border);border-radius:999px;background:var(--surface);padding:3px 7px;font-size:.75rem}.reaction-chip.mine{background:var(--surface-hover);border-color:var(--border-hover);font-weight:800}.reaction-picker{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;padding:6px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}.reaction-picker button{border:0;background:transparent;padding:4px;font-size:1.15rem}
+    .message-foot{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:5px;min-height:16px}
+    .unread-number{font-size:.68rem;font-weight:800;color:var(--muted)}
+    .attachments{display:grid;gap:6px;margin-top:7px}
+    .image-preview{width:min(100%,420px);max-height:300px;object-fit:contain;border:1px solid var(--border);border-radius:9px;cursor:pointer}
+    .attachment{display:flex;gap:8px;align-items:center;padding:6px 7px;border:1px solid var(--border);border-radius:9px;background:var(--surface);text-decoration:none}
+    .attachment-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem}
+    .attachment-size{font-size:.7rem;color:var(--muted)}
+    .translate-button{border:1px solid var(--border);border-radius:999px;background:transparent;padding:3px 7px;color:var(--muted);font-size:.69rem}
+    .translation{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);white-space:pre-wrap;font-size:.84rem;line-height:1.45}
+    .translation-label{display:block;margin-bottom:3px;color:var(--muted);font-size:.68rem}
+    .composer{padding:9px}
+    .replying{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);font-size:.76rem;color:var(--muted)}
+    .replying span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .replying button{border:0;background:transparent;color:var(--muted)}
+    .file-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
+    .file-chip{max-width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .compose-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px;align-items:end}
+    .file-button,.send-button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:7px 11px;font-weight:700}
+    textarea{min-height:40px;max-height:150px;resize:none;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:9px 10px;outline:none;line-height:1.4}
+    .status{min-height:1.1em;margin-top:5px;color:var(--muted);font-size:.72rem}
+    .status.error{color:#c2410c}
+    .gate{width:min(520px,calc(100% - 28px));margin:10vh auto;padding:22px;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow)}
+    .gate h1{margin-top:0}
+    .chat-login{display:grid;gap:8px;margin-top:14px}
+    .chat-login input{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover)}
+    .chat-login button{padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);font-weight:700}
+    .gate-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .gate-links a{padding:7px 9px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none}
+
+    .room-tools{display:flex;gap:5px}
+    .room-tools button{min-width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:0 7px}
+    .room-dialog{width:min(520px,calc(100vw - 28px));border:1px solid var(--border);border-radius:15px;padding:0;background:var(--surface-hover);color:var(--text);box-shadow:var(--menu-shadow)}
+    .room-dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
+    .room-dialog-inner{padding:17px}
+    .room-dialog h2{margin:0 0 10px;font-size:1.05rem}
+    .room-dialog input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
+    .room-dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
+    .room-dialog-actions button,.member-row button{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:7px 9px}
+    .member-list,.invite-list{display:grid;gap:6px;margin-top:9px;max-height:240px;overflow:auto}
+    .member-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
+    .member-row .member-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .member-kind{font-size:.68rem;color:var(--muted)}
+    .room-note{color:var(--muted);font-size:.76rem;line-height:1.45}
+    .danger-button{color:#c2410c}
 
     @media(max-width:760px){
-      .app{
-        height:100dvh;
-        padding:7px;
-        grid-template-columns:1fr;
-        grid-template-rows:auto minmax(0,1fr);
-      }
-
-      .sidebar{
-        min-height:auto;
-        padding:7px;
-      }
-
-      .rooms{
-        display:flex;
-        overflow:auto;
-        gap:5px;
-      }
-
-      .room-button{
-        width:auto;
-        min-width:max-content;
-      }
-
-      .main{
-        min-height:0;
-      }
-
-      .searchbar{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .search-text-label{
-        grid-column:1/-1;
-      }
-
-      .message{
-        max-width:88%;
-      }
-
-      .actor{
-        display:none;
-      }
-
-      .bar{
-        padding:8px;
-      }
-
-      .bar button,
-      .bar a{
-        padding:6px 7px;
-      }
+      .app{height:100dvh;padding:7px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+      .sidebar{min-height:auto;padding:7px}
+      .rooms{display:flex;overflow:auto;gap:5px}
+      .room-button{width:auto;min-width:max-content}
+      .main{min-height:0}
+      .searchbar{grid-template-columns:1fr 1fr}
+      .search-text-label{grid-column:1/-1}
+      .message{max-width:88%}
+      .actor{display:none}
     }
   </style>
 </head>
-
 <body>
-
-<section id="gate" class="gate">
-  <h1 id="gateTitle">Staff Chat</h1>
-  <p id="gateMessage">Checking access…</p>
-
-  <div id="chatLogin" class="chat-login">
-    <input
-      id="chatId"
-      type="text"
-      autocomplete="username"
-      placeholder="Chat ID"
-    >
-
-    <input
-      id="chatPassword"
-      type="password"
-      autocomplete="current-password"
-      placeholder="Password"
-    >
-
-    <button id="chatLoginButton" type="button">
-      Chat login
-    </button>
-  </div>
-
-  <div class="gate-links">
-    <a href="/">Home</a>
-  </div>
-</section>
-
-
-<main id="app" class="app hidden">
-
-  <aside class="sidebar panel">
-
-    <div class="side-head">
-      <strong id="roomsTitle">Rooms</strong>
-
-      <div class="room-tools">
-        <button
-          id="createRoomButton"
-          type="button"
-          title="Create room"
-        >＋</button>
-
-        <button
-          id="roomRefreshButton"
-          type="button"
-          title="Refresh"
-        >↻</button>
-      </div>
+  <section id="gate" class="gate">
+    <h1 id="gateTitle">Staff Chat</h1>
+    <p id="gateMessage">Checking access…</p>
+    <div id="chatLogin" class="chat-login">
+      <input id="chatId" type="text" autocomplete="username" placeholder="Chat ID">
+      <input id="chatPassword" type="password" autocomplete="current-password" placeholder="Password">
+      <button id="chatLoginButton" type="button">Chat login</button>
     </div>
-
-    <div id="rooms" class="rooms"></div>
-
-  </aside>
-
-
-  <section class="main">
-
-    <header class="bar panel">
-
-      <h1 id="chatTitle">Staff Chat</h1>
-
-      <span id="actor" class="actor"></span>
-
-      <button
-        id="roomMembersButton"
-        type="button"
-        title="Room members"
-      >👥</button>
-
-      <button
-        id="notifyButton"
-        type="button"
-      >🔔</button>
-
-      <button
-        id="refreshButton"
-        type="button"
-      >↻</button>
-
-      <a id="backButton" href="/">Back</a>
-
-    </header>
-
-
-    <section class="searchbar panel">
-
-      <label class="search-text-label">
-        <span id="searchTextLabel">Text</span>
-
-        <input
-          id="searchText"
-          type="search"
-          maxlength="100"
-          autocomplete="off"
-        >
-      </label>
-
-      <label>
-        <span id="dateLabel">Date</span>
-
-        <input
-          id="searchDate"
-          type="date"
-        >
-      </label>
-
-      <button
-        id="searchButton"
-        type="button"
-      >Search</button>
-
-      <button
-        id="clearSearchButton"
-        type="button"
-      >Clear</button>
-
-    </section>
-
-
-    <button
-      id="olderButton"
-      class="older hidden"
-      type="button"
-    >Load older</button>
-
-
-    <section
-      id="messages"
-      class="messages panel"
-      aria-live="polite"
-    ></section>
-
-
-    <section class="composer panel">
-
-      <div id="replying" class="replying hidden">
-        <span id="replyingText"></span>
-
-        <button
-          id="cancelReplyButton"
-          type="button"
-        >×</button>
-      </div>
-
-
-      <div id="fileList" class="file-list hidden"></div>
-
-
-      <div class="compose-row">
-
-        <button
-          id="fileButton"
-          class="file-button"
-          type="button"
-        >＋</button>
-
-        <textarea
-          id="messageInput"
-          maxlength="4000"
-          rows="1"
-          placeholder="Message"
-        ></textarea>
-
-        <button
-          id="sendButton"
-          class="send-button"
-          type="button"
-        >Send</button>
-
-      </div>
-
-
-      <input
-        id="fileInput"
-        type="file"
-        multiple
-        hidden
-        accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.csv,.xlsx,.docx,.zip,image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip"
-      >
-
-      <div id="status" class="status"></div>
-
-    </section>
-
+    <div class="gate-links">
+      <a href="/">Home</a>
+    </div>
   </section>
-</main>
+
+  <main id="app" class="app hidden">
+    <aside class="sidebar panel">
+      <div class="side-head">
+        <strong id="roomsTitle">Rooms</strong>
+        <div class="room-tools">
+          <button id="createRoomButton" type="button" title="Create room">＋</button>
+          <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
+        </div>
+      </div>
+      <div id="rooms" class="rooms"></div>
+    </aside>
+
+    <section class="main">
+      <header class="bar panel">
+        <h1 id="chatTitle">Staff Chat</h1>
+        <span id="actor" class="actor"></span>
+        <button id="roomMembersButton" type="button" title="Room members">👥</button>
+        <button id="notifyButton" type="button">🔔</button>
+        <button id="refreshButton" type="button">↻</button>
+        <a id="backButton" href="/">Back</a>
+      </header>
+
+      <section class="searchbar panel">
+        <label class="search-text-label">
+          <span id="searchTextLabel">Text</span>
+          <input id="searchText" type="search" maxlength="100">
+        </label>
+        <label>
+          <span id="dateFromLabel">From</span>
+          <input id="dateFrom" type="date">
+        </label>
+        <label>
+          <span id="dateToLabel">To</span>
+          <input id="dateTo" type="date">
+        </label>
+        <button id="searchButton" type="button">Search</button>
+        <button id="clearSearchButton" type="button">Clear</button>
+      </section>
+
+      <button id="olderButton" class="older hidden" type="button">Load older</button>
+
+      <section id="messages" class="messages panel" aria-live="polite"></section>
+
+      <section class="composer panel">
+        <div id="replying" class="replying hidden">
+          <span id="replyingText"></span>
+          <button id="cancelReplyButton" type="button">×</button>
+        </div>
+        <div id="fileList" class="file-list hidden"></div>
+        <div class="compose-row">
+          <button id="fileButton" class="file-button" type="button">＋</button>
+          <textarea id="messageInput" maxlength="4000" rows="1" placeholder="Message"></textarea>
+          <button id="sendButton" class="send-button" type="button">Send</button>
+        </div>
+        <input id="fileInput" type="file" multiple hidden accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.csv,.xlsx,.docx,.zip,image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip">
+        <div id="status" class="status"></div>
+      </section>
+    </section>
+  </main>
 
 
-<!-- CREATE ROOM -->
-
-<dialog id="createRoomDialog" class="room-dialog">
-
-  <div class="room-dialog-inner">
-
-    <h2 id="createRoomTitle">Create room</h2>
-
-    <input
-      id="newRoomName"
-      type="text"
-      maxlength="100"
-      autocomplete="off"
-    >
-
-    <div id="createRoomStatus" class="status"></div>
-
-    <div class="room-dialog-actions">
-
-      <button
-        id="cancelCreateRoomButton"
-        type="button"
-      >Cancel</button>
-
-      <button
-        id="confirmCreateRoomButton"
-        type="button"
-      >Create</button>
-
+  <dialog id="createRoomDialog" class="room-dialog">
+    <div class="room-dialog-inner">
+      <h2 id="createRoomTitle">Create room</h2>
+      <input id="newRoomName" type="text" maxlength="100" autocomplete="off">
+      <div id="createRoomStatus" class="status"></div>
+      <div class="room-dialog-actions">
+        <button id="cancelCreateRoomButton" type="button">Cancel</button>
+        <button id="confirmCreateRoomButton" type="button">Create</button>
+      </div>
     </div>
+  </dialog>
 
-  </div>
+  <dialog id="roomMembersDialog" class="room-dialog">
+    <div class="room-dialog-inner">
+      <h2 id="roomMembersTitle">Room members</h2>
+      <div id="roomMembersNote" class="room-note"></div>
+      <div id="roomMemberList" class="member-list"></div>
 
-</dialog>
+      <div id="inviteSection">
+        <h3 id="inviteTitle" style="font-size:.9rem;margin:14px 0 5px">Add people</h3>
+        <div id="inviteList" class="invite-list"></div>
+      </div>
 
+      <div id="roomManageStatus" class="status"></div>
 
-<!-- ROOM MEMBERS -->
-
-<dialog id="roomMembersDialog" class="room-dialog">
-
-  <div class="room-dialog-inner">
-
-    <h2 id="roomMembersTitle">Room members</h2>
-
-    <div
-      id="roomMembersNote"
-      class="room-note"
-    ></div>
-
-    <div
-      id="roomMemberList"
-      class="member-list"
-    ></div>
-
-
-    <div id="inviteSection">
-
-      <h3
-        id="inviteTitle"
-        style="font-size:.9rem;margin:14px 0 5px"
-      >Add people</h3>
-
-      <div
-        id="inviteList"
-        class="invite-list"
-      ></div>
-
+      <div class="room-dialog-actions">
+        <button id="deleteRoomButton" type="button" class="danger-button hidden">Delete room</button>
+        <button id="closeRoomMembersButton" type="button">Close</button>
+      </div>
     </div>
-
-
-    <div
-      id="roomManageStatus"
-      class="status"
-    ></div>
-
-
-    <div class="room-dialog-actions">
-
-      <button
-        id="deleteRoomButton"
-        type="button"
-        class="danger-button hidden"
-      >Delete room</button>
-
-      <button
-        id="closeRoomMembersButton"
-        type="button"
-      >Close</button>
-
-    </div>
-
-  </div>
-
-</dialog>
-
-
-<script type="module">
-
-  import {
-    createClient
-  } from "https://esm.sh/@supabase/supabase-js@2.111.0";
-
-
-  /* =========================================================
-     CONFIG
-  ========================================================= */
-
-  const SUPABASE_URL =
-    "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
-
-  const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
-
-  const FUNCTIONS_BASE =
-    `${SUPABASE_URL}/functions/v1`;
-
-  const API = {
-
-    list:
-      `${FUNCTIONS_BASE}/staff-chat-list`,
-
-    send:
-      `${FUNCTIONS_BASE}/staff-chat-send`,
-
-    upload:
-      `${FUNCTIONS_BASE}/staff-chat-upload`,
-
-    file:
-      `${FUNCTIONS_BASE}/staff-chat-file`,
-
-    delete:
-      `${FUNCTIONS_BASE}/staff-chat-delete`,
-
-    translate:
-      `${FUNCTIONS_BASE}/staff-chat-translate`,
-
-    read:
-      `${FUNCTIONS_BASE}/staff-chat-read`,
-
-    react:
-      `${FUNCTIONS_BASE}/staff-chat-react`,
-
-    roomUser:
-      `${FUNCTIONS_BASE}/staff-chat-room-user`,
-
-    report:
-      `${FUNCTIONS_BASE}/staff-chat-report`
-  };
-
-
-  const supabase =
-    createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
-
-
-  /* =========================================================
-     CONSTANTS
-  ========================================================= */
-
-  const FALLBACK_POLL_MS = 15000;
-
-  const MAX_FILES = 5;
-
-  const MAX_FILE_BYTES =
-    10 * 1024 * 1024;
-
-  const REACTIONS = [
-    "😂",
-    "🤗",
-    "🧐",
-    "😞",
-    "😭",
-    "😅",
-    "😍",
-    "😨",
-    "😡",
-    "👍",
-    "👎",
-    "✋",
-    "👀"
-  ];
-
-
-  /* =========================================================
-     LANGUAGE
-  ========================================================= */
-
-  const TEXT = {
-
-    ko:{
-      title:"채팅",
-      rooms:"채팅방",
-      checking:"접근 권한을 확인하고 있습니다…",
-      denied:"스태프 또는 초대된 채팅 계정으로 로그인하세요.",
-      chatLogin:"채팅 로그인",
-      message:"메시지",
-      send:"전송",
-      reply:"답장",
-      replying:"답장 중",
-      deletedReply:"삭제된 메시지",
-      deletedMessage:"삭제된 메시지입니다.",
-      report:"신고",
-      reportReason:"신고 사유를 입력하세요. (선택)",
-      reportDone:"신고했습니다.",
-      translate:"번역",
-      translation:"번역",
-      translating:"번역 중…",
-      translationFailed:"번역에 실패했습니다.",
-      search:"검색",
-      text:"문자열",
-      clear:"초기화",
-      older:"이전 메시지",
-      empty:"아직 메시지가 없습니다.",
-      delete:"삭제",
-      deleteConfirm:"이 메시지를 삭제할까요?",
-      loadFailed:"채팅을 불러오지 못했습니다.",
-      sendFailed:"메시지를 전송하지 못했습니다.",
-      fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",
-      tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",
-      notification:"브라우저 알림",
-      notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",
-      createRoom:"채팅방 만들기",
-      roomName:"채팅방 이름",
-      members:"참여자",
-      addPeople:"인원 추가",
-      officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",
-      deleteRoom:"채팅방 삭제",
-      deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",
-      close:"닫기",
-      cancel:"취소",
-      create:"만들기"
-    },
-
-    en:{
-      title:"Chat",
-      rooms:"Rooms",
-      checking:"Checking access…",
-      denied:"Sign in as Staff, or an invited chat account.",
-      chatLogin:"Chat login",
-      message:"Message",
-      send:"Send",
-      reply:"Reply",
-      replying:"Replying",
-      deletedReply:"Deleted message",
-      deletedMessage:"This message was deleted.",
-      report:"Report",
-      reportReason:"Reason for report (optional)",
-      reportDone:"Reported.",
-      translate:"Translate",
-      translation:"Translation",
-      translating:"Translating…",
-      translationFailed:"Translation failed.",
-      search:"Search",
-      text:"Text",
-      clear:"Clear",
-      older:"Load older",
-      empty:"No messages yet.",
-      delete:"Delete",
-      deleteConfirm:"Delete this message?",
-      loadFailed:"Failed to load chat.",
-      sendFailed:"Failed to send message.",
-      fileTooLarge:"Each file must be 10 MB or smaller.",
-      tooManyFiles:"Up to 5 files per message.",
-      notification:"Browser notifications",
-      notificationDenied:"Browser notifications were not allowed.",
-      createRoom:"Create room",
-      roomName:"Room name",
-      members:"Members",
-      addPeople:"Add people",
-      officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",
-      deleteRoom:"Delete room",
-      deleteRoomConfirm:"Delete this room and all of its messages?",
-      close:"Close",
-      cancel:"Cancel",
-      create:"Create"
-    },
-
-    ja:{
-      title:"チャット",
-      rooms:"チャットルーム",
-      checking:"アクセス権限を確認しています…",
-      denied:"スタッフまたは招待されたチャットアカウントでログインしてください。",
-      chatLogin:"チャットログイン",
-      message:"メッセージ",
-      send:"送信",
-      reply:"返信",
-      replying:"返信中",
-      deletedReply:"削除されたメッセージ",
-      deletedMessage:"削除されたメッセージです。",
-      report:"通報",
-      reportReason:"通報理由を入力してください。（任意）",
-      reportDone:"通報しました。",
-      translate:"翻訳",
-      translation:"翻訳",
-      translating:"翻訳中…",
-      translationFailed:"翻訳に失敗しました。",
-      search:"検索",
-      text:"文字列",
-      clear:"クリア",
-      older:"以前のメッセージ",
-      empty:"まだメッセージはありません。",
-      delete:"削除",
-      deleteConfirm:"このメッセージを削除しますか？",
-      loadFailed:"チャットを読み込めませんでした。",
-      sendFailed:"メッセージを送信できませんでした。",
-      fileTooLarge:"各ファイルは10MB以下にしてください。",
-      tooManyFiles:"1メッセージにつき最大5ファイルです。",
-      notification:"ブラウザ通知",
-      notificationDenied:"ブラウザ通知が許可されていません。",
-      createRoom:"チャットルームを作成",
-      roomName:"ルーム名",
-      members:"参加者",
-      addPeople:"メンバー追加",
-      officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",
-      deleteRoom:"ルーム削除",
-      deleteRoomConfirm:"このルームとすべての会話を削除しますか？",
-      close:"閉じる",
-      cancel:"キャンセル",
-      create:"作成"
-    },
-
-    ru:{
-      title:"Чат",
-      rooms:"Комнаты",
-      checking:"Проверка доступа…",
-      denied:"Войдите как сотрудник или приглашённый пользователь чата.",
-      chatLogin:"Войти в чат",
-      message:"Сообщение",
-      send:"Отправить",
-      reply:"Ответить",
-      replying:"Ответ",
-      deletedReply:"Удалённое сообщение",
-      deletedMessage:"Сообщение удалено.",
-      report:"Пожаловаться",
-      reportReason:"Причина жалобы (необязательно)",
-      reportDone:"Жалоба отправлена.",
-      translate:"Перевести",
-      translation:"Перевод",
-      translating:"Перевод…",
-      translationFailed:"Не удалось перевести.",
-      search:"Поиск",
-      text:"Текст",
-      clear:"Сбросить",
-      older:"Загрузить предыдущие",
-      empty:"Сообщений пока нет.",
-      delete:"Удалить",
-      deleteConfirm:"Удалить это сообщение?",
-      loadFailed:"Не удалось загрузить чат.",
-      sendFailed:"Не удалось отправить сообщение.",
-      fileTooLarge:"Каждый файл должен быть не более 10 МБ.",
-      tooManyFiles:"До 5 файлов на сообщение.",
-      notification:"Уведомления браузера",
-      notificationDenied:"Уведомления браузера не разрешены.",
-      createRoom:"Создать комнату",
-      roomName:"Название комнаты",
-      members:"Участники",
-      addPeople:"Добавить людей",
-      officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",
-      deleteRoom:"Удалить комнату",
-      deleteRoomConfirm:"Удалить эту комнату и всю переписку?",
-      close:"Закрыть",
-      cancel:"Отмена",
-      create:"Создать"
-    }
-
-  };
-
-
-  let language =
-    typeof getCurrentLanguage === "function"
-      ? getCurrentLanguage()
-      : "en";
-
-  let text =
-    TEXT[language] ?? TEXT.en;
-
-
-  /* =========================================================
-     STATE
-  ========================================================= */
-
-  let actor = null;
-
-  let rooms = [];
-
-  let currentRoomId = null;
-
-  let currentSignalTopic = null;
-
-  let replyTarget = null;
-
-  let selectedFiles = [];
-
-  let hasMore = false;
-
-  let loading = false;
-
-  let sending = false;
-
-  let realtimeChannel = null;
-
-  let fallbackTimer = null;
-
-  let refreshTimer = null;
-
-  let notificationBaseline = null;
-
-  const messageMap = new Map();
-
-  let currentSearch = {
-    q:"",
-    date:""
-  };
-
-
-  /* =========================================================
-     DOM
-  ========================================================= */
-
-  const $ =
-    id => document.getElementById(id);
-
-
-  const gate =
-    $("gate");
-
-  const gateMessage =
-    $("gateMessage");
-
-  const chatLogin =
-    $("chatLogin");
-
-  const chatId =
-    $("chatId");
-
-  const chatPassword =
-    $("chatPassword");
-
-  const chatLoginButton =
-    $("chatLoginButton");
-
-  const app =
-    $("app");
-
-  const roomsHost =
-    $("rooms");
-
-  const roomsTitle =
-    $("roomsTitle");
-
-  const roomRefreshButton =
-    $("roomRefreshButton");
-
-  const chatTitle =
-    $("chatTitle");
-
-  const actorLabel =
-    $("actor");
-
-  const notifyButton =
-    $("notifyButton");
-
-  const refreshButton =
-    $("refreshButton");
-
-  const backButton =
-    $("backButton");
-
-  const searchText =
-    $("searchText");
-
-  const searchDate =
-    $("searchDate");
-
-  const searchButton =
-    $("searchButton");
-
-  const clearSearchButton =
-    $("clearSearchButton");
-
-  const searchTextLabel =
-    $("searchTextLabel");
-
-  const dateLabel =
-    $("dateLabel");
-
-  const olderButton =
-    $("olderButton");
-
-  const messagesHost =
-    $("messages");
-
-  const replying =
-    $("replying");
-
-  const replyingText =
-    $("replyingText");
-
-  const cancelReplyButton =
-    $("cancelReplyButton");
-
-  const fileList =
-    $("fileList");
-
-  const fileButton =
-    $("fileButton");
-
-  const fileInput =
-    $("fileInput");
-
-  const messageInput =
-    $("messageInput");
-
-  const sendButton =
-    $("sendButton");
-
-  const statusHost =
-    $("status");
-
-  const createRoomButton =
-    $("createRoomButton");
-
-  const roomMembersButton =
-    $("roomMembersButton");
-
-  const createRoomDialog =
-    $("createRoomDialog");
-
-  const createRoomTitle =
-    $("createRoomTitle");
-
-  const newRoomName =
-    $("newRoomName");
-
-  const createRoomStatus =
-    $("createRoomStatus");
-
-  const cancelCreateRoomButton =
-    $("cancelCreateRoomButton");
-
-  const confirmCreateRoomButton =
-    $("confirmCreateRoomButton");
-
-  const roomMembersDialog =
-    $("roomMembersDialog");
-
-  const roomMembersTitle =
-    $("roomMembersTitle");
-
-  const roomMembersNote =
-    $("roomMembersNote");
-
-  const roomMemberList =
-    $("roomMemberList");
-
-  const inviteSection =
-    $("inviteSection");
-
-  const inviteTitle =
-    $("inviteTitle");
-
-  const inviteList =
-    $("inviteList");
-
-  const roomManageStatus =
-    $("roomManageStatus");
-
-  const deleteRoomButton =
-    $("deleteRoomButton");
-
-  const closeRoomMembersButton =
-    $("closeRoomMembersButton");
-
-
-  /* =========================================================
-     TEXT
-  ========================================================= */
-
-  function setText(){
-
-    document.documentElement.lang =
-      language;
-
-    document.title =
-      `${text.title} | S967`;
-
-    $("gateTitle").textContent =
-      text.title;
-
-    gateMessage.textContent =
-      text.checking;
-
-    chatLoginButton.textContent =
-      text.chatLogin;
-
-    roomsTitle.textContent =
-      text.rooms;
-
-    createRoomButton.title =
-      text.createRoom;
-
-    roomMembersButton.title =
-      text.members;
-
-    createRoomTitle.textContent =
-      text.createRoom;
-
-    newRoomName.placeholder =
-      text.roomName;
-
-    cancelCreateRoomButton.textContent =
-      text.cancel;
-
-    confirmCreateRoomButton.textContent =
-      text.create;
-
-    roomMembersTitle.textContent =
-      text.members;
-
-    inviteTitle.textContent =
-      text.addPeople;
-
-    deleteRoomButton.textContent =
-      text.deleteRoom;
-
-    closeRoomMembersButton.textContent =
-      text.close;
-
-    messageInput.placeholder =
-      text.message;
-
-    sendButton.textContent =
-      text.send;
-
-    searchTextLabel.textContent =
-      text.text;
-
-    dateLabel.textContent =
-      language === "ko"
-        ? "날짜"
-        : language === "ja"
-          ? "日付"
-          : language === "ru"
-            ? "Дата"
-            : "Date";
-
-    searchButton.textContent =
-      text.search;
-
-    clearSearchButton.textContent =
-      text.clear;
-
-    olderButton.textContent =
-      text.older;
-
-    notifyButton.title =
-      text.notification;
-
-    renderRooms();
-
-    renderMessages();
-
-    renderReplyTarget();
-  }
-
-
-  /* =========================================================
-     STATUS
-  ========================================================= */
-
-  function setStatus(
-    message = "",
-    error = false
-  ){
-
-    statusHost.textContent =
-      message;
-
-    statusHost.classList.toggle(
-      "error",
-      error
-    );
-  }
-
-
-  /* =========================================================
-     AUTH
-  ========================================================= */
-
-  async function accessToken(){
-
-    const adminToken =
-      globalThis.S967AdminAuth
-        ?.getToken?.();
-
-    if(adminToken){
-
-      return {
-        token:adminToken,
-        kind:"admin"
-      };
-
-    }
-
-    const {
-      data
-    } =
-      await supabase.auth.getSession();
-
-    const token =
-      data.session?.access_token;
-
-    if(!token){
-      return null;
-    }
-
-    return {
-      token,
-      kind:"auth"
+  </dialog>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+
+    const SUPABASE_URL = "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
+    const API = {
+      list: `${FUNCTIONS_BASE}/staff-chat-list`,
+      send: `${FUNCTIONS_BASE}/staff-chat-send`,
+      upload: `${FUNCTIONS_BASE}/staff-chat-upload`,
+      file: `${FUNCTIONS_BASE}/staff-chat-file`,
+      delete: `${FUNCTIONS_BASE}/staff-chat-delete`,
+      translate: `${FUNCTIONS_BASE}/staff-chat-translate`,
+      read: `${FUNCTIONS_BASE}/staff-chat-read`,
+      react: `${FUNCTIONS_BASE}/staff-chat-react`,
+      roomUser: `${FUNCTIONS_BASE}/staff-chat-room-user`,
+      report: `${FUNCTIONS_BASE}/staff-chat-report`,
     };
-  }
 
-
-  async function request(
-    url,
-    options = {}
-  ){
-
-    const auth =
-      await accessToken();
-
-    if(!auth?.token){
-
-      const error =
-        new Error("UNAUTHORIZED");
-
-      error.status = 401;
-
-      throw error;
-    }
-
-    const headers =
-      new Headers(
-        options.headers ?? {}
-      );
-
-    headers.set(
-      "Authorization",
-      `Bearer ${auth.token}`
-    );
-
-    const response =
-      await fetch(
-        url,
-        {
-          ...options,
-          headers
-        }
-      );
-
-    const result =
-      await response
-        .json()
-        .catch(
-          () => ({})
-        );
-
-    if(!response.ok){
-
-      const error =
-        new Error(
-          result.error ||
-          `HTTP_${response.status}`
-        );
-
-      error.status =
-        response.status;
-
-      throw error;
-    }
-
-    return result;
-  }
-
-
-  /* =========================================================
-     HELPERS
-  ========================================================= */
-
-  function formatDate(value){
-
-    try{
-
-      return new Intl.DateTimeFormat(
-
-        language === "ko"
-          ? "ko-KR"
-          : language === "ja"
-            ? "ja-JP"
-            : language === "ru"
-              ? "ru-RU"
-              : "en-US",
-
-        {
-          month:"2-digit",
-          day:"2-digit",
-          hour:"2-digit",
-          minute:"2-digit"
-        }
-
-      ).format(
-        new Date(value)
-      );
-
-    }catch{
-
-      return "";
-
-    }
-  }
-
-
-  function formatBytes(bytes){
-
-    const n =
-      Number(bytes) || 0;
-
-    if(n < 1024){
-      return `${n} B`;
-    }
-
-    if(n < 1048576){
-      return `${(
-        n / 1024
-      ).toFixed(1)} KB`;
-    }
-
-    return `${(
-      n / 1048576
-    ).toFixed(1)} MB`;
-  }
-
-
-  function nearBottom(){
-
-    return (
-      messagesHost.scrollHeight -
-      messagesHost.scrollTop -
-      messagesHost.clientHeight
-    ) < 120;
-  }
-
-
-  function newestMessage(){
-
-    return [
-      ...messageMap.values()
-    ]
-      .sort(
-        (a,b) =>
-          new Date(b.created_at) -
-          new Date(a.created_at)
-      )[0] ?? null;
-  }
-
-
-  function selectedRoom(){
-
-    return rooms.find(
-      room =>
-        room.id === currentRoomId
-    ) ?? null;
-  }
-
-
-  /* =========================================================
-     ROOMS
-  ========================================================= */
-
-  function renderRooms(){
-
-    if(!roomsHost){
-      return;
-    }
-
-    roomsHost.replaceChildren(
-
-      ...rooms.map(room => {
-
-        const button =
-          document.createElement("button");
-
-        button.type =
-          "button";
-
-        button.className =
-          "room-button";
-
-        button.classList.toggle(
-          "active",
-          room.id === currentRoomId
-        );
-
-        const name =
-          document.createElement("span");
-
-        name.className =
-          "room-name";
-
-        name.textContent =
-          room.name;
-
-        button.append(name);
-
-
-        if(
-          Number(room.unread_count ?? 0) > 0
-        ){
-
-          const badge =
-            document.createElement("span");
-
-          badge.className =
-            "badge";
-
-          badge.textContent =
-            String(
-              room.unread_count
-            );
-
-          button.append(badge);
-        }
-
-
-        button.onclick =
-          () => selectRoom(room.id);
-
-        return button;
-      })
-    );
-  }
-
-
-  async function loadRooms(){
-
-    const result =
-      await request(
-        `${API.list}?view=rooms`
-      );
-
-    actor =
-      result.actor;
-
-    actorLabel.textContent =
-      actor?.name
-        ? `${actor.name} · ${actor.kind}`
-        : "";
-
-    rooms =
-      result.rooms ?? [];
-
-
-    if(
-      !currentRoomId ||
-      !rooms.some(
-        room =>
-          room.id === currentRoomId
-      )
-    ){
-
-      currentRoomId =
-        rooms[0]?.id ?? null;
-    }
-
-
-    renderRooms();
-
-    return currentRoomId;
-  }
-
-
-  /* =========================================================
-     LIST URL
-  ========================================================= */
-
-  function buildListUrl({
-    before = "",
-    limit = 30
-  } = {}){
-
-    const params =
-      new URLSearchParams();
-
-    params.set(
-      "room_id",
-      currentRoomId ?? ""
-    );
-
-    params.set(
-      "limit",
-      String(limit)
-    );
-
-
-    if(before){
-
-      params.set(
-        "before",
-        before
-      );
-    }
-
-
-    if(currentSearch.q){
-
-      params.set(
-        "q",
-        currentSearch.q
-      );
-    }
-
-
-    if(currentSearch.date){
-
-      params.set(
-        "date",
-        currentSearch.date
-      );
-    }
-
-
-    return `${API.list}?${params.toString()}`;
-  }
-
-
-  /* =========================================================
-     ATTACHMENTS
-  ========================================================= */
-
-  async function openAttachment(attachment){
-
-    try{
-
-      const result =
-        await request(
-          `${API.file}?id=${encodeURIComponent(
-            attachment.id
-          )}`
-        );
-
-      if(result.url){
-
-        window.open(
-          result.url,
-          "_blank",
-          "noopener,noreferrer"
-        );
-      }
-
-    }catch(error){
-
-      setStatus(
-        error.message,
-        true
-      );
-    }
-  }
-
-
-  /* =========================================================
-     MESSAGE RENDER
-  ========================================================= */
-
-  function renderMessage(message){
-
-    const article =
-      document.createElement("article");
-
-    article.className =
-      "message";
-
-    if(message.is_mine){
-
-      article.classList.add(
-        "mine"
-      );
-    }
-
-    if(
-      message.author_kind === "admin"
-    ){
-
-      article.classList.add(
-        "admin"
-      );
-    }
-
-
-    /* HEADER */
-
-    const head =
-      document.createElement("div");
-
-    head.className =
-      "message-head";
-
-
-    const author =
-      document.createElement("span");
-
-    author.className =
-      "message-author";
-
-    author.textContent =
-      message.author_name;
-
-
-    const time =
-      document.createElement("span");
-
-    time.className =
-      "message-time";
-
-    time.textContent =
-      formatDate(
-        message.created_at
-      );
-
-
-    head.append(
-      author,
-      time
-    );
-
-
-    /* ACTIONS */
-
-    if(!message.is_deleted){
-
-      const reply =
-        document.createElement("button");
-
-      reply.type =
-        "button";
-
-      reply.className =
-        "message-action";
-
-      reply.textContent =
-        text.reply;
-
-      reply.onclick =
-        () => {
-
-          replyTarget = {
-            id:message.id,
-            author_name:
-              message.author_name,
-            body:
-              message.body
-          };
-
-          renderReplyTarget();
-
-          messageInput.focus();
-        };
-
-      head.append(reply);
-
-
-      if(message.can_report){
-
-        const report =
-          document.createElement("button");
-
-        report.type =
-          "button";
-
-        report.className =
-          "message-action";
-
-        report.textContent =
-          text.report;
-
-        report.onclick =
-          () =>
-            reportMessage(
-              message.id
-            );
-
-        head.append(report);
-      }
-
-
-      if(message.can_delete){
-
-        const del =
-          document.createElement("button");
-
-        del.type =
-          "button";
-
-        del.className =
-          "message-action";
-
-        del.textContent =
-          text.delete;
-
-        del.onclick =
-          () =>
-            deleteMessage(
-              message.id
-            );
-
-        head.append(del);
-      }
-    }
-
-
-    article.append(head);
-
-
-    /* REPLY PREVIEW */
-
-    if(message.reply_to){
-
-      const preview =
-        document.createElement("div");
-
-      preview.className =
-        "reply-preview";
-
-
-      if(message.reply_to.deleted){
-
-        preview.textContent =
-          text.deletedReply;
-
-      }else{
-
-        const strong =
-          document.createElement("strong");
-
-        strong.textContent =
-          message.reply_to.author_name;
-
-
-        const snippet =
-          document.createElement("div");
-
-        snippet.className =
-          "snippet";
-
-        snippet.textContent =
-          message.reply_to.body;
-
-
-        preview.append(
-          strong,
-          snippet
-        );
-      }
-
-
-      article.append(preview);
-    }
-
-
-    /* BODY */
-
-    if(message.is_deleted){
-
-      const body =
-        document.createElement("div");
-
-      body.className =
-        "message-body";
-
-      body.textContent =
-        text.deletedMessage;
-
-      article.append(body);
-
-    }else if(message.body){
-
-      const body =
-        document.createElement("div");
-
-      body.className =
-        "message-body";
-
-      body.textContent =
-        message.body;
-
-      article.append(body);
-    }
-
-
-    /* ATTACHMENTS */
-
-    if(
-      !message.is_deleted &&
-      message.attachments?.length
-    ){
-
-      const host =
-        document.createElement("div");
-
-      host.className =
-        "attachments";
-
-
-      for(
-        const attachment
-        of message.attachments
-      ){
-
-        if(
-          String(
-            attachment.mime_type ?? ""
-          ).startsWith("image/") &&
-          attachment.signed_url
-        ){
-
-          const image =
-            document.createElement("img");
-
-          image.className =
-            "image-preview";
-
-          image.src =
-            attachment.signed_url;
-
-          image.alt =
-            attachment.original_name;
-
-          image.loading =
-            "lazy";
-
-          image.onclick =
-            () =>
-              openAttachment(
-                attachment
-              );
-
-          host.append(image);
-        }
-
-
-        const link =
-          document.createElement("a");
-
-        link.className =
-          "attachment";
-
-        link.href =
-          "#";
-
-
-        const name =
-          document.createElement("span");
-
-        name.className =
-          "attachment-name";
-
-        name.textContent =
-          attachment.original_name;
-
-
-        const size =
-          document.createElement("span");
-
-        size.className =
-          "attachment-size";
-
-        size.textContent =
-          formatBytes(
-            attachment.size_bytes
-          );
-
-
-        link.append(
-          name,
-          size
-        );
-
-
-        link.onclick =
-          event => {
-
-            event.preventDefault();
-
-            openAttachment(
-              attachment
-            );
-          };
-
-
-        host.append(link);
-      }
-
-
-      article.append(host);
-    }
-
-
-    /* TRANSLATION */
-
-    if(
-      !message.is_deleted &&
-      String(message.body ?? "").trim()
-    ){
-
-      const translate =
-        document.createElement("button");
-
-      translate.type =
-        "button";
-
-      translate.className =
-        "translate-button";
-
-      translate.textContent =
-        `🌐 ${text.translate}`;
-
-
-      const translation =
-        document.createElement("div");
-
-      translation.className =
-        "translation hidden";
-
-
-      translate.onclick =
-        () =>
-          translateMessage(
-            message,
-            translate,
-            translation
-          );
-
-
-      article.append(
-        translate,
-        translation
-      );
-    }
-
-
-    /* REACTIONS */
-
-    if(!message.is_deleted){
-
-      const reactions =
-        document.createElement("div");
-
-      reactions.className =
-        "reactions";
-
-
-      const reactionData =
-        message.reactions ?? {
-          counts:{},
-          my_reaction:null
-        };
-
-
-      for(
-        const emoji
-        of REACTIONS
-      ){
-
-        const count =
-          Number(
-            reactionData.counts?.[emoji] ?? 0
-          );
-
-
-        if(!count){
-          continue;
-        }
-
-
-        const button =
-          document.createElement("button");
-
-        button.type =
-          "button";
-
-        button.className =
-          "reaction-chip";
-
-        if(
-          reactionData.my_reaction === emoji
-        ){
-
-          button.classList.add(
-            "mine"
-          );
-        }
-
-        button.textContent =
-          `${emoji} ${count}`;
-
-
-        button.onclick =
-          () =>
-            reactToMessage(
-              message.id,
-              emoji
-            );
-
-
-        reactions.append(button);
-      }
-
-
-      const add =
-        document.createElement("button");
-
-      add.type =
-        "button";
-
-      add.className =
-        "reaction-add";
-
-      add.textContent =
-        "☺+";
-
-      add.title =
-        "Reaction";
-
-
-      const picker =
-        document.createElement("div");
-
-      picker.className =
-        "reaction-picker hidden";
-
-
-      for(
-        const emoji
-        of REACTIONS
-      ){
-
-        const button =
-          document.createElement("button");
-
-        button.type =
-          "button";
-
-        button.textContent =
-          emoji;
-
-        button.onclick =
-          () =>
-            reactToMessage(
-              message.id,
-              emoji
-            );
-
-        picker.append(button);
-      }
-
-
-      add.onclick =
-        () =>
-          picker.classList.toggle(
-            "hidden"
-          );
-
-
-      reactions.append(add);
-
-      article.append(
-        reactions,
-        picker
-      );
-    }
-
-
-    /* FOOT */
-
-    const foot =
-      document.createElement("div");
-
-    foot.className =
-      "message-foot";
-
-
-    if(
-      Number(
-        message.unread_count ?? 0
-      ) > 0
-    ){
-
-      const unread =
-        document.createElement("span");
-
-      unread.className =
-        "unread-number";
-
-      unread.textContent =
-        String(
-          message.unread_count
-        );
-
-      unread.title =
-        "Unread people";
-
-      foot.append(unread);
-    }
-
-
-    article.append(foot);
-
-
-    return article;
-  }
-
-
-  /* =========================================================
-     MESSAGE LIST
-  ========================================================= */
-
-  function renderMessages(){
-
-    const items =
-      [
-        ...messageMap.values()
-      ].sort(
-        (a,b) =>
-          new Date(a.created_at) -
-          new Date(b.created_at)
-      );
-
-
-    if(!items.length){
-
-      const empty =
-        document.createElement("div");
-
-      empty.className =
-        "empty";
-
-      empty.textContent =
-        text.empty;
-
-      messagesHost.replaceChildren(
-        empty
-      );
-
-      olderButton.classList.add(
-        "hidden"
-      );
-
-      return;
-    }
-
-
-    messagesHost.replaceChildren(
-      ...items.map(
-        renderMessage
-      )
-    );
-
-
-    olderButton.classList.toggle(
-      "hidden",
-      !hasMore
-    );
-  }
-
-
-  /* =========================================================
-     LOAD LATEST
-  ========================================================= */
-
-  async function loadLatest(
-    forceScroll = false,
-    notify = false
-  ){
-
-    if(
-      loading ||
-      !currentRoomId
-    ){
-
-      return;
-    }
-
-
-    loading = true;
-
-
-    const shouldScroll =
-      forceScroll ||
-      nearBottom();
-
-
-    const previousNewest =
-      newestMessage()?.id ??
-      notificationBaseline;
-
-
-    try{
-
-      const result =
-        await request(
-          buildListUrl({
-            limit:30
-          })
-        );
-
-
-      actor =
-        result.actor;
-
-      currentSignalTopic =
-        result.signal_topic ??
-        null;
-
-
-      chatTitle.textContent =
-        result.room?.name ??
-        text.title;
-
-
-      /*
-       * 검색 / 일반 로딩 모두
-       * 서버가 내려준 메시지를 Map에 반영
-       */
-      for(
-        const message
-        of result.messages ?? []
-      ){
-
-        messageMap.set(
-          message.id,
-          message
-        );
-      }
-
-
-      hasMore =
-        Boolean(
-          result.has_more
-        );
-
-
-      renderMessages();
-
-
-      /*
-       * 날짜 검색 시 결과가 있으면
-       * 첫 번째 결과로 이동
-       */
-      if(
-        currentSearch.date &&
-        result.messages?.length
-      ){
-
-        const targetId =
-          result.messages[0].id;
-
-
-        requestAnimationFrame(() => {
-
-          const target =
-            [
-              ...messagesHost.querySelectorAll(
-                ".message"
-              )
-            ].find(
-              element =>
-                messageMap.get(
-                  targetId
-                )?.id === targetId
-            );
-
-
-          if(target){
-
-            target.scrollIntoView({
-              behavior:"smooth",
-              block:"start"
-            });
-          }
-        });
-
-
-      }else if(shouldScroll){
-
-        messagesHost.scrollTop =
-          messagesHost.scrollHeight;
-      }
-
-
-      if(notify){
-
-        maybeNotify(
-          result.messages ?? [],
-          previousNewest
-        );
-      }
-
-
-      notificationBaseline =
-        newestMessage()?.id ??
-        notificationBaseline;
-
-
-      gate.classList.add(
-        "hidden"
-      );
-
-      app.classList.remove(
-        "hidden"
-      );
-
-
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const $ = id => document.getElementById(id);
+    const FALLBACK_POLL_MS = 15000;
+    const MAX_FILES = 5;
+    const MAX_FILE_BYTES = 10 * 1024 * 1024;
+    const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
+
+    const TEXT = {
+      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"스태프 또는 초대된 채팅 계정으로 로그인하세요.",chatLogin:"채팅 로그인",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고했습니다.",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",from:"시작 날짜",to:"종료 날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",close:"닫기",cancel:"취소",create:"만들기"},
+      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff, or an invited chat account.",chatLogin:"Chat login",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Reported.",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",from:"From",to:"To",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",close:"Close",cancel:"Cancel",create:"Create"},
+      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"スタッフまたは招待されたチャットアカウントでログインしてください。",chatLogin:"チャットログイン",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報しました。",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",from:"開始日",to:"終了日",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",close:"閉じる",cancel:"キャンセル",create:"作成"},
+      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как сотрудник или приглашённый пользователь чата.",chatLogin:"Войти в чат",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба отправлена.",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",from:"С даты",to:"По дату",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",close:"Закрыть",cancel:"Отмена",create:"Создать"},
+    };
+
+    let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
+    let text = TEXT[language] ?? TEXT.en;
+    let actor = null;
+    let rooms = [];
+    let currentRoomId = null;
+    let currentSignalTopic = null;
+    let replyTarget = null;
+    let selectedFiles = [];
+    let hasMore = false;
+    let loading = false;
+    let sending = false;
+    let realtimeChannel = null;
+    let fallbackTimer = null;
+    let refreshTimer = null;
+    let notificationBaseline = null;
+    const messageMap = new Map();
+    let currentSearch = {q:"",dateFrom:"",dateTo:""};
+
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton");
+
+    function setText(){
+      document.documentElement.lang=language;
+      document.title=`${text.title} | S967`;
+      $("gateTitle").textContent=text.title;
+      gateMessage.textContent=text.checking;
+      chatLoginButton.textContent=text.chatLogin;
+      roomsTitle.textContent=text.rooms;
+      createRoomButton.title=text.createRoom;
+      roomMembersButton.title=text.members;
+      createRoomTitle.textContent=text.createRoom;
+      newRoomName.placeholder=text.roomName;
+      cancelCreateRoomButton.textContent=text.cancel;
+      confirmCreateRoomButton.textContent=text.create;
+      roomMembersTitle.textContent=text.members;
+      inviteTitle.textContent=text.addPeople;
+      deleteRoomButton.textContent=text.deleteRoom;
+      closeRoomMembersButton.textContent=text.close;
+      messageInput.placeholder=text.message;
+      sendButton.textContent=text.send;
+      searchTextLabel.textContent=text.text;
+      dateFromLabel.textContent=text.from;
+      dateToLabel.textContent=text.to;
+      searchButton.textContent=text.search;
+      clearSearchButton.textContent=text.clear;
+      olderButton.textContent=text.older;
+      notifyButton.title=text.notification;
       renderRooms();
-
-
-      if(shouldScroll){
-
-        await markRead();
-      }
-
-
-    }catch(error){
-
-      if(
-        error.status === 401 ||
-        error.status === 403
-      ){
-
-        showGate(
-          text.denied
-        );
-
-      }else{
-
-        setStatus(
-          text.loadFailed,
-          true
-        );
-      }
-
-
-      throw error;
-
-    }finally{
-
-      loading = false;
-    }
-  }
-
-
-  /* =========================================================
-     LOAD OLDER
-  ========================================================= */
-
-  async function loadOlder(){
-
-    const items =
-      [
-        ...messageMap.values()
-      ].sort(
-        (a,b) =>
-          new Date(a.created_at) -
-          new Date(b.created_at)
-      );
-
-
-    const earliest =
-      items[0];
-
-
-    if(!earliest){
-      return;
-    }
-
-
-    olderButton.disabled =
-      true;
-
-
-    try{
-
-      const result =
-        await request(
-          buildListUrl({
-            limit:30,
-            before:
-              earliest.created_at
-          })
-        );
-
-
-      for(
-        const message
-        of result.messages ?? []
-      ){
-
-        messageMap.set(
-          message.id,
-          message
-        );
-      }
-
-
-      hasMore =
-        Boolean(
-          result.has_more
-        );
-
-
       renderMessages();
-
-
-    }catch{
-
-      setStatus(
-        text.loadFailed,
-        true
-      );
-
-    }finally{
-
-      olderButton.disabled =
-        false;
-    }
-  }
-
-
-  /* =========================================================
-     ROOM SELECT
-  ========================================================= */
-
-  async function selectRoom(id){
-
-    if(
-      id === currentRoomId
-    ){
-
-      return;
-    }
-
-
-    stopRealtime();
-
-
-    currentRoomId =
-      id;
-
-    currentSignalTopic =
-      null;
-
-
-    messageMap.clear();
-
-
-    replyTarget =
-      null;
-
-    renderReplyTarget();
-
-
-    /*
-     * FIX:
-     * 기존 코드의 dateFrom/dateTo 제거.
-     * 현재 UI는 searchDate 하나만 사용.
-     */
-    currentSearch = {
-      q:"",
-      date:""
-    };
-
-
-    searchText.value =
-      "";
-
-    searchDate.value =
-      "";
-
-
-    renderRooms();
-
-
-    await loadLatest(
-      true
-    ).catch(
-      () => {}
-    );
-
-
-    startRealtime();
-  }
-
-
-  /* =========================================================
-     REPLY
-  ========================================================= */
-
-  function renderReplyTarget(){
-
-    replying.classList.toggle(
-      "hidden",
-      !replyTarget
-    );
-
-
-    replyingText.textContent =
-      replyTarget
-        ? `${text.replying} · ${replyTarget.author_name}: ${
-            String(
-              replyTarget.body ?? ""
-            )
-              .replace(/\s+/g," ")
-              .slice(0,100)
-          }`
-        : "";
-  }
-
-
-  /* =========================================================
-     FILES
-  ========================================================= */
-
-  function renderFiles(){
-
-    fileList.classList.toggle(
-      "hidden",
-      !selectedFiles.length
-    );
-
-
-    fileList.replaceChildren(
-      ...selectedFiles.map(
-        file => {
-
-          const span =
-            document.createElement("span");
-
-          span.className =
-            "file-chip";
-
-          span.textContent =
-            `${file.name} · ${formatBytes(
-              file.size
-            )}`;
-
-          return span;
-        }
-      )
-    );
-  }
-
-
-  async function uploadFile(
-    messageId,
-    file
-  ){
-
-    const form =
-      new FormData();
-
-    form.append(
-      "message_id",
-      messageId
-    );
-
-    form.append(
-      "file",
-      file,
-      file.name
-    );
-
-
-    return request(
-      API.upload,
-      {
-        method:"POST",
-        body:form
-      }
-    );
-  }
-
-
-  /* =========================================================
-     SEND
-  ========================================================= */
-
-  async function sendMessage(){
-
-    if(
-      sending ||
-      !currentRoomId
-    ){
-
-      return;
-    }
-
-
-    const body =
-      messageInput.value;
-
-
-    if(
-      !body.trim() &&
-      !selectedFiles.length
-    ){
-
-      return;
-    }
-
-
-    sending =
-      true;
-
-    sendButton.disabled =
-      true;
-
-
-    try{
-
-      const result =
-        await request(
-          API.send,
-          {
-            method:"POST",
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-
-              room_id:
-                currentRoomId,
-
-              body,
-
-              reply_to_message_id:
-                replyTarget?.id ??
-                null
-            })
-          }
-        );
-
-
-      const id =
-        result.message?.id;
-
-
-      if(!id){
-
-        throw new Error(
-          "MESSAGE_ID_MISSING"
-        );
-      }
-
-
-      if(selectedFiles.length){
-
-        const uploads =
-          await Promise.allSettled(
-
-            selectedFiles.map(
-              file =>
-                uploadFile(
-                  id,
-                  file
-                )
-            )
-          );
-
-
-        const failedUploads =
-          uploads.filter(
-            result =>
-              result.status ===
-              "rejected"
-          );
-
-
-        if(failedUploads.length){
-
-          setStatus(
-            "Some files failed to upload.",
-            true
-          );
-        }
-      }
-
-
-      messageInput.value =
-        "";
-
-      selectedFiles =
-        [];
-
-      fileInput.value =
-        "";
-
-      replyTarget =
-        null;
-
-
-      renderFiles();
-
       renderReplyTarget();
-
-
-      await loadLatest(
-        true
-      );
-
-
-    }catch{
-
-      setStatus(
-        text.sendFailed,
-        true
-      );
-
-    }finally{
-
-      sending =
-        false;
-
-      sendButton.disabled =
-        false;
     }
-  }
 
+    function setStatus(message="",error=false){
+      statusHost.textContent=message;
+      statusHost.classList.toggle("error",error);
+    }
 
-  /* =========================================================
-     REACTION
-  ========================================================= */
+    async function accessToken(){
+      const adminToken=globalThis.S967AdminAuth?.getToken?.();
+      if(adminToken) return {token:adminToken,kind:"admin"};
+      const {data}=await supabase.auth.getSession();
+      const token=data.session?.access_token;
+      return token?{token,kind:"auth"}:null;
+    }
 
-  async function reactToMessage(
-    messageId,
-    emoji
-  ){
+    async function request(url,options={}){
+      const auth=await accessToken();
+      if(!auth?.token){const e=new Error("UNAUTHORIZED");e.status=401;throw e;}
+      const headers=new Headers(options.headers??{});
+      headers.set("Authorization",`Bearer ${auth.token}`);
+      const response=await fetch(url,{...options,headers});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok){const e=new Error(result.error||`HTTP_${response.status}`);e.status=response.status;throw e;}
+      return result;
+    }
 
-    try{
+    function formatDate(value){
+      try{return new Intl.DateTimeFormat(language==="ko"?"ko-KR":language==="ja"?"ja-JP":language==="ru"?"ru-RU":"en-US",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "";}
+    }
+    function formatBytes(bytes){const n=Number(bytes)||0;if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(1)} MB`;}
+    function nearBottom(){return messagesHost.scrollHeight-messagesHost.scrollTop-messagesHost.clientHeight<120;}
+    function newestMessage(){return [...messageMap.values()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]??null;}
 
-      await request(
-        API.react,
-        {
-          method:"POST",
+    function renderRooms(){
+      if(!roomsHost)return;
+      roomsHost.replaceChildren(...rooms.map(room=>{
+        const b=document.createElement("button");b.type="button";b.className="room-button";b.classList.toggle("active",room.id===currentRoomId);
+        const n=document.createElement("span");n.className="room-name";n.textContent=room.name;
+        b.append(n);
+        if((room.unread_count??0)>0){const badge=document.createElement("span");badge.className="badge";badge.textContent=String(room.unread_count);b.append(badge);}
+        b.onclick=()=>selectRoom(room.id);
+        return b;
+      }));
+    }
 
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
+    async function loadRooms(){
+      const result=await request(`${API.list}?view=rooms`);
+      actor=result.actor;
+      actorLabel.textContent=actor?.name?`${actor.name} · ${actor.kind}`:"";
+      rooms=result.rooms??[];
+      if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)) currentRoomId=rooms[0]?.id??null;
+      renderRooms();
+      return currentRoomId;
+    }
 
-          body:JSON.stringify({
-            message_id:
-              messageId,
+    function buildListUrl({before="",limit=30}={}){
+      const p=new URLSearchParams({room_id:currentRoomId??"",limit:String(limit)});
+      if(before)p.set("before",before);
+      if(currentSearch.q)p.set("q",currentSearch.q);
+      if(currentSearch.dateFrom)p.set("date_from",currentSearch.dateFrom);
+      if(currentSearch.dateTo)p.set("date_to",currentSearch.dateTo);
+      return`${API.list}?${p.toString()}`;
+    }
 
-            emoji
-          })
+    async function openAttachment(a){
+      try{const r=await request(`${API.file}?id=${encodeURIComponent(a.id)}`);if(r.url)window.open(r.url,"_blank","noopener,noreferrer");}catch(e){setStatus(e.message,true);}
+    }
+
+    function renderMessage(message){
+      const article=document.createElement("article");article.className="message";
+      if(message.is_mine)article.classList.add("mine");
+      if(message.author_kind==="admin")article.classList.add("admin");
+
+      const head=document.createElement("div");head.className="message-head";
+      const author=document.createElement("span");author.className="message-author";author.textContent=message.author_name;
+      const time=document.createElement("span");time.className="message-time";time.textContent=formatDate(message.created_at);
+      head.append(author,time);
+
+      if(!message.is_deleted){
+        const reply=document.createElement("button");reply.type="button";reply.className="message-action";reply.textContent=text.reply;reply.onclick=()=>{replyTarget={id:message.id,author_name:message.author_name,body:message.body};renderReplyTarget();messageInput.focus();};
+        head.append(reply);
+
+        if(message.can_report){
+          const report=document.createElement("button");report.type="button";report.className="message-action";report.textContent=text.report;report.onclick=()=>reportMessage(message.id);
+          head.append(report);
         }
-      );
 
-
-      await loadLatest(
-        false
-      );
-
-
-    }catch(error){
-
-      setStatus(
-        error.message,
-        true
-      );
-    }
-  }
-
-
-  /* =========================================================
-     REPORT
-  ========================================================= */
-
-  async function reportMessage(id){
-
-    const reason =
-      prompt(
-        text.reportReason
-      );
-
-
-    if(reason === null){
-      return;
-    }
-
-
-    try{
-
-      await request(
-        API.report,
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            message_id:id,
-            reason
-          })
-        }
-      );
-
-
-      setStatus(
-        text.reportDone
-      );
-
-
-    }catch(error){
-
-      setStatus(
-        error.message,
-        true
-      );
-    }
-  }
-
-
-  /* =========================================================
-     DELETE MESSAGE
-  ========================================================= */
-
-  async function deleteMessage(id){
-
-    if(
-      !confirm(
-        text.deleteConfirm
-      )
-    ){
-
-      return;
-    }
-
-
-    try{
-
-      await request(
-        API.delete,
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            message_id:id
-          })
-        }
-      );
-
-
-      await loadLatest(
-        false
-      );
-
-
-    }catch(error){
-
-      setStatus(
-        error.message,
-        true
-      );
-    }
-  }
-
-
-  /* =========================================================
-     TRANSLATE
-  ========================================================= */
-
-  async function translateMessage(
-    message,
-    button,
-    host
-  ){
-
-    if(button.disabled){
-      return;
-    }
-
-
-    const old =
-      button.textContent;
-
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      text.translating;
-
-
-    try{
-
-      const targetLanguage =
-        [
-          "ko",
-          "en",
-          "ja",
-          "ru"
-        ].includes(language)
-          ? language
-          : "en";
-
-
-      const result =
-        await request(
-          API.translate,
-          {
-            method:"POST",
-
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-
-              message_id:
-                message.id,
-
-              target_language:
-                targetLanguage
-            })
-          }
-        );
-
-
-      host.replaceChildren();
-
-
-      const label =
-        document.createElement("span");
-
-      label.className =
-        "translation-label";
-
-      label.textContent =
-        `${text.translation} · ${
-          targetLanguage.toUpperCase()
-        }`;
-
-
-      const content =
-        document.createElement("span");
-
-      content.textContent =
-        result.translation ?? "";
-
-
-      host.append(
-        label,
-        content
-      );
-
-
-      host.classList.remove(
-        "hidden"
-      );
-
-
-    }catch{
-
-      host.textContent =
-        text.translationFailed;
-
-      host.classList.remove(
-        "hidden"
-      );
-
-    }finally{
-
-      button.disabled =
-        false;
-
-      button.textContent =
-        old;
-    }
-  }
-
-
-  /* =========================================================
-     READ
-  ========================================================= */
-
-  async function markRead(){
-
-    if(
-      !currentRoomId ||
-      document.hidden ||
-      !nearBottom()
-    ){
-
-      return;
-    }
-
-
-    try{
-
-      await request(
-        API.read,
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            room_id:
-              currentRoomId
-          })
-        }
-      );
-
-
-      await loadRooms();
-
-    }catch{
-
-      /* intentionally ignored */
-    }
-  }
-
-
-  /* =========================================================
-     NOTIFICATIONS
-  ========================================================= */
-
-  function maybeNotify(
-    items,
-    previousNewestId
-  ){
-
-    if(
-      document.visibilityState !==
-        "hidden" ||
-      !("Notification" in window) ||
-      Notification.permission !==
-        "granted"
-    ){
-
-      return;
-    }
-
-
-    const fresh =
-      items
-        .filter(
-          message =>
-            !message.is_mine &&
-            message.id !==
-              previousNewestId
-        )
-        .sort(
-          (a,b) =>
-            new Date(b.created_at) -
-            new Date(a.created_at)
-        )[0];
-
-
-    if(!fresh){
-      return;
-    }
-
-
-    new Notification(
-
-      rooms.find(
-        room =>
-          room.id ===
-          currentRoomId
-      )?.name ??
-      text.title,
-
-      {
-        body:
-          language === "ko"
-            ? "새 채팅 메시지가 있습니다."
-            : language === "ja"
-              ? "新しいチャットメッセージがあります。"
-              : language === "ru"
-                ? "Есть новое сообщение в чате."
-                : "You have a new chat message.",
-
-        tag:
-          `staff-chat-${currentRoomId}`,
-
-        renotify:true
-      }
-    );
-  }
-
-
-  /* =========================================================
-     REALTIME
-  ========================================================= */
-
-  function scheduleRefresh(){
-
-    clearTimeout(
-      refreshTimer
-    );
-
-
-    refreshTimer =
-      setTimeout(
-        () => {
-
-          loadLatest(
-            false,
-            true
-          )
-            .then(
-              loadRooms
-            )
-            .catch(
-              () => {}
-            );
-
-        },
-        120
-      );
-  }
-
-
-  function startRealtime(){
-
-    stopRealtime();
-
-
-    if(!currentRoomId){
-      return;
-    }
-
-
-    if(!currentSignalTopic){
-      return;
-    }
-
-
-    realtimeChannel =
-      supabase.channel(
-        currentSignalTopic,
-        {
-          config:{
-            private:false
-          }
-        }
-      )
-      .on(
-        "broadcast",
-        {
-          event:"changed"
-        },
-        scheduleRefresh
-      )
-      .subscribe();
-  }
-
-
-  function stopRealtime(){
-
-    if(refreshTimer){
-
-      clearTimeout(
-        refreshTimer
-      );
-
-      refreshTimer =
-        null;
-    }
-
-
-    if(realtimeChannel){
-
-      supabase.removeChannel(
-        realtimeChannel
-      );
-
-      realtimeChannel =
-        null;
-    }
-  }
-
-
-  /* =========================================================
-     FALLBACK POLLING
-  ========================================================= */
-
-  function startFallback(){
-
-    stopFallback();
-
-
-    fallbackTimer =
-      setInterval(
-        () => {
-
-          if(
-            !document.hidden
-          ){
-
-            loadLatest(
-              false
-            )
-              .then(
-                loadRooms
-              )
-              .catch(
-                () => {}
-              );
-          }
-
-        },
-        FALLBACK_POLL_MS
-      );
-  }
-
-
-  function stopFallback(){
-
-    if(fallbackTimer){
-
-      clearInterval(
-        fallbackTimer
-      );
-
-      fallbackTimer =
-        null;
-    }
-  }
-
-
-  /* =========================================================
-     GATE
-  ========================================================= */
-
-  function showGate(message){
-
-    stopRealtime();
-
-    stopFallback();
-
-
-    app.classList.add(
-      "hidden"
-    );
-
-    gate.classList.remove(
-      "hidden"
-    );
-
-
-    gateMessage.textContent =
-      message;
-
-    chatLogin.classList.remove(
-      "hidden"
-    );
-  }
-
-
-  /* =========================================================
-     CREATE ROOM
-  ========================================================= */
-
-  async function createRoom(){
-
-    const name =
-      newRoomName.value.trim();
-
-
-    if(!name){
-      return;
-    }
-
-
-    confirmCreateRoomButton.disabled =
-      true;
-
-
-    createRoomStatus.textContent =
-      "";
-
-    createRoomStatus.classList.remove(
-      "error"
-    );
-
-
-    try{
-
-      const result =
-        await request(
-          API.roomUser,
-          {
-            method:"POST",
-
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-              action:
-                "create_room",
-
-              name
-            })
-          }
-        );
-
-
-      createRoomDialog.close();
-
-      newRoomName.value =
-        "";
-
-
-      await loadRooms();
-
-
-      if(result.room?.id){
-
-        await selectRoom(
-          result.room.id
-        );
+        if(message.can_delete){const del=document.createElement("button");del.type="button";del.className="message-action";del.textContent=text.delete;del.onclick=()=>deleteMessage(message.id);head.append(del);}
       }
 
+      article.append(head);
 
-    }catch(error){
+      if(message.reply_to){const rp=document.createElement("div");rp.className="reply-preview";if(message.reply_to.deleted){rp.textContent=text.deletedReply;}else{const strong=document.createElement("strong");strong.textContent=message.reply_to.author_name;const sn=document.createElement("div");sn.className="snippet";sn.textContent=message.reply_to.body;rp.append(strong,sn);}article.append(rp);}
 
-      createRoomStatus.textContent =
-        error.message;
+      if(message.is_deleted){
+        const body=document.createElement("div");
+        body.className="message-body";
+        body.textContent=text.deletedMessage;
+        article.append(body);
+      }else if(message.body){
+        const body=document.createElement("div");body.className="message-body";body.textContent=message.body;article.append(body);
+      }
 
-      createRoomStatus.classList.add(
-        "error"
-      );
+      if(!message.is_deleted&&message.attachments?.length){const host=document.createElement("div");host.className="attachments";for(const a of message.attachments){if(String(a.mime_type??"").startsWith("image/")&&a.signed_url){const img=document.createElement("img");img.className="image-preview";img.src=a.signed_url;img.alt=a.original_name;img.loading="lazy";img.onclick=()=>openAttachment(a);host.append(img);}const link=document.createElement("a");link.className="attachment";link.href="#";const name=document.createElement("span");name.className="attachment-name";name.textContent=a.original_name;const size=document.createElement("span");size.className="attachment-size";size.textContent=formatBytes(a.size_bytes);link.append(name,size);link.onclick=e=>{e.preventDefault();openAttachment(a);};host.append(link);}article.append(host);}
 
-    }finally{
+      if(!message.is_deleted&&String(message.body??"").trim()){const tr=document.createElement("button");tr.type="button";tr.className="translate-button";tr.textContent=`🌐 ${text.translate}`;const th=document.createElement("div");th.className="translation hidden";tr.onclick=()=>translateMessage(message,tr,th);article.append(tr,th);}
 
-      confirmCreateRoomButton.disabled =
-        false;
+      if(!message.is_deleted){
+      const reactions=document.createElement("div");reactions.className="reactions";
+      const reactionData=message.reactions??{counts:{},my_reaction:null};
+      for(const emoji of REACTIONS){const count=Number(reactionData.counts?.[emoji]??0);if(!count)continue;const b=document.createElement("button");b.type="button";b.className="reaction-chip";if(reactionData.my_reaction===emoji)b.classList.add("mine");b.textContent=`${emoji} ${count}`;b.onclick=()=>reactToMessage(message.id,emoji);reactions.append(b);}
+      const add=document.createElement("button");add.type="button";add.className="reaction-add";add.textContent="☺+";add.title="Reaction";
+      const picker=document.createElement("div");picker.className="reaction-picker hidden";for(const emoji of REACTIONS){const b=document.createElement("button");b.type="button";b.textContent=emoji;b.onclick=()=>reactToMessage(message.id,emoji);picker.append(b);}
+      add.onclick=()=>picker.classList.toggle("hidden");reactions.append(add);article.append(reactions,picker);
+      }
+
+      const foot=document.createElement("div");foot.className="message-foot";
+      if((message.unread_count??0)>0){const u=document.createElement("span");u.className="unread-number";u.textContent=String(message.unread_count);u.title="Unread people";foot.append(u);}
+      article.append(foot);
+      return article;
     }
-  }
+
+    function renderMessages(){
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      if(!items.length){const empty=document.createElement("div");empty.className="empty";empty.textContent=text.empty;messagesHost.replaceChildren(empty);olderButton.classList.add("hidden");return;}
+      messagesHost.replaceChildren(...items.map(renderMessage));
+      olderButton.classList.toggle("hidden",!hasMore);
+    }
 
 
-  /* =========================================================
-     MEMBER ROW
-  ========================================================= */
+    function selectedRoom(){
+      return rooms.find(room=>room.id===currentRoomId)??null;
+    }
 
-  function renderMemberRow(
-    member,
-    details
-  ){
+    async function createRoom(){
+      const name=newRoomName.value.trim();
+      if(!name)return;
+      confirmCreateRoomButton.disabled=true;
+      createRoomStatus.textContent="";
+      createRoomStatus.classList.remove("error");
+      try{
+        const result=await request(API.roomUser,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"create_room",name})
+        });
+        createRoomDialog.close();
+        newRoomName.value="";
+        await loadRooms();
+        if(result.room?.id)await selectRoom(result.room.id);
+      }catch(error){
+        createRoomStatus.textContent=error.message;
+        createRoomStatus.classList.add("error");
+      }finally{
+        confirmCreateRoomButton.disabled=false;
+      }
+    }
 
-    const row =
-      document.createElement("div");
+    function renderMemberRow(member,details){
+      const row=document.createElement("div");
+      row.className="member-row";
+      const name=document.createElement("span");
+      name.className="member-name";
+      name.textContent=member.display_name;
+      const kind=document.createElement("span");
+      kind.className="member-kind";
+      kind.textContent=member.automatic?"Staff · Auto":member.kind;
+      row.append(name,kind);
 
-    row.className =
-      "member-row";
-
-
-    const name =
-      document.createElement("span");
-
-    name.className =
-      "member-name";
-
-    name.textContent =
-      member.display_name;
-
-
-    const kind =
-      document.createElement("span");
-
-    kind.className =
-      "member-kind";
-
-    kind.textContent =
-      member.automatic
-        ? "Staff · Auto"
-        : member.kind;
-
-
-    row.append(
-      name,
-      kind
-    );
-
-
-    if(
-      details.room?.is_owner &&
-      details.room?.room_kind === "private" &&
-      !member.is_owner
-    ){
-
-      const remove =
-        document.createElement("button");
-
-      remove.type =
-        "button";
-
-      remove.textContent =
-        "−";
-
-      remove.title =
-        "Remove";
-
-
-      remove.onclick =
-        async () => {
-
+      if(details.room?.is_owner&&details.room?.room_kind==="private"&&!member.is_owner){
+        const remove=document.createElement("button");
+        remove.type="button";
+        remove.textContent="−";
+        remove.title="Remove";
+        remove.onclick=async()=>{
           try{
-
-            await request(
-              API.roomUser,
-              {
-                method:"POST",
-
-                headers:{
-                  "Content-Type":
-                    "application/json"
-                },
-
-                body:JSON.stringify({
-
-                  action:
-                    "remove_member",
-
-                  room_id:
-                    currentRoomId,
-
-                  user_id:
-                    member.user_id
-                })
-              }
-            );
-
-
+            await request(API.roomUser,{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({action:"remove_member",room_id:currentRoomId,user_id:member.user_id})
+            });
             await openRoomMembers();
-
             await loadRooms();
-
-
           }catch(error){
-
-            roomManageStatus.textContent =
-              error.message;
-
-            roomManageStatus.classList.add(
-              "error"
-            );
+            roomManageStatus.textContent=error.message;
+            roomManageStatus.classList.add("error");
           }
         };
-
-
-      row.append(remove);
-    }
-
-
-    return row;
-  }
-
-
-  /* =========================================================
-     ROOM MEMBERS
-  ========================================================= */
-
-  async function openRoomMembers(){
-
-    if(!currentRoomId){
-      return;
-    }
-
-
-    roomManageStatus.textContent =
-      "";
-
-    roomManageStatus.classList.remove(
-      "error"
-    );
-
-
-    try{
-
-      const details =
-        await request(
-          `${API.roomUser}?room_id=${encodeURIComponent(
-            currentRoomId
-          )}`
-        );
-
-
-      roomMembersTitle.textContent =
-        `${text.members} · ${
-          details.room?.name ?? ""
-        }`;
-
-
-      roomMembersNote.textContent =
-        details.room?.room_kind ===
-          "staff_official"
-          ? text.officialRoom
-          : "";
-
-
-      roomMemberList.replaceChildren(
-        ...(details.members ?? [])
-          .map(
-            member =>
-              renderMemberRow(
-                member,
-                details
-              )
-          )
-      );
-
-
-      const memberIds =
-        new Set(
-          (details.members ?? [])
-            .map(
-              member =>
-                member.user_id
-            )
-        );
-
-
-      const available =
-        (details.directory ?? [])
-          .filter(
-            account =>
-              !memberIds.has(
-                account.user_id
-              )
-          );
-
-
-      inviteSection.classList.toggle(
-        "hidden",
-        !details.room?.can_invite
-      );
-
-
-      inviteList.replaceChildren(
-        ...available.map(
-          account => {
-
-            const row =
-              document.createElement(
-                "div"
-              );
-
-            row.className =
-              "member-row";
-
-
-            const name =
-              document.createElement(
-                "span"
-              );
-
-            name.className =
-              "member-name";
-
-            name.textContent =
-              account.display_name;
-
-
-            const kind =
-              document.createElement(
-                "span"
-              );
-
-            kind.className =
-              "member-kind";
-
-            kind.textContent =
-              account.kind;
-
-
-            const add =
-              document.createElement(
-                "button"
-              );
-
-            add.type =
-              "button";
-
-            add.textContent =
-              "+";
-
-
-            add.onclick =
-              async () => {
-
-                add.disabled =
-                  true;
-
-
-                try{
-
-                  await request(
-                    API.roomUser,
-                    {
-                      method:"POST",
-
-                      headers:{
-                        "Content-Type":
-                          "application/json"
-                      },
-
-                      body:JSON.stringify({
-
-                        action:
-                          "add_member",
-
-                        room_id:
-                          currentRoomId,
-
-                        user_id:
-                          account.user_id
-                      })
-                    }
-                  );
-
-
-                  await openRoomMembers();
-
-                  await loadRooms();
-
-
-                }catch(error){
-
-                  roomManageStatus.textContent =
-                    error.message;
-
-                  roomManageStatus.classList.add(
-                    "error"
-                  );
-
-                }finally{
-
-                  add.disabled =
-                    false;
-                }
-              };
-
-
-            row.append(
-              name,
-              kind,
-              add
-            );
-
-
-            return row;
-          }
-        )
-      );
-
-
-      if(
-        !available.length &&
-        details.room?.can_invite
-      ){
-
-        const empty =
-          document.createElement(
-            "div"
-          );
-
-        empty.className =
-          "room-note";
-
-        empty.textContent =
-          "—";
-
-        inviteList.replaceChildren(
-          empty
-        );
+        row.append(remove);
       }
-
-
-      deleteRoomButton.classList.toggle(
-        "hidden",
-        !details.room?.can_delete
-      );
-
-
-      if(
-        !roomMembersDialog.open
-      ){
-
-        roomMembersDialog.showModal();
-      }
-
-
-    }catch(error){
-
-      setStatus(
-        error.message,
-        true
-      );
-    }
-  }
-
-
-  /* =========================================================
-     DELETE ROOM
-  ========================================================= */
-
-  async function deleteCurrentRoom(){
-
-    if(
-      !currentRoomId ||
-      !confirm(
-        text.deleteRoomConfirm
-      )
-    ){
-
-      return;
+      return row;
     }
 
+    async function openRoomMembers(){
+      if(!currentRoomId)return;
+      roomManageStatus.textContent="";
+      roomManageStatus.classList.remove("error");
 
-    deleteRoomButton.disabled =
-      true;
+      try{
+        const details=await request(`${API.roomUser}?room_id=${encodeURIComponent(currentRoomId)}`);
+        roomMembersTitle.textContent=`${text.members} · ${details.room?.name??""}`;
+        roomMembersNote.textContent=details.room?.room_kind==="staff_official"?text.officialRoom:"";
 
+        roomMemberList.replaceChildren(...(details.members??[]).map(member=>renderMemberRow(member,details)));
 
-    try{
+        const memberIds=new Set((details.members??[]).map(member=>member.user_id));
+        const available=(details.directory??[]).filter(account=>!memberIds.has(account.user_id));
 
-      await request(
-        API.roomUser,
-        {
-          method:"POST",
+        inviteSection.classList.toggle("hidden",!details.room?.can_invite);
+        inviteList.replaceChildren(...available.map(account=>{
+          const row=document.createElement("div");
+          row.className="member-row";
+          const name=document.createElement("span");
+          name.className="member-name";
+          name.textContent=account.display_name;
+          const kind=document.createElement("span");
+          kind.className="member-kind";
+          kind.textContent=account.kind;
+          const add=document.createElement("button");
+          add.type="button";
+          add.textContent="+";
+          add.onclick=async()=>{
+            add.disabled=true;
+            try{
+              await request(API.roomUser,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({action:"add_member",room_id:currentRoomId,user_id:account.user_id})
+              });
+              await openRoomMembers();
+              await loadRooms();
+            }catch(error){
+              roomManageStatus.textContent=error.message;
+              roomManageStatus.classList.add("error");
+            }finally{
+              add.disabled=false;
+            }
+          };
+          row.append(name,kind,add);
+          return row;
+        }));
 
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-
-            action:
-              "delete_room",
-
-            room_id:
-              currentRoomId
-          })
+        if(!available.length&&details.room?.can_invite){
+          const empty=document.createElement("div");
+          empty.className="room-note";
+          empty.textContent="—";
+          inviteList.replaceChildren(empty);
         }
-      );
 
-
-      roomMembersDialog.close();
-
-      stopRealtime();
-
-
-      currentRoomId =
-        null;
-
-
-      messageMap.clear();
-
-
-      await loadRooms();
-
-
-      if(currentRoomId){
-
-        await loadLatest(
-          true
-        );
-
-        startRealtime();
-
-      }else{
-
-        renderMessages();
+        deleteRoomButton.classList.toggle("hidden",!details.room?.can_delete);
+        if(!roomMembersDialog.open)roomMembersDialog.showModal();
+      }catch(error){
+        setStatus(error.message,true);
       }
-
-
-    }catch(error){
-
-      roomManageStatus.textContent =
-        error.message;
-
-      roomManageStatus.classList.add(
-        "error"
-      );
-
-    }finally{
-
-      deleteRoomButton.disabled =
-        false;
-    }
-  }
-
-
-  /* =========================================================
-     BOOTSTRAP
-  ========================================================= */
-
-  async function bootstrap(){
-
-    setText();
-
-
-    try{
-
-      await loadRooms();
-
-
-      if(!currentRoomId){
-
-        throw Object.assign(
-          new Error("NO_ROOM"),
-          {
-            status:403
-          }
-        );
-      }
-
-
-      await loadLatest(
-        true
-      );
-
-
-      startRealtime();
-
-      startFallback();
-
-
-    }catch(error){
-
-      showGate(
-        error.status === 401 ||
-        error.status === 403
-          ? text.denied
-          : text.denied
-      );
-    }
-  }
-
-
-  /* =========================================================
-     CHAT LOGIN
-  ========================================================= */
-
-  async function doChatLogin(){
-
-    const id =
-      chatId.value.trim();
-
-    const password =
-      chatPassword.value;
-
-
-    if(
-      !id ||
-      !password
-    ){
-
-      return;
     }
 
-
-    chatLoginButton.disabled =
-      true;
-
-
-    try{
-
-      const email =
-        `chat-${id.toLowerCase()}@s967.org`;
-
-
-      const {
-        error
-      } =
-        await supabase.auth.signInWithPassword({
-
-          email,
-
-          password
+    async function deleteCurrentRoom(){
+      if(!currentRoomId||!confirm(text.deleteRoomConfirm))return;
+      deleteRoomButton.disabled=true;
+      try{
+        await request(API.roomUser,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"delete_room",room_id:currentRoomId})
         });
-
-
-      if(error){
-        throw error;
+        roomMembersDialog.close();
+        stopRealtime();
+        currentRoomId=null;
+        messageMap.clear();
+        await loadRooms();
+        if(currentRoomId){
+          await loadLatest(true);
+          startRealtime();
+        }else{
+          renderMessages();
+        }
+      }catch(error){
+        roomManageStatus.textContent=error.message;
+        roomManageStatus.classList.add("error");
+      }finally{
+        deleteRoomButton.disabled=false;
       }
-
-
-      gate.classList.add(
-        "hidden"
-      );
-
-
-      await bootstrap();
-
-
-    }catch{
-
-      gateMessage.textContent =
-        text.denied;
-
-    }finally{
-
-      chatLoginButton.disabled =
-        false;
     }
-  }
 
+    async function translateMessage(message,button,host){
+      if(button.disabled)return;const old=button.textContent;button.disabled=true;button.textContent=text.translating;
+      try{const r=await request(API.translate,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:message.id,target_language:["ko","en","ja","ru"].includes(language)?language:"en"})});host.replaceChildren();const lab=document.createElement("span");lab.className="translation-label";lab.textContent=`${text.translation} · ${(["ko","en","ja","ru"].includes(language)?language:"en").toUpperCase()}`;const c=document.createElement("span");c.textContent=r.translation??"";host.append(lab,c);host.classList.remove("hidden");}catch{host.textContent=text.translationFailed;host.classList.remove("hidden");}finally{button.disabled=false;button.textContent=old;}
+    }
 
-  /* =========================================================
-     EVENTS
-  ========================================================= */
+    async function markRead(){
+      if(!currentRoomId||document.hidden||!nearBottom())return;
+      try{await request(API.read,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId})});await loadRooms();}catch{}
+    }
 
-  chatLoginButton.onclick =
-    doChatLogin;
+    function maybeNotify(items,previousNewestId){
+      if(document.visibilityState!=="hidden"||Notification.permission!=="granted")return;
+      const fresh=items.filter(m=>!m.is_mine&&m.id!==previousNewestId).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+      if(!fresh)return;
+      new Notification(rooms.find(r=>r.id===currentRoomId)?.name??text.title,{body:language==="ko"?"새 채팅 메시지가 있습니다.":language==="ja"?"新しいチャットメッセージがあります。":language==="ru"?"Есть новое сообщение в чате.":"You have a new chat message.",tag:`staff-chat-${currentRoomId}`,renotify:true});
+    }
 
+    async function loadLatest(forceScroll=false,notify=false){
+      if(loading||!currentRoomId)return;loading=true;const shouldScroll=forceScroll||nearBottom();const previous=newestMessage()?.id??notificationBaseline;
+      try{const r=await request(buildListUrl({limit:30}));actor=r.actor;currentSignalTopic=r.signal_topic??null;chatTitle.textContent=r.room?.name??text.title;for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();if(shouldScroll)messagesHost.scrollTop=messagesHost.scrollHeight;if(notify)maybeNotify(r.messages??[],previous);notificationBaseline=newestMessage()?.id??notificationBaseline;gate.classList.add("hidden");app.classList.remove("hidden");renderRooms();if(shouldScroll)await markRead();}catch(e){if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);throw e;}finally{loading=false;}
+    }
 
-  chatPassword.addEventListener(
-    "keydown",
-    event => {
+    async function loadOlder(){
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const earliest=items[0];if(!earliest)return;olderButton.disabled=true;
+      try{const r=await request(buildListUrl({limit:30,before:earliest.created_at}));for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();}catch{setStatus(text.loadFailed,true);}finally{olderButton.disabled=false;}
+    }
+
+    async function selectRoom(id){
+      if(id===currentRoomId)return;stopRealtime();currentRoomId=id;currentSignalTopic=null;messageMap.clear();replyTarget=null;renderReplyTarget();currentSearch={q:"",dateFrom:"",dateTo:""};searchText.value="";dateFrom.value="";dateTo.value="";renderRooms();await loadLatest(true).catch(()=>{});startRealtime();
+    }
+
+    function renderReplyTarget(){
+      replying.classList.toggle("hidden",!replyTarget);
+      replyingText.textContent=replyTarget?`${text.replying} · ${replyTarget.author_name}: ${String(replyTarget.body??"").replace(/\s+/g," ").slice(0,100)}`:"";
+    }
+
+    function renderFiles(){
+      fileList.classList.toggle("hidden",!selectedFiles.length);fileList.replaceChildren(...selectedFiles.map(f=>{const s=document.createElement("span");s.className="file-chip";s.textContent=`${f.name} · ${formatBytes(f.size)}`;return s;}));
+    }
+
+    async function uploadFile(messageId,file){const form=new FormData();form.append("message_id",messageId);form.append("file",file,file.name);return request(API.upload,{method:"POST",body:form});}
+
+    async function sendMessage(){
+      if(sending||!currentRoomId)return;const body=messageInput.value;if(!body.trim()&&!selectedFiles.length)return;sending=true;sendButton.disabled=true;
+      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
+    }
+
+    async function reactToMessage(messageId,emoji){
+      try{
+        await request(API.react,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:messageId,emoji})});
+        await loadLatest(false);
+      }catch(e){setStatus(e.message,true);}
+    }
+
+    async function reportMessage(id){
+      const reason=prompt(text.reportReason)??null;
+      if(reason===null)return;
+
+      try{
+        await request(API.report,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({message_id:id,reason})
+        });
+        setStatus(text.reportDone);
+      }catch(error){
+        setStatus(error.message,true);
+      }
+    }
+
+    async function deleteMessage(id){
+      if(!confirm(text.deleteConfirm))return;
+      try{await request(API.delete,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:id})});await loadLatest(false);}catch(e){setStatus(e.message,true);}
+    }
+
+    function scheduleRefresh(){
+      clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadLatest(false,true).then(loadRooms).catch(()=>{}),120);
+    }
+
+    function startRealtime(){
+      stopRealtime();if(!currentRoomId)return;
+      if(!currentSignalTopic)return;realtimeChannel=supabase.channel(currentSignalTopic,{config:{private:false}}).on("broadcast",{event:"changed"},scheduleRefresh).subscribe();
+    }
+    function stopRealtime(){if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null;}if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}}
+    function startFallback(){stopFallback();fallbackTimer=setInterval(()=>{if(!document.hidden)loadLatest(false).then(loadRooms).catch(()=>{});},FALLBACK_POLL_MS);}
+    function stopFallback(){if(fallbackTimer){clearInterval(fallbackTimer);fallbackTimer=null;}}
+
+    function showGate(message){stopRealtime();stopFallback();app.classList.add("hidden");gate.classList.remove("hidden");gateMessage.textContent=message;chatLogin.classList.remove("hidden");}
+
+    async function bootstrap(){
+      setText();
+      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(true);startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
+    }
+
+    function chatLoginErrorMessage(error){
+      const code=String(error?.code??"");
+      const message=String(error?.message??"");
 
       if(
-        event.key === "Enter"
+        code==="invalid_credentials" ||
+        /invalid login credentials/i.test(message)
       ){
-
-        event.preventDefault();
-
-        doChatLogin();
+        return language==="ko"
+          ? "로그인 정보가 틀렸습니다. 아이디와 비밀번호를 확인하세요."
+          : language==="ja"
+            ? "ログイン情報が正しくありません。IDとパスワードを確認してください。"
+            : language==="ru"
+              ? "Неверные данные для входа. Проверьте ID и пароль."
+              : "Incorrect login information. Check your ID and password.";
       }
-    }
-  );
-
-
-  createRoomButton.onclick =
-    () => {
-
-      createRoomStatus.textContent =
-        "";
-
-      createRoomStatus.classList.remove(
-        "error"
-      );
-
-      newRoomName.value =
-        "";
-
-      createRoomDialog.showModal();
-
-      newRoomName.focus();
-    };
-
-
-  cancelCreateRoomButton.onclick =
-    () =>
-      createRoomDialog.close();
-
-
-  confirmCreateRoomButton.onclick =
-    createRoom;
-
-
-  newRoomName.addEventListener(
-    "keydown",
-    event => {
 
       if(
-        event.key === "Enter" &&
-        !event.isComposing
+        code==="email_not_confirmed" ||
+        /email not confirmed/i.test(message)
       ){
-
-        event.preventDefault();
-
-        createRoom();
+        return language==="ko"
+          ? "계정 인증이 완료되지 않았습니다. 관리자에게 문의하세요."
+          : language==="ja"
+            ? "アカウント認証が完了していません。管理者にお問い合わせください。"
+            : language==="ru"
+              ? "Учётная запись не подтверждена. Обратитесь к администратору."
+              : "The account is not confirmed. Contact the administrator.";
       }
-    }
-  );
-
-
-  roomMembersButton.onclick =
-    openRoomMembers;
-
-
-  closeRoomMembersButton.onclick =
-    () =>
-      roomMembersDialog.close();
-
-
-  deleteRoomButton.onclick =
-    deleteCurrentRoom;
-
-
-  backButton.addEventListener(
-    "click",
-    event => {
-
-      event.preventDefault();
-
-
-      if(history.length > 1){
-
-        history.back();
-
-      }else{
-
-        location.href = "/";
-      }
-    }
-  );
-
-
-  roomRefreshButton.onclick =
-    () =>
-      loadRooms()
-        .catch(
-          () => {}
-        );
-
-
-  refreshButton.onclick =
-    () =>
-      loadLatest(false)
-        .then(loadRooms)
-        .catch(
-          () => {}
-        );
-
-
-  notifyButton.onclick =
-    async () => {
 
       if(
-        !("Notification" in window)
+        code==="user_banned" ||
+        /banned/i.test(message)
       ){
+        return language==="ko"
+          ? "비활성화되었거나 이용이 정지된 계정입니다."
+          : language==="ja"
+            ? "無効化または停止されたアカウントです。"
+            : language==="ru"
+              ? "Учётная запись отключена или заблокирована."
+              : "This account is disabled or suspended.";
+      }
 
+      return language==="ko"
+        ? `로그인에 실패했습니다.${message?` (${message})`:""}`
+        : language==="ja"
+          ? `ログインに失敗しました。${message?` (${message})`:""}`
+          : language==="ru"
+            ? `Не удалось войти.${message?` (${message})`:""}`
+            : `Login failed.${message?` (${message})`:""}`;
+    }
+
+    async function doChatLogin(){
+      const id=chatId.value.trim();
+      const password=chatPassword.value;
+
+      if(!id||!password){
+        gateMessage.textContent=
+          language==="ko"
+            ? "아이디와 비밀번호를 입력하세요."
+            : language==="ja"
+              ? "IDとパスワードを入力してください。"
+              : language==="ru"
+                ? "Введите ID и пароль."
+                : "Enter your ID and password.";
         return;
       }
 
+      chatLoginButton.disabled=true;
+      gateMessage.textContent=text.checking;
 
-      const permission =
-        await Notification.requestPermission();
-
-
-      if(
-        permission !== "granted"
-      ){
-
-        setStatus(
-          text.notificationDenied,
-          true
-        );
-      }
-    };
-
-
-  /* =========================================================
-     SEARCH
-  ========================================================= */
-
-  searchButton.onclick =
-    async () => {
-
-      currentSearch = {
-
-        q:
-          searchText.value.trim(),
-
-        date:
-          searchDate.value
-      };
-
-
-      messageMap.clear();
-
-
-      await loadLatest(
-        true
-      ).catch(
-        () => {}
-      );
-    };
-
-
-  clearSearchButton.onclick =
-    async () => {
-
-      searchText.value =
-        "";
-
-      searchDate.value =
-        "";
-
-
-      currentSearch = {
-        q:"",
-        date:""
-      };
-
-
-      messageMap.clear();
-
-
-      await loadLatest(
-        true
-      ).catch(
-        () => {}
-      );
-    };
-
-
-  searchText.addEventListener(
-    "keydown",
-    event => {
-
-      if(
-        event.key === "Enter" &&
-        !event.isComposing
-      ){
-
-        event.preventDefault();
-
-        searchButton.click();
-      }
-    }
-  );
-
-
-  searchDate.onchange =
-    () =>
-      searchButton.click();
-
-
-  olderButton.onclick =
-    loadOlder;
-
-
-  /* =========================================================
-     REPLY
-  ========================================================= */
-
-  cancelReplyButton.onclick =
-    () => {
-
-      replyTarget =
-        null;
-
-      renderReplyTarget();
-    };
-
-
-  /* =========================================================
-     FILE INPUT
-  ========================================================= */
-
-  fileButton.onclick =
-    () =>
-      fileInput.click();
-
-
-  fileInput.onchange =
-    () => {
-
-      const files =
-        [
-          ...(fileInput.files ?? [])
+      try{
+        /*
+          New Chat-only accounts use chat-<id>@s967.org.
+          Accounts converted from Staff to Chat-only intentionally keep
+          their existing <id>@s967.org Supabase Auth email, so try that
+          legacy/current-permission path only if the normal Chat login fails.
+        */
+        const normalized=id.toLowerCase();
+        const candidates=[
+          `chat-${normalized}@s967.org`,
+          `${normalized}@s967.org`
         ];
 
+        let lastError=null;
+        let signedIn=false;
 
-      if(
-        files.length > MAX_FILES
-      ){
+        for(const email of candidates){
+          const {error}=await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
 
-        setStatus(
-          text.tooManyFiles,
-          true
-        );
+          if(!error){
+            signedIn=true;
+            break;
+          }
 
-        fileInput.value =
-          "";
+          lastError=error;
 
-        return;
-      }
+          /*
+            Only fall back to the alternate Auth email when credentials
+            were rejected. Other errors should be shown immediately.
+          */
+          const code=String(error?.code??"");
+          const message=String(error?.message??"");
 
+          if(
+            code!=="invalid_credentials" &&
+            !/invalid login credentials/i.test(message)
+          ){
+            break;
+          }
+        }
 
-      if(
-        files.some(
-          file =>
-            file.size >
-            MAX_FILE_BYTES
-        )
-      ){
+        if(!signedIn){
+          throw lastError??new Error("LOGIN_FAILED");
+        }
 
-        setStatus(
-          text.fileTooLarge,
-          true
-        );
-
-        fileInput.value =
-          "";
-
-        return;
-      }
-
-
-      selectedFiles =
-        files;
-
-
-      setStatus("");
-
-      renderFiles();
-    };
-
-
-  /* =========================================================
-     SEND
-  ========================================================= */
-
-  sendButton.onclick =
-    sendMessage;
-
-
-  messageInput.addEventListener(
-    "input",
-    () => {
-
-      messageInput.style.height =
-        "auto";
-
-
-      messageInput.style.height =
-        `${Math.min(
-          150,
-          messageInput.scrollHeight
-        )}px`;
-    }
-  );
-
-
-  messageInput.addEventListener(
-    "keydown",
-    event => {
-
-      if(
-        event.key === "Enter" &&
-        !event.shiftKey &&
-        !event.isComposing
-      ){
-
-        event.preventDefault();
-
-        sendMessage();
+        gate.classList.add("hidden");
+        await bootstrap();
+      }catch(error){
+        console.error("Chat login failed:",error);
+        gateMessage.textContent=
+          chatLoginErrorMessage(error);
+        chatPassword.focus();
+        chatPassword.select();
+      }finally{
+        chatLoginButton.disabled=false;
       }
     }
-  );
 
+    chatLoginButton.onclick=doChatLogin;
+    chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
+    createRoomButton.onclick=()=>{createRoomStatus.textContent="";createRoomStatus.classList.remove("error");newRoomName.value="";createRoomDialog.showModal();newRoomName.focus();};
+    cancelCreateRoomButton.onclick=()=>createRoomDialog.close();
+    confirmCreateRoomButton.onclick=createRoom;
+    newRoomName.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();createRoom();}});
+    roomMembersButton.onclick=openRoomMembers;
+    closeRoomMembersButton.onclick=()=>roomMembersDialog.close();
+    deleteRoomButton.onclick=deleteCurrentRoom;
+    backButton.addEventListener("click",event=>{event.preventDefault();if(history.length>1){history.back();}else{location.href="/";}});
+    roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
+    refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
+    notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
+    searchButton.onclick=async()=>{currentSearch={q:searchText.value.trim(),dateFrom:dateFrom.value,dateTo:dateTo.value};messageMap.clear();await loadLatest(true).catch(()=>{});};
+    clearSearchButton.onclick=async()=>{searchText.value="";dateFrom.value="";dateTo.value="";currentSearch={q:"",dateFrom:"",dateTo:""};messageMap.clear();await loadLatest(true).catch(()=>{});};
+    searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
+    dateFrom.onchange=()=>searchButton.click();
+    dateTo.onchange=()=>searchButton.click();
+    olderButton.onclick=loadOlder;
+    cancelReplyButton.onclick=()=>{replyTarget=null;renderReplyTarget();};
+    fileButton.onclick=()=>fileInput.click();
+    fileInput.onchange=()=>{const files=[...(fileInput.files??[])];if(files.length>MAX_FILES){setStatus(text.tooManyFiles,true);return;}if(files.some(f=>f.size>MAX_FILE_BYTES)){setStatus(text.fileTooLarge,true);return;}selectedFiles=files;setStatus("");renderFiles();};
+    sendButton.onclick=sendMessage;
+    messageInput.addEventListener("input",()=>{messageInput.style.height="auto";messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;});
+    messageInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendMessage();}});
+    messagesHost.addEventListener("scroll",()=>{if(nearBottom())markRead();},{passive:true});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(()=>{markRead();loadRooms();}).catch(()=>{});} });
+    window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
+    window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
 
-  /* =========================================================
-     MESSAGE SCROLL
-  ========================================================= */
-
-  messagesHost.addEventListener(
-    "scroll",
-    () => {
-
-      if(nearBottom()){
-
-        markRead();
-      }
-    },
-    {
-      passive:true
-    }
-  );
-
-
-  /* =========================================================
-     VISIBILITY
-  ========================================================= */
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if(!document.hidden){
-
-        loadLatest(false)
-          .then(() => {
-
-            markRead();
-
-            loadRooms();
-          })
-          .catch(
-            () => {}
-          );
-      }
-    }
-  );
-
-
-  /* =========================================================
-     LANGUAGE CHANGE
-  ========================================================= */
-
-  window.addEventListener(
-    "s967languagechange",
-    event => {
-
-      language =
-        event.detail?.language ??
-        (
-          typeof getCurrentLanguage ===
-          "function"
-            ? getCurrentLanguage()
-            : "en"
-        );
-
-
-      text =
-        TEXT[language] ??
-        TEXT.en;
-
-
-      setText();
-    }
-  );
-
-
-  /* =========================================================
-     CLEANUP
-  ========================================================= */
-
-  window.addEventListener(
-    "beforeunload",
-    () => {
-
-      stopRealtime();
-
-      stopFallback();
-    }
-  );
-
-
-  /* =========================================================
-     START
-  ========================================================= */
-
-  bootstrap();
-
-</script>
-
+    bootstrap();
+  </script>
 </body>
 </html>
