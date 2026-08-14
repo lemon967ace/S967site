@@ -345,6 +345,43 @@ export function restoreRanges(ranges) {
 // weakening the model's locked flag.
 // ---------------------------------------------------------------------------
 
+export function editBuildingType(typeId, changes = {}) {
+  requireDocument();
+  ensureWritable();
+
+  const index =
+    document.buildingTypes.findIndex(
+      item => item.id === typeId
+    );
+
+  if (index < 0) {
+    throw new RangeError(
+      `Unknown building type ID: ${typeId}`
+    );
+  }
+
+  const current =
+    document.buildingTypes[index];
+
+  const edited =
+    new BuildingType({
+      id: current.id,
+      name:
+        changes.name ??
+        current.name,
+      color:
+        changes.color ??
+        current.color,
+    });
+
+  document.buildingTypes[index] =
+    edited;
+
+  return {
+    ...edited,
+  };
+}
+
 export function addFixedBuildingType(data) {
   ensureTemplateWritable();
   const type = data instanceof FixedBuildingType ? data : new FixedBuildingType(data);
@@ -667,6 +704,7 @@ export const PNSMapEngine = {
   restoreBuildings,
   editBuilding,
   restoreBuildingState,
+  editBuildingType,
   commitRange,
   editRange,
   deleteRange,
