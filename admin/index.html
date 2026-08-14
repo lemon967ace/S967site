@@ -578,6 +578,60 @@
       }
     }
 
+  
+    .permission-dialog {
+      width: min(440px, calc(100vw - 28px));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0;
+      background: var(--surface-hover);
+      color: var(--text);
+      box-shadow: var(--menu-shadow);
+    }
+
+    .permission-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.52);
+      backdrop-filter: blur(2px);
+    }
+
+    .permission-dialog-inner {
+      padding: 20px;
+    }
+
+    .permission-dialog-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .permission-choice {
+      min-height: 48px;
+      font-weight: 750;
+    }
+
+    .permission-choice.is-current {
+      border-color: var(--text);
+      box-shadow: inset 0 0 0 1px var(--text);
+    }
+
+    .permission-dialog-cancel {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .account-permission-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 480px) {
+      .permission-dialog-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
@@ -828,6 +882,27 @@
     <div
       id="staffStatus"
       class="status"
+    ></div>
+
+    <hr
+      style="
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid var(--border);
+      "
+    >
+
+    <h3 style="margin-bottom: 6px;">
+      Chat-only Accounts
+    </h3>
+
+    <p class="small">
+      채팅 전용 권한으로 전환된 계정입니다. 권한 버튼에서 Staff로 다시 전환할 수 있습니다.
+    </p>
+
+    <div
+      id="chatOnlyAccounts"
+      class="manage-list"
     ></div>
 
     <hr
@@ -1688,6 +1763,60 @@
 </div>
 </div>
 
+
+  <dialog
+    id="accountPermissionDialog"
+    class="permission-dialog"
+  >
+    <div class="permission-dialog-inner">
+      <h2 style="margin-bottom: 6px;">
+        계정 권한
+      </h2>
+
+      <div
+        id="accountPermissionName"
+        class="manage-name"
+      ></div>
+
+      <div
+        class="account-permission-note"
+      >
+        로그인 ID와 비밀번호는 유지됩니다. 권한에 맞게 로그인 계정 내부 이메일만 자동 전환됩니다.
+      </div>
+
+      <div class="permission-dialog-actions">
+        <button
+          id="chooseStaffPermission"
+          type="button"
+          class="permission-choice"
+        >
+          Staff
+        </button>
+
+        <button
+          id="chooseChatPermission"
+          type="button"
+          class="permission-choice"
+        >
+          채팅 전용
+        </button>
+      </div>
+
+      <button
+        id="cancelPermissionDialog"
+        type="button"
+        class="permission-dialog-cancel"
+      >
+        취소
+      </button>
+
+      <div
+        id="accountPermissionStatus"
+        class="status"
+      ></div>
+    </div>
+  </dialog>
+
     <a class="back" href="/">
       ← Back to Home
     </a>
@@ -1709,6 +1838,9 @@
 
     const STAFF_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-admin";
+
+    const CHAT_ROOM_ADMIN_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
     
     const WK_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
@@ -1814,6 +1946,45 @@ const createStaffButton =
   document.getElementById(
     "createStaffButton"
   );
+
+
+const chatOnlyAccounts =
+  document.getElementById(
+    "chatOnlyAccounts"
+  );
+
+const accountPermissionDialog =
+  document.getElementById(
+    "accountPermissionDialog"
+  );
+
+const accountPermissionName =
+  document.getElementById(
+    "accountPermissionName"
+  );
+
+const chooseStaffPermission =
+  document.getElementById(
+    "chooseStaffPermission"
+  );
+
+const chooseChatPermission =
+  document.getElementById(
+    "chooseChatPermission"
+  );
+
+const cancelPermissionDialog =
+  document.getElementById(
+    "cancelPermissionDialog"
+  );
+
+const accountPermissionStatus =
+  document.getElementById(
+    "accountPermissionStatus"
+  );
+
+let permissionAccount =
+  null;
     
     const adminTabs =
   document.querySelectorAll(
@@ -2690,6 +2861,199 @@ async function apiRequest(
   return result;
 }
 
+
+async function chatRoomAdminApiRequest(
+  method,
+  body = null
+) {
+  const options = {
+    method,
+    headers: {},
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await authenticatedAdminFetch(
+      CHAT_ROOM_ADMIN_API_URL,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "Chat account request failed."
+    );
+  }
+
+  return result;
+}
+
+function openPermissionDialog(
+  account,
+  currentPermission
+) {
+  permissionAccount = {
+    user_id:
+      account.user_id,
+    display_name:
+      account.display_name,
+    currentPermission,
+  };
+
+  accountPermissionName.textContent =
+    account.display_name;
+
+  chooseStaffPermission.classList.toggle(
+    "is-current",
+    currentPermission ===
+      "staff"
+  );
+
+  chooseChatPermission.classList.toggle(
+    "is-current",
+    currentPermission ===
+      "chat"
+  );
+
+  chooseStaffPermission.disabled =
+    false;
+
+  chooseChatPermission.disabled =
+    false;
+
+  setStatus(
+    accountPermissionStatus,
+    ""
+  );
+
+  accountPermissionDialog.showModal();
+}
+
+async function applyAccountPermission(
+  permission
+) {
+  if (
+    !permissionAccount ||
+    permissionAccount
+      .currentPermission ===
+      permission
+  ) {
+    accountPermissionDialog.close();
+    return;
+  }
+
+  const label =
+    permission === "staff"
+      ? "Staff"
+      : "채팅 전용";
+
+  if (
+    !confirm(
+      `"${permissionAccount.display_name}" 계정의 권한을 ${label}(으)로 변경할까요?`
+    )
+  ) {
+    return;
+  }
+
+  chooseStaffPermission.disabled =
+    true;
+
+  chooseChatPermission.disabled =
+    true;
+
+  setStatus(
+    accountPermissionStatus,
+    "권한을 변경하는 중…"
+  );
+
+  try {
+    await chatRoomAdminApiRequest(
+      "POST",
+      {
+        action:
+          "set_account_permission",
+        user_id:
+          permissionAccount.user_id,
+        permission,
+      }
+    );
+
+    accountPermissionDialog.close();
+    permissionAccount = null;
+
+    await loadStaffAccounts();
+
+    setStatus(
+      staffStatus,
+      `계정 권한을 ${label}(으)로 변경했습니다.`
+    );
+  } catch (error) {
+    setStatus(
+      accountPermissionStatus,
+      error.message ||
+        "권한 변경에 실패했습니다.",
+      true
+    );
+
+    chooseStaffPermission.disabled =
+      false;
+
+    chooseChatPermission.disabled =
+      false;
+  }
+}
+
+chooseStaffPermission
+  ?.addEventListener(
+    "click",
+    () =>
+      applyAccountPermission(
+        "staff"
+      )
+  );
+
+chooseChatPermission
+  ?.addEventListener(
+    "click",
+    () =>
+      applyAccountPermission(
+        "chat"
+      )
+  );
+
+cancelPermissionDialog
+  ?.addEventListener(
+    "click",
+    () => {
+      permissionAccount = null;
+      accountPermissionDialog.close();
+    }
+  );
+
+accountPermissionDialog
+  ?.addEventListener(
+    "cancel",
+    () => {
+      permissionAccount = null;
+    }
+  );
+
  function renderStaffAccounts(accounts) {
   staffAccounts.innerHTML = "";
 
@@ -2898,6 +3262,32 @@ async function apiRequest(
 
 
     /*
+      PERMISSION
+    */
+
+    const permissionButton =
+      document.createElement(
+        "button"
+      );
+
+    permissionButton.type =
+      "button";
+
+    permissionButton.textContent =
+      "권한";
+
+    permissionButton.addEventListener(
+      "click",
+      () => {
+        openPermissionDialog(
+          account,
+          "staff"
+        );
+      }
+    );
+
+
+    /*
       DELETE
     */
 
@@ -2963,6 +3353,10 @@ async function apiRequest(
     );
 
     actions.appendChild(
+      permissionButton
+    );
+
+    actions.appendChild(
       deleteButton
     );
 
@@ -2974,6 +3368,134 @@ async function apiRequest(
   });
 }
 
+
+function renderChatOnlyAccounts(
+  accounts
+) {
+  if (!chatOnlyAccounts) {
+    return;
+  }
+
+  chatOnlyAccounts.replaceChildren();
+
+  const activeAccounts =
+    (accounts ?? [])
+      .filter(
+        (account) =>
+          account.is_active ===
+          true
+      );
+
+  if (!activeAccounts.length) {
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "small";
+
+    empty.textContent =
+      "채팅 전용 계정이 없습니다.";
+
+    chatOnlyAccounts.appendChild(
+      empty
+    );
+
+    return;
+  }
+
+  for (
+    const account of
+      activeAccounts
+  ) {
+    const row =
+      document.createElement(
+        "div"
+      );
+
+    row.className =
+      "manage-item";
+
+    const content =
+      document.createElement(
+        "div"
+      );
+
+    content.style.flex =
+      "1";
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "manage-name";
+
+    name.textContent =
+      account.display_name;
+
+    const state =
+      document.createElement(
+        "div"
+      );
+
+    state.className =
+      "manage-note";
+
+    state.textContent =
+      "권한: 채팅 전용 · Active";
+
+    content.append(
+      name,
+      state
+    );
+
+    const actions =
+      document.createElement(
+        "div"
+      );
+
+    actions.className =
+      "manage-actions";
+
+    const permissionButton =
+      document.createElement(
+        "button"
+      );
+
+    permissionButton.type =
+      "button";
+
+    permissionButton.textContent =
+      "권한";
+
+    permissionButton.addEventListener(
+      "click",
+      () => {
+        openPermissionDialog(
+          account,
+          "chat"
+        );
+      }
+    );
+
+    actions.appendChild(
+      permissionButton
+    );
+
+    row.append(
+      content,
+      actions
+    );
+
+    chatOnlyAccounts.appendChild(
+      row
+    );
+  }
+}
+
     async function loadStaffAccounts() {
   setStatus(
     staffStatus,
@@ -2981,13 +3503,62 @@ async function apiRequest(
   );
 
   try {
-    const result =
-      await staffApiRequest(
-        "GET"
+    const [
+      staffResult,
+      chatResult,
+    ] =
+      await Promise.all([
+        staffApiRequest(
+          "GET"
+        ),
+        chatRoomAdminApiRequest(
+          "GET"
+        ),
+      ]);
+
+    const activeChatIds =
+      new Set(
+        (
+          chatResult
+            .chat_users ??
+          []
+        )
+          .filter(
+            (account) =>
+              account.is_active ===
+              true
+          )
+          .map(
+            (account) =>
+              account.user_id
+          )
       );
 
+    /*
+      A user converted from Staff to chat-only keeps an inactive
+      staff_accounts row so the conversion can be reversed without
+      destroying historical account data. Hide that inactive Staff
+      shadow row from the Staff list while its chat permission is active.
+    */
+    const visibleStaff =
+      (
+        staffResult.accounts ??
+        []
+      )
+        .filter(
+          (account) =>
+            !activeChatIds.has(
+              account.user_id
+            )
+        );
+
     renderStaffAccounts(
-      result.accounts || []
+      visibleStaff
+    );
+
+    renderChatOnlyAccounts(
+      chatResult.chat_users ??
+      []
     );
 
     setStatus(
@@ -3005,7 +3576,7 @@ async function apiRequest(
     throw error;
   }
 }
-    
+
 async function inquiryApiRequest(
   method,
   body = null,
