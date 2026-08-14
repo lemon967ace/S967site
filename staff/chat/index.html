@@ -136,6 +136,19 @@
       }
     }
 
+
+    .message-pending {
+      opacity: .72;
+    }
+
+    .message-pending::after {
+      content: "…";
+      display: inline-block;
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: .78rem;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -341,6 +354,62 @@
     let refreshTimer = null;
     let notificationBaseline = null;
     const messageMap = new Map();
+    let optimisticSequence = 0;
+    const pendingMessageIds = new Set();
+
+    function makeOptimisticMessageId(){
+      optimisticSequence += 1;
+      return `local-${Date.now()}-${optimisticSequence}`;
+    }
+
+    function cloneReactionState(message){
+      return {
+        reactions: Array.isArray(message.reactions)
+          ? message.reactions.map(item => ({...item}))
+          : [],
+        my_reaction: message.my_reaction ?? null,
+      };
+    }
+
+    function setOptimisticReaction(message, emoji){
+      const previous = message.my_reaction ?? null;
+      const reactions = Array.isArray(message.reactions)
+        ? message.reactions.map(item => ({...item}))
+        : [];
+
+      const byEmoji = new Map(
+        reactions.map(item => [
+          item.emoji,
+          {
+            emoji: item.emoji,
+            count: Number(item.count ?? 0),
+          },
+        ])
+      );
+
+      if(previous){
+        const item = byEmoji.get(previous);
+        if(item){
+          item.count = Math.max(0, item.count - 1);
+          if(item.count === 0) byEmoji.delete(previous);
+          else byEmoji.set(previous, item);
+        }
+      }
+
+      const next = previous === emoji ? null : emoji;
+
+      if(next){
+        const item = byEmoji.get(next) ?? {emoji: next, count: 0};
+        item.count += 1;
+        byEmoji.set(next, item);
+      }
+
+      message.reactions = [...byEmoji.values()];
+      message.my_reaction = next;
+
+      return next;
+    }
+
     const translationViewCache = new Map();
     let currentSearch = {q:"",dateFrom:"",dateTo:""};
 
@@ -444,7 +513,7 @@
     }
 
     function renderMessage(message){
-      const article=document.createElement("article");article.className="message";
+      const article=document.createElement("article");article.className="message";if(message.is_optimistic)article.classList.add("message-pending");
       if(message.is_mine)article.classList.add("mine");
       if(message.author_kind==="admin")article.classList.add("admin");
 
@@ -759,15 +828,158 @@
     async function uploadFile(messageId,file){const form=new FormData();form.append("message_id",messageId);form.append("file",file,file.name);return request(API.upload,{method:"POST",body:form});}
 
     async function sendMessage(){
-      if(sending||!currentRoomId)return;const body=messageInput.value;if(!body.trim()&&!selectedFiles.length)return;sending=true;sendButton.disabled=true;
-      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
+      if(sending||!currentRoomId)return;
+
+      const body=messageInput.value;
+      if(!body.trim()&&!selectedFiles.length)return;
+
+      const filesToUpload=[...selectedFiles];
+      const replySnapshot=replyTarget ? {...replyTarget} : null;
+      const optimisticId=makeOptimisticMessageId();
+      const now=new Date().toISOString();
+
+      const optimisticMessage={
+        id:optimisticId,
+        room_id:currentRoomId,
+        author_name:actor?.name ?? actor?.display_name ?? "Me",
+        author_kind:actor?.kind ?? "staff",
+        author_user_id:actor?.user_id ?? actor?.userId ?? null,
+        body,
+        created_at:now,
+        updated_at:now,
+        is_deleted:false,
+        attachments:[],
+        reactions:[],
+        my_reaction:null,
+        can_delete:false,
+        can_report:false,
+        reply_to_message_id:replySnapshot?.id ?? null,
+        reply_to_author_name:replySnapshot?.author_name ?? null,
+        reply_to_body:replySnapshot?.body ?? null,
+        is_optimistic:true,
+      };
+
+      messageMap.set(optimisticId,optimisticMessage);
+      pendingMessageIds.add(optimisticId);
+      renderMessages();
+      messagesHost.scrollTop=messagesHost.scrollHeight;
+
+      messageInput.value="";
+      selectedFiles=[];
+      fileInput.value="";
+      replyTarget=null;
+      renderFiles();
+      renderReplyTarget();
+
+      sending=true;
+      sendButton.disabled=true;
+
+      try{
+        const r=await request(API.send,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            room_id:currentRoomId,
+            body,
+            reply_to_message_id:replySnapshot?.id??null
+          })
+        });
+
+        const saved=r.message;
+        const id=saved?.id;
+        if(!id)throw new Error("MESSAGE_ID_MISSING");
+
+        messageMap.delete(optimisticId);
+        pendingMessageIds.delete(optimisticId);
+
+        const mergedMessage={
+          ...optimisticMessage,
+          ...saved,
+          is_optimistic:false,
+        };
+        messageMap.set(id,mergedMessage);
+        renderMessages();
+
+        if(filesToUpload.length){
+          await Promise.allSettled(
+            filesToUpload.map(file=>uploadFile(id,file))
+          );
+          // Attachments are server-owned data; refresh only once after uploads finish.
+          await loadLatest(false).catch(()=>{});
+        }
+      }catch(error){
+        messageMap.delete(optimisticId);
+        pendingMessageIds.delete(optimisticId);
+        renderMessages();
+
+        // Restore unsent content so the user does not lose it.
+        if(!messageInput.value){
+          messageInput.value=body;
+          messageInput.style.height="auto";
+          messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;
+        }
+        if(!selectedFiles.length && filesToUpload.length){
+          selectedFiles=filesToUpload;
+          renderFiles();
+        }
+        if(!replyTarget && replySnapshot){
+          replyTarget=replySnapshot;
+          renderReplyTarget();
+        }
+
+        setStatus(text.sendFailed,true);
+      }finally{
+        sending=false;
+        sendButton.disabled=false;
+      }
     }
 
     async function reactToMessage(messageId,emoji){
+      const message=messageMap.get(messageId);
+      if(!message||message.is_optimistic)return;
+
+      const snapshot=cloneReactionState(message);
+      setOptimisticReaction(message,emoji);
+      renderMessages();
+
       try{
-        await request(API.react,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:messageId,emoji})});
-        await loadLatest(false);
-      }catch(e){setStatus(e.message,true);}
+        const result=await request(API.react,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            message_id:messageId,
+            emoji
+          })
+        });
+
+        /*
+          If the endpoint returns the authoritative message/reaction state,
+          merge it. Otherwise keep the optimistic state and let Realtime /
+          fallback reconciliation update it later.
+        */
+        if(result?.message){
+          messageMap.set(messageId,{
+            ...messageMap.get(messageId),
+            ...result.message
+          });
+          renderMessages();
+        }else if(Array.isArray(result?.reactions)){
+          const current=messageMap.get(messageId);
+          if(current){
+            current.reactions=result.reactions;
+            if("my_reaction" in result) current.my_reaction=result.my_reaction;
+            renderMessages();
+          }
+        }
+      }catch(e){
+        const current=messageMap.get(messageId);
+        if(current){
+          current.reactions=snapshot.reactions;
+          current.my_reaction=snapshot.my_reaction;
+          renderMessages();
+        }
+        setStatus(e.message,true);
+      }
     }
 
     async function reportMessage(id){
@@ -792,7 +1004,11 @@
     }
 
     function scheduleRefresh(){
-      clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadLatest(false,true).then(loadRooms).catch(()=>{}),120);
+      clearTimeout(refreshTimer);
+      refreshTimer=setTimeout(()=>{
+        if(loading)return;
+        loadLatest(false,true).then(loadRooms).catch(()=>{});
+      },220);
     }
 
     function startRealtime(){
