@@ -1084,6 +1084,421 @@
       }
     }
 
+  
+    /* ===== FINAL BALANCED HOMEPAGE LAYOUT =====
+       No fixed footer, no absolute button anchoring, no auto-margin dumping.
+       Remaining vertical space is distributed evenly around hero/buttons/footer.
+    */
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+    }
+
+    main {
+      position: relative !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+
+      width: 100% !important;
+      height: 100svh !important;
+      min-height: 0 !important;
+
+      padding:
+        clamp(52px, 6.5svh, 76px)
+        clamp(14px, 4vw, 40px)
+        clamp(10px, 1.6svh, 18px) !important;
+
+      overflow: hidden !important;
+    }
+
+    .home-content {
+      flex: 1 1 auto;
+      min-height: 0;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+
+      width: 100%;
+    }
+
+    .home-hero {
+      flex: 0 0 auto;
+      width: 100%;
+      text-align: center;
+    }
+
+    .server {
+      margin: 0 !important;
+      font-size:
+        clamp(
+          3.45rem,
+          min(13vw, 11.5svh),
+          7rem
+        ) !important;
+      line-height: .9 !important;
+    }
+
+    .headline {
+      margin:
+        clamp(11px, 1.8svh, 22px)
+        0 0 !important;
+
+      font-size:
+        clamp(
+          1rem,
+          min(3.3vw, 2.7svh),
+          1.72rem
+        ) !important;
+
+      line-height: 1.18 !important;
+    }
+
+    .tagline {
+      margin:
+        clamp(5px, .85svh, 10px)
+        0 0 !important;
+
+      font-size:
+        clamp(
+          .76rem,
+          min(2.2vw, 1.7svh),
+          1rem
+        ) !important;
+
+      line-height: 1.2 !important;
+    }
+
+    .buttons {
+      position: static !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      transform: none !important;
+
+      flex: 0 0 auto;
+      display: grid !important;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+      width:
+        min(
+          420px,
+          calc(100vw - 32px)
+        ) !important;
+
+      max-width: 420px !important;
+      margin: 0 !important;
+
+      gap:
+        clamp(8px, 1.1svh, 12px)
+        clamp(10px, 1.4vw, 14px) !important;
+    }
+
+    .button {
+      min-width: 0 !important;
+      width: 100% !important;
+
+      padding:
+        clamp(9px, 1.25svh, 13px)
+        clamp(12px, 2vw, 20px) !important;
+
+      font-size:
+        clamp(
+          .8rem,
+          min(2.1vw, 1.55svh),
+          .96rem
+        ) !important;
+
+      line-height: 1.15 !important;
+    }
+
+    .group-buy-button {
+      grid-column: 1 / -1 !important;
+    }
+
+    footer {
+      position: static !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+
+      flex: 0 0 auto;
+      align-self: center !important;
+
+      width: 100% !important;
+      max-width: none !important;
+
+      margin: 0 !important;
+      padding: 0 !important;
+
+      text-align: center !important;
+
+      font-size:
+        clamp(
+          .58rem,
+          min(1.55vw, 1.05svh),
+          .72rem
+        ) !important;
+
+      line-height: 1.24 !important;
+      z-index: auto !important;
+    }
+
+    .source-link {
+      margin-top:
+        clamp(2px, .45svh, 5px) !important;
+
+      font-size:
+        clamp(
+          .54rem,
+          min(1.35vw, .95svh),
+          .66rem
+        ) !important;
+    }
+
+    /* Announcement remains a thin independent strip.
+       The remaining space below it is re-balanced automatically. */
+    .announcement-ticker {
+      flex: 0 0 auto !important;
+
+      width: 100vw !important;
+      height:
+        clamp(38px, 5svh, 44px) !important;
+
+      min-height: 0 !important;
+
+      margin:
+        calc(-1 * clamp(52px, 6.5svh, 76px))
+        0
+        0 !important;
+
+      margin-left:
+        calc(50% - 50vw) !important;
+
+      border-radius: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .announcement-viewport {
+      height: 100% !important;
+    }
+
+    .announcement-label {
+      top: 2px !important;
+      padding: 0 !important;
+
+      font-size:
+        clamp(
+          .48rem,
+          min(1.45vw, .82svh),
+          .58rem
+        ) !important;
+    }
+
+    .announcement-slide {
+      padding:
+        8px
+        clamp(12px, 4vw, 48px)
+        3px !important;
+
+      font-size:
+        clamp(
+          .65rem,
+          min(1.95vw, 1.3svh),
+          .86rem
+        ) !important;
+
+      line-height: 1.2 !important;
+
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden !important;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding:
+          clamp(48px, 6svh, 64px)
+          14px
+          clamp(8px, 1.2svh, 14px) !important;
+      }
+
+      .buttons {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+
+        width:
+          min(
+            360px,
+            calc(100vw - 28px)
+          ) !important;
+
+        gap:
+          clamp(5px, .8svh, 8px) !important;
+      }
+
+      .button,
+      .group-buy-button {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+
+        padding:
+          clamp(7px, 1svh, 10px)
+          12px !important;
+
+        font-size:
+          clamp(
+            .74rem,
+            1.45svh,
+            .88rem
+          ) !important;
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .52rem,
+            .92svh,
+            .62rem
+          ) !important;
+
+        line-height: 1.17 !important;
+      }
+
+      .announcement-ticker {
+        height:
+          clamp(36px, 4.8svh, 42px) !important;
+
+        margin-top:
+          calc(-1 * clamp(48px, 6svh, 64px)) !important;
+      }
+    }
+
+    /* Shorter displays: everything scales together.
+       No single gap absorbs the remaining height. */
+    @media (max-height: 720px) {
+      main {
+        padding-top:
+          clamp(42px, 5.5svh, 54px) !important;
+        padding-bottom: 5px !important;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            2.9rem,
+            min(10vw, 9svh),
+            5.1rem
+          ) !important;
+      }
+
+      .headline {
+        margin-top: 7px !important;
+        font-size:
+          clamp(.9rem, 2.25svh, 1.22rem) !important;
+      }
+
+      .tagline {
+        margin-top: 3px !important;
+        font-size:
+          clamp(.68rem, 1.5svh, .84rem) !important;
+      }
+
+      .buttons {
+        gap: 5px 8px !important;
+      }
+
+      .button {
+        padding: 7px 10px !important;
+      }
+
+      footer {
+        font-size: .54rem !important;
+        line-height: 1.14 !important;
+      }
+
+      .announcement-ticker {
+        height: 34px !important;
+        margin-top:
+          calc(-1 * clamp(42px, 5.5svh, 54px)) !important;
+      }
+
+      .announcement-slide {
+        padding: 7px 10px 2px !important;
+        font-size: .62rem !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      main {
+        padding-top: 36px !important;
+        padding-bottom: 3px !important;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            2.45rem,
+            min(8vw, 7.5svh),
+            3.9rem
+          ) !important;
+      }
+
+      .headline {
+        margin-top: 5px !important;
+        font-size: .82rem !important;
+      }
+
+      .tagline {
+        margin-top: 2px !important;
+        font-size: .62rem !important;
+      }
+
+      .buttons {
+        gap: 4px 7px !important;
+      }
+
+      .button {
+        padding: 6px 9px !important;
+        font-size: .7rem !important;
+      }
+
+      footer {
+        font-size: .48rem !important;
+        line-height: 1.1 !important;
+      }
+
+      .source-link {
+        font-size: .46rem !important;
+      }
+
+      .announcement-ticker {
+        height: 30px !important;
+        margin-top: -36px !important;
+      }
+
+      .announcement-slide {
+        padding: 6px 9px 1px !important;
+        font-size: .58rem !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -1276,27 +1691,29 @@
       ></div>
     </section>
 
-    <h1 class="server">
-      S967
-    </h1>
+    <div class="home-content">
+      <section class="home-hero">
+        <h1 class="server">
+          S967
+        </h1>
 
-    <p
-      class="headline"
-      data-i18n="headline"
-    >
-      Different Languages. One Server.
-    </p>
+        <p
+          class="headline"
+          data-i18n="headline"
+        >
+          Different Languages. One Server.
+        </p>
 
-    <p
-      class="tagline"
-      data-i18n="tagline"
-    >
-      Peaceful, open, and connected.
-    </p>
+        <p
+          class="tagline"
+          data-i18n="tagline"
+        >
+          Peaceful, open, and connected.
+        </p>
+      </section>
 
-
-    <nav
-      class="buttons"
+      <nav
+        class="buttons"
       aria-label="S967 links"
     >
       <a
@@ -1391,6 +1808,7 @@
     View source code
   </a>
 </footer>
+    </div>
 
 
   </main>
