@@ -1,7 +1,17 @@
 import { buildRangeCellOwnerIndex, isValidMapCell, MapRange } from "./editor-model.js";
 import { snapshotRange } from "./editor-history.js";
+import { calculateOccupiedCells } from "./editor-occupancy.js";
 
 export const RANGE_COLORS = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F", "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC", "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", "#E377C2", "#7F7F7F"];
+
+export const MOUNTAIN_PRESET = Object.freeze({
+  id: "mountain",
+  kind: "blocked",
+  color: "#7F7F7F",
+  locked: false,
+  width: 2,
+  height: 2,
+});
 
 export function rectangleCells(first, second) {
   if (!isValidMapCell(...first) || !isValidMapCell(...second)) return [];
@@ -30,12 +40,195 @@ export function visibleRangeCells(range, bounds) {
 }
 
 export function createRangeController({ engine, history, buildingController = null, onChange = () => {}, onDirty = () => {} }) {
-  let mode = "select", settings = null, startCell = null, previewCells = [], selectedRangeId = null;
+  let mode = "select", settings = null, preset = null, startCell = null, previewCells = [], selectedRangeId = null;
   const areaPeers = new Set();
   const emit = () => onChange(api.getState());
   const notify = () => onDirty(!history.isAtSavedState());
   function ensureWritable() { if (engine.isReadOnly()) throw new Error("The map is read-only."); }
-  function startCreate(next) { ensureWritable(); for (const peer of areaPeers) peer?.cancel(); buildingController?.cancelMode(); settings = { kind: next.kind, color: next.color, locked: Boolean(next.locked) }; new MapRange({ ...settings, cells: [[0, 0]] }); mode = "rangeCreate"; startCell = null; previewCells = []; selectedRangeId = null; emit(); }
+  function startCreate(next) {
+    ensureWritable();
+    for (const peer of areaPeers) peer?.cancel();
+    buildingController?.cancelMode();
+
+    settings = {
+      kind: next.kind,
+      color: next.color,
+      locked: Boolean(next.locked),
+    };
+    preset = null;
+
+    new MapRange({
+      ...settings,
+      cells: [[0, 0]],
+    });
+
+    mode = "rangeCreate";
+    startCell = null;
+    previewCells = [];
+    selectedRangeId = null;
+    emit();
+  }
+
+  function startPreset(next = MOUNTAIN_PRESET) {
+    ensureWritable();
+    for (const peer of areaPeers) peer?.cancel();
+    buildingController?.cancelMode();
+
+    preset = {
+      ...MOUNTAIN_PRESET,
+      ...next,
+    };
+    settings = null;
+    mode = "rangePreset";
+    startCell = null;
+    previewCells = [];
+    selectedRangeId = null;
+    emit();
+  }
+
+  function placePresetAt(cell) {
+    ensureWritable();
+
+    if (
+      mode !== "rangePreset" ||
+      !preset
+    ) {
+      return null;
+    }
+
+    const cells =
+      calculateOccupiedCells(
+        cell[0],
+        cell[1],
+        preset.width,
+        preset.height
+      );
+
+    if (
+      cells.some(
+        value =>
+          !isValidMapCell(
+            ...value
+          )
+      )
+    ) {
+      throw new RangeError(
+        "The preset would extend outside the map."
+      );
+    }
+
+    /*
+      A mountain is an obstacle, so do not allow dropping one on top of
+      an existing building. Range/range overlap is still validated by
+      engine.commitRange().
+    */
+    const document =
+      engine.getDocument();
+
+    const occupied =
+      new Set(
+        [
+          ...document.fixedBuildings,
+          ...document.buildings,
+        ]
+          .flatMap(
+            building =>
+              building
+                .occupiedCells()
+                .map(
+                  value =>
+                    value.join(",")
+                )
+          )
+      );
+
+    if (
+      cells.some(
+        value =>
+          occupied.has(
+            value.join(",")
+          )
+      )
+    ) {
+      const error =
+        new RangeError(
+          "The preset cannot overlap a building."
+        );
+      error.code =
+        "RANGE_PRESET_BUILDING_OVERLAP";
+      throw error;
+    }
+
+    const before =
+      document.ranges.map(
+        snapshotRange
+      );
+
+    const result =
+      engine.commitRange({
+        kind: preset.kind,
+        color: preset.color,
+        locked: Boolean(
+          preset.locked
+        ),
+        cells,
+      });
+
+    const after =
+      engine
+        .getDocument()
+        .ranges
+        .map(
+          snapshotRange
+        );
+
+    if (!result.accepted.length) {
+      return null;
+    }
+
+    selectedRangeId =
+      after.at(-1)?.id ??
+      null;
+
+    /*
+      Building palette behavior: one placement ends the preset mode.
+      The user presses Mountain again to place another obstacle.
+    */
+    mode = "select";
+    preset = null;
+    previewCells = [];
+
+    history.record({
+      description:
+        "rangePresetMountain",
+      undo() {
+        engine.restoreRanges(
+          before
+        );
+        selectedRangeId = null;
+      },
+      redo() {
+        engine.restoreRanges(
+          after
+        );
+        selectedRangeId =
+          after.at(-1)?.id ??
+          null;
+      },
+    });
+
+    notify();
+    emit();
+
+    return {
+      complete: true,
+      cells:
+        result.accepted.map(
+          value => [...value]
+        ),
+      result,
+    };
+  }
   function hover(cell) { if (mode !== "rangeCreate" || !startCell) return null; previewCells = rectangleCells(startCell, cell); emit(); return previewCells; }
   function click(cell) {
     if (mode !== "rangeCreate") {
@@ -214,13 +407,22 @@ export function createRangeController({ engine, history, buildingController = nu
     return changed;
   }
   function deleteSelected() { ensureWritable(); const item = selected(); if (!item) return null; const before = engine.getDocument().ranges.map(snapshotRange); const deleted = engine.deleteRange(item.id); const after = engine.getDocument().ranges.map(snapshotRange); history.record({ description: "rangeDelete", undo() { engine.restoreRanges(before); selectedRangeId = item.id; }, redo() { engine.restoreRanges(after); selectedRangeId = null; } }); selectedRangeId = null; notify(); emit(); return deleted; }
-  function cancel() { mode = "select"; settings = null; startCell = null; previewCells = []; emit(); }
+  function cancel() {
+    mode = "select";
+    settings = null;
+    preset = null;
+    startCell = null;
+    previewCells = [];
+    emit();
+  }
   function selected() { return engine.getDocument().ranges.find(item => item.id === selectedRangeId) ?? null; }
   function normalizeSelection() { if (selectedRangeId && !selected()) selectedRangeId = null; return selectedRangeId; }
   function undo() { const command = history.undo(); if (!command) return null; mode = "select"; previewCells = []; notify(); emit(); return command; }
   function redo() { const command = history.redo(); if (!command) return null; mode = "select"; previewCells = []; notify(); emit(); return command; }
   const api = {
     startCreate,
+    startPreset,
+    placePresetAt,
     hover,
     click,
     commit,
@@ -242,6 +444,10 @@ export function createRangeController({ engine, history, buildingController = nu
       settings:
         settings && {
           ...settings,
+        },
+      preset:
+        preset && {
+          ...preset,
         },
       startCell:
         startCell &&
