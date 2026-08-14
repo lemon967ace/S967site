@@ -3253,6 +3253,68 @@ async function chatRoomAdminApiRequest(
   return result;
 }
 
+function getManagedAccountLoginId(account) {
+  const explicit =
+    account?.login_id ??
+    account?.staff_id ??
+    account?.chat_id ??
+    account?.account_id ??
+    "";
+
+  if (String(explicit).trim()) {
+    return String(explicit).trim();
+  }
+
+  /*
+    Staff 인증은 <login-id>@s967.org 형태를 사용하므로
+    staff-admin 응답에 별도 ID 필드가 없고 email만 있는 경우
+    로컬파트를 로그인 ID로 표시합니다.
+  */
+  const email =
+    String(account?.email ?? "")
+      .trim();
+
+  const suffix =
+    "@s967.org";
+
+  if (
+    email.toLowerCase()
+      .endsWith(suffix)
+  ) {
+    return email.slice(
+      0,
+      -suffix.length
+    );
+  }
+
+  return "";
+}
+
+function getManagedAccountLabel(account) {
+  const loginId =
+    getManagedAccountLoginId(account);
+
+  const nickname =
+    String(
+      account?.display_name ??
+      ""
+    ).trim();
+
+  if (
+    loginId &&
+    nickname
+  ) {
+    return `${loginId} (${nickname})`;
+  }
+
+  return (
+    loginId ||
+    nickname ||
+    "알 수 없는 계정"
+  );
+}
+
+
 function openPermissionDialog(
   account,
   currentPermission
@@ -3262,11 +3324,21 @@ function openPermissionDialog(
       account.user_id,
     display_name:
       account.display_name,
+    login_id:
+      account.login_id,
+    staff_id:
+      account.staff_id,
+    chat_id:
+      account.chat_id,
+    account_id:
+      account.account_id,
+    email:
+      account.email,
     currentPermission,
   };
 
   accountPermissionName.textContent =
-    account.display_name;
+    getManagedAccountLabel(account);
 
   chooseStaffPermission.classList.toggle(
     "is-current",
@@ -3314,7 +3386,7 @@ async function applyAccountPermission(
 
   if (
     !confirm(
-      `"${permissionAccount.display_name}" 계정의 권한을 ${label}(으)로 변경할까요?`
+      `"${getManagedAccountLabel(permissionAccount)}" 계정의 권한을 ${label}(으)로 변경할까요?`
     )
   ) {
     return;
@@ -3441,7 +3513,7 @@ accountPermissionDialog
       "manage-name";
 
     name.textContent =
-      account.display_name;
+      getManagedAccountLabel(account);
 
     const email =
       document.createElement("div");
@@ -3492,7 +3564,7 @@ accountPermissionDialog
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${account.display_name}:`
+            `Enter a new temporary password for ${getManagedAccountLabel(account)}:`
           );
 
         if (password === null) {
@@ -3576,7 +3648,7 @@ accountPermissionDialog
 
         const confirmed =
           confirm(
-            `${verb} Staff "${account.display_name}"?`
+            `${verb} Staff "${getManagedAccountLabel(account)}"?`
           );
 
         if (!confirmed) {
@@ -3657,7 +3729,7 @@ accountPermissionDialog
       async () => {
         const confirmed =
           confirm(
-            `Delete Staff "${account.display_name}"?\n\nThis cannot be undone.`
+            `Delete Staff "${getManagedAccountLabel(account)}"?\n\nThis cannot be undone.`
           );
 
         if (!confirmed) {
@@ -3765,7 +3837,7 @@ function renderChatOnlyAccounts(accounts) {
 
     name.className = "manage-name";
     name.textContent =
-      account.display_name;
+      getManagedAccountLabel(account);
 
     const state =
       document.createElement("div");
@@ -3801,7 +3873,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${account.display_name}:`
+            `Enter a new temporary password for ${getManagedAccountLabel(account)}:`
           );
 
         if (password === null) {
@@ -3874,7 +3946,7 @@ function renderChatOnlyAccounts(accounts) {
 
         if (
           !confirm(
-            `${verb} chat-only account "${account.display_name}"?`
+            `${verb} chat-only account "${getManagedAccountLabel(account)}"?`
           )
         ) {
           return;
@@ -3941,7 +4013,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const confirmed =
           confirm(
-            `Delete chat-only account "${account.display_name}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
+            `Delete chat-only account "${getManagedAccountLabel(account)}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
           );
 
         if (!confirmed) {
@@ -11404,7 +11476,7 @@ window.addEventListener(
     function renderUsers(){
       usersHost.replaceChildren(...data.chat_users.map(u=>{
         const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
+        const h=document.createElement("h3");h.textContent=`${getManagedAccountLabel(u)} ${u.is_active?"":"[비활성]"}`;
         const row=document.createElement("div");row.className="row";
         const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
         const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
