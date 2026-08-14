@@ -792,7 +792,7 @@
         app.classList.remove("hidden");
         renderRooms();
       }catch(e){
-        if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);
+        if(e.status===401||e.status===403){await showAccessFailure(e);}else setStatus(text.loadFailed,true);
         throw e;
       }finally{
         if(requestGeneration===roomLoadGeneration)loading=false;
@@ -931,11 +931,64 @@
     function startFallback(){stopFallback();fallbackTimer=setInterval(()=>{if(!document.hidden)loadLatest(false).then(loadRooms).catch(()=>{});},FALLBACK_POLL_MS);}
     function stopFallback(){if(fallbackTimer){clearInterval(fallbackTimer);fallbackTimer=null;}}
 
-    function showGate(message){stopRealtime();stopFallback();app.classList.add("hidden");gate.classList.remove("hidden");gateMessage.textContent=message;chatLogin.classList.remove("hidden");}
+    function showGate(message,{showChatLogin=true}={}){
+      stopRealtime();
+      stopFallback();
+      app.classList.add("hidden");
+      gate.classList.remove("hidden");
+      gateMessage.textContent=message;
+      chatLogin.classList.toggle("hidden",!showChatLogin);
+    }
+
+    async function showAccessFailure(error){
+      const auth=await accessToken().catch(()=>null);
+      if(auth?.kind==="admin"){
+        const adminMessage=
+          language==="ko"
+            ? "관리자 세션이 만료되었거나 유효하지 않습니다. 관리자 페이지에서 다시 로그인하세요."
+            : language==="ja"
+              ? "管理者セッションの有効期限が切れているか、無効です。管理者ページから再度ログインしてください。"
+              : language==="ru"
+                ? "Сеанс администратора истёк или недействителен. Войдите снова на странице администратора."
+                : "The admin session has expired or is invalid. Sign in again from the admin page.";
+        showGate(adminMessage,{showChatLogin:false});
+        return;
+      }
+      showGate(text.denied,{showChatLogin:true});
+    }
 
     async function bootstrap(){
       setText();
-      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(false,false,{initial:true});startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
+      try{
+        await loadRooms();
+
+        // Authenticated actors are allowed to have zero accessible rooms.
+        // This is especially important for Lemon/admin, whose room membership
+        // is explicit rather than automatic. An empty room list is NOT 403.
+        if(!currentRoomId){
+          stopRealtime();
+          messageMap.clear();
+          hasMore=false;
+          currentSignalTopic=null;
+          chatTitle.textContent=text.title;
+          renderRooms();
+          renderMessages();
+          gate.classList.add("hidden");
+          app.classList.remove("hidden");
+          startFallback();
+          return;
+        }
+
+        await loadLatest(false,false,{initial:true});
+        startRealtime();
+        startFallback();
+      }catch(e){
+        if(e?.status===401||e?.status===403){
+          await showAccessFailure(e);
+        }else{
+          showGate(text.denied,{showChatLogin:true});
+        }
+      }
     }
 
     function chatLoginErrorMessage(error){
