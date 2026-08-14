@@ -2076,6 +2076,3067 @@
       }
     }
 
+  
+    /* =========================================================
+       MOBILE HERO POSITION + TINTED ANNOUNCEMENT
+       ========================================================= */
+
+    /* 공지 배너: 라이트 테마에서는 썬팅 유리 같은 반투명 어두운 톤 */
+    .announcement-ticker {
+      background:
+        rgba(28, 31, 36, .68) !important;
+
+      box-shadow:
+        0 8px 24px
+        rgba(0,0,0,.12) !important;
+
+      backdrop-filter:
+        blur(16px)
+        saturate(115%) !important;
+
+      -webkit-backdrop-filter:
+        blur(16px)
+        saturate(115%) !important;
+    }
+
+    /* 다크 테마에서는 반대로 밝은 반투명 글래스 */
+    html[data-theme="dark"] .announcement-ticker,
+    body[data-theme="dark"] .announcement-ticker,
+    [data-theme="dark"] .announcement-ticker {
+      background:
+        rgba(245, 247, 250, .18) !important;
+
+      box-shadow:
+        0 8px 24px
+        rgba(255,255,255,.045) !important;
+
+      border-top:
+        1px solid
+        rgba(255,255,255,.10) !important;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.08) !important;
+    }
+
+    /* 배너 폭은 유지하고 실제 텍스트만 화면 양끝에서 떨어뜨림 */
+    .announcement-slide {
+      box-sizing: border-box !important;
+
+      padding-left:
+        max(
+          clamp(34px, 7vw, 110px),
+          env(safe-area-inset-left)
+        ) !important;
+
+      padding-right:
+        max(
+          clamp(34px, 7vw, 110px),
+          env(safe-area-inset-right)
+        ) !important;
+    }
+
+    @media (max-width: 600px) {
+      .announcement-slide {
+        padding-left:
+          max(
+            clamp(26px, 8.5vw, 42px),
+            env(safe-area-inset-left)
+          ) !important;
+
+        padding-right:
+          max(
+            clamp(26px, 8.5vw, 42px),
+            env(safe-area-inset-right)
+          ) !important;
+      }
+
+      /*
+        제목 3줄을 공지 배너와 버튼 사이의 거의 중앙,
+        중앙보다 아주 살짝 위에 오도록 배치.
+        기존 크기 확대/제목 간격은 유지.
+      */
+      .home-content {
+        grid-template-rows:
+          clamp(54px, 8.2svh, 88px)
+          auto
+          minmax(
+            clamp(10px, 1.7svh, 20px),
+            .12fr
+          )
+          auto
+          minmax(
+            clamp(8px, 1.2svh, 16px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (min-height: 780px) {
+      .home-content {
+        grid-template-rows:
+          clamp(66px, 9.4svh, 106px)
+          auto
+          minmax(
+            clamp(12px, 1.9svh, 22px),
+            .13fr
+          )
+          auto
+          minmax(
+            clamp(10px, 1.5svh, 20px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          clamp(38px, 6.6svh, 58px)
+          auto
+          minmax(
+            5px,
+            .07fr
+          )
+          auto
+          minmax(
+            5px,
+            .12fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(26px, 5svh, 40px)
+          auto
+          3px
+          auto
+          4px
+          auto;
+      }
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+
+  <!-- =======================================================
+       CORNER LINKS
+       ======================================================= -->
+
+  <div class="corner-links">
+
+    <a
+      class="staff-link"
+      href="/staff"
+      aria-label="Staff"
+      title="Staff"
+    >
+      🛠️
+    </a>
+
+    <a
+      class="chat-link"
+      href="/chat/"
+      aria-label="Chat"
+      title="Chat"
+    >
+      💬
+    </a>
+
+    <a
+      class="map-link"
+      href="/map"
+      aria-label="Map"
+      title="Map"
+    >
+      🏰
+    </a>
+
+  </div>
+
+
+  <!-- =======================================================
+       LANGUAGE / THEME
+       ======================================================= -->
+
+  <div class="top-pickers">
+
+    <div
+      class="language-picker"
+      data-language-picker
+    >
+
+      <button
+        class="language-button"
+        type="button"
+        data-language-button
+        aria-label="Language"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        🌐
+      </button>
+
+      <div
+        class="language-menu"
+        data-language-menu
+        role="menu"
+      >
+
+        <button
+          type="button"
+          data-language-choice="ko"
+          role="menuitemradio"
+        >
+          한국어
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="en"
+          role="menuitemradio"
+        >
+          English
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="ja"
+          role="menuitemradio"
+        >
+          日本語
+        </button>
+
+        <button
+          type="button"
+          data-language-choice="ru"
+          role="menuitemradio"
+        >
+          Русский
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="theme-picker"
+      data-theme-picker
+    >
+
+      <button
+        class="theme-button"
+        type="button"
+        data-theme-button
+        aria-label="Theme"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        ◐
+      </button>
+
+      <div
+        class="theme-menu"
+        data-theme-menu
+        role="menu"
+      >
+
+        <button
+          type="button"
+          data-theme-choice="system"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ◐
+          </span>
+
+          <span data-i18n="themeSystem">
+            System
+          </span>
+        </button>
+
+        <button
+          type="button"
+          data-theme-choice="light"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ☀
+          </span>
+
+          <span data-i18n="themeLight">
+            Light
+          </span>
+        </button>
+
+        <button
+          type="button"
+          data-theme-choice="dark"
+          role="menuitemradio"
+        >
+          <span class="theme-choice-icon">
+            ☾
+          </span>
+
+          <span data-i18n="themeDark">
+            Dark
+          </span>
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       MAIN
+       ======================================================= -->
+
+  <main>
+
+
+    <!-- =====================================================
+         ANNOUNCEMENT
+         ===================================================== -->
+
+    <section
+      id="announcementTicker"
+      class="announcement-ticker"
+      aria-live="polite"
+      hidden
+    >
+
+      <div
+        class="announcement-viewport"
+        id="announcementViewport"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HOME
+         ===================================================== -->
+
+    <div class="home-content">
+
+
+      <!-- HERO -->
+
+      <section class="home-hero">
+
+        <h1 class="server">
+          S967
+        </h1>
+
+        <p
+          class="headline"
+          data-i18n="headline"
+        >
+          Different Languages. One Server.
+        </p>
+
+        <p
+          class="tagline"
+          data-i18n="tagline"
+        >
+          Peaceful, open, and connected.
+        </p>
+
+      </section>
+
+
+      <!-- BUTTONS -->
+
+      <nav
+        class="buttons"
+        aria-label="S967 links"
+      >
+
+        <a
+          class="button"
+          href="/inquiry"
+          data-i18n="inquiry"
+        >
+          Inquiry
+        </a>
+
+        <a
+          class="button"
+          href="/wk"
+          data-i18n="wkApplication"
+        >
+          WK Application
+        </a>
+
+        <a
+          class="button"
+          href="/upload"
+          data-i18n="imageUpload"
+        >
+          Image Upload
+        </a>
+
+        <a
+          class="button"
+          href="/gallery"
+          data-i18n="viewImages"
+        >
+          View Images
+        </a>
+
+        <a
+          class="button group-buy-button"
+          href="/groupBuy"
+          data-i18n="groupBuyApplication"
+        >
+          Group Buy Application
+        </a>
+
+      </nav>
+
+
+      <!-- ===================================================
+           FOOTER
+           =================================================== -->
+
+      <footer>
+
+        PNS · State 967
+
+        <br>
+
+        <span
+          class="unofficial"
+          data-i18n="unofficial"
+        >
+          Unofficial community site for State 967.
+        </span>
+
+        <br>
+
+        <span class="operator-wrap">
+
+          <span data-i18n="operatedBy">
+            Operated by ᴬᶜᴱ⍣⃝ 레몬
+          </span>
+
+          <button
+            type="button"
+            class="privacy-info-button"
+            id="privacyInfoButton"
+            aria-label="Privacy information"
+            aria-expanded="false"
+          >
+            ⓘ
+          </button>
+
+          <span
+            class="privacy-popover"
+            id="privacyPopover"
+            role="note"
+            hidden
+            data-i18n="privacyNotice"
+          >
+            This website uses cookies and similar browser
+            storage technologies as necessary to provide and
+            maintain its functionality, including authentication
+            sessions and language preferences. These technologies
+            are not used for advertising or behavioral tracking.
+          </span>
+
+        </span>
+
+        <br>
+
+        <a
+          class="source-link"
+          href="https://github.com/lemon967ace/S967site"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-i18n="sourceCode"
+        >
+          View source code
+        </a>
+
+      </footer>
+
+    </div>
+
+  </main>
+
+
+  <!-- =======================================================
+       PRIVACY POPUP
+       ======================================================= -->
+
+  <script>
+
+    const privacyInfoButton =
+      document.getElementById(
+        "privacyInfoButton"
+      );
+
+    const privacyPopover =
+      document.getElementById(
+        "privacyPopover"
+      );
+
+
+    privacyInfoButton.addEventListener(
+      "click",
+      (event) => {
+
+        event.stopPropagation();
+
+        const isOpen =
+          !privacyPopover.hidden;
+
+        privacyPopover.hidden =
+          isOpen;
+
+        privacyInfoButton.setAttribute(
+          "aria-expanded",
+          String(!isOpen)
+        );
+
+      }
+    );
+
+
+    privacyPopover.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+      }
+    );
+
+
+    document.addEventListener(
+      "click",
+      () => {
+
+        privacyPopover.hidden =
+          true;
+
+        privacyInfoButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+      }
+    );
+
+  </script>
+
+
+  <!-- =======================================================
+       ANNOUNCEMENT SYSTEM
+       ======================================================= -->
+
+  <script>
+
+    (() => {
+
+      const ANNOUNCEMENT_API =
+        "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
+
+
+      const ticker =
+        document.getElementById(
+          "announcementTicker"
+        );
+
+
+      const viewport =
+        document.getElementById(
+          "announcementViewport"
+        );
+
+
+      if (
+        !ticker ||
+        !viewport
+      ) {
+        return;
+      }
+
+
+      let pages = [];
+
+      let pageIndex = 0;
+
+      let timer = null;
+
+
+      function language() {
+
+        const value =
+
+          typeof getCurrentLanguage ===
+            "function"
+
+            ? getCurrentLanguage()
+
+            : (
+                localStorage.getItem(
+                  "s967_language"
+                ) ||
+                "en"
+              );
+
+
+        const resolved =
+
+          [
+            "ko",
+            "en",
+            "ja",
+            "ru",
+          ].includes(value)
+
+            ? value
+
+            : "en";
+
+
+        document.documentElement.lang =
+          resolved;
+
+
+        return resolved;
+
+      }
+
+
+      function splitByWords(text) {
+
+        const value =
+          String(text ?? "")
+            .trim();
+
+
+        if (!value) {
+          return [];
+        }
+
+
+        const width =
+          window.innerWidth;
+
+
+        const limit =
+
+          width <= 480
+
+            ? 44
+
+            : width <= 800
+
+              ? 72
+
+              : 112;
+
+
+        const words =
+          value.split(/\s+/);
+
+
+        if (
+          words.length <= 1
+        ) {
+          return [value];
+        }
+
+
+        const chunks = [];
+
+        let current = "";
+
+
+        for (
+          const word of words
+        ) {
+
+          const candidate =
+            current
+              ? `${current} ${word}`
+              : word;
+
+
+          if (
+            current &&
+            candidate.length > limit
+          ) {
+
+            chunks.push(
+              current
+            );
+
+            current =
+              word;
+
+          } else {
+
+            current =
+              candidate;
+
+          }
+
+        }
+
+
+        if (current) {
+          chunks.push(current);
+        }
+
+
+        return chunks;
+
+      }
+
+
+      function clearTimer() {
+
+        if (timer) {
+
+          clearInterval(timer);
+
+          timer = null;
+
+        }
+
+      }
+
+
+      function showPage(
+        nextIndex,
+        initial = false
+      ) {
+
+        if (!pages.length) {
+
+          ticker.hidden = true;
+
+          document.body.classList.remove(
+            "has-announcement"
+          );
+
+          viewport.replaceChildren();
+
+          return;
+
+        }
+
+
+        const old =
+          viewport.querySelector(
+            ".announcement-slide.is-active"
+          );
+
+
+        const next =
+          document.createElement(
+            "div"
+          );
+
+
+        next.className =
+          "announcement-slide";
+
+
+        next.textContent =
+          pages[nextIndex];
+
+
+        viewport.append(next);
+
+
+        requestAnimationFrame(
+          () => {
+
+            if (old) {
+
+              old.classList.remove(
+                "is-active"
+              );
+
+              old.classList.add(
+                "is-leaving"
+              );
+
+
+              setTimeout(
+                () => old.remove(),
+                480
+              );
+
+            }
+
+
+            next.classList.add(
+              "is-active"
+            );
+
+          }
+        );
+
+
+        pageIndex =
+          nextIndex;
+
+
+        if (initial) {
+
+          ticker.hidden =
+            false;
+
+          document.body.classList.add(
+            "has-announcement"
+          );
+
+        }
+
+      }
+
+
+      function start() {
+
+        clearTimer();
+
+
+        if (!pages.length) {
+          return;
+        }
+
+
+        timer =
+          setInterval(
+            () => {
+
+              showPage(
+                (
+                  pageIndex + 1
+                ) %
+                pages.length
+              );
+
+            },
+            5000
+          );
+
+      }
+
+
+      async function load() {
+
+        try {
+
+          const response =
+            await fetch(
+              ANNOUNCEMENT_API,
+              {
+                cache: "no-store",
+              }
+            );
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              "ANNOUNCEMENT_LOAD_FAILED"
+            );
+
+          }
+
+
+          const result =
+            await response.json();
+
+
+          const lang =
+            language();
+
+
+          pages =
+            (
+              result
+                .announcements ??
+              []
+            )
+              .flatMap(
+                (item) =>
+                  splitByWords(
+                    item
+                      ?.texts
+                      ?.[lang] ??
+                    item
+                      ?.texts
+                      ?.en ??
+                    ""
+                  )
+              )
+              .filter(Boolean);
+
+
+          pageIndex = 0;
+
+          viewport.replaceChildren();
+
+          clearTimer();
+
+
+          if (!pages.length) {
+
+            ticker.hidden = true;
+
+            document.body.classList.remove(
+              "has-announcement"
+            );
+
+            return;
+
+          }
+
+
+          showPage(
+            0,
+            true
+          );
+
+
+          start();
+
+        } catch (error) {
+
+          console.error(
+            "Announcement load failed:",
+            error
+          );
+
+
+          clearTimer();
+
+          ticker.hidden = true;
+
+          document.body.classList.remove(
+            "has-announcement"
+          );
+
+        }
+
+      }
+
+
+      window.addEventListener(
+        "resize",
+        () => {
+
+          clearTimeout(
+            window.__s967AnnouncementResizeTimer
+          );
+
+
+          window.__s967AnnouncementResizeTimer =
+            setTimeout(
+              load,
+              180
+            );
+
+        },
+        {
+          passive: true,
+        }
+      );
+
+
+      window.addEventListener(
+        "s967languagechange",
+        load
+      );
+
+
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+
+          if (
+            document.hidden
+          ) {
+
+            clearTimer();
+
+          } else {
+
+            load();
+
+          }
+
+        }
+      );
+
+
+      load();
+
+    })();
+
+  </script>
+
+</body>
+</html>
+  <style>
+
+    /* =========================================================
+       BASIC / PRIVACY
+       ========================================================= */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 100svh;
+
+      display: flex;
+      flex-direction: column;
+
+      background:
+        radial-gradient(
+          circle at 50% 15%,
+          rgba(255,255,255,.08),
+          transparent 34%
+        ),
+        linear-gradient(
+          145deg,
+          #111318 0%,
+          #171a21 50%,
+          #0e1014 100%
+        );
+
+      color: #f3f4f6;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    .operator-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .privacy-info-button {
+      border: 0;
+      padding: 0;
+      margin-left: 3px;
+
+      background: none;
+      color: inherit;
+
+      font: inherit;
+      font-size: .85em;
+
+      cursor: pointer;
+      opacity: .65;
+
+      vertical-align: baseline;
+    }
+
+    .privacy-info-button:hover {
+      opacity: 1;
+    }
+
+    .privacy-popover {
+      position: absolute;
+
+      left: 50%;
+      bottom: calc(100% + 8px);
+
+      transform: translateX(-50%);
+
+      width:
+        min(
+          340px,
+          calc(100vw - 32px)
+        );
+
+      padding: 10px 12px;
+
+      background: #fff;
+      color: #333;
+
+      border:
+        1px solid
+        rgba(0,0,0,.15);
+
+      border-radius: 8px;
+
+      box-shadow:
+        0 4px 16px
+        rgba(0,0,0,.15);
+
+      font-size: 12px;
+      line-height: 1.5;
+
+      text-align: left;
+
+      z-index: 1000;
+    }
+
+
+    /* =========================================================
+       TOP CORNER LINKS
+       ========================================================= */
+
+    .corner-links {
+      position: fixed;
+
+      top:
+        var(
+          --corner-control-edge,
+          clamp(18px, 1.15vw, 28px)
+        );
+
+      left:
+        var(
+          --corner-control-edge,
+          clamp(18px, 1.15vw, 28px)
+        );
+
+      z-index: 1100;
+
+      display: flex;
+      flex-direction: column;
+
+      gap:
+        var(
+          --corner-control-gap,
+          clamp(8px, .65vw, 16px)
+        );
+    }
+
+    .staff-link,
+    .map-link,
+    .chat-link {
+      width:
+        var(
+          --corner-control-size,
+          clamp(40px, 2.9vw, 70px)
+        );
+
+      height:
+        var(
+          --corner-control-size,
+          clamp(40px, 2.9vw, 70px)
+        );
+
+      padding: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        clamp(10px, .65vw, 15px);
+
+      background:
+        var(--surface-hover);
+
+      color:
+        var(--text);
+
+      text-decoration: none;
+
+      font-size:
+        clamp(1rem, 1.18vw, 1.65rem);
+
+      cursor: pointer;
+    }
+
+    .staff-link:hover,
+    .map-link:hover,
+    .chat-link:hover {
+      border-color:
+        var(--border-hover);
+    }
+
+
+    /* =========================================================
+       LANGUAGE / THEME
+       ========================================================= */
+
+    .top-pickers {
+      position: fixed;
+
+      right: 18px;
+      bottom: 18px;
+
+      z-index: 1100;
+
+      display: flex;
+      align-items: flex-end;
+
+      gap: 8px;
+    }
+
+    .top-pickers .language-picker,
+    .top-pickers .theme-picker {
+      position: relative;
+
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+    }
+
+    .top-pickers .language-menu,
+    .top-pickers .theme-menu {
+      top: auto;
+      bottom: calc(100% + 8px);
+      right: 0;
+    }
+
+
+    /* =========================================================
+       MAIN
+       ========================================================= */
+
+    main {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+      min-height: 0;
+
+      padding:
+        clamp(52px, 6.5svh, 76px)
+        clamp(14px, 4vw, 40px)
+        clamp(10px, 1.6svh, 18px);
+
+      overflow: hidden;
+    }
+
+
+    /* =========================================================
+       ANNOUNCEMENT
+       ========================================================= */
+
+    .announcement-ticker {
+      position: relative;
+
+      flex: 0 0 auto;
+
+      width: 100vw;
+
+      height:
+        clamp(
+          38px,
+          5svh,
+          44px
+        );
+
+      min-height: 0;
+
+      margin:
+        calc(
+          -1 *
+          clamp(
+            52px,
+            6.5svh,
+            76px
+          )
+        )
+        0
+        0;
+
+      margin-left:
+        calc(50% - 50vw);
+
+      border: 0;
+      border-radius: 0;
+
+      background:
+        rgba(18,18,16,.95);
+
+      box-shadow:
+        0 4px 14px
+        rgba(0,0,0,.12);
+
+      overflow: hidden;
+
+      z-index: 10;
+    }
+
+    .announcement-ticker[hidden] {
+      display: none !important;
+    }
+
+    .announcement-label {
+      position: absolute;
+
+      z-index: 2;
+
+      top: 2px;
+      left: 12px;
+
+      padding: 0;
+
+      color: #d3a900;
+
+      font-size:
+        clamp(
+          .48rem,
+          min(1.45vw,.82svh),
+          .58rem
+        );
+
+      font-weight: 850;
+      letter-spacing: .1em;
+
+      text-transform: uppercase;
+    }
+
+    .announcement-viewport {
+      position: relative;
+
+      width: 100%;
+      height: 100%;
+
+      overflow: hidden;
+    }
+
+    .announcement-slide {
+      position: absolute;
+
+      inset: 0;
+
+      display: -webkit-box;
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      padding:
+        8px
+        clamp(12px,4vw,48px)
+        3px;
+
+      color: #f0c400;
+
+      font-size:
+        clamp(
+          .78rem,
+          min(2.2vw,1.5svh),
+          1rem
+        );
+
+      font-weight: 800;
+
+      line-height: 1.2;
+
+      text-align: center;
+
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+
+      overflow: hidden;
+
+      opacity: 0;
+
+      transform:
+        translateY(110%);
+
+      transition:
+        transform 420ms ease,
+        opacity 420ms ease;
+    }
+
+    .announcement-slide.is-active {
+      opacity: 1;
+
+      transform:
+        translateY(0);
+    }
+
+    .announcement-slide.is-leaving {
+      opacity: 0;
+
+      transform:
+        translateY(-110%);
+    }
+
+
+    /* =========================================================
+       HOME CONTENT
+       ========================================================= */
+
+    .home-content {
+      width: 100%;
+      height: calc(100% - 0px);
+
+      display: grid;
+
+      grid-template-columns: 1fr;
+
+      grid-template-rows:
+        clamp(20px,3.2svh,48px)
+        auto
+        minmax(
+          clamp(52px,7.5svh,100px),
+          1fr
+        )
+        auto
+        minmax(
+          clamp(18px,2.6svh,34px),
+          .38fr
+        )
+        auto;
+
+      align-items: center;
+      justify-items: center;
+
+      min-height: 0;
+    }
+
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .home-hero {
+      grid-row: 2;
+
+      width: 100%;
+
+      align-self: start;
+
+      margin: 0;
+
+      text-align: center;
+    }
+
+    .server {
+      margin: 0;
+
+      font-size:
+        clamp(
+          3.45rem,
+          min(13vw,11.5svh),
+          7rem
+        );
+
+      line-height: .9;
+
+      letter-spacing: -.055em;
+
+      font-weight: 800;
+    }
+
+    .headline {
+      margin:
+        clamp(11px,1.8svh,22px)
+        0
+        0;
+
+      font-size:
+        clamp(
+          1rem,
+          min(3.3vw,2.7svh),
+          1.72rem
+        );
+
+      line-height: 1.18;
+
+      font-weight: 650;
+
+      letter-spacing: -.02em;
+    }
+
+    .tagline {
+      margin:
+        clamp(5px,.85svh,10px)
+        0
+        0;
+
+      font-size:
+        clamp(
+          .76rem,
+          min(2.2vw,1.7svh),
+          1rem
+        );
+
+      color: #aeb4bf;
+
+      line-height: 1.2;
+
+      letter-spacing: .01em;
+    }
+
+
+    /* =========================================================
+       BUTTON GROUP
+       ========================================================= */
+
+    .buttons {
+      grid-row: 4;
+
+      align-self: center;
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0,1fr)
+        );
+
+      width:
+        min(
+          440px,
+          calc(100vw - 32px)
+        );
+
+      max-width: 440px;
+
+      margin: 0;
+
+      /*
+        기본 데스크톱 간격.
+        기존보다 조금 넓게 설정.
+      */
+      gap:
+        clamp(12px,1.35vw,20px)
+        clamp(14px,1.8vw,24px);
+    }
+
+    .button {
+      min-width: 0;
+
+      width: 100%;
+
+      min-height: 48px;
+
+      padding:
+        clamp(10px,1.35svh,14px)
+        clamp(14px,2vw,22px);
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      border:
+        1px solid
+        rgba(255,255,255,.18);
+
+      border-radius: 12px;
+
+      background:
+        rgba(255,255,255,.07);
+
+      color: #f7f7f8;
+
+      text-decoration: none;
+
+      font-size:
+        clamp(
+          .86rem,
+          min(2.1vw,1.55svh),
+          .98rem
+        );
+
+      font-weight: 650;
+
+      line-height: 1.15;
+
+      text-align: center;
+
+      transition:
+        transform 160ms ease,
+        background 160ms ease,
+        border-color 160ms ease;
+
+      backdrop-filter:
+        blur(10px);
+
+      -webkit-backdrop-filter:
+        blur(10px);
+    }
+
+    .button:hover {
+      transform:
+        translateY(-2px);
+
+      background:
+        rgba(255,255,255,.12);
+
+      border-color:
+        rgba(255,255,255,.32);
+    }
+
+    .button:active {
+      transform:
+        translateY(0);
+    }
+
+    .group-buy-button {
+      grid-column: 1 / -1;
+    }
+
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    footer {
+      grid-row: 6;
+
+      align-self: end;
+
+      width: 100%;
+
+      margin: 0;
+      padding: 0;
+
+      text-align: center;
+
+      color: #626875;
+
+      font-size:
+        clamp(
+          .58rem,
+          min(1.55vw,1.05svh),
+          .72rem
+        );
+
+      line-height: 1.24;
+
+      letter-spacing: .08em;
+
+      text-transform: uppercase;
+    }
+
+    .source-link {
+      display: inline-block;
+
+      margin-top:
+        clamp(
+          2px,
+          .45svh,
+          5px
+        );
+
+      color: #555c68;
+
+      font-size:
+        clamp(
+          .54rem,
+          min(1.35vw,.95svh),
+          .66rem
+        );
+
+      letter-spacing: .03em;
+
+      text-transform: none;
+
+      text-decoration: none;
+    }
+
+    .source-link:hover {
+      color: #8c939f;
+
+      text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       LARGE DESKTOP
+       1440px+
+       버튼 그룹을 조금 넓히고 간격을 확실히 확보
+       ========================================================= */
+
+    @media (min-width: 1440px) and (min-height: 800px) {
+
+      .buttons {
+        width:
+          clamp(
+            440px,
+            30vw,
+            500px
+          );
+
+        max-width: 500px;
+
+        gap:
+          clamp(16px,1.35vw,24px)
+          clamp(20px,1.8vw,30px);
+      }
+
+      .button {
+        min-height: 52px;
+
+        padding:
+          12px
+          22px;
+
+        font-size:
+          clamp(
+            .92rem,
+            1vw,
+            1.05rem
+          );
+      }
+    }
+
+
+    /* =========================================================
+       QHD
+       2560px+
+       화면이 충분히 크면 버튼 사이를 더 넓게
+       ========================================================= */
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+
+      .server {
+        font-size:
+          clamp(
+            6.2rem,
+            min(6vw,10svh),
+            8.4rem
+          );
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            1.45rem,
+            min(1.55vw,2.35svh),
+            2rem
+          );
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            .95rem,
+            min(1vw,1.55svh),
+            1.25rem
+          );
+      }
+
+      .buttons {
+        width:
+          clamp(
+            500px,
+            25vw,
+            620px
+          );
+
+        max-width: 620px;
+
+        /*
+          화면이 커질수록 버튼 사이 공간도 증가
+        */
+        gap:
+          clamp(20px,1.1vw,32px)
+          clamp(24px,1.6vw,38px);
+      }
+
+      .button {
+        min-height: 58px;
+
+        padding:
+          14px
+          26px;
+
+        font-size:
+          clamp(
+            1rem,
+            min(.9vw,1.45svh),
+            1.18rem
+          );
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .68rem,
+            min(.6vw,.95svh),
+            .82rem
+          );
+      }
+
+      .source-link {
+        font-size:
+          clamp(
+            .62rem,
+            min(.53vw,.85svh),
+            .76rem
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(28px,3.8svh,72px)
+          auto
+          minmax(
+            clamp(84px,8svh,150px),
+            1fr
+          )
+          auto
+          minmax(
+            clamp(28px,2.8svh,50px),
+            .34fr
+          )
+          auto;
+      }
+    }
+
+
+    /* =========================================================
+       4K
+       2560px+
+       ========================================================= */
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+
+      .server {
+        font-size:
+          clamp(
+            8rem,
+            min(6.2vw,10.5svh),
+            11rem
+          );
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            1.8rem,
+            min(1.4vw,2.4svh),
+            2.55rem
+          );
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            1.15rem,
+            min(.9vw,1.5svh),
+            1.55rem
+          );
+      }
+
+      .buttons {
+        width:
+          clamp(
+            600px,
+            24vw,
+            760px
+          );
+
+        max-width: 760px;
+
+        /*
+          4K에서는 버튼끼리 확실하게 분리
+        */
+        gap:
+          clamp(24px,1vw,38px)
+          clamp(28px,1.35vw,44px);
+      }
+
+      .button {
+        min-height: 68px;
+
+        padding:
+          16px
+          30px;
+
+        font-size:
+          clamp(
+            1.12rem,
+            min(.75vw,1.35svh),
+            1.42rem
+          );
+
+        border-radius:
+          clamp(
+            12px,
+            .55vw,
+            18px
+          );
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .78rem,
+            min(.48vw,.9svh),
+            .96rem
+          );
+      }
+
+      .source-link {
+        font-size:
+          clamp(
+            .7rem,
+            min(.43vw,.78svh),
+            .88rem
+          );
+      }
+    }
+
+
+    /* =========================================================
+       ULTRA LARGE
+       3400px+
+       ========================================================= */
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+
+      .buttons {
+        width:
+          clamp(
+            720px,
+            20vw,
+            900px
+          );
+
+        max-width: 900px;
+
+        gap:
+          clamp(30px,.9vw,48px)
+          clamp(34px,1.2vw,54px);
+      }
+
+      .button {
+        min-height: 78px;
+
+        padding:
+          18px
+          34px;
+
+        font-size:
+          clamp(
+            1.3rem,
+            min(.68vw,1.25svh),
+            1.62rem
+          );
+      }
+
+      .server {
+        font-size:
+          clamp(
+            9.5rem,
+            min(5.4vw,9.8svh),
+            13rem
+          );
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            2.15rem,
+            min(1.15vw,2.1svh),
+            3rem
+          );
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            1.35rem,
+            min(.72vw,1.3svh),
+            1.8rem
+          );
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .88rem,
+            min(.4vw,.8svh),
+            1.08rem
+          );
+      }
+    }
+
+
+    /* =========================================================
+       MOBILE
+       600px 이하
+       
+       여기서 버튼을 확실하게 키움.
+       ========================================================= */
+
+    @media (max-width: 600px) {
+
+      main {
+        padding:
+          clamp(48px,6svh,64px)
+          14px
+          clamp(8px,1.2svh,14px);
+      }
+
+      .corner-links {
+        top:
+          clamp(
+            14px,
+            2svh,
+            20px
+          );
+
+        left:
+          14px;
+
+        gap: 8px;
+      }
+
+      .staff-link,
+      .map-link,
+      .chat-link {
+        width: 40px;
+        height: 40px;
+
+        font-size: 1rem;
+
+        border-radius: 10px;
+      }
+
+      .top-pickers {
+        right: 14px;
+        bottom: 14px;
+
+        gap: 8px;
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(10px,1.7svh,20px)
+          auto
+          minmax(
+            clamp(18px,3.2svh,34px),
+            .55fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .22fr
+          )
+          auto;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            3.35rem,
+            15vw,
+            5rem
+          );
+      }
+
+      .headline {
+        margin-top: 12px;
+
+        font-size:
+          clamp(
+            1.05rem,
+            4.4vw,
+            1.35rem
+          );
+      }
+
+      .tagline {
+        margin-top: 6px;
+
+        font-size:
+          clamp(
+            .78rem,
+            3.2vw,
+            .95rem
+          );
+      }
+
+
+      /* =====================================================
+         MOBILE BUTTONS
+         ===================================================== */
+
+      .buttons {
+        display: flex;
+
+        flex-direction: column;
+        flex-wrap: nowrap;
+
+        width:
+          min(
+            370px,
+            calc(100vw - 28px)
+          );
+
+        max-width: 370px;
+
+        gap:
+          8px;
+
+        margin: 0;
+      }
+
+      .button,
+      .group-buy-button {
+        flex: 0 0 auto;
+
+        width: 100%;
+
+        /*
+          모바일에서 얇아 보이지 않도록
+          버튼 자체 높이를 확실히 확보
+        */
+        min-height: 48px;
+
+        padding:
+          11px
+          14px;
+
+        font-size:
+          clamp(
+            .92rem,
+            2.1svh,
+            1.06rem
+          );
+
+        font-weight: 700;
+
+        line-height: 1.2;
+
+        border-radius: 12px;
+      }
+
+      .group-buy-button {
+        grid-column: auto;
+      }
+
+
+      footer {
+        width: 100%;
+
+        font-size:
+          clamp(
+            .52rem,
+            .92svh,
+            .62rem
+          );
+
+        line-height: 1.17;
+      }
+
+      .source-link {
+        margin-top: 2px;
+
+        font-size:
+          clamp(
+            .5rem,
+            .84svh,
+            .58rem
+          );
+      }
+
+
+      .announcement-ticker {
+        height:
+          clamp(
+            36px,
+            4.8svh,
+            42px
+          );
+
+        margin-top:
+          calc(
+            -1 *
+            clamp(
+              48px,
+              6svh,
+              64px
+            )
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          9px
+          12px
+          3px;
+
+        font-size:
+          clamp(
+            .74rem,
+            1.42svh,
+            .92rem
+          );
+      }
+    }
+
+
+    /* =========================================================
+       VERY SHORT MOBILE
+       ========================================================= */
+
+    @media (max-width: 600px) and (max-height: 720px) {
+
+      main {
+        padding-top:
+          clamp(
+            42px,
+            5.5svh,
+            54px
+          );
+
+        padding-bottom: 5px;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            2.9rem,
+            min(10vw,9svh),
+            5.1rem
+          );
+      }
+
+      .headline {
+        margin-top: 7px;
+
+        font-size:
+          clamp(
+            .9rem,
+            2.25svh,
+            1.22rem
+          );
+      }
+
+      .tagline {
+        margin-top: 3px;
+
+        font-size:
+          clamp(
+            .68rem,
+            1.5svh,
+            .84rem
+          );
+      }
+
+      .buttons {
+        gap: 6px;
+      }
+
+      .button,
+      .group-buy-button {
+        min-height: 44px;
+
+        padding:
+          9px
+          12px;
+
+        font-size:
+          clamp(
+            .86rem,
+            1.8svh,
+            .98rem
+          );
+      }
+
+      footer {
+        font-size: .54rem;
+
+        line-height: 1.14;
+      }
+
+      .announcement-ticker {
+        height: 34px;
+
+        margin-top:
+          calc(
+            -1 *
+            clamp(
+              42px,
+              5.5svh,
+              54px
+            )
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          7px
+          10px
+          2px;
+
+        font-size: .69rem;
+      }
+    }
+
+
+    /* =========================================================
+       EXTREMELY SHORT SCREEN
+       ========================================================= */
+
+    @media (max-height: 600px) {
+
+      main {
+        padding-top: 36px;
+        padding-bottom: 3px;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            2.45rem,
+            min(8vw,7.5svh),
+            3.9rem
+          );
+      }
+
+      .headline {
+        margin-top: 5px;
+
+        font-size: .82rem;
+      }
+
+      .tagline {
+        margin-top: 2px;
+
+        font-size: .62rem;
+      }
+
+      .buttons {
+        gap: 5px;
+      }
+
+      .button,
+      .group-buy-button {
+        min-height: 40px;
+
+        padding:
+          7px
+          10px;
+
+        font-size: .78rem;
+      }
+
+      footer {
+        font-size: .48rem;
+
+        line-height: 1.1;
+      }
+
+      .source-link {
+        font-size: .46rem;
+      }
+
+      .announcement-ticker {
+        height: 30px;
+
+        margin-top: -36px;
+      }
+
+      .announcement-slide {
+        padding:
+          6px
+          9px
+          1px;
+
+        font-size: .65rem;
+      }
+    }
+
+
+    /* =========================================================
+       MOBILE SAFE AREA
+       ========================================================= */
+
+    @media (max-width: 480px) {
+
+      .top-pickers {
+        right: 14px;
+        bottom:
+          max(
+            14px,
+            env(safe-area-inset-bottom)
+          );
+      }
+
+      .privacy-popover {
+        width:
+          calc(100vw - 32px);
+      }
+    }
+
+  
+    /* =========================================================
+       ANNOUNCEMENT / CORNER LINKS OFFSET
+       공지가 보일 때 좌측 상단 Staff / Chat / Map 버튼을
+       공지 배너 아래로 자연스럽게 내려줍니다.
+       ========================================================= */
+
+    body.has-announcement .corner-links {
+      top:
+        calc(
+          var(
+            --corner-control-edge,
+            clamp(18px, 1.15vw, 28px)
+          )
+          +
+          clamp(38px, 5svh, 44px)
+          +
+          6px
+        );
+    }
+
+    /* 제목 위 여백은 기존보다 아주 조금만 증가 */
+    .home-content {
+      grid-template-rows:
+        clamp(24px,3.6svh,54px)
+        auto
+        minmax(
+          clamp(52px,7.5svh,100px),
+          1fr
+        )
+        auto
+        minmax(
+          clamp(18px,2.6svh,34px),
+          .38fr
+        )
+        auto;
+    }
+
+    @media (max-width: 600px) {
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            clamp(14px,2svh,20px)
+            +
+            clamp(36px,4.8svh,42px)
+            +
+            5px
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(12px,2svh,23px)
+          auto
+          minmax(
+            clamp(18px,3.2svh,34px),
+            .55fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .22fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            clamp(12px,1.7svh,18px)
+            +
+            34px
+            +
+            4px
+          );
+      }
+    }
+
+    @media (max-height: 600px) {
+      body.has-announcement .corner-links {
+        top: 40px;
+      }
+    }
+
+  
+    /* =========================================================
+       ANNOUNCEMENT LARGE DISPLAY SCALING
+       일반 화면의 배너 높이는 유지하고,
+       QHD/4K 이상에서만 배너와 글씨를 함께 확대합니다.
+       ========================================================= */
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            44px,
+            3.2svh,
+            52px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          9px
+          clamp(22px,3vw,64px)
+          4px;
+
+        font-size:
+          clamp(
+            .94rem,
+            min(.86vw,1.32svh),
+            1.12rem
+          );
+      }
+
+      .announcement-label {
+        top: 3px;
+        left: 16px;
+
+        font-size:
+          clamp(
+            .54rem,
+            min(.5vw,.78svh),
+            .64rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(44px,3.2svh,52px)
+            +
+            7px
+          );
+      }
+    }
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            52px,
+            3.4svh,
+            64px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          11px
+          clamp(28px,3vw,84px)
+          5px;
+
+        font-size:
+          clamp(
+            1.12rem,
+            min(.76vw,1.28svh),
+            1.36rem
+          );
+      }
+
+      .announcement-label {
+        top: 4px;
+        left: 20px;
+
+        font-size:
+          clamp(
+            .62rem,
+            min(.42vw,.7svh),
+            .76rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(52px,3.4svh,64px)
+            +
+            8px
+          );
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            62px,
+            3.6svh,
+            76px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          13px
+          clamp(36px,2.8vw,104px)
+          6px;
+
+        font-size:
+          clamp(
+            1.28rem,
+            min(.64vw,1.18svh),
+            1.52rem
+          );
+      }
+
+      .announcement-label {
+        top: 5px;
+        left: 24px;
+
+        font-size:
+          clamp(
+            .70rem,
+            min(.36vw,.62svh),
+            .84rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(62px,3.6svh,76px)
+            +
+            9px
+          );
+      }
+    }
+
+  
+    /* =========================================================
+       ROOT SCROLL / MOBILE PULL-TO-REFRESH
+       콘텐츠는 여전히 한 화면 안에 맞추되,
+       브라우저의 세로 스크롤/오버스크롤 제스처는 막지 않습니다.
+       ========================================================= */
+
+    html {
+      height: auto !important;
+      min-height: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+    }
+
+    body {
+      height: auto !important;
+      min-height: 100svh !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+      touch-action: pan-y !important;
+    }
+
+    main {
+      min-height: 100svh !important;
+      height: 100svh !important;
+      overflow: hidden !important;
+    }
+
+  
+    /* =========================================================
+       ANNOUNCEMENT: ONE LINE / NO LABEL
+       ========================================================= */
+
+    .announcement-label {
+      display: none !important;
+    }
+
+    .announcement-slide {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+
+      white-space: nowrap !important;
+      -webkit-line-clamp: 1 !important;
+      -webkit-box-orient: initial !important;
+
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+
+      line-height: 1 !important;
+
+      font-size:
+        clamp(
+          .86rem,
+          min(2.35vw,1.7svh),
+          1.08rem
+        ) !important;
+    }
+
+    @media (max-width: 600px) {
+      .announcement-slide {
+        font-size:
+          clamp(
+            .80rem,
+            1.58svh,
+            .98rem
+          ) !important;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      .announcement-slide {
+        font-size: .76rem !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .announcement-slide {
+        font-size: .70rem !important;
+      }
+    }
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+      .announcement-slide {
+        font-size:
+          clamp(
+            1.02rem,
+            min(.92vw,1.45svh),
+            1.22rem
+          ) !important;
+      }
+    }
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .announcement-slide {
+        font-size:
+          clamp(
+            1.22rem,
+            min(.82vw,1.42svh),
+            1.48rem
+          ) !important;
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .announcement-slide {
+        font-size:
+          clamp(
+            1.40rem,
+            min(.70vw,1.32svh),
+            1.66rem
+          ) !important;
+      }
+    }
+
+  
+    /* =========================================================
+       MOBILE HERO ENLARGEMENT
+       모바일에서만 S967 / headline / tagline 3줄을 크게 표시하고,
+       화면 높이에 따라 위 여백과 줄 사이 간격을 넓힙니다.
+       ========================================================= */
+
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(24px,4.2svh,52px)
+          auto
+          minmax(
+            clamp(18px,3svh,34px),
+            .42fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .18fr
+          )
+          auto;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            4.35rem,
+            min(21vw,15.8svh),
+            7.4rem
+          );
+      }
+
+      .headline {
+        margin-top:
+          clamp(
+            16px,
+            2.7svh,
+            28px
+          );
+
+        font-size:
+          clamp(
+            1.40rem,
+            min(6.2vw,4.1svh),
+            2.05rem
+          );
+
+        line-height: 1.15;
+      }
+
+      .tagline {
+        margin-top:
+          clamp(
+            9px,
+            1.55svh,
+            16px
+          );
+
+        font-size:
+          clamp(
+            1.02rem,
+            min(4.6vw,2.7svh),
+            1.40rem
+          );
+
+        line-height: 1.18;
+      }
+    }
+
+    @media (max-width: 600px) and (min-height: 780px) {
+      .home-content {
+        grid-template-rows:
+          clamp(34px,5.2svh,66px)
+          auto
+          minmax(
+            clamp(24px,3.6svh,42px),
+            .46fr
+          )
+          auto
+          minmax(
+            clamp(10px,1.5svh,20px),
+            .18fr
+          )
+          auto;
+      }
+
+      .headline {
+        margin-top:
+          clamp(
+            18px,
+            3svh,
+            32px
+          );
+      }
+
+      .tagline {
+        margin-top:
+          clamp(
+            10px,
+            1.8svh,
+            18px
+          );
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          clamp(18px,3svh,32px)
+          auto
+          minmax(
+            clamp(12px,2svh,22px),
+            .34fr
+          )
+          auto
+          minmax(
+            5px,
+            .12fr
+          )
+          auto;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            3.75rem,
+            min(18vw,13svh),
+            5.8rem
+          );
+      }
+
+      .headline {
+        margin-top:
+          clamp(
+            11px,
+            1.9svh,
+            16px
+          );
+
+        font-size:
+          clamp(
+            1.15rem,
+            min(5.2vw,3.2svh),
+            1.55rem
+          );
+      }
+
+      .tagline {
+        margin-top:
+          clamp(
+            6px,
+            1svh,
+            9px
+          );
+
+        font-size:
+          clamp(
+            .86rem,
+            min(4vw,2.1svh),
+            1.08rem
+          );
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 600px) {
+      .server {
+        font-size:
+          clamp(
+            3.25rem,
+            min(16vw,11.5svh),
+            4.9rem
+          );
+      }
+
+      .headline {
+        margin-top: 8px;
+
+        font-size:
+          clamp(
+            1rem,
+            min(4.7vw,2.8svh),
+            1.3rem
+          );
+      }
+
+      .tagline {
+        margin-top: 4px;
+
+        font-size:
+          clamp(
+            .76rem,
+            min(3.6vw,1.9svh),
+            .96rem
+          );
+      }
+    }
+
+  
+    /* =========================================================
+       MOBILE HERO → BUTTON SPACING
+       모바일에서 제목 3줄과 버튼 그룹 사이의 빈 공간만 줄입니다.
+       ========================================================= */
+
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(24px,4.2svh,52px)
+          auto
+          minmax(
+            clamp(6px,1.2svh,14px),
+            .16fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (min-height: 780px) {
+      .home-content {
+        grid-template-rows:
+          clamp(34px,5.2svh,66px)
+          auto
+          minmax(
+            clamp(8px,1.4svh,16px),
+            .18fr
+          )
+          auto
+          minmax(
+            clamp(10px,1.5svh,20px),
+            .18fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          clamp(18px,3svh,32px)
+          auto
+          minmax(
+            4px,
+            .08fr
+          )
+          auto
+          minmax(
+            5px,
+            .12fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(12px,2.2svh,22px)
+          auto
+          3px
+          auto
+          4px
+          auto;
+      }
+    }
+
   </style>
 </head>
 
