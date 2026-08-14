@@ -523,11 +523,73 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       return;
     }
     if (rangeController?.getState().mode === "rangeCreate" && cell) { rangeController.click(cell); onRangeStateChange(rangeController.getState()); invalidate(); return; }
-    const building = hitTestBuildings(sceneX, sceneY, filterHitGeometries(visibleBuildingGeometries()), interaction.selectedBuildingId);
-    controller?.selectBuilding(building && (!building.fixed || editableFixed) ? building.id : null);
-    if (!building && cell && rangeController) { const selectedRange = rangeController.selectAtCell(cell); onRangeSelectionChange(selectedRange); }
-    else if (building && rangeController) { rangeController.selectAtCell([-1, -1]); onRangeSelectionChange(null); }
-    if (interaction.select(building?.id)) { onSelectionChange(building ?? null); invalidate(); }
+    const building =
+      hitTestBuildings(
+        sceneX,
+        sceneY,
+        filterHitGeometries(
+          visibleBuildingGeometries()
+        ),
+        interaction.selectedBuildingId
+      );
+
+    controller?.selectBuilding(
+      building &&
+      (
+        !building.fixed ||
+        editableFixed
+      )
+        ? building.id
+        : null
+    );
+
+    if (
+      !building &&
+      cell &&
+      rangeController
+    ) {
+      const selectedRange =
+        rangeController
+          .selectAtCell(
+            cell
+          );
+
+      /*
+        Map click and list click now drive the exact same selected-range state.
+        The panel is refreshed immediately, so the clicked range can be edited
+        without first finding it in the range list.
+      */
+      onRangeSelectionChange(
+        selectedRange
+      );
+      onSelectionChange(
+        null
+      );
+    } else if (
+      building &&
+      rangeController
+    ) {
+      rangeController
+        .selectAtCell(
+          [-1, -1]
+        );
+      onRangeSelectionChange(
+        null
+      );
+    }
+
+    if (
+      interaction.select(
+        building?.id
+      )
+    ) {
+      onSelectionChange(
+        building ??
+        null
+      );
+    }
+
+    invalidate();
   }
 
   function filterHitGeometries(items) { return buildingFilter ? items.filter(item => item.building.fixed || buildingFilter.appearance(item.building, interaction.selectedBuildingId).hitTest) : items; }
