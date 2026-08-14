@@ -622,7 +622,30 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         eventCell(event);
 
       if (cell) {
-        rangeController.click(cell);
+        const rangeState =
+          rangeController.getState();
+
+        /*
+          Range는 "첫 클릭 = 시작점", "두 번째 클릭 = 끝점"이다.
+
+          예전 코드는 pointerdown과 pointerup 양쪽에서 click()을
+          호출해서 한 번의 실제 마우스 클릭을 두 번의 범위 클릭처럼
+          취급할 수 있었다.
+
+          이제 첫 번째 실제 클릭의 pointerdown에서만 시작점을 잡고,
+          두 번째 실제 클릭은 pointerup에서 확정한다.
+        */
+        if (!rangeState.startCell) {
+          try {
+            rangeController.click(cell);
+          } catch (error) {
+            globalThis.alert?.(
+              error?.message ??
+              String(error)
+            );
+          }
+        }
+
         rangeDrawing =
           event.pointerId;
 
@@ -635,6 +658,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         );
 
         event.preventDefault();
+        invalidate();
         return;
       }
     }
@@ -875,7 +899,48 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       else rangeEraseController.cancel();
       onRangeEraseStateChange(rangeEraseController.getState()); invalidate(); return;
     }
-    if (rangeDrawing === event.pointerId) { const cell = eventCell(event); if (cell) rangeController.click(cell); rangeDrawing = null; if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId); onRangeStateChange(rangeController.getState()); invalidate(); return; }
+    if (
+      rangeDrawing ===
+      event.pointerId
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        try {
+          /*
+            첫 클릭의 pointerup은 시작점과 같은 셀이므로
+            controller가 무시한다.
+            두 번째 클릭의 pointerup은 다른 셀이므로 여기서 즉시 확정된다.
+          */
+          rangeController.click(cell);
+        } catch (error) {
+          globalThis.alert?.(
+            error?.message ??
+            String(error)
+          );
+        }
+      }
+
+      rangeDrawing = null;
+
+      if (
+        canvas.hasPointerCapture(
+          event.pointerId
+        )
+      ) {
+        canvas.releasePointerCapture(
+          event.pointerId
+        );
+      }
+
+      onRangeStateChange(
+        rangeController.getState()
+      );
+
+      invalidate();
+      return;
+    }
     const wasPanning = panning?.pointerId === event.pointerId;
     const candidate = clickCandidate?.pointerId === event.pointerId ? clickCandidate : null;
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
