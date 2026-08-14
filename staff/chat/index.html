@@ -17,7 +17,7 @@
     button,input,textarea{font:inherit;color:inherit}
     button{cursor:pointer}
     .hidden{display:none!important}
-    .app{width:min(1180px,100%);height:100dvh;margin:0 auto;padding:12px 12px 76px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px}
+    .app{width:min(1180px,100%);height:100dvh;margin:0 auto;padding:12px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px}
     .panel{border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:15px}
     .sidebar{min-height:0;padding:10px;display:flex;flex-direction:column;gap:8px}
     .side-head{display:flex;align-items:center;gap:6px}
@@ -97,7 +97,7 @@
     .danger-button{color:#c2410c}
 
     @media(max-width:760px){
-      .app{height:100dvh;padding:7px 7px 68px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+      .app{height:100dvh;padding:7px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
       .sidebar{min-height:auto;padding:7px}
       .rooms{display:flex;overflow:auto;gap:5px}
       .room-button{width:auto;min-width:max-content}
@@ -107,98 +107,11 @@
       .message{max-width:88%}
       .actor{display:none}
     }
-
-    /* Shared bottom-right Language + Theme controls */
-    .top-pickers{
-      position:fixed;
-      right:18px;
-      bottom:18px;
-      z-index:1400;
-      display:flex;
-      align-items:flex-end;
-      gap:8px;
-    }
-    .top-pickers .language-picker,
-    .top-pickers .theme-picker{
-      position:relative;
-      inset:auto;
-    }
-    .top-pickers .language-menu,
-    .top-pickers .theme-menu{
-      top:auto;
-      right:0;
-      bottom:calc(100% + 8px);
-    }
-    @media(max-width:480px){
-      .top-pickers{
-        right:14px;
-        bottom:14px;
-      }
-    }
-
-
-    .message-pending {
-      opacity: .72;
-    }
-
-    .message-pending::after {
-      content: "…";
-      display: inline-block;
-      margin-left: 6px;
-      color: var(--muted);
-      font-size: .78rem;
-      vertical-align: middle;
-    }
-  </style>
+  
+    .message.search-hit{outline:2px solid currentColor;outline-offset:3px}
+</style>
 </head>
 <body>
-
-  <div class="top-pickers">
-    <div class="language-picker" data-language-picker>
-      <button
-        class="language-button"
-        type="button"
-        data-language-button
-        aria-label="Language"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >🌐</button>
-
-      <div class="language-menu" data-language-menu role="menu">
-        <button type="button" data-language-choice="ko" role="menuitemradio">한국어</button>
-        <button type="button" data-language-choice="en" role="menuitemradio">English</button>
-        <button type="button" data-language-choice="ja" role="menuitemradio">日本語</button>
-        <button type="button" data-language-choice="ru" role="menuitemradio">Русский</button>
-      </div>
-    </div>
-
-    <div class="theme-picker" data-theme-picker>
-      <button
-        class="theme-button"
-        type="button"
-        data-theme-button
-        aria-label="Theme"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >◐</button>
-
-      <div class="theme-menu" data-theme-menu role="menu">
-        <button type="button" data-theme-choice="system" role="menuitemradio">
-          <span class="theme-choice-icon">◐</span>
-          <span data-i18n="themeSystem">System</span>
-        </button>
-        <button type="button" data-theme-choice="light" role="menuitemradio">
-          <span class="theme-choice-icon">☀</span>
-          <span data-i18n="themeLight">Light</span>
-        </button>
-        <button type="button" data-theme-choice="dark" role="menuitemradio">
-          <span class="theme-choice-icon">☾</span>
-          <span data-i18n="themeDark">Dark</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <section id="gate" class="gate">
     <h1 id="gateTitle">Staff Chat</h1>
     <p id="gateMessage">Checking access…</p>
@@ -327,6 +240,7 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
     const FALLBACK_POLL_MS = 15000;
+    const MESSAGE_BATCH_SIZE = 20;
     const MAX_FILES = 5;
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
@@ -353,64 +267,9 @@
     let fallbackTimer = null;
     let refreshTimer = null;
     let notificationBaseline = null;
+    let loadingOlder = false;
+    let initialUnreadAnchor = null;
     const messageMap = new Map();
-    let optimisticSequence = 0;
-    const pendingMessageIds = new Set();
-
-    function makeOptimisticMessageId(){
-      optimisticSequence += 1;
-      return `local-${Date.now()}-${optimisticSequence}`;
-    }
-
-    function cloneReactionState(message){
-      return {
-        reactions: Array.isArray(message.reactions)
-          ? message.reactions.map(item => ({...item}))
-          : [],
-        my_reaction: message.my_reaction ?? null,
-      };
-    }
-
-    function setOptimisticReaction(message, emoji){
-      const previous = message.my_reaction ?? null;
-      const reactions = Array.isArray(message.reactions)
-        ? message.reactions.map(item => ({...item}))
-        : [];
-
-      const byEmoji = new Map(
-        reactions.map(item => [
-          item.emoji,
-          {
-            emoji: item.emoji,
-            count: Number(item.count ?? 0),
-          },
-        ])
-      );
-
-      if(previous){
-        const item = byEmoji.get(previous);
-        if(item){
-          item.count = Math.max(0, item.count - 1);
-          if(item.count === 0) byEmoji.delete(previous);
-          else byEmoji.set(previous, item);
-        }
-      }
-
-      const next = previous === emoji ? null : emoji;
-
-      if(next){
-        const item = byEmoji.get(next) ?? {emoji: next, count: 0};
-        item.count += 1;
-        byEmoji.set(next, item);
-      }
-
-      message.reactions = [...byEmoji.values()];
-      message.my_reaction = next;
-
-      return next;
-    }
-
-    const translationViewCache = new Map();
     let currentSearch = {q:"",dateFrom:"",dateTo:""};
 
     const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton");
@@ -503,12 +362,21 @@
       return currentRoomId;
     }
 
-    function buildListUrl({before="",limit=30}={}){
+    function buildListUrl({before="",after="",around="",limit=MESSAGE_BATCH_SIZE,initialUnread=false}={}){
       const p=new URLSearchParams({room_id:currentRoomId??"",limit:String(limit)});
       if(before)p.set("before",before);
+      if(after)p.set("after",after);
+      if(around)p.set("around",around);
+      if(initialUnread)p.set("initial_unread","1");
+      return`${API.list}?${p.toString()}`;
+    }
+
+    function buildSearchUrl(){
+      const p=new URLSearchParams({room_id:currentRoomId??"",limit:"1"});
       if(currentSearch.q)p.set("q",currentSearch.q);
       if(currentSearch.dateFrom)p.set("date_from",currentSearch.dateFrom);
       if(currentSearch.dateTo)p.set("date_to",currentSearch.dateTo);
+      p.set("search_navigation","1");
       return`${API.list}?${p.toString()}`;
     }
 
@@ -517,7 +385,7 @@
     }
 
     function renderMessage(message){
-      const article=document.createElement("article");article.className="message";if(message.is_optimistic)article.classList.add("message-pending");
+      const article=document.createElement("article");article.className="message";article.dataset.messageId=String(message.id);
       if(message.is_mine)article.classList.add("mine");
 
       const head=document.createElement("div");head.className="message-head";
@@ -552,30 +420,7 @@
 
       if(!message.is_deleted&&message.attachments?.length){const host=document.createElement("div");host.className="attachments";for(const a of message.attachments){if(String(a.mime_type??"").startsWith("image/")&&a.signed_url){const img=document.createElement("img");img.className="image-preview";img.src=a.signed_url;img.alt=a.original_name;img.loading="lazy";img.onclick=()=>openAttachment(a);host.append(img);}const link=document.createElement("a");link.className="attachment";link.href="#";const name=document.createElement("span");name.className="attachment-name";name.textContent=a.original_name;const size=document.createElement("span");size.className="attachment-size";size.textContent=formatBytes(a.size_bytes);link.append(name,size);link.onclick=e=>{e.preventDefault();openAttachment(a);};host.append(link);}article.append(host);}
 
-      if(!message.is_deleted&&String(message.body??"").trim()){
-        const targetLanguage=["ko","en","ja","ru"].includes(language)?language:"en";
-        const translationKey=`${message.id}:${targetLanguage}`;
-        const tr=document.createElement("button");
-        tr.type="button";
-        tr.className="translate-button";
-        tr.textContent=`🌐 ${text.translate}`;
-        const th=document.createElement("div");
-        th.className="translation hidden";
-
-        const cachedTranslation=translationViewCache.get(translationKey);
-        if(cachedTranslation){
-          const lab=document.createElement("span");
-          lab.className="translation-label";
-          lab.textContent=`${text.translation} · ${targetLanguage.toUpperCase()}`;
-          const c=document.createElement("span");
-          c.textContent=cachedTranslation;
-          th.append(lab,c);
-          th.classList.remove("hidden");
-        }
-
-        tr.onclick=()=>translateMessage(message,tr,th);
-        article.append(tr,th);
-      }
+      if(!message.is_deleted&&String(message.body??"").trim()){const tr=document.createElement("button");tr.type="button";tr.className="translate-button";tr.textContent=`🌐 ${text.translate}`;const th=document.createElement("div");th.className="translation hidden";tr.onclick=()=>translateMessage(message,tr,th);article.append(tr,th);}
 
       if(!message.is_deleted){
       const reactions=document.createElement("div");reactions.className="reactions";
@@ -755,42 +600,8 @@
     }
 
     async function translateMessage(message,button,host){
-      if(button.disabled)return;
-      const old=button.textContent;
-      const targetLanguage=["ko","en","ja","ru"].includes(language)?language:"en";
-      const translationKey=`${message.id}:${targetLanguage}`;
-
-      button.disabled=true;
-      button.textContent=text.translating;
-
-      try{
-        const r=await request(API.translate,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            message_id:message.id,
-            target_language:targetLanguage
-          })
-        });
-
-        const translated=String(r.translation??"");
-        translationViewCache.set(translationKey,translated);
-
-        host.replaceChildren();
-        const lab=document.createElement("span");
-        lab.className="translation-label";
-        lab.textContent=`${text.translation} · ${targetLanguage.toUpperCase()}`;
-        const c=document.createElement("span");
-        c.textContent=translated;
-        host.append(lab,c);
-        host.classList.remove("hidden");
-      }catch{
-        host.textContent=text.translationFailed;
-        host.classList.remove("hidden");
-      }finally{
-        button.disabled=false;
-        button.textContent=old;
-      }
+      if(button.disabled)return;const old=button.textContent;button.disabled=true;button.textContent=text.translating;
+      try{const r=await request(API.translate,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:message.id,target_language:["ko","en","ja","ru"].includes(language)?language:"en"})});host.replaceChildren();const lab=document.createElement("span");lab.className="translation-label";lab.textContent=`${text.translation} · ${(["ko","en","ja","ru"].includes(language)?language:"en").toUpperCase()}`;const c=document.createElement("span");c.textContent=r.translation??"";host.append(lab,c);host.classList.remove("hidden");}catch{host.textContent=text.translationFailed;host.classList.remove("hidden");}finally{button.disabled=false;button.textContent=old;}
     }
 
     async function markRead(){
@@ -805,18 +616,109 @@
       new Notification(rooms.find(r=>r.id===currentRoomId)?.name??text.title,{body:language==="ko"?"새 채팅 메시지가 있습니다.":language==="ja"?"新しいチャットメッセージがあります。":language==="ru"?"Есть новое сообщение в чате.":"You have a new chat message.",tag:`staff-chat-${currentRoomId}`,renotify:true});
     }
 
-    async function loadLatest(forceScroll=false,notify=false){
-      if(loading||!currentRoomId)return;loading=true;const shouldScroll=forceScroll||nearBottom();const previous=newestMessage()?.id??notificationBaseline;
-      try{const r=await request(buildListUrl({limit:30}));actor=r.actor;currentSignalTopic=r.signal_topic??null;chatTitle.textContent=r.room?.name??text.title;for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();if(shouldScroll)messagesHost.scrollTop=messagesHost.scrollHeight;if(notify)maybeNotify(r.messages??[],previous);notificationBaseline=newestMessage()?.id??notificationBaseline;gate.classList.add("hidden");app.classList.remove("hidden");renderRooms();if(shouldScroll)await markRead();}catch(e){if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);throw e;}finally{loading=false;}
+    function currentRoomUnreadCount(){
+      return Number(rooms.find(r=>r.id===currentRoomId)?.unread_count??0);
+    }
+
+    async function loadLatest(forceScroll=false,notify=false,{initial=false}={}){
+      if(loading||!currentRoomId)return;
+      loading=true;
+      const previous=newestMessage()?.id??notificationBaseline;
+      const unread=currentRoomUnreadCount();
+      try{
+        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,initialUnread:initial&&unread>0}));
+        actor=r.actor;
+        currentSignalTopic=r.signal_topic??null;
+        chatTitle.textContent=r.room?.name??text.title;
+        if(initial)messageMap.clear();
+        for(const m of r.messages??[])messageMap.set(m.id,m);
+        hasMore=Boolean(r.has_more);
+        initialUnreadAnchor=r.initial_unread_message_id??null;
+        renderMessages();
+
+        if(initial&&unread>0){
+          const anchorId=initialUnreadAnchor??r.messages?.[0]?.id;
+          const anchor=anchorId?messagesHost.querySelector(`[data-message-id="${CSS.escape(String(anchorId))}"]`):null;
+          if(anchor)anchor.scrollIntoView({block:"start"});
+          else messagesHost.scrollTop=0;
+        }else if(forceScroll){
+          messagesHost.scrollTop=messagesHost.scrollHeight;
+        }
+
+        if(notify)maybeNotify(r.messages??[],previous);
+        notificationBaseline=newestMessage()?.id??notificationBaseline;
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+        renderRooms();
+      }catch(e){
+        if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);
+        throw e;
+      }finally{
+        loading=false;
+      }
     }
 
     async function loadOlder(){
-      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const earliest=items[0];if(!earliest)return;olderButton.disabled=true;
-      try{const r=await request(buildListUrl({limit:30,before:earliest.created_at}));for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();}catch{setStatus(text.loadFailed,true);}finally{olderButton.disabled=false;}
+      if(loadingOlder||!hasMore||!currentRoomId)return;
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      const earliest=items[0];
+      if(!earliest)return;
+      loadingOlder=true;
+      olderButton.disabled=true;
+      const oldHeight=messagesHost.scrollHeight;
+      const oldTop=messagesHost.scrollTop;
+      try{
+        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,before:earliest.created_at}));
+        for(const m of r.messages??[])messageMap.set(m.id,m);
+        hasMore=Boolean(r.has_more);
+        renderMessages();
+        messagesHost.scrollTop=oldTop+(messagesHost.scrollHeight-oldHeight);
+      }catch{
+        setStatus(text.loadFailed,true);
+      }finally{
+        olderButton.disabled=false;
+        loadingOlder=false;
+      }
     }
 
     async function selectRoom(id){
-      if(id===currentRoomId)return;stopRealtime();currentRoomId=id;currentSignalTopic=null;messageMap.clear();replyTarget=null;renderReplyTarget();currentSearch={q:"",dateFrom:"",dateTo:""};searchText.value="";dateFrom.value="";dateTo.value="";renderRooms();await loadLatest(true).catch(()=>{});startRealtime();
+      if(id===currentRoomId)return;
+      stopRealtime();
+      currentRoomId=id;
+      currentSignalTopic=null;
+      messageMap.clear();
+      replyTarget=null;
+      renderReplyTarget();
+      currentSearch={q:"",dateFrom:"",dateTo:""};
+      searchText.value="";
+      dateFrom.value="";
+      dateTo.value="";
+      renderRooms();
+      await loadLatest(false,false,{initial:true}).catch(()=>{});
+      startRealtime();
+    }
+
+    async function navigateSearch(){
+      currentSearch={q:searchText.value.trim(),dateFrom:dateFrom.value,dateTo:dateTo.value};
+      if(!currentSearch.q&&!currentSearch.dateFrom&&!currentSearch.dateTo)return;
+      try{
+        const result=await request(buildSearchUrl());
+        const hit=result.search_match??result.messages?.[0]??null;
+        if(!hit)return;
+        const around=await request(buildListUrl({around:hit.id,limit:MESSAGE_BATCH_SIZE}));
+        messageMap.clear();
+        for(const m of around.messages??[])messageMap.set(m.id,m);
+        hasMore=Boolean(around.has_more);
+        renderMessages();
+        requestAnimationFrame(()=>{
+          const el=messagesHost.querySelector(`[data-message-id="${CSS.escape(String(hit.id))}"]`);
+          el?.scrollIntoView({block:"center"});
+          el?.classList.add("search-hit");
+          setTimeout(()=>el?.classList.remove("search-hit"),1800);
+        });
+      }catch(e){
+        setStatus(text.loadFailed,true);
+      }
     }
 
     function renderReplyTarget(){
@@ -831,158 +733,15 @@
     async function uploadFile(messageId,file){const form=new FormData();form.append("message_id",messageId);form.append("file",file,file.name);return request(API.upload,{method:"POST",body:form});}
 
     async function sendMessage(){
-      if(sending||!currentRoomId)return;
-
-      const body=messageInput.value;
-      if(!body.trim()&&!selectedFiles.length)return;
-
-      const filesToUpload=[...selectedFiles];
-      const replySnapshot=replyTarget ? {...replyTarget} : null;
-      const optimisticId=makeOptimisticMessageId();
-      const now=new Date().toISOString();
-
-      const optimisticMessage={
-        id:optimisticId,
-        room_id:currentRoomId,
-        author_name:actor?.name ?? actor?.display_name ?? "Me",
-        author_kind:actor?.kind ?? "staff",
-        author_user_id:actor?.user_id ?? actor?.userId ?? null,
-        body,
-        created_at:now,
-        updated_at:now,
-        is_deleted:false,
-        attachments:[],
-        reactions:[],
-        my_reaction:null,
-        can_delete:false,
-        can_report:false,
-        reply_to_message_id:replySnapshot?.id ?? null,
-        reply_to_author_name:replySnapshot?.author_name ?? null,
-        reply_to_body:replySnapshot?.body ?? null,
-        is_optimistic:true,
-      };
-
-      messageMap.set(optimisticId,optimisticMessage);
-      pendingMessageIds.add(optimisticId);
-      renderMessages();
-      messagesHost.scrollTop=messagesHost.scrollHeight;
-
-      messageInput.value="";
-      selectedFiles=[];
-      fileInput.value="";
-      replyTarget=null;
-      renderFiles();
-      renderReplyTarget();
-
-      sending=true;
-      sendButton.disabled=true;
-
-      try{
-        const r=await request(API.send,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            room_id:currentRoomId,
-            body,
-            reply_to_message_id:replySnapshot?.id??null
-          })
-        });
-
-        const saved=r.message;
-        const id=saved?.id;
-        if(!id)throw new Error("MESSAGE_ID_MISSING");
-
-        messageMap.delete(optimisticId);
-        pendingMessageIds.delete(optimisticId);
-
-        const mergedMessage={
-          ...optimisticMessage,
-          ...saved,
-          is_optimistic:false,
-        };
-        messageMap.set(id,mergedMessage);
-        renderMessages();
-
-        if(filesToUpload.length){
-          await Promise.allSettled(
-            filesToUpload.map(file=>uploadFile(id,file))
-          );
-          // Attachments are server-owned data; refresh only once after uploads finish.
-          await loadLatest(false).catch(()=>{});
-        }
-      }catch(error){
-        messageMap.delete(optimisticId);
-        pendingMessageIds.delete(optimisticId);
-        renderMessages();
-
-        // Restore unsent content so the user does not lose it.
-        if(!messageInput.value){
-          messageInput.value=body;
-          messageInput.style.height="auto";
-          messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;
-        }
-        if(!selectedFiles.length && filesToUpload.length){
-          selectedFiles=filesToUpload;
-          renderFiles();
-        }
-        if(!replyTarget && replySnapshot){
-          replyTarget=replySnapshot;
-          renderReplyTarget();
-        }
-
-        setStatus(text.sendFailed,true);
-      }finally{
-        sending=false;
-        sendButton.disabled=false;
-      }
+      if(sending||!currentRoomId)return;const body=messageInput.value;if(!body.trim()&&!selectedFiles.length)return;sending=true;sendButton.disabled=true;
+      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
     }
 
     async function reactToMessage(messageId,emoji){
-      const message=messageMap.get(messageId);
-      if(!message||message.is_optimistic)return;
-
-      const snapshot=cloneReactionState(message);
-      setOptimisticReaction(message,emoji);
-      renderMessages();
-
       try{
-        const result=await request(API.react,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            message_id:messageId,
-            emoji
-          })
-        });
-
-        /*
-          If the endpoint returns the authoritative message/reaction state,
-          merge it. Otherwise keep the optimistic state and let Realtime /
-          fallback reconciliation update it later.
-        */
-        if(result?.message){
-          messageMap.set(messageId,{
-            ...messageMap.get(messageId),
-            ...result.message
-          });
-          renderMessages();
-        }else if(Array.isArray(result?.reactions)){
-          const current=messageMap.get(messageId);
-          if(current){
-            current.reactions=result.reactions;
-            if("my_reaction" in result) current.my_reaction=result.my_reaction;
-            renderMessages();
-          }
-        }
-      }catch(e){
-        const current=messageMap.get(messageId);
-        if(current){
-          current.reactions=snapshot.reactions;
-          current.my_reaction=snapshot.my_reaction;
-          renderMessages();
-        }
-        setStatus(e.message,true);
-      }
+        await request(API.react,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:messageId,emoji})});
+        await loadLatest(false);
+      }catch(e){setStatus(e.message,true);}
     }
 
     async function reportMessage(id){
@@ -1007,11 +766,7 @@
     }
 
     function scheduleRefresh(){
-      clearTimeout(refreshTimer);
-      refreshTimer=setTimeout(()=>{
-        if(loading)return;
-        loadLatest(false,true).then(loadRooms).catch(()=>{});
-      },220);
+      clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadLatest(false,true).then(loadRooms).catch(()=>{}),120);
     }
 
     function startRealtime(){
@@ -1026,7 +781,7 @@
 
     async function bootstrap(){
       setText();
-      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(true);startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
+      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(false,false,{initial:true});startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
     }
 
     function chatLoginErrorMessage(error){
@@ -1174,8 +929,8 @@
     roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
     refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
     notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
-    searchButton.onclick=async()=>{currentSearch={q:searchText.value.trim(),dateFrom:dateFrom.value,dateTo:dateTo.value};messageMap.clear();await loadLatest(true).catch(()=>{});};
-    clearSearchButton.onclick=async()=>{searchText.value="";dateFrom.value="";dateTo.value="";currentSearch={q:"",dateFrom:"",dateTo:""};messageMap.clear();await loadLatest(true).catch(()=>{});};
+    searchButton.onclick=navigateSearch;
+    clearSearchButton.onclick=async()=>{searchText.value="";dateFrom.value="";dateTo.value="";currentSearch={q:"",dateFrom:"",dateTo:""};messageMap.clear();await loadLatest(false,false,{initial:true}).catch(()=>{});};
     searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
     dateFrom.onchange=()=>searchButton.click();
     dateTo.onchange=()=>searchButton.click();
@@ -1186,8 +941,11 @@
     sendButton.onclick=sendMessage;
     messageInput.addEventListener("input",()=>{messageInput.style.height="auto";messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;});
     messageInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendMessage();}});
-    messagesHost.addEventListener("scroll",()=>{if(nearBottom())markRead();},{passive:true});
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(()=>{markRead();loadRooms();}).catch(()=>{});} });
+    messagesHost.addEventListener("scroll",()=>{
+      if(messagesHost.scrollTop<80&&hasMore&&!loadingOlder)loadOlder();
+      if(nearBottom())markRead();
+    },{passive:true});
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(loadRooms).catch(()=>{});} });
     window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
     window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
 
