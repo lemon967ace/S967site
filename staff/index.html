@@ -5800,6 +5800,7 @@ groupBuyEmailAddButton.addEventListener(
     const rId=$("staffAnnRoutineId"),rName=$("staffAnnRName"),rAnchor=$("staffAnnRAnchor"),rRepeat=$("staffAnnRRepeat"),rHours=$("staffAnnRHours"),rOffset=$("staffAnnROffset"),rEnabled=$("staffAnnREnabled"),rKo=$("staffAnnRKo"),rEn=$("staffAnnREn"),rJa=$("staffAnnRJa"),rRu=$("staffAnnRRu"),saveRoutine=$("staffAnnSaveRoutine"),cancelRoutineEdit=$("staffAnnCancelRoutineEdit"),routineStatus=$("staffAnnRoutineStatus"),routineList=$("staffAnnRoutineList"),wkPreset=$("staffAnnWkPreset"),periodPreset=$("staffAnnPeriodPreset");
 
     let data={announcements:[],routines:[]};
+    let editingAnnouncementEnabled=true;
 
     const ANN_TEXT = {
       ko: {
@@ -5819,7 +5820,7 @@ groupBuyEmailAddButton.addEventListener(
         wkPreset:"황무지 모집 프리셋", periodPreset:"일반 기간 공지 프리셋",
         routineName:"루틴 이름", anchor:"첫 표시 시작", repeat:"반복 주기(일)", hours:"한 번 표시되는 시간(시간)",
         offset:"{date} 기준일: 표시 시작일부터 며칠 뒤", enabled:"활성화", enabledYes:"사용", enabledNo:"중지",
-        saveRoutine:"루틴 저장", saveRoutineEdit:"루틴 수정 저장", edit:"수정", delete:"삭제",
+        saveRoutine:"루틴 저장", saveRoutineEdit:"루틴 수정 저장", edit:"수정", delete:"삭제", activate:"활성화", reactivate:"다시 활성화", deactivate:"비활성화",
         deleteAnnouncementConfirm:"이 공지사항을 삭제할까요?", deleteRoutineConfirm:"이 반복 루틴을 삭제할까요?",
         saving:"저장 중…", saved:"저장했습니다.", loginNeeded:"로그인이 필요합니다.",
         firstStart:"첫 시작", everyDays:"일마다", activeHours:"시간 표시", dateOffset:"{date}=+{n}일",
@@ -5842,7 +5843,7 @@ groupBuyEmailAddButton.addEventListener(
         wkPreset:"Wasteland Recruitment Preset", periodPreset:"General Period Preset",
         routineName:"Routine Name", anchor:"First Display Start", repeat:"Repeat Every (days)", hours:"Display Duration (hours)",
         offset:"{date}: days after display start", enabled:"Enabled", enabledYes:"On", enabledNo:"Off",
-        saveRoutine:"Save Routine", saveRoutineEdit:"Save Routine Changes", edit:"Edit", delete:"Delete",
+        saveRoutine:"Save Routine", saveRoutineEdit:"Save Routine Changes", edit:"Edit", delete:"Delete", activate:"Activate", reactivate:"Reactivate", deactivate:"Deactivate",
         deleteAnnouncementConfirm:"Delete this announcement?", deleteRoutineConfirm:"Delete this recurring routine?",
         saving:"Saving…", saved:"Saved.", loginNeeded:"Login required.",
         firstStart:"First start", everyDays:"days", activeHours:"hours shown", dateOffset:"{date}=+{n} days",
@@ -5865,7 +5866,7 @@ groupBuyEmailAddButton.addEventListener(
         wkPreset:"荒野募集プリセット", periodPreset:"一般期間プリセット",
         routineName:"ルーチン名", anchor:"最初の表示開始", repeat:"繰り返し周期（日）", hours:"1回の表示時間（時間）",
         offset:"{date} 基準日：表示開始から何日後", enabled:"有効", enabledYes:"使用", enabledNo:"停止",
-        saveRoutine:"ルーチンを保存", saveRoutineEdit:"ルーチン変更を保存", edit:"編集", delete:"削除",
+        saveRoutine:"ルーチンを保存", saveRoutineEdit:"ルーチン変更を保存", edit:"編集", delete:"削除", activate:"有効化", reactivate:"再有効化", deactivate:"無効化",
         deleteAnnouncementConfirm:"このお知らせを削除しますか？", deleteRoutineConfirm:"この繰り返しルーチンを削除しますか？",
         saving:"保存中…", saved:"保存しました。", loginNeeded:"ログインが必要です。",
         firstStart:"最初の開始", everyDays:"日ごと", activeHours:"時間表示", dateOffset:"{date}=+{n}日",
@@ -5888,7 +5889,7 @@ groupBuyEmailAddButton.addEventListener(
         wkPreset:"Шаблон набора в Пустошь", periodPreset:"Шаблон периода",
         routineName:"Название правила", anchor:"Первое начало показа", repeat:"Интервал (дни)", hours:"Длительность показа (часы)",
         offset:"{date}: дней после начала показа", enabled:"Включено", enabledYes:"Да", enabledNo:"Нет",
-        saveRoutine:"Сохранить правило", saveRoutineEdit:"Сохранить изменения", edit:"Изменить", delete:"Удалить",
+        saveRoutine:"Сохранить правило", saveRoutineEdit:"Сохранить изменения", edit:"Изменить", delete:"Удалить", activate:"Включить", reactivate:"Включить снова", deactivate:"Отключить",
         deleteAnnouncementConfirm:"Удалить это объявление?", deleteRoutineConfirm:"Удалить это повторяющееся правило?",
         saving:"Сохранение…", saved:"Сохранено.", loginNeeded:"Требуется вход.",
         firstStart:"Первое начало", everyDays:"дн.", activeHours:"ч. показа", dateOffset:"{date}=+{n} дн.",
@@ -6045,11 +6046,30 @@ groupBuyEmailAddButton.addEventListener(
             edit.textContent=annText().edit;
             edit.onclick=()=>editAnnouncement(item);
 
+            const endMs=new Date(item.ends_at).getTime();
+            const enabled=item.enabled!==false;
+            const toggle=document.createElement("button");
+
+            if(!enabled){
+              toggle.textContent=endMs>Date.now()
+                ? annText().activate
+                : annText().reactivate;
+              toggle.onclick=()=>endMs>Date.now()
+                ? setAnnouncementEnabled(item,true)
+                : prepareAnnouncementReactivation(item);
+            }else if(endMs<=Date.now()){
+              toggle.textContent=annText().reactivate;
+              toggle.onclick=()=>prepareAnnouncementReactivation(item);
+            }else{
+              toggle.textContent=annText().deactivate;
+              toggle.onclick=()=>setAnnouncementEnabled(item,false);
+            }
+
             const del=document.createElement("button");
             del.textContent=annText().delete;
             del.onclick=()=>deleteAnnouncement(item);
 
-            actions.append(edit,del);
+            actions.append(edit,toggle,del);
             card.append(actions);
           }
 
@@ -6117,11 +6137,66 @@ groupBuyEmailAddButton.addEventListener(
       render();
     }
 
-    function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent=annText().saveAnnouncement;cancelAnnouncementEdit.classList.add("hidden");}
-    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent=annText().saveAnnouncementEdit;cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    function clearAnnouncement(){
+      aId.value="";
+      aKo.value=aEn.value=aJa.value=aRu.value="";
+      aStart.value=aEnd.value="";
+      editingAnnouncementEnabled=true;
+      saveAnnouncement.textContent=annText().saveAnnouncement;
+      cancelAnnouncementEdit.classList.add("hidden");
+    }
+
+    function editAnnouncement(item){
+      aId.value=item.id;
+      aKo.value=item.text_ko;
+      aEn.value=item.text_en;
+      aJa.value=item.text_ja;
+      aRu.value=item.text_ru;
+      aStart.value=localInputValue(item.starts_at);
+      aEnd.value=localInputValue(item.ends_at);
+      editingAnnouncementEnabled=item.enabled!==false;
+      saveAnnouncement.textContent=annText().saveAnnouncementEdit;
+      cancelAnnouncementEdit.classList.remove("hidden");
+      scrollTo({top:0,behavior:"smooth"});
+    }
+
+    function prepareAnnouncementReactivation(item){
+      aId.value=item.id;
+      aKo.value=item.text_ko;
+      aEn.value=item.text_en;
+      aJa.value=item.text_ja;
+      aRu.value=item.text_ru;
+      aStart.value=localInputValue(new Date().toISOString());
+      aEnd.value="";
+      editingAnnouncementEnabled=true;
+      saveAnnouncement.textContent=annText().reactivate;
+      cancelAnnouncementEdit.classList.remove("hidden");
+      scrollTo({top:0,behavior:"smooth"});
+      setTimeout(()=>aEnd.focus(),250);
+    }
+
+    async function setAnnouncementEnabled(item,enabled){
+      try{
+        await request("POST",{
+          action:"update_announcement",
+          id:item.id,
+          text_ko:item.text_ko,
+          text_en:item.text_en,
+          text_ja:item.text_ja,
+          text_ru:item.text_ru,
+          starts_at:item.starts_at,
+          ends_at:item.ends_at,
+          enabled
+        });
+        await load();
+      }catch(e){
+        status(announcementStatus,e.message,true);
+      }
+    }
+
     async function deleteAnnouncement(item){if(!confirm(annText().deleteAnnouncementConfirm))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
 
-    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,annText().saving);const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,annText().saved);}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
+    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,annText().saving);const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value),enabled:editingAnnouncementEnabled};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,annText().saved);}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
     cancelAnnouncementEdit.onclick=clearAnnouncement;
 
     function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent=annText().saveRoutine;cancelRoutineEdit.classList.add("hidden");}
