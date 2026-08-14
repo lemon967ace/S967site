@@ -947,6 +947,66 @@
       }
     }
 
+  
+    /* =========================================================
+       RESPONSIVE SETTINGS PLACEMENT v11
+       Mobile: chat toolbar / Desktop: same bottom-right UI as other pages
+       ========================================================= */
+
+    .chat-settings-pickers.desktop-position {
+      position: fixed !important;
+      right: 18px !important;
+      bottom: 18px !important;
+      z-index: 1200 !important;
+
+      display: flex !important;
+      align-items: flex-end !important;
+      gap: 8px !important;
+    }
+
+    .chat-settings-pickers.desktop-position .language-picker,
+    .chat-settings-pickers.desktop-position .theme-picker {
+      position: relative !important;
+      inset: auto !important;
+    }
+
+    .chat-settings-pickers.desktop-position .language-menu,
+    .chat-settings-pickers.desktop-position .theme-menu {
+      top: auto !important;
+      bottom: calc(100% + 8px) !important;
+      right: 0 !important;
+      z-index: 1300 !important;
+    }
+
+    @media (min-width: 761px) {
+      /* Match the Staff/Admin page picker size and placement on desktop. */
+      .chat-settings-pickers.login-position,
+      .chat-settings-pickers.desktop-position {
+        right: 18px !important;
+        bottom: 18px !important;
+        gap: 8px !important;
+      }
+
+      .chat-settings-pickers.login-position .chat-setting-button,
+      .chat-settings-pickers.desktop-position .chat-setting-button {
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 !important;
+      }
+    }
+
+    @media (max-width: 760px) {
+      /* Logged-in mobile keeps the current rectangular toolbar treatment. */
+      .chat-settings-pickers.toolbar-position .chat-setting-button {
+        min-width: 40px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 5px 9px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1265,17 +1325,44 @@
       if(!chatSettingsPickers)return;
       document.body.append(chatSettingsPickers);
       chatSettingsPickers.classList.add("login-position");
-      chatSettingsPickers.classList.remove("toolbar-position");
+      chatSettingsPickers.classList.remove("toolbar-position","desktop-position");
     }
 
     function placeChatSettingsInToolbar(){
-      if(!chatSettingsPickers||!chatSettingsToolbarSlot)return;
-      chatSettingsToolbarSlot.append(chatSettingsPickers);
-      chatSettingsPickers.classList.remove("login-position");
-      chatSettingsPickers.classList.add("toolbar-position");
+      if(!chatSettingsPickers)return;
+
+      const isMobile=window.matchMedia("(max-width:760px)").matches;
+
+      if(isMobile){
+        if(!chatSettingsToolbarSlot)return;
+        chatSettingsToolbarSlot.append(chatSettingsPickers);
+        chatSettingsPickers.classList.add("toolbar-position");
+        chatSettingsPickers.classList.remove("login-position","desktop-position");
+        return;
+      }
+
+      /* Desktop: same fixed bottom-right placement/design as the other pages. */
+      document.body.append(chatSettingsPickers);
+      chatSettingsPickers.classList.add("desktop-position");
+      chatSettingsPickers.classList.remove("login-position","toolbar-position");
+    }
+
+    function syncChatSettingsPlacement(){
+      if(!chatSettingsPickers)return;
+
+      if(app && !app.classList.contains("hidden")){
+        placeChatSettingsInToolbar();
+      }else{
+        placeChatSettingsForLogin();
+      }
     }
 
     placeChatSettingsForLogin();
+
+    window.addEventListener("resize",()=>{
+      window.clearTimeout(syncChatSettingsPlacement._timer);
+      syncChatSettingsPlacement._timer=window.setTimeout(syncChatSettingsPlacement,80);
+    });
 
 
     const chatAnnouncementDesktop =
