@@ -2740,7 +2740,7 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
               id: "mountain",
               kind: "blocked",
               color: "#7F7F7F",
-              locked: false,
+              locked: true,
               width: 2,
               height: 2,
             });
@@ -2969,10 +2969,14 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         );
 
         button.onclick = () => {
-          rangeController.selectAtCell(
-            item.cells[0]
+          const selectedRange =
+            rangeController.selectRange(
+              item.id
+            );
+
+          renderRangePanel(
+            selectedRange
           );
-          renderRangePanel(item);
           mapRenderer.invalidate();
         };
 
@@ -2991,8 +2995,21 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         const checkbox =
           edit.querySelector("input");
 
+        const isMountain =
+          selected.presetId ===
+            "mountain";
+
+        /*
+          Mountain is permanently fixed.
+          Show the checked state but do not let the user turn it off.
+        */
+        if (isMountain) {
+          checkbox.checked = true;
+        }
+
         checkbox.disabled =
-          readOnly;
+          readOnly ||
+          isMountain;
 
         checkbox.onchange = () => {
           rangeController.editSelected({
@@ -3011,7 +3028,11 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           labels.remove;
         remove.disabled =
           readOnly ||
-          selected.locked;
+          (
+            selected.locked &&
+            selected.presetId !==
+              "mountain"
+          );
 
         remove.onclick = () => {
           try {
