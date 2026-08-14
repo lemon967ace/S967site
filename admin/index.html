@@ -3254,37 +3254,41 @@ async function chatRoomAdminApiRequest(
 }
 
 function getManagedAccountLoginId(account) {
-  const explicit =
-    account?.login_id ??
-    account?.staff_id ??
-    account?.chat_id ??
-    account?.account_id ??
-    "";
+  const accountId =
+    String(
+      account?.account_id ??
+      account?.login_id ??
+      account?.chat_id ??
+      ""
+    ).trim();
 
-  if (String(explicit).trim()) {
-    return String(explicit).trim();
+  if (accountId) {
+    return accountId;
   }
 
+  const legacyStaffId =
+    String(
+      account?.staff_id ??
+      ""
+    ).trim();
+
+  const nickname =
+    String(
+      account?.display_name ??
+      ""
+    ).trim();
+
   /*
-    Staff 인증은 <login-id>@s967.org 형태를 사용하므로
-    staff-admin 응답에 별도 ID 필드가 없고 email만 있는 경우
-    로컬파트를 로그인 ID로 표시합니다.
+    예전 staff-admin은 staff_id에 실제 로그인 ID가 아니라
+    display_name을 그대로 복제해 보냈다.
+    두 값이 같으면 그 값은 ID로 신뢰하지 않는다.
   */
-  const email =
-    String(account?.email ?? "")
-      .trim();
-
-  const suffix =
-    "@s967.org";
-
   if (
-    email.toLowerCase()
-      .endsWith(suffix)
+    legacyStaffId &&
+    legacyStaffId.toLowerCase() !==
+      nickname.toLowerCase()
   ) {
-    return email.slice(
-      0,
-      -suffix.length
-    );
+    return legacyStaffId;
   }
 
   return "";
@@ -3304,6 +3308,13 @@ function getManagedAccountLabel(account) {
     loginId &&
     nickname
   ) {
+    if (
+      loginId.toLowerCase() ===
+      nickname.toLowerCase()
+    ) {
+      return loginId;
+    }
+
     return `${loginId} (${nickname})`;
   }
 
