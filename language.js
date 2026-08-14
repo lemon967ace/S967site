@@ -285,7 +285,8 @@ confirmNewPassword: "Confirm new password",
 staffTabImages: "Image Management",
 staffTabWk: "WK Applications",
 staffTabGroupBuy: "Group Purchase",
-
+staffTabAnnouncements: "Announcements",
+    
 staffImageTitle: "Image Management",
 staffImageLead:
   "Review uploaded images, remove inappropriate images, or block an uploader for 7 days.",
@@ -801,6 +802,7 @@ confirmNewPassword: "새 비밀번호 확인",
 staffTabImages: "이미지 관리",
 staffTabWk: "황무지 신청",
 staffTabGroupBuy: "공동구매",
+staffTabAnnouncements: "공지사항",
 
 staffImageTitle: "이미지 관리",
 staffImageLead:
@@ -1317,6 +1319,7 @@ confirmNewPassword: "新しいパスワードを確認",
 staffTabImages: "画像管理",
 staffTabWk: "荒野申請",
 staffTabGroupBuy: "共同購入",
+staffTabAnnouncements: "お知らせ",
 
 staffImageTitle: "画像管理",
 staffImageLead:
@@ -1830,6 +1833,7 @@ confirmNewPassword: "Подтвердите новый пароль",
 staffTabImages: "Управление изображениями",
 staffTabWk: "Заявки на WK",
 staffTabGroupBuy: "Совместная покупка",
+staffTabAnnouncements: "объявление", 
 
 staffImageTitle: "Управление изображениями",
 staffImageLead:
