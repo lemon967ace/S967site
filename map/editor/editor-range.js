@@ -38,11 +38,12 @@ export const MOUNTAIN_PRESET = Object.freeze({
   color: "#7F7F7F",
 
   /*
-    The preset settings themselves are fixed.
-    The placed obstacle is not locked so it can be selected/deleted
-    if the user placed it incorrectly.
+    Mountain preset is permanently fixed:
+    - always created with locked=true
+    - locked state cannot be changed
+    - deletion is still allowed as a correction action
   */
-  locked: false,
+  locked: true,
   width: 2,
   height: 2,
 });
@@ -264,7 +265,12 @@ export function createRangeController({ engine, history, buildingController = nu
       engine.commitRange({
         kind: preset.kind,
         color: preset.color,
-        locked: false,
+        locked:
+          preset.id === "mountain"
+            ? true
+            : Boolean(
+                preset.locked
+              ),
         presetId:
           preset.id,
         cells,
@@ -461,15 +467,50 @@ export function createRangeController({ engine, history, buildingController = nu
     emit();
     return selected();
   }
+  function selectRange(
+    rangeId
+  ) {
+    const item =
+      engine
+        .getDocument()
+        .ranges
+        .find(
+          range =>
+            range.id ===
+              rangeId &&
+            !range.linked
+        );
+
+    selectedRangeId =
+      item?.id ??
+      null;
+
+    emit();
+    return selected();
+  }
+
   function editSelected({ locked }) {
     ensureWritable();
     const item = selected();
     if (!item) return null;
+
     if (item.linked) {
       throw new RangeError(
         "Building-linked ranges cannot be edited directly."
       );
     }
+
+    /*
+      Mountain is permanently fixed.
+      Its locked checkbox is informational only.
+    */
+    if (
+      item.presetId ===
+        "mountain"
+    ) {
+      return item;
+    }
+
     if (
       item.locked ===
       Boolean(locked)
@@ -567,6 +608,7 @@ export function createRangeController({ engine, history, buildingController = nu
     click,
     commit,
     selectAtCell,
+    selectRange,
     editSelected,
     deleteSelected,
     setAffiliationColor,
