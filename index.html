@@ -2221,6 +2221,60 @@
       }
     }
 
+  
+    /* =========================================================
+       ANNOUNCEMENT GLASS TINT v2
+       색을 덜 섞고 투명도 + blur 중심의 깔끔한 유리 느낌
+       ========================================================= */
+
+    .announcement-ticker {
+      background:
+        rgba(12, 16, 20, .34) !important;
+
+      border-top:
+        1px solid
+        rgba(255,255,255,.035) !important;
+
+      border-bottom:
+        1px solid
+        rgba(0,0,0,.075) !important;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0,0,0,.07) !important;
+
+      backdrop-filter:
+        blur(18px) !important;
+
+      -webkit-backdrop-filter:
+        blur(18px) !important;
+    }
+
+    html[data-theme="dark"] .announcement-ticker,
+    body[data-theme="dark"] .announcement-ticker,
+    [data-theme="dark"] .announcement-ticker {
+      background:
+        rgba(235, 240, 246, .095) !important;
+
+      border-top:
+        1px solid
+        rgba(255,255,255,.09) !important;
+
+      border-bottom:
+        1px solid
+        rgba(255,255,255,.045) !important;
+
+      box-shadow:
+        0 5px 18px
+        rgba(0,0,0,.055) !important;
+
+      backdrop-filter:
+        blur(18px) !important;
+
+      -webkit-backdrop-filter:
+        blur(18px) !important;
+    }
+
   </style>
 </head>
 
