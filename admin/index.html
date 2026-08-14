@@ -4561,7 +4561,7 @@ async function groupBuyExportEmailRequest(
 
   setStatus(
     inquirySubmissionsStatus,
-    `총 ${Number(pagination.total ?? list.length)}건`
+    ""
   );
 }
 
@@ -5284,34 +5284,59 @@ function renderAdminPagination(
 ) {
   if (!container) return;
 
-  container.innerHTML = "";
+  container.replaceChildren();
 
   const current =
     Math.max(1, Number(pagination?.page ?? 1));
+
   const totalPages =
     Math.max(1, Number(pagination?.total_pages ?? 1));
 
-  if (totalPages <= 1) {
-    return;
-  }
+  const total =
+    Math.max(0, Number(pagination?.total ?? 0));
 
-  const addButton = (label, page, disabled = false, active = false) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = label;
-    button.disabled = disabled;
-    if (active) button.classList.add("is-active");
-    button.addEventListener("click", () => onPage(page));
-    container.appendChild(button);
-  };
+  const prev =
+    document.createElement("button");
 
-  addButton("‹", current - 1, current <= 1);
+  prev.type = "button";
+  prev.textContent = "이전";
+  prev.disabled = current <= 1;
 
-  for (let page = 1; page <= totalPages; page += 1) {
-    addButton(String(page), page, false, page === current);
-  }
+  prev.addEventListener(
+    "click",
+    async () => {
+      if (current <= 1) return;
+      await onPage(current - 1);
+    }
+  );
 
-  addButton("›", current + 1, current >= totalPages);
+  const info =
+    document.createElement("span");
+
+  info.className = "small";
+  info.textContent =
+    `${current} / ${totalPages} 페이지 · 총 ${total}건`;
+
+  const next =
+    document.createElement("button");
+
+  next.type = "button";
+  next.textContent = "다음";
+  next.disabled = current >= totalPages;
+
+  next.addEventListener(
+    "click",
+    async () => {
+      if (current >= totalPages) return;
+      await onPage(current + 1);
+    }
+  );
+
+  container.append(
+    prev,
+    info,
+    next
+  );
 }
 
 
@@ -5359,7 +5384,7 @@ function renderWkApplications() {
     ) {
       setStatus(
         wkApplicationsStatus,
-        `총 ${Number(pagination.total ?? 0)}건`
+        ""
       );
     }
 
@@ -5580,7 +5605,7 @@ function renderWkApplications() {
   ) {
     setStatus(
       wkApplicationsStatus,
-      `총 ${Number(pagination.total ?? applications.length)}건`
+      ""
     );
   }
 }
@@ -8845,7 +8870,7 @@ function renderEmailAutoSend() {
         await loadAdminData();
       });
 
-      setStatus(uploadsStatus, `총 ${Number(pagination.total ?? 0)}건`);
+      setStatus(uploadsStatus, "");
       loadedAdminSections.add("uploads");
     }
 
@@ -10723,37 +10748,14 @@ createMapTemplateButton.addEventListener(
     }
 
     function renderReportPagination(pagination){
-      reportsPagination.replaceChildren();
-
-      const page=Math.max(1,Number(pagination?.page??1));
-      const totalPages=Math.max(1,Number(pagination?.total_pages??1));
-      const total=Math.max(0,Number(pagination?.total??0));
-
-      const prev=document.createElement("button");
-      prev.type="button";
-      prev.textContent="이전";
-      prev.disabled=page<=1;
-      prev.onclick=async()=>{
-        if(page<=1)return;
-        reportPage=page-1;
-        await loadReports();
-      };
-
-      const info=document.createElement("span");
-      info.className="small";
-      info.textContent=`${page} / ${totalPages} 페이지 · 총 ${total}건`;
-
-      const next=document.createElement("button");
-      next.type="button";
-      next.textContent="다음";
-      next.disabled=page>=totalPages;
-      next.onclick=async()=>{
-        if(page>=totalPages)return;
-        reportPage=page+1;
-        await loadReports();
-      };
-
-      reportsPagination.append(prev,info,next);
+      renderAdminPagination(
+        reportsPagination,
+        pagination,
+        async (page) => {
+          reportPage=page;
+          await loadReports();
+        }
+      );
     }
 
     async function loadReports(){
