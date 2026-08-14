@@ -3972,18 +3972,13 @@ function renderChatOnlyAccounts(accounts) {
         ),
       ]);
 
-    const activeChatIds =
+    const chatAccountIds =
       new Set(
         (
           chatResult
             .chat_users ??
           []
         )
-          .filter(
-            (account) =>
-              account.is_active ===
-              true
-          )
           .map(
             (account) =>
               account.user_id
@@ -3992,9 +3987,13 @@ function renderChatOnlyAccounts(accounts) {
 
     /*
       A user converted from Staff to chat-only keeps an inactive
-      staff_accounts row so the conversion can be reversed without
-      destroying historical account data. Hide that inactive Staff
-      shadow row from the Staff list while its chat permission is active.
+      staff_accounts shadow row so the conversion can be reversed without
+      destroying historical account data.
+
+      That shadow row must stay hidden from the Staff list even when the
+      chat-only account itself is disabled. A real active Staff account,
+      however, must always remain visible even if an inactive chat shadow
+      row also exists.
     */
     const visibleStaff =
       (
@@ -4003,7 +4002,8 @@ function renderChatOnlyAccounts(accounts) {
       )
         .filter(
           (account) =>
-            !activeChatIds.has(
+            account.is_active === true ||
+            !chatAccountIds.has(
               account.user_id
             )
         );
