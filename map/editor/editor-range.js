@@ -45,8 +45,9 @@ export function createRangeController({ engine, history, buildingController = nu
 
     /*
       첫 번째 클릭: 시작점만 저장.
-      Renderer가 같은 실제 클릭의 pointerdown / pointerup 양쪽에서
-      click()을 호출하므로, 첫 클릭의 pointerup은 확정으로 보지 않는다.
+      Renderer는 첫 실제 클릭의 pointerdown에서 시작점을 지정하고,
+      pointerup에서는 같은 셀을 다시 전달한다. 같은 셀은 아래에서 무시한다.
+      두 번째 실제 클릭의 pointerup에서 다른 셀이 들어오면 즉시 확정한다.
     */
     if (!startCell) {
       startCell = [...cell];
