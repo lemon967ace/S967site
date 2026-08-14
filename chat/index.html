@@ -876,6 +876,77 @@
       }
     }
 
+  
+    /* =========================================================
+       SETTINGS MENU LAYER FIX v10
+       언어/테마 메뉴가 채팅 영역 뒤로 깔리지 않도록 보정
+       ========================================================= */
+
+    .main,
+    .bar,
+    .bar-actions,
+    #chatSettingsToolbarSlot,
+    .chat-settings-pickers.toolbar-position,
+    .chat-settings-pickers.toolbar-position .language-picker,
+    .chat-settings-pickers.toolbar-position .theme-picker {
+      overflow: visible !important;
+    }
+
+    .bar {
+      position: relative !important;
+      z-index: 5000 !important;
+      isolation: visible;
+    }
+
+    .bar-actions {
+      position: relative !important;
+      z-index: 5100 !important;
+    }
+
+    #chatSettingsToolbarSlot {
+      position: relative !important;
+      z-index: 5200 !important;
+    }
+
+    .chat-settings-pickers.toolbar-position {
+      position: relative !important;
+      z-index: 5300 !important;
+    }
+
+    .chat-settings-pickers.toolbar-position .language-picker,
+    .chat-settings-pickers.toolbar-position .theme-picker {
+      z-index: 5400 !important;
+    }
+
+    .chat-settings-pickers.toolbar-position .language-menu,
+    .chat-settings-pickers.toolbar-position .theme-menu {
+      z-index: 99999 !important;
+      position: absolute !important;
+    }
+
+    .messages,
+    .searchbar,
+    .older,
+    .composer {
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 760px) {
+      /* 모바일에서는 버튼 줄 자체의 가로 스크롤이 메뉴를 잘라버리므로
+         메뉴가 열리는 설정 영역은 clipping 대상에서 제외한다. */
+      .bar-actions {
+        overflow: visible !important;
+      }
+
+      .chat-settings-pickers.toolbar-position .language-menu,
+      .chat-settings-pickers.toolbar-position .theme-menu {
+        top: calc(100% + 8px) !important;
+        bottom: auto !important;
+        right: 0 !important;
+      }
+    }
+
   </style>
 </head>
 <body>
