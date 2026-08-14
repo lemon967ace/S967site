@@ -964,6 +964,126 @@
       }
     }
 
+  
+    /* ===== Layout correction: footer bottom + buttons directly above footer ===== */
+
+    /*
+      Reserve only the actual footer area at the bottom.
+      The button group is anchored just above it with a controlled gap,
+      so there is never a large empty ocean between buttons and footer.
+    */
+    main {
+      position: relative !important;
+      padding-bottom: clamp(118px, 15svh, 150px) !important;
+    }
+
+    .buttons {
+      position: absolute !important;
+      left: 50% !important;
+      bottom: clamp(48px, 6.2svh, 64px) !important;
+      transform: translateX(-50%) !important;
+
+      margin: 0 !important;
+    }
+
+    footer {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: max(6px, env(safe-area-inset-bottom)) !important;
+
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 clamp(18px, 4vw, 48px) !important;
+
+      text-align: center !important;
+      z-index: 100 !important;
+    }
+
+    /*
+      Keep the hero comfortably above the bottom controls.
+      No auto margins are used anywhere in this relationship.
+    */
+    .server {
+      margin-top: clamp(8px, 2svh, 20px) !important;
+    }
+
+    .headline {
+      margin-top: clamp(12px, 1.8svh, 22px) !important;
+    }
+
+    .tagline {
+      margin-top: clamp(5px, .8svh, 10px) !important;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding-bottom: clamp(250px, 34svh, 300px) !important;
+      }
+
+      .buttons {
+        bottom: clamp(42px, 5.5svh, 54px) !important;
+      }
+
+      footer {
+        bottom: max(5px, env(safe-area-inset-bottom)) !important;
+        padding: 0 14px !important;
+      }
+    }
+
+    @media (max-height: 720px) {
+      main {
+        padding-bottom: clamp(105px, 15svh, 124px) !important;
+      }
+
+      .buttons {
+        bottom: 38px !important;
+      }
+
+      .server {
+        margin-top: 2px !important;
+      }
+
+      .headline {
+        margin-top: 7px !important;
+      }
+
+      .tagline {
+        margin-top: 3px !important;
+      }
+    }
+
+    @media (max-height: 720px) and (max-width: 600px) {
+      main {
+        padding-bottom: clamp(218px, 34svh, 250px) !important;
+      }
+
+      .buttons {
+        bottom: 32px !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      main {
+        padding-bottom: 96px !important;
+      }
+
+      .buttons {
+        bottom: 28px !important;
+      }
+    }
+
+    @media (max-height: 600px) and (max-width: 600px) {
+      main {
+        padding-bottom: 196px !important;
+      }
+
+      .buttons {
+        bottom: 25px !important;
+      }
+    }
+
   </style>
 </head>
 
