@@ -37,6 +37,7 @@
   <section id="gate" class="gate">
     <h1>번역 용어집</h1>
     <p id="gateMessage">관리자 세션을 확인하고 있습니다.</p>
+    <a class="button-link" href="/admin/" target="_top">관리자 페이지</a>
   </section>
 
   <main id="app" class="hidden">
@@ -48,6 +49,7 @@
           저장하면 기존 AI 번역 캐시는 자동으로 무효화됩니다.
         </p>
       </div>
+      <a class="button-link" href="/admin/" target="_top">← 관리자</a>
     </div>
 
     <section class="panel">
@@ -150,16 +152,8 @@
           .catch(() => ({}));
 
       if (!response.ok) {
-        const detail =
-          [
-            result.error,
-            result.code,
-          ]
-            .filter(Boolean)
-            .join(" · ");
-
         throw new Error(
-          detail ||
+          result.error ||
           `HTTP_${response.status}`,
         );
       }
