@@ -600,9 +600,200 @@
       }
     }
 
+  
+    /* =========================================================
+       CHAT NOTICE POSITION + LANGUAGE/THEME CONTROLS v8
+       ========================================================= */
+
+    .sidebar-stack {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .sidebar-stack > .sidebar {
+      min-height: 0;
+      height: 100%;
+    }
+
+    .chat-announcement-desktop-panel {
+      border-radius: 15px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .chat-announcement-desktop-panel .chat-announcement-inner {
+      padding: 11px 12px;
+    }
+
+    .bar .actor {
+      margin-right: auto;
+      min-width: 0;
+    }
+
+    #chatSettingsToolbarSlot:empty {
+      display: none;
+    }
+
+    .chat-settings-pickers {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-settings-pickers.login-position {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1200;
+      align-items: flex-end;
+    }
+
+    .chat-settings-pickers .language-picker,
+    .chat-settings-pickers .theme-picker {
+      position: relative;
+      inset: auto;
+    }
+
+    .chat-setting-button {
+      width: 38px !important;
+      height: 36px !important;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      background: var(--surface-hover) !important;
+      color: var(--text) !important;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .chat-settings-pickers.login-position .language-menu,
+    .chat-settings-pickers.login-position .theme-menu {
+      top: auto !important;
+      bottom: calc(100% + 8px) !important;
+      right: 0 !important;
+    }
+
+    .chat-settings-pickers.toolbar-position {
+      position: static;
+    }
+
+    .chat-settings-pickers.toolbar-position .language-menu,
+    .chat-settings-pickers.toolbar-position .theme-menu {
+      top: calc(100% + 8px) !important;
+      bottom: auto !important;
+      right: 0 !important;
+    }
+
+    .chat-settings-pickers .language-menu {
+      position: absolute;
+      right: 0;
+      min-width: 140px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 1300;
+    }
+
+    .chat-settings-pickers .language-picker.is-open .language-menu {
+      display: block;
+    }
+
+    .chat-settings-pickers .language-menu button {
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .chat-settings-pickers .language-menu button:hover {
+      background: var(--surface-hover);
+    }
+
+    @media (max-width: 760px) {
+      .sidebar-stack {
+        display: block;
+        min-height: auto;
+      }
+
+      .sidebar-stack > .sidebar {
+        height: auto;
+      }
+
+      #chatAnnouncementDesktop {
+        display: none !important;
+      }
+
+      .chat-settings-pickers.toolbar-position {
+        gap: 4px;
+      }
+
+      .chat-setting-button {
+        width: 36px !important;
+        height: 34px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
+  <div id="chatSettingsPickers" class="chat-settings-pickers login-position">
+    <div class="language-picker" data-language-picker>
+      <button
+        class="language-button chat-setting-button"
+        type="button"
+        data-language-button
+        aria-label="Language"
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="Language"
+      >🌐</button>
+
+      <div class="language-menu" data-language-menu role="menu">
+        <button type="button" data-language-choice="ko" role="menuitemradio">한국어</button>
+        <button type="button" data-language-choice="en" role="menuitemradio">English</button>
+        <button type="button" data-language-choice="ja" role="menuitemradio">日本語</button>
+        <button type="button" data-language-choice="ru" role="menuitemradio">Русский</button>
+      </div>
+    </div>
+
+    <div class="theme-picker" data-theme-picker>
+      <button
+        class="theme-button chat-setting-button"
+        type="button"
+        data-theme-button
+        aria-label="Theme"
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="Theme"
+      >◐</button>
+
+      <div class="theme-menu" data-theme-menu role="menu">
+        <button type="button" data-theme-choice="system" role="menuitemradio">
+          <span class="theme-choice-icon">◐</span><span>System</span>
+        </button>
+        <button type="button" data-theme-choice="light" role="menuitemradio">
+          <span class="theme-choice-icon">☀</span><span>Light</span>
+        </button>
+        <button type="button" data-theme-choice="dark" role="menuitemradio">
+          <span class="theme-choice-icon">☾</span><span>Dark</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <section id="gate" class="gate">
     <h1 id="gateTitle">Staff Chat</h1>
     <p id="gateMessage">Checking access…</p>
@@ -617,33 +808,10 @@
   </section>
 
   <main id="app" class="app hidden">
-    <aside class="sidebar panel">
-      <div class="side-head">
-        <strong id="roomsTitle">Rooms</strong>
-
-        <div
-          id="chatAnnouncementMobile"
-          class="chat-announcement"
-          hidden
-          aria-live="polite"
-        >
-          <div class="chat-announcement-inner">
-            <span
-              id="chatAnnouncementMobileText"
-              class="chat-announcement-text"
-            ></span>
-          </div>
-        </div>
-
-        <div class="room-tools">
-          <button id="createRoomButton" type="button" title="Create room">＋</button>
-          <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
-        </div>
-      </div>
-
+    <div class="sidebar-stack">
       <div
         id="chatAnnouncementDesktop"
-        class="chat-announcement"
+        class="chat-announcement chat-announcement-desktop-panel"
         hidden
         aria-live="polite"
       >
@@ -655,18 +823,44 @@
         </div>
       </div>
 
-      <div id="rooms" class="rooms"></div>
-    </aside>
+      <aside class="sidebar panel">
+        <div class="side-head">
+          <strong id="roomsTitle">Rooms</strong>
+
+          <div
+            id="chatAnnouncementMobile"
+            class="chat-announcement"
+            hidden
+            aria-live="polite"
+          >
+            <div class="chat-announcement-inner">
+              <span
+                id="chatAnnouncementMobileText"
+                class="chat-announcement-text"
+              ></span>
+            </div>
+          </div>
+
+          <div class="room-tools">
+            <button id="createRoomButton" type="button" title="Create room">＋</button>
+            <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
+          </div>
+        </div>
+
+        <div id="rooms" class="rooms"></div>
+      </aside>
+    </div>
 
     <section class="main">
       <header class="bar panel">
-        <h1 id="chatTitle">Staff Chat</h1>
+        <span id="chatTitle" class="hidden" aria-hidden="true"></span>
         <span id="actor" class="actor"></span>
         <a id="memberPasswordButton" class="hidden" href="/chat/password/" title="Change password">🔑</a>
         <button id="nicknameButton" class="hidden" type="button" title="Change nickname">✎</button>
         <button id="roomMembersButton" type="button" title="Room members">👥</button>
         <button id="searchToggleButton" type="button" title="Search" aria-expanded="false">🔎</button>
         <button id="notifyButton" type="button">🔔</button>
+        <span id="chatSettingsToolbarSlot"></span>
         <button id="refreshButton" type="button">↻</button>
         <a id="backButton" href="/">Back</a>
       </header>
@@ -827,6 +1021,26 @@
     let currentSearch = {q:"",date:""};
 
     const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+
+    const chatSettingsPickers = $("chatSettingsPickers");
+    const chatSettingsToolbarSlot = $("chatSettingsToolbarSlot");
+
+    function placeChatSettingsForLogin(){
+      if(!chatSettingsPickers)return;
+      document.body.append(chatSettingsPickers);
+      chatSettingsPickers.classList.add("login-position");
+      chatSettingsPickers.classList.remove("toolbar-position");
+    }
+
+    function placeChatSettingsInToolbar(){
+      if(!chatSettingsPickers||!chatSettingsToolbarSlot)return;
+      chatSettingsToolbarSlot.append(chatSettingsPickers);
+      chatSettingsPickers.classList.remove("login-position");
+      chatSettingsPickers.classList.add("toolbar-position");
+    }
+
+    placeChatSettingsForLogin();
+
 
     const chatAnnouncementDesktop =
       $("chatAnnouncementDesktop");
@@ -1723,6 +1937,7 @@
         notificationBaseline=newestMessage()?.id??notificationBaseline;
         gate.classList.add("hidden");
         app.classList.remove("hidden");
+      placeChatSettingsInToolbar();
       loadChatAnnouncements();
       loadChatAnnouncements();
         renderRooms();
@@ -1882,6 +2097,7 @@
     function showGate(message){
       stopRealtime();
       app.classList.add("hidden");
+      placeChatSettingsForLogin();
       hideChatAnnouncements();
       gate.classList.remove("hidden");
       gateMessage.textContent=message;
@@ -1910,6 +2126,7 @@
           renderMessages();
           gate.classList.add("hidden");
           app.classList.remove("hidden");
+      placeChatSettingsInToolbar();
       loadChatAnnouncements();
           return;
         }
