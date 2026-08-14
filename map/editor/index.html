@@ -1808,10 +1808,10 @@
       ru: { UNAUTHORIZED: "Войдите снова.", INVALID_SESSION: "Сеанс недействителен. Войдите снова.", SESSION_EXPIRED: "Срок действия сеанса истёк. Войдите снова.", MAP_NAME_REQUIRED: "Введите название карты.", MAP_NAME_TOO_LONG: "Название карты должно содержать не более 100 символов.", INVALID_DOCUMENT_DATA: "Документ карты недействителен.", INVALID_MAP_ID: "Недействительный ID карты.", MAP_NOT_FOUND: "Карта не найдена.", MAP_LIMIT_REACHED: "Можно сохранить не более 5 карт.", DATABASE_ERROR: "Ошибка базы данных помешала сохранению.", MAP_SAVE_FAILED: "Не удалось сохранить карту.", INTERNAL_SERVER_ERROR: "Ошибка сервера помешала сохранению.", NETWORK_ERROR: "Ошибка сети. Изменения сохранены локально." },
     };
     const RANGE_TEXT = {
-      en: { title: "Ranges", allowed: "Allowed", blocked: "Blocked", locked: "Locked", newAllowed: "New allowed range", newBlocked: "New blocked range", confirm: "Confirm range", cancel: "Cancel", remove: "Delete", empty: "No ranges", cells: "cells", affiliationColors: "Alliance territory colors", noAffiliation: "No affiliation" },
-      ko: { title: "범위", allowed: "건축 허용", blocked: "건축 금지", locked: "고정", newAllowed: "새 허용 범위", newBlocked: "새 금지 범위", confirm: "범위 확정", cancel: "취소", remove: "삭제", empty: "범위 없음", cells: "칸", affiliationColors: "소속별 영토 색상", noAffiliation: "소속 없음" },
-      ja: { title: "範囲", allowed: "建築可能", blocked: "建築禁止", locked: "固定", newAllowed: "許可範囲を作成", newBlocked: "禁止範囲を作成", confirm: "範囲を確定", cancel: "キャンセル", remove: "削除", empty: "範囲なし", cells: "セル", affiliationColors: "所属別の領地色", noAffiliation: "所属なし" },
-      ru: { title: "Области", allowed: "Разрешено", blocked: "Запрещено", locked: "Закреплено", newAllowed: "Новая разрешённая", newBlocked: "Новая запрещённая", confirm: "Подтвердить", cancel: "Отмена", remove: "Удалить", empty: "Областей нет", cells: "ячеек", affiliationColors: "Цвет территории по альянсу", noAffiliation: "Без принадлежности" },
+      en: { title: "Ranges", allowed: "Allowed", blocked: "Blocked", locked: "Locked", newAllowed: "New allowed range", newBlocked: "New blocked range", mountain: "Mt", confirm: "Confirm range", cancel: "Cancel", remove: "Delete", empty: "No ranges", cells: "cells", affiliationColors: "Alliance territory colors", noAffiliation: "No affiliation" },
+      ko: { title: "범위", allowed: "건축 허용", blocked: "건축 금지", locked: "고정", newAllowed: "새 허용 범위", newBlocked: "새 금지 범위", mountain: "산", confirm: "범위 확정", cancel: "취소", remove: "삭제", empty: "범위 없음", cells: "칸", affiliationColors: "소속별 영토 색상", noAffiliation: "소속 없음" },
+      ja: { title: "範囲", allowed: "建築可能", blocked: "建築禁止", locked: "固定", newAllowed: "許可範囲を作成", newBlocked: "禁止範囲を作成", mountain: "山", confirm: "範囲を確定", cancel: "キャンセル", remove: "削除", empty: "範囲なし", cells: "セル", affiliationColors: "所属別の領地色", noAffiliation: "所属なし" },
+      ru: { title: "Области", allowed: "Разрешено", blocked: "Запрещено", locked: "Закреплено", newAllowed: "Новая разрешённая", newBlocked: "Новая запрещённая", mountain: "Гора", confirm: "Подтвердить", cancel: "Отмена", remove: "Удалить", empty: "Областей нет", cells: "ячеек", affiliationColors: "Цвет территории по альянсу", noAffiliation: "Без принадлежности" },
     };
     const RANGE_OVERLAP_TEXT = {
       en: "A range cannot overlap another range.",
@@ -2702,6 +2702,57 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         controls.append(button);
       }
 
+      const mountainButton =
+        document.createElement(
+          "button"
+        );
+
+      mountainButton.type =
+        "button";
+      mountainButton.textContent =
+        labels.mountain;
+      mountainButton.disabled =
+        readOnly;
+
+      mountainButton.classList.toggle(
+        "active",
+        rangeState.mode ===
+          "rangePreset" &&
+        rangeState.preset?.id ===
+          "mountain"
+      );
+
+      mountainButton.title =
+        language === "ko"
+          ? "2×2 건설 불가 장애물"
+          : language === "ja"
+            ? "2×2 建設不可の障害物"
+            : language === "ru"
+              ? "Препятствие 2×2, запрещающее строительство"
+              : "2×2 non-buildable obstacle";
+
+      mountainButton.onclick =
+        () => {
+          cancelAreaModes();
+
+          rangeController
+            .startPreset({
+              id: "mountain",
+              kind: "blocked",
+              color: "#7F7F7F",
+              locked: false,
+              width: 2,
+              height: 2,
+            });
+
+          renderRangePanel();
+          mapRenderer.invalidate();
+        };
+
+      controls.append(
+        mountainButton
+      );
+
       const confirm =
         document.createElement("button");
 
@@ -2741,9 +2792,14 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         labels.cancel;
       cancel.disabled =
         readOnly ||
-        rangeController.getState()
-          .mode !==
-          "rangeCreate";
+        ![
+          "rangeCreate",
+          "rangePreset",
+        ].includes(
+          rangeController
+            .getState()
+            .mode
+        );
 
       cancel.onclick = () => {
         rangeController.cancel();
@@ -3318,6 +3374,47 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         bulkDeleteController,
         rangeEraseController,
         buildingFilter,
+        notifyRangePresetError:
+          error => {
+            let message;
+
+            if (
+              error?.code ===
+              "RANGE_OVERLAP"
+            ) {
+              message =
+                RANGE_OVERLAP_TEXT[
+                  language
+                ] ??
+                RANGE_OVERLAP_TEXT.en;
+            } else if (
+              error?.code ===
+              "RANGE_PRESET_BUILDING_OVERLAP"
+            ) {
+              message =
+                language === "ko"
+                  ? "산은 기존 건물 위에 설치할 수 없습니다."
+                  : language === "ja"
+                    ? "山は既存の建物の上には設置できません。"
+                    : language === "ru"
+                      ? "Гору нельзя разместить поверх существующего здания."
+                      : "A mountain cannot be placed on an existing building.";
+            } else {
+              message =
+                language === "ko"
+                  ? "이 위치에는 산을 설치할 수 없습니다."
+                  : language === "ja"
+                    ? "この位置には山を設置できません。"
+                    : language === "ru"
+                      ? "В этом месте нельзя разместить гору."
+                      : "A mountain cannot be placed here.";
+            }
+
+            window.alert(
+              message
+            );
+          },
+
         notifyInvalidPlacement: ({
           preview,
         }) => {
