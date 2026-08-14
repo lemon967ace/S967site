@@ -602,12 +602,8 @@
         clamp(8px, 1svh, 12px)
         clamp(10px, 1.3vw, 14px);
 
-      /*
-        This flexible margin is the main visual spacer:
-        title stays upper-middle, buttons sit closer to footer.
-      */
       margin:
-        auto
+        clamp(30px, 5.2svh, 58px)
         auto
         0;
     }
@@ -632,11 +628,13 @@
 
     footer {
       flex: 0 0 auto;
+      width: 100%;
+      align-self: center;
 
-      margin-top:
-        clamp(12px, 1.9svh, 24px);
+      margin-top: auto;
+      padding: clamp(10px, 1.5svh, 18px) 0 2px;
 
-      padding: 0 0 2px;
+      text-align: center;
 
       font-size:
         clamp(.58rem, min(1.55vw, 1.05svh), .72rem);
@@ -756,11 +754,13 @@
       }
 
       footer {
-        margin-top:
+        width: 100%;
+        max-width: none;
+        margin-top: auto;
+        padding-top:
           clamp(7px, 1.2svh, 14px);
 
-        max-width:
-          calc(100vw - 92px);
+        text-align: center;
 
         font-size:
           clamp(.52rem, .92svh, .62rem);
@@ -842,7 +842,8 @@
       }
 
       footer {
-        margin-top: 6px;
+        margin-top: auto;
+        padding-top: 6px;
       }
 
       .announcement-ticker {
@@ -890,7 +891,8 @@
       }
 
       footer {
-        margin-top: 4px;
+        margin-top: auto;
+        padding-top: 4px;
         font-size: .5rem;
         line-height: 1.12;
       }
@@ -913,6 +915,19 @@
       .announcement-slide {
         padding: 7px 10px 2px;
         font-size: .61rem;
+      }
+    }
+
+  
+    @media (max-height: 720px) {
+      .buttons {
+        margin-top: clamp(18px, 3svh, 30px);
+      }
+    }
+
+    @media (max-height: 600px) {
+      .buttons {
+        margin-top: 10px;
       }
     }
 
