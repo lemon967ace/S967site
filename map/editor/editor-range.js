@@ -1,6 +1,31 @@
 import { buildRangeCellOwnerIndex, isValidMapCell, MapRange } from "./editor-model.js";
-import { snapshotRange } from "./editor-history.js";
 import { calculateOccupiedCells } from "./editor-occupancy.js";
+
+function snapshotRange(range) {
+  return Object.freeze({
+    id: range.id,
+    kind: range.kind,
+    color: range.color,
+    locked: range.locked,
+    priority: range.priority,
+    fixed: range.fixed,
+    linked: Boolean(range.linked),
+    sourceBuildingId:
+      range.sourceBuildingId ??
+      null,
+    affiliation:
+      range.affiliation ??
+      "",
+    active:
+      range.active !== false,
+    cells: Object.freeze(
+      range.cells.map(
+        cell =>
+          Object.freeze([...cell])
+      )
+    ),
+  });
+}
 
 export const RANGE_COLORS = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F", "#EDC948", "#B07AA1", "#FF9DA7", "#9C755F", "#BAB0AC", "#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", "#E377C2", "#7F7F7F"];
 
