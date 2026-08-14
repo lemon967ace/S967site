@@ -9175,7 +9175,10 @@ try {
         else if (target === "groupbuy") { await loadGroupBuyData(); loadedAdminSections.add("groupbuy"); }
         else if (target === "staff") { await loadStaffAccounts(); loadedAdminSections.add("staff"); }
         else if (target === "chat") { loadedAdminSections.add("chat"); }
-        else if (target === "announcements") { loadedAdminSections.add("announcements"); }
+        else if (target === "announcements") {
+          window.dispatchEvent(new Event("s967adminannouncementopen"));
+          loadedAdminSections.add("announcements");
+        }
         else if (target === "maptemplates") { await loadMapTemplates(); loadedAdminSections.add("maptemplates"); }
       } catch (error) {
         console.error(`Admin section load failed: ${target}`, error);
@@ -10483,6 +10486,9 @@ createMapTemplateButton.addEventListener(
     setStatus(loginStatus, "");
     const activeTarget = document.querySelector(".admin-tab.is-active")?.dataset.adminTab || "uploads";
     loadAdminSectionData(activeTarget, { force: true });
+    if (activeTarget === "announcements") {
+      window.dispatchEvent(new Event("s967adminannouncementopen"));
+    }
   } catch (error) {
     S967AdminAuth.clearToken();
     showLogin("관리자 세션을 복구하지 못했습니다. 다시 로그인하세요.");
@@ -10694,10 +10700,7 @@ createMapTemplateButton.addEventListener(
     function fmt(value){try{return new Intl.DateTimeFormat("ko-KR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}catch{return value??"";}}
 
     async function token(){
-      const admin=S967AdminAuth?.getToken?.();
-      if(admin)return admin;
-      const {data}=await supabase.auth.getSession();
-      return data.session?.access_token??null;
+      return S967AdminAuth?.getToken?.() ?? null;
     }
 
     async function request(method="GET",body=null){
