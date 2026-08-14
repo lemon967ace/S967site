@@ -36,129 +36,33 @@
   ></script>
 
   <style>
-  .operator-wrap {
-  position: relative;
-  display: inline-block;
-}
+    /* =========================================================
+       BASE
+       ========================================================= */
 
-.privacy-info-button {
-  border: 0;
-  padding: 0;
-  margin-left: 3px;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: 0.85em;
-  cursor: pointer;
-  opacity: 0.65;
-  vertical-align: baseline;
-}
-
-.privacy-info-button:hover {
-  opacity: 1;
-}
-
-.privacy-popover {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%);
-
-  width: min(340px, calc(100vw - 32px));
-  padding: 10px 12px;
-
-  background: #fff;
-  color: #333;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: left;
-
-  z-index: 1000;
-}
-
-   .corner-links {
-  position: fixed;
-  top: var(--corner-control-edge, clamp(18px, 1.15vw, 28px));
-  left: var(--corner-control-edge, clamp(18px, 1.15vw, 28px));
-  z-index: 1100;
-
-  display: flex;
-  flex-direction: column;
-  gap: var(--corner-control-gap, clamp(8px, 0.65vw, 16px));
-}
-
-.staff-link,
-.map-link,
-.chat-link {
-  width: var(--corner-control-size, clamp(40px, 2.9vw, 70px));
-  height: var(--corner-control-size, clamp(40px, 2.9vw, 70px));
-  padding: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid var(--border);
-  border-radius: clamp(10px, 0.65vw, 15px);
-
-  background: var(--surface-hover);
-  color: var(--text);
-
-  text-decoration: none;
-  font-size: clamp(1rem, 1.18vw, 1.65rem);
-  cursor: pointer;
-}
-
-.staff-link:hover,
-.map-link:hover,
-.chat-link:hover {
-  border-color: var(--border-hover);
-}
-
-@media (max-width: 480px) {
-  .corner-links {
-    top: 14px;
-    left: 14px;
-    gap: 8px;
-  }
-
-  .staff-link,
-  .map-link,
-  .chat-link {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-    border-radius: 10px;
-  }
-}
-    
     * {
       box-sizing: border-box;
     }
 
     html,
     body {
-      margin: 0;
+      width: 100%;
+      height: 100%;
       min-height: 100%;
+      margin: 0;
+      overflow: hidden;
     }
 
     body {
-      min-height: 100vh;
       min-height: 100svh;
 
       display: flex;
       flex-direction: column;
 
-      padding: 0;
-
       background:
         radial-gradient(
           circle at 50% 15%,
-          rgba(255,255,255,.08),
+          rgba(255, 255, 255, .08),
           transparent 34%
         ),
         linear-gradient(
@@ -180,163 +84,91 @@
         sans-serif;
     }
 
-    main {
-      width: 100%;
-      min-height: 100vh;
-      min-height: 100svh;
-      padding: clamp(82px, 10vh, 124px) clamp(24px, 5vw, 72px) 24px;
+
+    /* =========================================================
+       CORNER LINKS
+       ========================================================= */
+
+    .corner-links {
+      position: fixed;
+
+      top:
+        var(
+          --corner-control-edge,
+          clamp(18px, 1.15vw, 28px)
+        );
+
+      left:
+        var(
+          --corner-control-edge,
+          clamp(18px, 1.15vw, 28px)
+        );
+
+      z-index: 1100;
 
       display: flex;
       flex-direction: column;
+
+      gap:
+        var(
+          --corner-control-gap,
+          clamp(8px, .65vw, 16px)
+        );
+    }
+
+    .staff-link,
+    .map-link,
+    .chat-link {
+      width:
+        var(
+          --corner-control-size,
+          clamp(40px, 2.9vw, 70px)
+        );
+
+      height:
+        var(
+          --corner-control-size,
+          clamp(40px, 2.9vw, 70px)
+        );
+
+      padding: 0;
+
+      display: flex;
       align-items: center;
-
-      text-align: center;
-    }
-
-    .server {
-      margin: clamp(8px, 1.5vh, 18px) 0 0;
-
-      font-size:
-        clamp(
-          4.5rem,
-          17vw,
-          8rem
-        );
-
-      line-height: .95;
-      letter-spacing: -.055em;
-      font-weight: 800;
-    }
-
-    .headline {
-      margin: 28px 0 0;
-
-      font-size:
-        clamp(
-          1.35rem,
-          4.5vw,
-          2rem
-        );
-
-      line-height: 1.3;
-      font-weight: 650;
-      letter-spacing: -.02em;
-    }
-
-    .tagline {
-      margin: 12px 0 0;
-
-      font-size:
-        clamp(
-          .95rem,
-          3.2vw,
-          1.12rem
-        );
-
-      color: #aeb4bf;
-      letter-spacing: .01em;
-    }
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-
-  gap:
-    clamp(12px, 1.4vw, 18px);
-
-  width: min(420px, 100%);
-  max-width: 420px;
-
-  margin: clamp(96px, 14vh, 180px) auto 0;
-}
-
-    .button {
-  flex: 1 1 calc(50% - 9px);
-  min-width: 0;
-
-      padding: 15px 24px;
+      justify-content: center;
 
       border:
         1px solid
-        rgba(255,255,255,.18);
+        var(--border);
 
-      border-radius: 12px;
-
-      color: #f7f7f8;
+      border-radius:
+        clamp(10px, .65vw, 15px);
 
       background:
-        rgba(255,255,255,.07);
+        var(--surface-hover);
+
+      color:
+        var(--text);
 
       text-decoration: none;
 
-      font-size: 1rem;
-      font-weight: 650;
+      font-size:
+        clamp(1rem, 1.18vw, 1.65rem);
 
-      transition:
-        transform 160ms ease,
-        background 160ms ease,
-        border-color 160ms ease;
-
-      backdrop-filter:
-        blur(10px);
+      cursor: pointer;
     }
 
-    .button:hover {
-      transform:
-        translateY(-2px);
-
-      background:
-        rgba(255,255,255,.12);
-
+    .staff-link:hover,
+    .map-link:hover,
+    .chat-link:hover {
       border-color:
-        rgba(255,255,255,.32);
-    }
-
-    .button:active {
-      transform:
-        translateY(0);
-    }
-
-    .group-buy-button {
-  flex: 1 1 100%;
-}
-
-    footer {
-      margin-top: clamp(34px, 5vh, 64px);
-      padding-top: 0;
-      padding-bottom: 4px;
-
-      color: #626875;
-
-      font-size: .78rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .source-link {
-      display: inline-block;
-
-      margin-top: 8px;
-
-      color: #555c68;
-
-      font-size: .72rem;
-      letter-spacing: .03em;
-      text-transform: none;
-      text-decoration: none;
-    }
-
-    .source-link:hover {
-      color: #8c939f;
-      text-decoration: underline;
+        var(--border-hover);
     }
 
 
-    /*
-      Language + Theme
-      오른쪽 아래 공통 컨트롤
-    */
+    /* =========================================================
+       LANGUAGE / THEME PICKERS
+       ========================================================= */
 
     .top-pickers {
       position: fixed;
@@ -348,13 +180,12 @@
 
       display: flex;
       align-items: flex-end;
+
       gap: 8px;
     }
 
-    .top-pickers
-    .language-picker,
-    .top-pickers
-    .theme-picker {
+    .top-pickers .language-picker,
+    .top-pickers .theme-picker {
       position: relative;
 
       top: auto;
@@ -363,36 +194,77 @@
       left: auto;
     }
 
-    .top-pickers
-    .language-menu,
-    .top-pickers
-    .theme-menu {
+    .top-pickers .language-menu,
+    .top-pickers .theme-menu {
       top: auto;
       bottom: calc(100% + 8px);
       right: 0;
     }
 
 
-    @media (
-  max-width: 480px
-) {
-  .top-pickers {
-    right: 14px;
-    bottom: 14px;
-  }
-}
-  
-    /* Active announcements: full-width notice strip. */
+    /* =========================================================
+       MAIN
+       ========================================================= */
+
+    main {
+      position: relative;
+
+      width: 100%;
+      height: 100svh;
+      min-height: 0;
+
+      padding:
+        clamp(52px, 6.5svh, 76px)
+        clamp(14px, 4vw, 40px)
+        clamp(10px, 1.6svh, 18px);
+
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+
+      overflow: hidden;
+    }
+
+
+    /* =========================================================
+       ANNOUNCEMENT
+       ========================================================= */
+
     .announcement-ticker {
+      position: relative;
+
+      flex: 0 0 auto;
+
       width: 100vw;
-      margin: calc(-1 * clamp(82px, 10vh, 124px)) 0 clamp(34px, 4vh, 54px);
-      margin-left: calc(50% - 50vw);
+
+      height:
+        clamp(38px, 5svh, 44px);
+
+      min-height: 0;
+
+      margin:
+        calc(-1 * clamp(52px, 6.5svh, 76px))
+        0
+        0;
+
+      margin-left:
+        calc(50% - 50vw);
+
       border: 0;
       border-radius: 0;
-      background: rgba(18, 18, 16, .94);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, .14);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+
+      background:
+        rgba(18, 18, 16, .95);
+
+      box-shadow:
+        0 4px 14px rgba(0, 0, 0, .12);
+
+      backdrop-filter:
+        blur(10px);
+
+      -webkit-backdrop-filter:
+        blur(10px);
+
       overflow: hidden;
     }
 
@@ -401,39 +273,80 @@
     }
 
     .announcement-label {
-      padding: 8px 18px 0;
+      position: absolute;
+
+      z-index: 2;
+
+      top: 2px;
+      left: 12px;
+
+      padding: 0;
+
       color: #d3a900;
-      font-size: .68rem;
-      font-weight: 800;
-      letter-spacing: .12em;
+
+      font-size:
+        clamp(
+          .48rem,
+          min(1.45vw, .82svh),
+          .58rem
+        );
+
+      font-weight: 850;
+
+      letter-spacing: .1em;
+
       text-transform: uppercase;
     }
 
     .announcement-viewport {
       position: relative;
-      height: 54px;
+
+      width: 100%;
+      height: 100%;
+
       overflow: hidden;
     }
 
     .announcement-slide {
       position: absolute;
+
       inset: 0;
-      display: flex;
+
+      display: -webkit-box;
+
       align-items: center;
       justify-content: center;
-      padding: 8px clamp(22px, 5vw, 76px) 12px;
+
+      padding:
+        8px
+        clamp(12px, 4vw, 48px)
+        3px;
+
       color: #f0c400;
-      font-size: clamp(.9rem, 1.25vw, 1.02rem);
+
+      font-size:
+        clamp(
+          .65rem,
+          min(1.95vw, 1.3svh),
+          .86rem
+        );
+
       font-weight: 800;
-      line-height: 1.45;
+
+      line-height: 1.2;
+
       text-align: center;
 
-      white-space: normal;
-      word-break: normal;
-      overflow-wrap: normal;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+
+      overflow: hidden;
 
       opacity: 0;
-      transform: translateY(110%);
+
+      transform:
+        translateY(110%);
+
       transition:
         transform 420ms ease,
         opacity 420ms ease;
@@ -441,171 +354,169 @@
 
     .announcement-slide.is-active {
       opacity: 1;
-      transform: translateY(0);
+
+      transform:
+        translateY(0);
     }
 
     .announcement-slide.is-leaving {
       opacity: 0;
-      transform: translateY(-110%);
+
+      transform:
+        translateY(-110%);
     }
 
-    @media (min-width: 900px) {
-      .headline {
-        margin-top: 34px;
-      }
 
-      .tagline {
-        margin-top: 16px;
-      }
+    /* =========================================================
+       HOME CONTENT
+       ========================================================= */
 
-      .buttons {
-        margin-top: clamp(110px, 16vh, 210px);
-      }
+    .home-content {
+      flex: 1 1 auto;
 
-      footer {
-        margin-top: clamp(38px, 5vh, 68px);
-      }
-    }
-
-    @media (max-width: 480px) {
-      main {
-        padding: 70px 20px 18px;
-      }
-
-      .announcement-ticker {
-        margin-top: -70px;
-        margin-bottom: 26px;
-      }
-
-      .announcement-viewport {
-        height: 62px;
-      }
-
-      .announcement-slide {
-        padding-left: 14px;
-        padding-right: 14px;
-        font-size: .82rem;
-      }
-
-      body.has-announcement .corner-links {
-        top: 86px;
-      }
-
-      body.has-announcement main {
-        padding-top: 132px;
-      }
-
-      body.has-announcement .announcement-ticker {
-        margin-top: -132px;
-      }
-
-      .buttons {
-        width: min(100%, 378px);
-        margin-top: clamp(56px, 9vh, 88px);
-      }
-
-      footer {
-        margin-top: 42px;
-        padding-top: 0;
-      }
-    }
-
-  
-  
-    /* ===== Final viewport layout =====
-       One screen only. Desktop: 2/2/1 buttons. Mobile: 1/1/1/1/1.
-    */
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    body {
-      height: 100svh;
-      min-height: 100svh;
-    }
-
-    main {
-      width: 100%;
-      height: 100svh;
       min-height: 0;
-      padding:
-        clamp(56px, 7svh, 82px)
-        clamp(16px, 4vw, 40px)
-        clamp(8px, 1.2svh, 14px);
 
-      display: flex;
-      flex-direction: column;
+      display: grid;
+
+      grid-template-columns: 1fr;
+
+      /*
+        위쪽 여백
+        Hero
+        Hero → Buttons 공간
+        Buttons
+        Buttons → Footer 공간
+        Footer
+      */
+      grid-template-rows:
+        clamp(18px, 3svh, 44px)
+        auto
+        minmax(
+          clamp(38px, 6svh, 86px),
+          1fr
+        )
+        auto
+        minmax(
+          clamp(24px, 4svh, 58px),
+          .72fr
+        )
+        auto;
+
       align-items: center;
+      justify-items: center;
 
-      overflow: hidden;
+      width: 100%;
+    }
+
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .home-hero {
+      grid-row: 2;
+
+      align-self: start;
+
+      width: 100%;
+
+      margin: 0;
+
       text-align: center;
     }
 
     .server {
-      flex: 0 0 auto;
       margin: 0;
 
       font-size:
         clamp(
-          3.5rem,
-          min(13vw, 12svh),
+          3.45rem,
+          min(13vw, 11.5svh),
           7rem
         );
 
       line-height: .9;
+
+      letter-spacing: -.055em;
+
+      font-weight: 800;
     }
 
     .headline {
-      flex: 0 0 auto;
-      margin: clamp(12px, 2svh, 24px) 0 0;
+      margin:
+        clamp(11px, 1.8svh, 22px)
+        0
+        0;
 
       font-size:
         clamp(
           1rem,
-          min(3.3vw, 2.8svh),
+          min(3.3vw, 2.7svh),
           1.72rem
         );
 
-      line-height: 1.2;
+      line-height: 1.18;
+
+      font-weight: 650;
+
+      letter-spacing: -.02em;
     }
 
     .tagline {
-      flex: 0 0 auto;
-      margin: clamp(5px, .9svh, 10px) 0 0;
+      margin:
+        clamp(5px, .85svh, 10px)
+        0
+        0;
 
       font-size:
         clamp(
           .76rem,
-          min(2.25vw, 1.75svh),
+          min(2.2vw, 1.7svh),
           1rem
         );
 
       line-height: 1.2;
+
+      color: #aeb4bf;
+
+      letter-spacing: .01em;
     }
 
+
+    /* =========================================================
+       BUTTON GROUP
+       ========================================================= */
+
     .buttons {
-      flex: 0 0 auto;
+      grid-row: 4;
+
+      align-self: center;
 
       display: grid;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr));
 
-      width: min(420px, calc(100vw - 32px));
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+
+      width:
+        min(
+          420px,
+          calc(100vw - 32px)
+        );
+
       max-width: 420px;
 
-      gap:
-        clamp(8px, 1svh, 12px)
-        clamp(10px, 1.3vw, 14px);
+      margin: 0;
 
-      margin:
-        clamp(30px, 5.2svh, 58px)
-        auto
-        0;
+      /*
+        기본 화면에서는 적당한 간격.
+        대형 화면 미디어쿼리에서 단계적으로 확대한다.
+      */
+      gap:
+        clamp(8px, 1.1svh, 12px)
+        clamp(10px, 1.4vw, 14px);
     }
 
     .button {
@@ -616,135 +527,273 @@
         clamp(9px, 1.25svh, 13px)
         clamp(12px, 2vw, 20px);
 
+      border:
+        1px solid
+        rgba(255, 255, 255, .18);
+
+      border-radius: 12px;
+
+      background:
+        rgba(255, 255, 255, .07);
+
+      color: #f7f7f8;
+
+      text-decoration: none;
+
       font-size:
-        clamp(.8rem, min(2.1vw, 1.55svh), .96rem);
+        clamp(
+          .8rem,
+          min(2.1vw, 1.55svh),
+          .96rem
+        );
+
+      font-weight: 650;
 
       line-height: 1.15;
+
+      text-align: center;
+
+      backdrop-filter:
+        blur(10px);
+
+      transition:
+        transform 160ms ease,
+        background 160ms ease,
+        border-color 160ms ease;
+    }
+
+    .button:hover {
+      transform:
+        translateY(-2px);
+
+      background:
+        rgba(255, 255, 255, .12);
+
+      border-color:
+        rgba(255, 255, 255, .32);
+    }
+
+    .button:active {
+      transform:
+        translateY(0);
     }
 
     .group-buy-button {
       grid-column: 1 / -1;
     }
 
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
     footer {
-      flex: 0 0 auto;
+      grid-row: 6;
+
+      align-self: end;
+
       width: 100%;
-      align-self: center;
 
-      margin-top:
-        clamp(14px, 2.2svh, 28px);
+      margin: 0;
+      padding: 0;
 
-      padding: 0 0 2px;
+      color: #626875;
+
+      font-size:
+        clamp(
+          .58rem,
+          min(1.55vw, 1.05svh),
+          .72rem
+        );
+
+      line-height: 1.24;
+
+      letter-spacing: .08em;
 
       text-align: center;
 
-      font-size:
-        clamp(.58rem, min(1.55vw, 1.05svh), .72rem);
-
-      line-height: 1.25;
+      text-transform: uppercase;
     }
 
     .source-link {
+      display: inline-block;
+
       margin-top:
         clamp(2px, .45svh, 5px);
 
+      color: #555c68;
+
       font-size:
-        clamp(.54rem, min(1.35vw, .95svh), .66rem);
+        clamp(
+          .54rem,
+          min(1.35vw, .95svh),
+          .66rem
+        );
+
+      letter-spacing: .03em;
+
+      text-transform: none;
+
+      text-decoration: none;
     }
 
-    /* Thin full-width notice: enough for up to two text lines. */
-    .announcement-ticker {
+    .source-link:hover {
+      color: #8c939f;
+
+      text-decoration: underline;
+    }
+
+
+    /* =========================================================
+       PRIVACY INFO
+       ========================================================= */
+
+    .operator-wrap {
       position: relative;
-      flex: 0 0 auto;
 
-      width: 100vw;
-      min-height: 0;
-      height: clamp(42px, 5.4svh, 48px);
-
-      margin:
-        calc(-1 * clamp(56px, 7svh, 82px))
-        0
-        clamp(12px, 1.8svh, 20px);
-
-      margin-left: calc(50% - 50vw);
-
-      border: 0;
-      border-radius: 0;
-
-      background: rgba(18, 18, 16, .95);
-
-      box-shadow:
-        0 4px 14px rgba(0, 0, 0, .12);
-
-      overflow: hidden;
+      display: inline-block;
     }
 
-    .announcement-label {
-      position: absolute;
-      z-index: 2;
-
-      top: 3px;
-      left: 12px;
+    .privacy-info-button {
+      border: 0;
 
       padding: 0;
 
-      color: #d3a900;
+      margin-left: 3px;
 
-      font-size:
-        clamp(.5rem, min(1.5vw, .85svh), .6rem);
+      background: none;
 
-      font-weight: 850;
-      letter-spacing: .1em;
+      color: inherit;
+
+      font: inherit;
+
+      font-size: .85em;
+
+      cursor: pointer;
+
+      opacity: .65;
+
+      vertical-align: baseline;
     }
 
-    .announcement-viewport {
-      height: 100%;
+    .privacy-info-button:hover {
+      opacity: 1;
     }
 
-    .announcement-slide {
+    .privacy-popover {
+      position: absolute;
+
+      left: 50%;
+
+      bottom:
+        calc(100% + 8px);
+
+      transform:
+        translateX(-50%);
+
+      width:
+        min(
+          340px,
+          calc(100vw - 32px)
+        );
+
       padding:
-        clamp(10px, 1.25svh, 12px)
-        clamp(14px, 4vw, 54px)
-        4px;
+        10px 12px;
 
-      color: #f0c400;
+      background: #fff;
 
-      font-size:
-        clamp(.68rem, min(2vw, 1.35svh), .9rem);
+      color: #333;
 
-      font-weight: 800;
-      line-height: 1.22;
+      border:
+        1px solid
+        rgba(0, 0, 0, .15);
 
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      border-radius: 8px;
 
-      overflow: hidden;
+      box-shadow:
+        0 4px 16px
+        rgba(0, 0, 0, .15);
+
+      font-size: 12px;
+
+      line-height: 1.5;
+
+      letter-spacing: normal;
+
+      text-align: left;
+
+      text-transform: none;
+
+      z-index: 1000;
     }
 
-    /* Mobile keeps five full-width buttons in one column. */
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
     @media (max-width: 600px) {
+
       main {
         padding:
-          clamp(50px, 6.4svh, 66px)
+          clamp(48px, 6svh, 64px)
           14px
-          clamp(6px, .9svh, 10px);
+          clamp(8px, 1.2svh, 14px);
+      }
+
+      .corner-links {
+        top:
+          clamp(14px, 2svh, 18px);
+
+        left:
+          clamp(14px, 2svh, 18px);
+
+        gap: 8px;
+      }
+
+      .staff-link,
+      .map-link,
+      .chat-link {
+        width: 40px;
+        height: 40px;
+
+        font-size: 1rem;
+
+        border-radius: 10px;
+      }
+
+      .top-pickers {
+        right: 14px;
+        bottom: 14px;
       }
 
       .buttons {
         display: flex;
+
         flex-direction: column;
         flex-wrap: nowrap;
 
-        width: min(360px, calc(100vw - 28px));
+        width:
+          min(
+            360px,
+            calc(100vw - 28px)
+          );
+
+        max-width: 360px;
 
         gap:
-          clamp(5px, .8svh, 8px);
+          clamp(
+            5px,
+            .8svh,
+            8px
+          );
       }
 
       .button,
       .group-buy-button {
-        flex: 0 0 auto;
+        flex:
+          0 0 auto;
+
         width: 100%;
 
         padding:
@@ -752,622 +801,64 @@
           12px;
 
         font-size:
-          clamp(.74rem, 1.45svh, .88rem);
-      }
-
-      footer {
-        width: 100%;
-        max-width: none;
-        margin-top:
-          clamp(8px, 1.35svh, 16px);
-        padding-top: 0;
-
-        text-align: center;
-
-        font-size:
-          clamp(.52rem, .92svh, .62rem);
-
-        line-height: 1.18;
-      }
-
-      .source-link {
-        margin-top: 2px;
-        font-size:
-          clamp(.5rem, .84svh, .58rem);
-      }
-
-      .announcement-ticker {
-        height:
-          clamp(40px, 5svh, 44px);
-
-        margin-top:
-          calc(-1 * clamp(50px, 6.4svh, 66px));
-
-        margin-bottom:
-          clamp(8px, 1.25svh, 14px);
-      }
-
-      .announcement-slide {
-        padding:
-          9px
-          12px
-          3px;
-
-        font-size:
-          clamp(.64rem, 1.2svh, .78rem);
-      }
-
-      body.has-announcement .corner-links {
-        top:
-          clamp(50px, 7svh, 62px);
-      }
-    }
-
-    /* Short screens: compress proportionally instead of scrolling. */
-    @media (max-height: 720px) {
-      main {
-        padding-top:
-          clamp(44px, 5.7svh, 58px);
-
-        padding-bottom: 4px;
-      }
-
-      .server {
-        font-size:
-          clamp(
-            3rem,
-            min(10.5vw, 9.5svh),
-            5.3rem
-          );
-      }
-
-      .headline {
-        margin-top: 8px;
-
-        font-size:
-          clamp(.9rem, 2.35svh, 1.28rem);
-      }
-
-      .tagline {
-        margin-top: 3px;
-
-        font-size:
-          clamp(.68rem, 1.55svh, .86rem);
-      }
-
-      .buttons {
-        gap: 5px 8px;
-      }
-
-      .button {
-        padding: 7px 10px;
-      }
-
-      footer {
-        margin-top: 6px;
-        padding-top: 0;
-      }
-
-      .announcement-ticker {
-        height: 38px;
-
-        margin-top:
-          calc(-1 * clamp(44px, 5.7svh, 58px));
-
-        margin-bottom: 6px;
-      }
-
-      .announcement-slide {
-        padding: 8px 12px 2px;
-        font-size: .66rem;
-      }
-    }
-
-    @media (max-height: 600px) {
-      main {
-        padding-top: 38px;
-      }
-
-      .server {
-        font-size:
-          clamp(2.6rem, min(8.6vw, 8svh), 4.2rem);
-      }
-
-      .headline {
-        margin-top: 5px;
-        font-size: .86rem;
-      }
-
-      .tagline {
-        margin-top: 2px;
-        font-size: .64rem;
-      }
-
-      .buttons {
-        gap: 4px 7px;
-      }
-
-      .button {
-        padding: 6px 9px;
-        font-size: .72rem;
-      }
-
-      footer {
-        margin-top: 4px;
-        padding-top: 0;
-        font-size: .5rem;
-        line-height: 1.12;
-      }
-
-      .source-link {
-        font-size: .48rem;
-      }
-
-      .announcement-ticker {
-        height: 34px;
-        margin-top: -38px;
-        margin-bottom: 4px;
-      }
-
-      .announcement-label {
-        top: 2px;
-        font-size: .47rem;
-      }
-
-      .announcement-slide {
-        padding: 7px 10px 2px;
-        font-size: .61rem;
-      }
-    }
-
-  
-    @media (max-height: 720px) {
-      .buttons {
-        margin-top: clamp(18px, 3svh, 30px);
-      }
-    }
-
-    @media (max-height: 600px) {
-      .buttons {
-        margin-top: 10px;
-      }
-    }
-
-  
-    /* ===== Final footer rule: permanently pinned to viewport bottom ===== */
-    footer {
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: max(6px, env(safe-area-inset-bottom)) !important;
-
-      width: 100% !important;
-      max-width: none !important;
-
-      margin: 0 !important;
-      padding: 0 clamp(72px, 10vw, 130px) !important;
-
-      text-align: center !important;
-      z-index: 100 !important;
-    }
-
-    @media (max-width: 600px) {
-      footer {
-        bottom: max(5px, env(safe-area-inset-bottom)) !important;
-        padding: 0 76px !important;
-      }
-    }
-
-    @media (max-height: 720px) {
-      footer {
-        bottom: max(3px, env(safe-area-inset-bottom)) !important;
-      }
-    }
-
-  
-    /* ===== Layout correction: footer bottom + buttons directly above footer ===== */
-
-    /*
-      Reserve only the actual footer area at the bottom.
-      The button group is anchored just above it with a controlled gap,
-      so there is never a large empty ocean between buttons and footer.
-    */
-    main {
-      position: relative !important;
-      padding-bottom: clamp(118px, 15svh, 150px) !important;
-    }
-
-    .buttons {
-      position: absolute !important;
-      left: 50% !important;
-      bottom: clamp(48px, 6.2svh, 64px) !important;
-      transform: translateX(-50%) !important;
-
-      margin: 0 !important;
-    }
-
-    footer {
-      position: fixed !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: max(6px, env(safe-area-inset-bottom)) !important;
-
-      width: 100% !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 clamp(18px, 4vw, 48px) !important;
-
-      text-align: center !important;
-      z-index: 100 !important;
-    }
-
-    /*
-      Keep the hero comfortably above the bottom controls.
-      No auto margins are used anywhere in this relationship.
-    */
-    .server {
-      margin-top: clamp(8px, 2svh, 20px) !important;
-    }
-
-    .headline {
-      margin-top: clamp(12px, 1.8svh, 22px) !important;
-    }
-
-    .tagline {
-      margin-top: clamp(5px, .8svh, 10px) !important;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding-bottom: clamp(250px, 34svh, 300px) !important;
-      }
-
-      .buttons {
-        bottom: clamp(42px, 5.5svh, 54px) !important;
-      }
-
-      footer {
-        bottom: max(5px, env(safe-area-inset-bottom)) !important;
-        padding: 0 14px !important;
-      }
-    }
-
-    @media (max-height: 720px) {
-      main {
-        padding-bottom: clamp(105px, 15svh, 124px) !important;
-      }
-
-      .buttons {
-        bottom: 38px !important;
-      }
-
-      .server {
-        margin-top: 2px !important;
-      }
-
-      .headline {
-        margin-top: 7px !important;
-      }
-
-      .tagline {
-        margin-top: 3px !important;
-      }
-    }
-
-    @media (max-height: 720px) and (max-width: 600px) {
-      main {
-        padding-bottom: clamp(218px, 34svh, 250px) !important;
-      }
-
-      .buttons {
-        bottom: 32px !important;
-      }
-    }
-
-    @media (max-height: 600px) {
-      main {
-        padding-bottom: 96px !important;
-      }
-
-      .buttons {
-        bottom: 28px !important;
-      }
-    }
-
-    @media (max-height: 600px) and (max-width: 600px) {
-      main {
-        padding-bottom: 196px !important;
-      }
-
-      .buttons {
-        bottom: 25px !important;
-      }
-    }
-
-  
-    /* ===== FINAL BALANCED HOMEPAGE LAYOUT =====
-       No fixed footer, no absolute button anchoring, no auto-margin dumping.
-       Remaining vertical space is distributed evenly around hero/buttons/footer.
-    */
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    body {
-      min-height: 100svh;
-    }
-
-    main {
-      position: relative !important;
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: stretch !important;
-
-      width: 100% !important;
-      height: 100svh !important;
-      min-height: 0 !important;
-
-      padding:
-        clamp(52px, 6.5svh, 76px)
-        clamp(14px, 4vw, 40px)
-        clamp(10px, 1.6svh, 18px) !important;
-
-      overflow: hidden !important;
-    }
-
-    .home-content {
-      flex: 1 1 auto;
-      min-height: 0;
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-evenly;
-
-      width: 100%;
-    }
-
-    .home-hero {
-      flex: 0 0 auto;
-      width: 100%;
-      text-align: center;
-    }
-
-    .server {
-      margin: 0 !important;
-      font-size:
-        clamp(
-          3.45rem,
-          min(13vw, 11.5svh),
-          7rem
-        ) !important;
-      line-height: .9 !important;
-    }
-
-    .headline {
-      margin:
-        clamp(11px, 1.8svh, 22px)
-        0 0 !important;
-
-      font-size:
-        clamp(
-          1rem,
-          min(3.3vw, 2.7svh),
-          1.72rem
-        ) !important;
-
-      line-height: 1.18 !important;
-    }
-
-    .tagline {
-      margin:
-        clamp(5px, .85svh, 10px)
-        0 0 !important;
-
-      font-size:
-        clamp(
-          .76rem,
-          min(2.2vw, 1.7svh),
-          1rem
-        ) !important;
-
-      line-height: 1.2 !important;
-    }
-
-    .buttons {
-      position: static !important;
-      left: auto !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: auto !important;
-      transform: none !important;
-
-      flex: 0 0 auto;
-      display: grid !important;
-      grid-template-columns:
-        repeat(2, minmax(0, 1fr)) !important;
-
-      width:
-        min(
-          420px,
-          calc(100vw - 32px)
-        ) !important;
-
-      max-width: 420px !important;
-      margin: 0 !important;
-
-      gap:
-        clamp(8px, 1.1svh, 12px)
-        clamp(10px, 1.4vw, 14px) !important;
-    }
-
-    .button {
-      min-width: 0 !important;
-      width: 100% !important;
-
-      padding:
-        clamp(9px, 1.25svh, 13px)
-        clamp(12px, 2vw, 20px) !important;
-
-      font-size:
-        clamp(
-          .8rem,
-          min(2.1vw, 1.55svh),
-          .96rem
-        ) !important;
-
-      line-height: 1.15 !important;
-    }
-
-    .group-buy-button {
-      grid-column: 1 / -1 !important;
-    }
-
-    footer {
-      position: static !important;
-      left: auto !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: auto !important;
-
-      flex: 0 0 auto;
-      align-self: center !important;
-
-      width: 100% !important;
-      max-width: none !important;
-
-      margin: 0 !important;
-      padding: 0 !important;
-
-      text-align: center !important;
-
-      font-size:
-        clamp(
-          .58rem,
-          min(1.55vw, 1.05svh),
-          .72rem
-        ) !important;
-
-      line-height: 1.24 !important;
-      z-index: auto !important;
-    }
-
-    .source-link {
-      margin-top:
-        clamp(2px, .45svh, 5px) !important;
-
-      font-size:
-        clamp(
-          .54rem,
-          min(1.35vw, .95svh),
-          .66rem
-        ) !important;
-    }
-
-    /* Announcement remains a thin independent strip.
-       The remaining space below it is re-balanced automatically. */
-    .announcement-ticker {
-      flex: 0 0 auto !important;
-
-      width: 100vw !important;
-      height:
-        clamp(38px, 5svh, 44px) !important;
-
-      min-height: 0 !important;
-
-      margin:
-        calc(-1 * clamp(52px, 6.5svh, 76px))
-        0
-        0 !important;
-
-      margin-left:
-        calc(50% - 50vw) !important;
-
-      border-radius: 0 !important;
-      overflow: hidden !important;
-    }
-
-    .announcement-viewport {
-      height: 100% !important;
-    }
-
-    .announcement-label {
-      top: 2px !important;
-      padding: 0 !important;
-
-      font-size:
-        clamp(
-          .48rem,
-          min(1.45vw, .82svh),
-          .58rem
-        ) !important;
-    }
-
-    .announcement-slide {
-      padding:
-        8px
-        clamp(12px, 4vw, 48px)
-        3px !important;
-
-      font-size:
-        clamp(
-          .65rem,
-          min(1.95vw, 1.3svh),
-          .86rem
-        ) !important;
-
-      line-height: 1.2 !important;
-
-      display: -webkit-box !important;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden !important;
-    }
-
-    @media (max-width: 600px) {
-      main {
-        padding:
-          clamp(48px, 6svh, 64px)
-          14px
-          clamp(8px, 1.2svh, 14px) !important;
-      }
-
-      .buttons {
-        display: flex !important;
-        flex-direction: column !important;
-        flex-wrap: nowrap !important;
-
-        width:
-          min(
-            360px,
-            calc(100vw - 28px)
-          ) !important;
-
-        gap:
-          clamp(5px, .8svh, 8px) !important;
-      }
-
-      .button,
-      .group-buy-button {
-        flex: 0 0 auto !important;
-        width: 100% !important;
-
-        padding:
-          clamp(7px, 1svh, 10px)
-          12px !important;
-
-        font-size:
           clamp(
             .74rem,
             1.45svh,
             .88rem
-          ) !important;
+          );
+      }
+
+      .group-buy-button {
+        grid-column: auto;
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(10px, 1.7svh, 20px)
+          auto
+          minmax(
+            clamp(18px, 3.2svh, 34px),
+            .55fr
+          )
+          auto
+          minmax(
+            clamp(8px, 1.2svh, 16px),
+            .22fr
+          )
+          auto;
+      }
+
+      .announcement-ticker {
+        height:
+          clamp(
+            36px,
+            4.8svh,
+            42px
+          );
+
+        margin-top:
+          calc(
+            -1 *
+            clamp(
+              48px,
+              6svh,
+              64px
+            )
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          8px
+          12px
+          3px;
+
+        font-size:
+          clamp(
+            .64rem,
+            1.2svh,
+            .78rem
+          );
       }
 
       footer {
@@ -1376,27 +867,41 @@
             .52rem,
             .92svh,
             .62rem
-          ) !important;
+          );
 
-        line-height: 1.17 !important;
+        line-height: 1.17;
+
+        letter-spacing: .06em;
       }
 
-      .announcement-ticker {
-        height:
-          clamp(36px, 4.8svh, 42px) !important;
+      .source-link {
+        margin-top: 2px;
 
-        margin-top:
-          calc(-1 * clamp(48px, 6svh, 64px)) !important;
+        font-size:
+          clamp(
+            .5rem,
+            .84svh,
+            .58rem
+          );
       }
     }
 
-    /* Shorter displays: everything scales together.
-       No single gap absorbs the remaining height. */
+
+    /* =========================================================
+       SHORT SCREENS
+       ========================================================= */
+
     @media (max-height: 720px) {
+
       main {
         padding-top:
-          clamp(42px, 5.5svh, 54px) !important;
-        padding-bottom: 5px !important;
+          clamp(
+            42px,
+            5.5svh,
+            54px
+          );
+
+        padding-bottom: 5px;
       }
 
       .server {
@@ -1405,50 +910,92 @@
             2.9rem,
             min(10vw, 9svh),
             5.1rem
-          ) !important;
+          );
       }
 
       .headline {
-        margin-top: 7px !important;
+        margin-top: 7px;
+
         font-size:
-          clamp(.9rem, 2.25svh, 1.22rem) !important;
+          clamp(
+            .9rem,
+            2.25svh,
+            1.22rem
+          );
       }
 
       .tagline {
-        margin-top: 3px !important;
+        margin-top: 3px;
+
         font-size:
-          clamp(.68rem, 1.5svh, .84rem) !important;
+          clamp(
+            .68rem,
+            1.5svh,
+            .84rem
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          6px
+          auto
+          minmax(
+            10px,
+            .32fr
+          )
+          auto
+          6px
+          auto;
       }
 
       .buttons {
-        gap: 5px 8px !important;
+        gap:
+          5px 8px;
       }
 
       .button {
-        padding: 7px 10px !important;
+        padding:
+          7px 10px;
       }
 
       footer {
-        font-size: .54rem !important;
-        line-height: 1.14 !important;
+        font-size: .54rem;
+
+        line-height: 1.14;
       }
 
       .announcement-ticker {
-        height: 34px !important;
+        height: 34px;
+
         margin-top:
-          calc(-1 * clamp(42px, 5.5svh, 54px)) !important;
+          calc(
+            -1 *
+            clamp(
+              42px,
+              5.5svh,
+              54px
+            )
+          );
       }
 
       .announcement-slide {
-        padding: 7px 10px 2px !important;
-        font-size: .62rem !important;
+        padding:
+          7px 10px 2px;
+
+        font-size: .62rem;
       }
     }
 
+
+    /* =========================================================
+       VERY SHORT SCREENS
+       ========================================================= */
+
     @media (max-height: 600px) {
+
       main {
-        padding-top: 36px !important;
-        padding-bottom: 3px !important;
+        padding-top: 36px;
+        padding-bottom: 3px;
       }
 
       .server {
@@ -1457,147 +1004,89 @@
             2.45rem,
             min(8vw, 7.5svh),
             3.9rem
-          ) !important;
+          );
       }
 
       .headline {
-        margin-top: 5px !important;
-        font-size: .82rem !important;
+        margin-top: 5px;
+        font-size: .82rem;
       }
 
       .tagline {
-        margin-top: 2px !important;
-        font-size: .62rem !important;
+        margin-top: 2px;
+        font-size: .62rem;
+      }
+
+      .home-content {
+        grid-template-rows:
+          3px
+          auto
+          6px
+          auto
+          3px
+          auto;
       }
 
       .buttons {
-        gap: 4px 7px !important;
+        gap:
+          4px 7px;
       }
 
       .button {
-        padding: 6px 9px !important;
-        font-size: .7rem !important;
+        padding:
+          6px 9px;
+
+        font-size: .7rem;
       }
 
       footer {
-        font-size: .48rem !important;
-        line-height: 1.1 !important;
+        font-size: .48rem;
+
+        line-height: 1.1;
       }
 
       .source-link {
-        font-size: .46rem !important;
+        font-size: .46rem;
       }
 
       .announcement-ticker {
-        height: 30px !important;
-        margin-top: -36px !important;
+        height: 30px;
+
+        margin-top: -36px;
+      }
+
+      .announcement-label {
+        top: 2px;
+
+        font-size: .47rem;
       }
 
       .announcement-slide {
-        padding: 6px 9px 1px !important;
-        font-size: .58rem !important;
+        padding:
+          6px 9px 1px;
+
+        font-size: .58rem;
       }
     }
 
-  
-    /* ===== FOOTER-BOTTOM BALANCED LAYOUT =====
-       Footer is always at the bottom of the viewport.
-       Flexible vertical space is distributed above the buttons,
-       never dumped between buttons and footer.
-    */
 
-    .home-content {
-      flex: 1 1 auto !important;
-      min-height: 0 !important;
-
-      display: grid !important;
-      grid-template-columns: 1fr !important;
-      grid-template-rows:
-        minmax(0, 1fr)
-        auto
-        minmax(clamp(22px, 3svh, 42px), .72fr)
-        auto
-        clamp(14px, 2svh, 26px)
-        auto !important;
-
-      align-items: center !important;
-      justify-items: center !important;
-
-      width: 100% !important;
-    }
-
-    .home-hero {
-      grid-row: 2 !important;
-      align-self: center !important;
-    }
-
-    .buttons {
-      grid-row: 4 !important;
-      align-self: center !important;
-    }
-
-    footer {
-      grid-row: 6 !important;
-      align-self: end !important;
-
-      position: static !important;
-      width: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-
-      text-align: center !important;
-    }
-
-    @media (max-width: 600px) {
-      .home-content {
-        grid-template-rows:
-          minmax(0, .72fr)
-          auto
-          minmax(clamp(14px, 2svh, 28px), .48fr)
-          auto
-          clamp(9px, 1.3svh, 16px)
-          auto !important;
-      }
-    }
-
-    @media (max-height: 720px) {
-      .home-content {
-        grid-template-rows:
-          minmax(0, .55fr)
-          auto
-          minmax(10px, .34fr)
-          auto
-          7px
-          auto !important;
-      }
-    }
-
-    @media (max-height: 600px) {
-      .home-content {
-        grid-template-rows:
-          minmax(0, .3fr)
-          auto
-          minmax(6px, .2fr)
-          auto
-          4px
-          auto !important;
-      }
-    }
-
-  
-    /* ===== LARGE / 4K DISPLAY SCALING =====
-       Preserve normal FHD/mobile sizing.
-       Increase the whole visual scale progressively on QHD/4K-class viewports.
-    */
+    /* =========================================================
+       LARGE SCREEN
+       1920px+
+       
+       핵심 수정:
+       화면이 커지면 버튼 그룹의 폭과 gap을 함께 증가시킨다.
+       ========================================================= */
 
     @media (min-width: 1920px) and (min-height: 900px) {
+
       .server {
         font-size:
           clamp(
             6.2rem,
             min(6vw, 10svh),
             8.4rem
-          ) !important;
+          );
       }
 
       .headline {
@@ -1606,7 +1095,7 @@
             1.45rem,
             min(1.55vw, 2.35svh),
             2rem
-          ) !important;
+          );
       }
 
       .tagline {
@@ -1615,37 +1104,64 @@
             .95rem,
             min(1vw, 1.55svh),
             1.25rem
-          ) !important;
+          );
       }
 
+
+      /*
+        기존 460~560px에서
+        500~680px으로 확대.
+
+        화면 중앙에 버튼들이 너무 좁게
+        몰려 보이는 현상을 방지한다.
+      */
       .buttons {
         width:
           clamp(
-            460px,
-            25vw,
-            560px
-          ) !important;
+            500px,
+            28vw,
+            680px
+          );
 
-        max-width: 560px !important;
+        max-width: 680px;
 
+        /*
+          세로 gap / 가로 gap
+        */
         gap:
-          clamp(12px, .75vw, 18px)
-          clamp(14px, .85vw, 20px) !important;
+          clamp(
+            16px,
+            1.15vw,
+            28px
+          )
+          clamp(
+            18px,
+            1.25vw,
+            32px
+          );
       }
 
       .button {
-        min-height: 54px !important;
+        min-height: 56px;
 
         padding:
-          clamp(13px, .8svh, 17px)
-          clamp(18px, 1.25vw, 28px) !important;
+          clamp(
+            14px,
+            .9svh,
+            18px
+          )
+          clamp(
+            20px,
+            1.4vw,
+            32px
+          );
 
         font-size:
           clamp(
-            .98rem,
-            min(.9vw, 1.45svh),
-            1.18rem
-          ) !important;
+            1rem,
+            min(1vw, 1.5svh),
+            1.2rem
+          );
       }
 
       footer {
@@ -1654,7 +1170,7 @@
             .68rem,
             min(.6vw, .95svh),
             .82rem
-          ) !important;
+          );
       }
 
       .source-link {
@@ -1663,18 +1179,27 @@
             .62rem,
             min(.53vw, .85svh),
             .76rem
-          ) !important;
+          );
       }
     }
 
+
+    /* =========================================================
+       QHD / 4K
+       2560px+
+       
+       버튼 간격을 한 단계 더 확대.
+       ========================================================= */
+
     @media (min-width: 2560px) and (min-height: 1200px) {
+
       .server {
         font-size:
           clamp(
             8rem,
             min(6.2vw, 10.5svh),
             11rem
-          ) !important;
+          );
       }
 
       .headline {
@@ -1683,7 +1208,7 @@
             1.8rem,
             min(1.4vw, 2.4svh),
             2.55rem
-          ) !important;
+          );
       }
 
       .tagline {
@@ -1692,40 +1217,93 @@
             1.15rem,
             min(.9vw, 1.5svh),
             1.55rem
-          ) !important;
+          );
       }
 
+
+      /*
+        QHD / 4K에서는 버튼 영역 자체를
+        확실하게 넓힌다.
+      */
       .buttons {
         width:
           clamp(
-            560px,
-            24vw,
-            720px
-          ) !important;
+            620px,
+            30vw,
+            820px
+          );
 
-        max-width: 720px !important;
+        max-width: 820px;
 
         gap:
-          clamp(16px, .7vw, 24px)
-          clamp(18px, .8vw, 28px) !important;
+          clamp(
+            20px,
+            1.35vw,
+            36px
+          )
+          clamp(
+            22px,
+            1.45vw,
+            40px
+          );
       }
 
       .button {
-        min-height: 66px !important;
+        min-height: 68px;
 
         padding:
-          clamp(16px, .85svh, 22px)
-          clamp(24px, 1.15vw, 36px) !important;
+          clamp(
+            16px,
+            1svh,
+            22px
+          )
+          clamp(
+            24px,
+            1.25vw,
+            38px
+          );
 
         font-size:
           clamp(
             1.12rem,
-            min(.75vw, 1.35svh),
+            min(.8vw, 1.4svh),
             1.42rem
-          ) !important;
+          );
 
         border-radius:
-          clamp(12px, .55vw, 18px) !important;
+          clamp(
+            12px,
+            .55vw,
+            18px
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(
+            34px,
+            3.8svh,
+            72px
+          )
+          auto
+          minmax(
+            clamp(
+              84px,
+              8svh,
+              150px
+            ),
+            1fr
+          )
+          auto
+          minmax(
+            clamp(
+              28px,
+              2.8svh,
+              50px
+            ),
+            .34fr
+          )
+          auto;
       }
 
       footer {
@@ -1734,7 +1312,7 @@
             .78rem,
             min(.48vw, .9svh),
             .96rem
-          ) !important;
+          );
       }
 
       .source-link {
@@ -1743,42 +1321,17 @@
             .7rem,
             min(.43vw, .78svh),
             .88rem
-          ) !important;
-      }
-
-      .home-content {
-        grid-template-rows:
-          minmax(0, 1fr)
-          auto
-          minmax(clamp(34px, 3.6svh, 60px), .72fr)
-          auto
-          clamp(20px, 2.2svh, 34px)
-          auto !important;
+          );
       }
     }
 
+
+    /* =========================================================
+       VERY LARGE 4K / 5K / LARGE DISPLAY
+       3400px+
+       ========================================================= */
+
     @media (min-width: 3400px) and (min-height: 1600px) {
-      .buttons {
-        width:
-          clamp(
-            680px,
-            20vw,
-            820px
-          ) !important;
-
-        max-width: 820px !important;
-      }
-
-      .button {
-        min-height: 76px !important;
-
-        font-size:
-          clamp(
-            1.3rem,
-            min(.68vw, 1.25svh),
-            1.62rem
-          ) !important;
-      }
 
       .server {
         font-size:
@@ -1786,7 +1339,7 @@
             9.5rem,
             min(5.4vw, 9.8svh),
             13rem
-          ) !important;
+          );
       }
 
       .headline {
@@ -1795,7 +1348,7 @@
             2.15rem,
             min(1.15vw, 2.1svh),
             3rem
-          ) !important;
+          );
       }
 
       .tagline {
@@ -1804,7 +1357,84 @@
             1.35rem,
             min(.72vw, 1.3svh),
             1.8rem
-          ) !important;
+          );
+      }
+
+
+      /*
+        초대형 화면에서는 버튼들이 중앙에
+        지나치게 몰리지 않도록 최대 폭을 확장.
+      */
+      .buttons {
+        width:
+          clamp(
+            760px,
+            25vw,
+            1000px
+          );
+
+        max-width: 1000px;
+
+        gap:
+          clamp(
+            24px,
+            1.5vw,
+            44px
+          )
+          clamp(
+            26px,
+            1.6vw,
+            48px
+          );
+      }
+
+      .button {
+        min-height: 78px;
+
+        padding:
+          18px 32px;
+
+        font-size:
+          clamp(
+            1.3rem,
+            min(.7vw, 1.25svh),
+            1.65rem
+          );
+
+        border-radius:
+          clamp(
+            14px,
+            .5vw,
+            20px
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(
+            46px,
+            4svh,
+            90px
+          )
+          auto
+          minmax(
+            clamp(
+              110px,
+              8.5svh,
+              190px
+            ),
+            1fr
+          )
+          auto
+          minmax(
+            clamp(
+              34px,
+              3svh,
+              62px
+            ),
+            .32fr
+          )
+          auto;
       }
 
       footer {
@@ -1813,221 +1443,23 @@
             .88rem,
             min(.4vw, .8svh),
             1.08rem
-          ) !important;
+          );
       }
     }
 
-  
-    /* ===== TITLE HIGHER / FOOTER BOTTOM =====
-       Keep footer at the bottom, but bias the hero toward the upper part
-       of the viewport instead of vertically centering the whole stack.
-    */
 
-    .home-content {
-      grid-template-rows:
-        clamp(18px, 3svh, 42px)
-        auto
-        minmax(clamp(26px, 4svh, 54px), .55fr)
-        auto
-        minmax(clamp(16px, 2.2svh, 30px), .28fr)
-        auto !important;
-    }
+    /* =========================================================
+       PRIVACY POPUP MOBILE
+       ========================================================= */
 
-    .home-hero {
-      grid-row: 2 !important;
-      align-self: start !important;
-    }
+    @media (max-width: 480px) {
 
-    .buttons {
-      grid-row: 4 !important;
-      align-self: start !important;
-    }
-
-    footer {
-      grid-row: 6 !important;
-      align-self: end !important;
-    }
-
-    @media (max-width: 600px) {
-      .home-content {
-        grid-template-rows:
-          clamp(12px, 2svh, 24px)
-          auto
-          minmax(clamp(14px, 2.5svh, 28px), .35fr)
-          auto
-          minmax(clamp(8px, 1.2svh, 14px), .18fr)
-          auto !important;
-      }
-    }
-
-    @media (max-height: 720px) {
-      .home-content {
-        grid-template-rows:
-          8px
-          auto
-          minmax(10px, .22fr)
-          auto
-          6px
-          auto !important;
-      }
-    }
-
-    @media (max-height: 600px) {
-      .home-content {
-        grid-template-rows:
-          4px
-          auto
-          6px
-          auto
-          4px
-          auto !important;
-      }
-    }
-
-    @media (min-width: 2560px) and (min-height: 1200px) {
-      .home-content {
-        grid-template-rows:
-          clamp(28px, 3.5svh, 62px)
-          auto
-          minmax(clamp(38px, 4.5svh, 74px), .52fr)
-          auto
-          minmax(clamp(20px, 2.2svh, 38px), .24fr)
-          auto !important;
-      }
-    }
-
-    @media (min-width: 3400px) and (min-height: 1600px) {
-      .home-content {
-        grid-template-rows:
-          clamp(36px, 3.8svh, 78px)
-          auto
-          minmax(clamp(48px, 4.8svh, 90px), .5fr)
-          auto
-          minmax(clamp(24px, 2.3svh, 44px), .22fr)
-          auto !important;
-      }
-    }
-
-  
-    /* ===== VISUAL BALANCE FINAL POSITIONING =====
-       Hero: upper visual zone.
-       Buttons: slightly below the viewport's optical center.
-       Footer: bottom edge.
-    */
-
-    .home-content {
-      position: relative !important;
-
-      display: grid !important;
-      grid-template-columns: 1fr !important;
-      grid-template-rows:
-        clamp(18px, 3svh, 44px)
-        auto
-        minmax(clamp(38px, 6svh, 86px), 1fr)
-        auto
-        minmax(clamp(24px, 4svh, 58px), .72fr)
-        auto !important;
-
-      align-items: center !important;
-      justify-items: center !important;
-
-      width: 100% !important;
-      min-height: 0 !important;
-    }
-
-    .home-hero {
-      grid-row: 2 !important;
-      align-self: start !important;
-      margin: 0 !important;
-    }
-
-    .buttons {
-      grid-row: 4 !important;
-      align-self: center !important;
-      margin: 0 !important;
-    }
-
-    footer {
-      grid-row: 6 !important;
-      align-self: end !important;
-      margin: 0 !important;
-    }
-
-    /* Normal desktop: keep the button group's visual center
-       around the lower-middle area instead of true center. */
-    @media (min-width: 601px) and (min-height: 721px) {
-      .home-content {
-        grid-template-rows:
-          clamp(20px, 3.2svh, 48px)
-          auto
-          minmax(clamp(52px, 7.5svh, 100px), 1fr)
-          auto
-          minmax(clamp(18px, 2.6svh, 34px), .38fr)
-          auto !important;
-      }
-    }
-
-    /* Phones: same visual hierarchy, with tighter vertical rhythm. */
-    @media (max-width: 600px) {
-      .home-content {
-        grid-template-rows:
-          clamp(10px, 1.7svh, 20px)
-          auto
-          minmax(clamp(18px, 3.2svh, 34px), .55fr)
-          auto
-          minmax(clamp(8px, 1.2svh, 16px), .22fr)
-          auto !important;
-      }
-    }
-
-    /* Short screens: preserve hierarchy without overflow. */
-    @media (max-height: 720px) {
-      .home-content {
-        grid-template-rows:
-          6px
-          auto
-          minmax(10px, .32fr)
-          auto
-          6px
-          auto !important;
-      }
-    }
-
-    @media (max-height: 600px) {
-      .home-content {
-        grid-template-rows:
-          3px
-          auto
-          6px
-          auto
-          3px
-          auto !important;
-      }
-    }
-
-    /* QHD / 4K: retain the same optical composition.
-       Scaling changes size, not the visual hierarchy. */
-    @media (min-width: 2560px) and (min-height: 1200px) {
-      .home-content {
-        grid-template-rows:
-          clamp(34px, 3.8svh, 72px)
-          auto
-          minmax(clamp(84px, 8svh, 150px), 1fr)
-          auto
-          minmax(clamp(28px, 2.8svh, 50px), .34fr)
-          auto !important;
-      }
-    }
-
-    @media (min-width: 3400px) and (min-height: 1600px) {
-      .home-content {
-        grid-template-rows:
-          clamp(46px, 4svh, 90px)
-          auto
-          minmax(clamp(110px, 8.5svh, 190px), 1fr)
-          auto
-          minmax(clamp(34px, 3svh, 62px), .32fr)
-          auto !important;
+      .privacy-popover {
+        width:
+          min(
+            320px,
+            calc(100vw - 28px)
+          );
       }
     }
 
@@ -2037,34 +1469,46 @@
 
 <body>
 
-<div class="corner-links">
-  <a
-    class="staff-link"
-    href="/staff"
-    aria-label="Staff"
-    title="Staff"
-  >
-    🛠️
-  </a>
 
-   <a
-    class="chat-link"
-    href="/chat/"
-    aria-label="Chat"
-    title="Chat"
-  >
-    💬
-  </a>
-  
-  <a
-    class="map-link"
-    href="/map"
-    aria-label="Map"
-    title="Map"
-  >
-    🏰
-  </a>
-</div>
+  <!-- =======================================================
+       CORNER NAVIGATION
+       ======================================================= -->
+
+  <div class="corner-links">
+
+    <a
+      class="staff-link"
+      href="/staff"
+      aria-label="Staff"
+      title="Staff"
+    >
+      🛠️
+    </a>
+
+    <a
+      class="chat-link"
+      href="/chat/"
+      aria-label="Chat"
+      title="Chat"
+    >
+      💬
+    </a>
+
+    <a
+      class="map-link"
+      href="/map"
+      aria-label="Map"
+      title="Map"
+    >
+      🏰
+    </a>
+
+  </div>
+
+
+  <!-- =======================================================
+       LANGUAGE / THEME
+       ======================================================= -->
 
   <div class="top-pickers">
 
@@ -2072,6 +1516,7 @@
       class="language-picker"
       data-language-picker
     >
+
       <button
         class="language-button"
         type="button"
@@ -2088,6 +1533,7 @@
         data-language-menu
         role="menu"
       >
+
         <button
           type="button"
           data-language-choice="ko"
@@ -2119,7 +1565,9 @@
         >
           Русский
         </button>
+
       </div>
+
     </div>
 
 
@@ -2127,6 +1575,7 @@
       class="theme-picker"
       data-theme-picker
     >
+
       <button
         class="theme-button"
         type="button"
@@ -2143,22 +1592,21 @@
         data-theme-menu
         role="menu"
       >
+
         <button
           type="button"
           data-theme-choice="system"
           role="menuitemradio"
         >
-          <span
-            class="theme-choice-icon"
-          >
+
+          <span class="theme-choice-icon">
             ◐
           </span>
 
-          <span
-            data-i18n="themeSystem"
-          >
+          <span data-i18n="themeSystem">
             System
           </span>
+
         </button>
 
         <button
@@ -2166,17 +1614,15 @@
           data-theme-choice="light"
           role="menuitemradio"
         >
-          <span
-            class="theme-choice-icon"
-          >
+
+          <span class="theme-choice-icon">
             ☀
           </span>
 
-          <span
-            data-i18n="themeLight"
-          >
+          <span data-i18n="themeLight">
             Light
           </span>
+
         </button>
 
         <button
@@ -2184,26 +1630,34 @@
           data-theme-choice="dark"
           role="menuitemradio"
         >
-          <span
-            class="theme-choice-icon"
-          >
+
+          <span class="theme-choice-icon">
             ☾
           </span>
 
-          <span
-            data-i18n="themeDark"
-          >
+          <span data-i18n="themeDark">
             Dark
           </span>
+
         </button>
+
       </div>
+
     </div>
 
   </div>
 
 
+  <!-- =======================================================
+       MAIN
+       ======================================================= -->
+
   <main>
 
+
+    <!-- =====================================================
+         ANNOUNCEMENT
+         ===================================================== -->
 
     <section
       id="announcementTicker"
@@ -2211,20 +1665,33 @@
       aria-live="polite"
       hidden
     >
+
       <div
         class="announcement-label"
         id="announcementLabel"
       >
         Notice
       </div>
+
       <div
         class="announcement-viewport"
         id="announcementViewport"
       ></div>
+
     </section>
 
+
+    <!-- =====================================================
+         HOME CONTENT
+         ===================================================== -->
+
     <div class="home-content">
+
+
+      <!-- HERO -->
+
       <section class="home-hero">
+
         <h1 class="server">
           S967
         </h1>
@@ -2242,135 +1709,203 @@
         >
           Peaceful, open, and connected.
         </p>
+
       </section>
+
+
+      <!-- BUTTONS -->
 
       <nav
         class="buttons"
-      aria-label="S967 links"
-    >
-      <a
-        class="button"
-        href="/inquiry"
-        data-i18n="inquiry"
+        aria-label="S967 links"
       >
-        Inquiry
-      </a>
 
-      <a
-        class="button"
-        href="/wk"
-        data-i18n="wkApplication"
-      >
-        WK Application
-      </a>
+        <a
+          class="button"
+          href="/inquiry"
+          data-i18n="inquiry"
+        >
+          Inquiry
+        </a>
 
-      <a
-        class="button"
-        href="/upload"
-        data-i18n="imageUpload"
-      >
-        Image Upload
-      </a>
+        <a
+          class="button"
+          href="/wk"
+          data-i18n="wkApplication"
+        >
+          WK Application
+        </a>
 
-      <a
-        class="button"
-        href="/gallery"
-        data-i18n="viewImages"
-      >
-        View Images
-      </a>
+        <a
+          class="button"
+          href="/upload"
+          data-i18n="imageUpload"
+        >
+          Image Upload
+        </a>
 
-      <a
-        class="button group-buy-button"
-        href="/groupBuy"
-        data-i18n="groupBuyApplication"
-      >
-        Group Buy Application
-      </a>
-    </nav>
+        <a
+          class="button"
+          href="/gallery"
+          data-i18n="viewImages"
+        >
+          View Images
+        </a>
 
-<footer>
-  PNS · State 967
-  <br>
+        <a
+          class="button group-buy-button"
+          href="/groupBuy"
+          data-i18n="groupBuyApplication"
+        >
+          Group Buy Application
+        </a>
 
-  <span
-    class="unofficial"
-    data-i18n="unofficial"
-  >
-    Unofficial community site for State 967.
-  </span>
+      </nav>
 
-  <br>
 
-  <span class="operator-wrap">
-    <span data-i18n="operatedBy">
-      Operated by ᴬᶜᴱ⍣⃝ 레몬
-    </span>
+      <!-- ===================================================
+           FOOTER
+           =================================================== -->
 
-    <button
-      type="button"
-      class="privacy-info-button"
-      id="privacyInfoButton"
-      aria-label="Privacy information"
-      aria-expanded="false"
-    >
-      ⓘ
-    </button>
+      <footer>
 
-    <span
-      class="privacy-popover"
-      id="privacyPopover"
-      role="note"
-      hidden
-      data-i18n="privacyNotice"
-    >
-      This website uses cookies and similar browser storage technologies as necessary to provide and maintain its functionality, including authentication sessions and language preferences. These technologies are not used for advertising or behavioral tracking.
-    </span>
-  </span>
+        PNS · State 967
 
-  <br>
+        <br>
 
-  <a
-    class="source-link"
-    href="https://github.com/lemon967ace/S967site"
-    target="_blank"
-    rel="noopener noreferrer"
-    data-i18n="sourceCode"
-  >
-    View source code
-  </a>
-</footer>
+        <span
+          class="unofficial"
+          data-i18n="unofficial"
+        >
+          Unofficial community site for State 967.
+        </span>
+
+        <br>
+
+        <span class="operator-wrap">
+
+          <span data-i18n="operatedBy">
+            Operated by ᴬᶜᴱ⍣⃝ 레몬
+          </span>
+
+          <button
+            type="button"
+            class="privacy-info-button"
+            id="privacyInfoButton"
+            aria-label="Privacy information"
+            aria-expanded="false"
+          >
+            ⓘ
+          </button>
+
+          <span
+            class="privacy-popover"
+            id="privacyPopover"
+            role="note"
+            hidden
+            data-i18n="privacyNotice"
+          >
+            This website uses cookies and similar browser
+            storage technologies as necessary to provide and
+            maintain its functionality, including authentication
+            sessions and language preferences. These technologies
+            are not used for advertising or behavioral tracking.
+          </span>
+
+        </span>
+
+        <br>
+
+        <a
+          class="source-link"
+          href="https://github.com/lemon967ace/S967site"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-i18n="sourceCode"
+        >
+          View source code
+        </a>
+
+      </footer>
+
     </div>
 
-
   </main>
-  <script>
-const privacyInfoButton = document.getElementById('privacyInfoButton');
-const privacyPopover = document.getElementById('privacyPopover');
 
-privacyInfoButton.addEventListener('click', (event) => {
-  event.stopPropagation();
 
-  const isOpen = !privacyPopover.hidden;
-
-  privacyPopover.hidden = isOpen;
-  privacyInfoButton.setAttribute('aria-expanded', String(!isOpen));
-});
-
-privacyPopover.addEventListener('click', (event) => {
-  event.stopPropagation();
-});
-
-document.addEventListener('click', () => {
-  privacyPopover.hidden = true;
-  privacyInfoButton.setAttribute('aria-expanded', 'false');
-});
-</script>
+  <!-- =======================================================
+       PRIVACY POPUP SCRIPT
+       ======================================================= -->
 
   <script>
     (() => {
+      const privacyInfoButton =
+        document.getElementById(
+          "privacyInfoButton"
+        );
+
+      const privacyPopover =
+        document.getElementById(
+          "privacyPopover"
+        );
+
+      if (
+        !privacyInfoButton ||
+        !privacyPopover
+      ) {
+        return;
+      }
+
+      privacyInfoButton.addEventListener(
+        "click",
+        (event) => {
+          event.stopPropagation();
+
+          const isOpen =
+            !privacyPopover.hidden;
+
+          privacyPopover.hidden =
+            isOpen;
+
+          privacyInfoButton.setAttribute(
+            "aria-expanded",
+            String(!isOpen)
+          );
+        }
+      );
+
+      privacyPopover.addEventListener(
+        "click",
+        (event) => {
+          event.stopPropagation();
+        }
+      );
+
+      document.addEventListener(
+        "click",
+        () => {
+          privacyPopover.hidden = true;
+
+          privacyInfoButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        }
+      );
+    })();
+  </script>
+
+
+  <!-- =======================================================
+       ANNOUNCEMENT SCRIPT
+       ======================================================= -->
+
+  <script>
+    (() => {
+
       const ANNOUNCEMENT_API =
         "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
+
 
       const ticker =
         document.getElementById(
@@ -2387,6 +1922,7 @@ document.addEventListener('click', () => {
           "announcementLabel"
         );
 
+
       if (
         !ticker ||
         !viewport
@@ -2394,22 +1930,30 @@ document.addEventListener('click', () => {
         return;
       }
 
+
       let pages = [];
+
       let pageIndex = 0;
+
       let timer = null;
+
 
       const LABELS = {
         ko: "공지",
         en: "Notice",
         ja: "お知らせ",
-        ru: "Объявление",
+        ru: "Объявление"
       };
 
+
       function language() {
+
         const value =
           typeof getCurrentLanguage ===
             "function"
+
             ? getCurrentLanguage()
+
             : (
                 localStorage.getItem(
                   "s967_language"
@@ -2417,39 +1961,48 @@ document.addEventListener('click', () => {
                 "en"
               );
 
+
         const resolved =
           [
             "ko",
             "en",
             "ja",
-            "ru",
+            "ru"
           ].includes(value)
+
             ? value
+
             : "en";
+
 
         document.documentElement.lang =
           resolved;
 
+
         return resolved;
       }
 
+
       /*
-        Long notices are split only between whitespace-separated words.
-        A word itself is never cut in the middle.
+        공지사항은 단어 중간에서 자르지 않는다.
       */
-      function splitByWords(
-        text
-      ) {
+
+      function splitByWords(text) {
+
         const value =
-          String(text ?? "")
-            .trim();
+          String(
+            text ?? ""
+          ).trim();
+
 
         if (!value) {
           return [];
         }
 
+
         const width =
           window.innerWidth;
+
 
         const limit =
           width <= 480
@@ -2458,90 +2011,127 @@ document.addEventListener('click', () => {
               ? 72
               : 112;
 
+
         const words =
           value.split(/\s+/);
 
+
         /*
-          Languages such as Japanese often do not use spaces.
-          Leave them intact and let the browser's native CJK
-          line-breaking rules render the notice.
+          일본어 / 중국어 등
+          공백이 없는 언어는 그대로 유지.
         */
+
         if (
           words.length <= 1
         ) {
           return [value];
         }
 
+
         const chunks = [];
+
         let current = "";
+
 
         for (
           const word of words
         ) {
+
           const candidate =
             current
+
               ? `${current} ${word}`
+
               : word;
+
 
           if (
             current &&
-            candidate.length >
-              limit
+            candidate.length > limit
           ) {
-            chunks.push(current);
+
+            chunks.push(
+              current
+            );
+
             current = word;
+
           } else {
+
             current =
               candidate;
+
           }
         }
+
 
         if (current) {
           chunks.push(current);
         }
 
+
         return chunks;
       }
 
+
       function clearTimer() {
+
         if (timer) {
+
           clearInterval(timer);
+
           timer = null;
         }
       }
+
 
       function showPage(
         nextIndex,
         initial = false
       ) {
+
         if (!pages.length) {
+
           ticker.hidden = true;
-          document.body.classList.remove("has-announcement");
+
+          document.body.classList.remove(
+            "has-announcement"
+          );
+
           viewport.replaceChildren();
+
           return;
         }
+
 
         const old =
           viewport.querySelector(
             ".announcement-slide.is-active"
           );
 
+
         const next =
           document.createElement(
             "div"
           );
 
+
         next.className =
           "announcement-slide";
+
 
         next.textContent =
           pages[nextIndex];
 
+
         viewport.append(next);
+
 
         requestAnimationFrame(
           () => {
+
             if (old) {
+
               old.classList.remove(
                 "is-active"
               );
@@ -2550,11 +2140,13 @@ document.addEventListener('click', () => {
                 "is-leaving"
               );
 
+
               setTimeout(
                 () => old.remove(),
                 480
               );
             }
+
 
             next.classList.add(
               "is-active"
@@ -2562,17 +2154,26 @@ document.addEventListener('click', () => {
           }
         );
 
+
         pageIndex =
           nextIndex;
 
+
         if (initial) {
+
           ticker.hidden = false;
-          document.body.classList.add("has-announcement");
+
+          document.body.classList.add(
+            "has-announcement"
+          );
         }
       }
 
+
       function start() {
+
         clearTimer();
+
 
         if (
           pages.length <= 1
@@ -2580,50 +2181,61 @@ document.addEventListener('click', () => {
           return;
         }
 
+
         timer =
           setInterval(
             () => {
+
               showPage(
                 (
                   pageIndex + 1
                 ) %
                 pages.length
               );
+
             },
             5000
           );
       }
 
+
       async function load() {
+
         try {
+
           const response =
             await fetch(
               ANNOUNCEMENT_API,
               {
-                cache: "no-store",
+                cache: "no-store"
               }
             );
 
+
           if (!response.ok) {
+
             throw new Error(
               "ANNOUNCEMENT_LOAD_FAILED"
             );
           }
 
+
           const result =
             await response.json();
 
+
           const lang =
             language();
+
 
           label.textContent =
             LABELS[lang] ??
             LABELS.en;
 
+
           pages =
             (
-              result
-                .announcements ??
+              result.announcements ??
               []
             )
               .flatMap(
@@ -2640,75 +2252,104 @@ document.addEventListener('click', () => {
               )
               .filter(Boolean);
 
+
           pageIndex = 0;
+
           viewport.replaceChildren();
+
           clearTimer();
 
+
           if (!pages.length) {
+
             ticker.hidden = true;
-            document.body.classList.remove("has-announcement");
+
+            document.body.classList.remove(
+              "has-announcement"
+            );
+
             return;
           }
+
 
           showPage(
             0,
             true
           );
 
+
           start();
+
         } catch (error) {
+
           console.error(
             "Announcement load failed:",
             error
           );
 
+
           clearTimer();
+
           ticker.hidden = true;
-          document.body.classList.remove("has-announcement");
+
+          document.body.classList.remove(
+            "has-announcement"
+          );
         }
       }
+
 
       window.addEventListener(
         "resize",
         () => {
+
           clearTimeout(
-            window
-              .__s967AnnouncementResizeTimer
+            window.__s967AnnouncementResizeTimer
           );
 
-          window
-            .__s967AnnouncementResizeTimer =
+
+          window.__s967AnnouncementResizeTimer =
             setTimeout(
               load,
               180
             );
         },
         {
-          passive: true,
+          passive: true
         }
       );
+
 
       window.addEventListener(
         "s967languagechange",
         load
       );
 
+
       document.addEventListener(
         "visibilitychange",
         () => {
+
           if (
             document.hidden
           ) {
+
             clearTimer();
+
           } else {
+
             load();
+
           }
         }
       );
 
+
       load();
+
     })();
   </script>
+
 
 </body>
 </html>
