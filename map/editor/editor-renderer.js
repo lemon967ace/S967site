@@ -100,7 +100,7 @@ export function viewportCenterGrid(state) {
   return nearestValidGridCoordinate(x, y);
 }
 
-export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, requestBuildingAffiliation = () => null, resolveBuildingName = () => null, notifyInvalidPlacement = () => {}, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
+export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, requestBuildingAffiliation = () => null, resolveBuildingName = () => null, notifyInvalidPlacement = () => {}, notifyRangePresetError = error => globalThis.alert?.(error?.message ?? String(error)), confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
   if (!(host instanceof HTMLElement)) throw new TypeError("A map canvas host is required.");
   const documentView = engine.getView();
   let state = createViewportState(documentView);
@@ -656,6 +656,54 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
         canvas.setPointerCapture(
           event.pointerId
+        );
+
+        event.preventDefault();
+        invalidate();
+      }
+
+      return;
+    }
+
+    if (
+      !touch &&
+      !mousePan &&
+      event.button === 0 &&
+      rangeController?.getState().mode ===
+        "rangePreset"
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        try {
+          const result =
+            rangeController
+              .placePresetAt(
+                cell
+              );
+
+          if (
+            result?.complete
+          ) {
+            refreshDocument();
+            rangeController
+              ?.normalizeSelection();
+
+            onRangeSelectionChange(
+              rangeController
+                ?.getSelectedRange?.() ??
+                null
+            );
+          }
+        } catch (error) {
+          notifyRangePresetError(
+            error
+          );
+        }
+
+        onRangeStateChange(
+          rangeController.getState()
         );
 
         event.preventDefault();
