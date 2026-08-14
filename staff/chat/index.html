@@ -474,6 +474,10 @@
       try{return new Intl.DateTimeFormat(language==="ko"?"ko-KR":language==="ja"?"ja-JP":language==="ru"?"ru-RU":"en-US",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "";}
     }
     function formatBytes(bytes){const n=Number(bytes)||0;if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(1)} MB`;}
+
+    function displayRole(kind){
+      return kind==="admin" ? "Staff" : kind==="staff" ? "Staff" : kind==="chat" ? "Chat" : (kind??"");
+    }
     function nearBottom(){return messagesHost.scrollHeight-messagesHost.scrollTop-messagesHost.clientHeight<120;}
     function newestMessage(){return [...messageMap.values()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]??null;}
 
@@ -492,7 +496,7 @@
     async function loadRooms(){
       const result=await request(`${API.list}?view=rooms`);
       actor=result.actor;
-      actorLabel.textContent=actor?.name?`${actor.name} · ${actor.kind}`:"";
+      actorLabel.textContent=actor?.name?`${actor.name} · ${displayRole(actor.kind)}`:"";
       rooms=result.rooms??[];
       if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)) currentRoomId=rooms[0]?.id??null;
       renderRooms();
@@ -515,7 +519,6 @@
     function renderMessage(message){
       const article=document.createElement("article");article.className="message";if(message.is_optimistic)article.classList.add("message-pending");
       if(message.is_mine)article.classList.add("mine");
-      if(message.author_kind==="admin")article.classList.add("admin");
 
       const head=document.createElement("div");head.className="message-head";
       const author=document.createElement("span");author.className="message-author";author.textContent=message.author_name;
@@ -633,7 +636,7 @@
       name.textContent=member.display_name;
       const kind=document.createElement("span");
       kind.className="member-kind";
-      kind.textContent=member.automatic?"Staff · Auto":member.kind;
+      kind.textContent=member.automatic?"Staff · Auto":displayRole(member.kind);
       row.append(name,kind);
 
       if(details.room?.is_owner&&details.room?.room_kind==="private"&&!member.is_owner){
