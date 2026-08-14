@@ -2826,6 +2826,7 @@
 
       return (
         !Number.isFinite(seenAt) ||
+        seenAt <= 0 ||
         Date.now() - seenAt >=
           TRANSLATION_DISCLOSURE_INTERVAL_MS
       );
@@ -2848,6 +2849,17 @@
       translationDisclosureCloseButton.textContent =
         text.translationNoticeOk;
 
+      /*
+        7일 주기는 "확인 버튼을 눌렀는지"가 아니라
+        실제로 안내창을 보여준 시점을 기준으로 기록합니다.
+        따라서 ESC, 새로고침, 페이지 이동 등으로 닫혀도
+        같은 7일 안에는 다시 표시되지 않습니다.
+      */
+      localStorage.setItem(
+        translationDisclosureStorageKey(),
+        String(Date.now())
+      );
+
       if(
         !translationDisclosureDialog.open
       ){
@@ -2856,11 +2868,6 @@
     }
 
     function acknowledgeTranslationDisclosure(){
-      localStorage.setItem(
-        translationDisclosureStorageKey(),
-        String(Date.now())
-      );
-
       translationDisclosureDialog.close();
     }
 
