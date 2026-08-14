@@ -2384,6 +2384,14 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       nameInput.id = "newBuildingName";
       nameInput.required = true;
       nameInput.placeholder = text.detailName;
+      nameInput.title =
+        language === "ko"
+          ? "건물을 배치하려면 이름을 먼저 입력해야 합니다."
+          : language === "ja"
+            ? "建物を配置するには、先に名前を入力してください。"
+            : language === "ru"
+              ? "Чтобы разместить здание, сначала введите его название."
+              : "Enter a name before placing a building.";
       buildingTypesHost.append(nameInput);
 
       const sizeRow = document.createElement("div");
@@ -2716,7 +2724,32 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         bulkDeleteController,
         rangeEraseController,
         buildingFilter,
-        requestBuildingName: () => document.getElementById("newBuildingName")?.value.trim() || null,
+        requestBuildingName: () => {
+          const input =
+            document.getElementById(
+              "newBuildingName"
+            );
+
+          const name =
+            input?.value.trim() ?? "";
+
+          if (name) {
+            return name;
+          }
+
+          const message =
+            language === "ko"
+              ? "건물 이름을 먼저 입력하세요."
+              : language === "ja"
+                ? "先に建物名を入力してください。"
+                : language === "ru"
+                  ? "Сначала введите название здания."
+                  : "Enter a building name first.";
+
+          window.alert(message);
+          input?.focus();
+          return null;
+        },
         editorHost: window.S967EditorHost,
         confirmBulkDelete: ({ deleteCount, lockedCount }) => {
           const labels = BULK_DELETE_TEXT[language] ?? BULK_DELETE_TEXT.en;
