@@ -539,6 +539,17 @@
     }
 
     .chat-announcement-text {
+      position: relative;
+      display: block;
+      min-width: 0;
+      height: 1.45em;
+      overflow: hidden;
+    }
+
+    .chat-announcement-slide {
+      position: absolute;
+      inset: 0;
+
       display: block;
       min-width: 0;
 
@@ -546,17 +557,22 @@
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      opacity: 1;
-      transform: translateY(0);
+      opacity: 0;
+      transform: translateY(110%);
 
       transition:
-        opacity .22s ease,
-        transform .22s ease;
+        transform 420ms ease,
+        opacity 420ms ease;
     }
 
-    .chat-announcement-text.is-changing {
+    .chat-announcement-slide.is-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .chat-announcement-slide.is-leaving {
       opacity: 0;
-      transform: translateY(-3px);
+      transform: translateY(-110%);
     }
 
     #chatAnnouncementMobile {
@@ -1291,10 +1307,10 @@
     const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
 
     const TEXT = {
-      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고가 완료되었습니다. 감사합니다!",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",chooseRoom:"채팅방을 골라주세요.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",memberInvited:"{target}님이 채팅방에 초대되었습니다. 초대자: {inviter}",memberLeft:"{target}님이 채팅방에서 퇴장하셨습니다.",memberRemoved:"{target}님이 채팅방에서 퇴장당하셨습니다.",removeMember:"내보내기",removeMemberConfirm:"{name}님을 채팅방에서 내보낼까요?",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",leaveRoom:"채팅방 나가기",leaveRoomConfirm:"이 채팅방에서 나갈까요?",ownerCannotLeave:"방장은 채팅방을 나갈 수 없습니다.",transferOwner:"방장 위임",transferOwnerConfirm:"{name}님에게 방장을 위임할까요?",ownerTransferred:"방장을 위임했습니다.",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
-      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Your report has been submitted. Thank you!",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",chooseRoom:"Please choose a chat room.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",memberInvited:"{target} was invited to the chat room. Invited by: {inviter}",memberLeft:"{target} left the chat room.",memberRemoved:"{target} was removed from the chat room.",removeMember:"Remove",removeMemberConfirm:"Remove {name} from the chat room?",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",leaveRoom:"Leave room",leaveRoomConfirm:"Leave this room?",ownerCannotLeave:"The room owner cannot leave the room.",transferOwner:"Transfer ownership",transferOwnerConfirm:"Transfer room ownership to {name}?",ownerTransferred:"Room ownership transferred.",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
-      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報が完了しました。ありがとうございます！",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",chooseRoom:"チャットルームを選んでください。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",memberInvited:"{target}さんがチャットルームに招待されました。招待者: {inviter}",memberLeft:"{target}さんがチャットルームから退出しました。",memberRemoved:"{target}さんがチャットルームから退出させられました。",removeMember:"退出させる",removeMemberConfirm:"{name}さんをチャットルームから退出させますか？",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",leaveRoom:"チャットルームを退出",leaveRoomConfirm:"このチャットルームから退出しますか？",ownerCannotLeave:"ルーム所有者は退出できません。",transferOwner:"所有権を移譲",transferOwnerConfirm:"{name} にルーム所有権を移譲しますか？",ownerTransferred:"ルーム所有権を移譲しました。",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
-      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба успешно отправлена. Спасибо!",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",chooseRoom:"Выберите чат.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",memberInvited:"{target} приглашён(а) в чат. Пригласил(а): {inviter}",memberLeft:"{target} вышел(а) из чата.",memberRemoved:"{target} был(а) удалён(а) из чата.",removeMember:"Удалить из чата",removeMemberConfirm:"Удалить {name} из чата?",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",leaveRoom:"Выйти из комнаты",leaveRoomConfirm:"Выйти из этой комнаты?",ownerCannotLeave:"Владелец комнаты не может выйти.",transferOwner:"Передать владельца",transferOwnerConfirm:"Передать владение комнатой пользователю {name}?",ownerTransferred:"Владелец комнаты изменён.",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
+      ko:{title:"채팅",back:"뒤로가기",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고가 완료되었습니다. 감사합니다!",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",chooseRoom:"채팅방을 골라주세요.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",memberInvited:"{target}님이 채팅방에 초대되었습니다. 초대자: {inviter}",memberLeft:"{target}님이 채팅방에서 퇴장하셨습니다.",memberRemoved:"{target}님이 채팅방에서 퇴장당하셨습니다.",removeMember:"내보내기",removeMemberConfirm:"{name}님을 채팅방에서 내보낼까요?",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",leaveRoom:"채팅방 나가기",leaveRoomConfirm:"이 채팅방에서 나갈까요?",ownerCannotLeave:"방장은 채팅방을 나갈 수 없습니다.",transferOwner:"방장 위임",transferOwnerConfirm:"{name}님에게 방장을 위임할까요?",ownerTransferred:"방장을 위임했습니다.",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
+      en:{title:"Chat",back:"Back",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Your report has been submitted. Thank you!",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",chooseRoom:"Please choose a chat room.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",memberInvited:"{target} was invited to the chat room. Invited by: {inviter}",memberLeft:"{target} left the chat room.",memberRemoved:"{target} was removed from the chat room.",removeMember:"Remove",removeMemberConfirm:"Remove {name} from the chat room?",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",leaveRoom:"Leave room",leaveRoomConfirm:"Leave this room?",ownerCannotLeave:"The room owner cannot leave the room.",transferOwner:"Transfer ownership",transferOwnerConfirm:"Transfer room ownership to {name}?",ownerTransferred:"Room ownership transferred.",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
+      ja:{title:"チャット",back:"戻る",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報が完了しました。ありがとうございます！",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",chooseRoom:"チャットルームを選んでください。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",memberInvited:"{target}さんがチャットルームに招待されました。招待者: {inviter}",memberLeft:"{target}さんがチャットルームから退出しました。",memberRemoved:"{target}さんがチャットルームから退出させられました。",removeMember:"退出させる",removeMemberConfirm:"{name}さんをチャットルームから退出させますか？",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",leaveRoom:"チャットルームを退出",leaveRoomConfirm:"このチャットルームから退出しますか？",ownerCannotLeave:"ルーム所有者は退出できません。",transferOwner:"所有権を移譲",transferOwnerConfirm:"{name} にルーム所有権を移譲しますか？",ownerTransferred:"ルーム所有権を移譲しました。",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
+      ru:{title:"Чат",back:"Назад",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба успешно отправлена. Спасибо!",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",chooseRoom:"Выберите чат.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",memberInvited:"{target} приглашён(а) в чат. Пригласил(а): {inviter}",memberLeft:"{target} вышел(а) из чата.",memberRemoved:"{target} был(а) удалён(а) из чата.",removeMember:"Удалить из чата",removeMemberConfirm:"Удалить {name} из чата?",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",leaveRoom:"Выйти из комнаты",leaveRoomConfirm:"Выйти из этой комнаты?",ownerCannotLeave:"Владелец комнаты не может выйти.",transferOwner:"Передать владельца",transferOwnerConfirm:"Передать владение комнатой пользователю {name}?",ownerTransferred:"Владелец комнаты изменён.",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
     };
 
     let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
@@ -1398,6 +1414,12 @@
         chatAnnouncementMobile.hidden=true;
       }
       if(chatAnnouncementDesktopText){
+        chatAnnouncementDesktopText.replaceChildren();
+      }
+      if(chatAnnouncementMobileText){
+        chatAnnouncementMobileText.replaceChildren();
+      }
+      if(chatAnnouncementDesktopText){
         chatAnnouncementDesktopText.textContent="";
       }
       if(chatAnnouncementMobileText){
@@ -1405,7 +1427,7 @@
       }
     }
 
-    function renderChatAnnouncement(index,animate=false){
+    function renderChatAnnouncement(index,initial=false){
       if(!chatAnnouncementPages.length){
         hideChatAnnouncements();
         return;
@@ -1416,29 +1438,44 @@
           chatAnnouncementPages.length)%
         chatAnnouncementPages.length;
 
-      const value=
-        chatAnnouncementPages[nextIndex];
+      const value=chatAnnouncementPages[nextIndex];
 
       const hosts=[
         [chatAnnouncementDesktop,chatAnnouncementDesktopText],
         [chatAnnouncementMobile,chatAnnouncementMobileText],
       ];
 
-      for(const [box,label] of hosts){
-        if(!box||!label)continue;
+      for(const [box,viewport] of hosts){
+        if(!box||!viewport)continue;
 
+        const old=
+          viewport.querySelector(
+            ".chat-announcement-slide.is-active"
+          );
+
+        const next=document.createElement("span");
+        next.className="chat-announcement-slide";
+        next.textContent=value;
+
+        viewport.append(next);
         box.hidden=false;
 
-        if(animate&&label.textContent){
-          label.classList.add("is-changing");
+        requestAnimationFrame(()=>{
+          if(old){
+            old.classList.remove("is-active");
+            old.classList.add("is-leaving");
 
-          setTimeout(()=>{
-            label.textContent=value;
-            label.classList.remove("is-changing");
-          },180);
-        }else{
-          label.textContent=value;
-          label.classList.remove("is-changing");
+            setTimeout(
+              ()=>old.remove(),
+              480
+            );
+          }
+
+          next.classList.add("is-active");
+        });
+
+        if(initial && !old){
+          // Initial display still enters from below, matching the main page.
         }
       }
 
@@ -1448,15 +1485,14 @@
     function startChatAnnouncementRotation(){
       clearChatAnnouncementTimer();
 
-      if(chatAnnouncementPages.length<=1){
+      if(!chatAnnouncementPages.length){
         return;
       }
 
       chatAnnouncementTimer=setInterval(()=>{
         renderChatAnnouncement(
           (chatAnnouncementIndex+1)%
-            chatAnnouncementPages.length,
-          true
+            chatAnnouncementPages.length
         );
       },5000);
     }
@@ -1500,7 +1536,7 @@
           return;
         }
 
-        renderChatAnnouncement(0,false);
+        renderChatAnnouncement(0,true);
         startChatAnnouncementRotation();
 
       }catch(error){
