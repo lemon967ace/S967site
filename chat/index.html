@@ -466,6 +466,28 @@
       }
     }
 
+  
+    /* =========================================================
+       TOP ACTION BUTTON CLEANUP
+       - desktop/tablet: search panel is always visible, so hide search toggle
+       - top refresh button is no longer shown
+       - mobile: keep search toggle because the search panel collapses there
+       ========================================================= */
+
+    #refreshButton {
+      display: none !important;
+    }
+
+    #searchToggleButton {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      #searchToggleButton {
+        display: inline-flex !important;
+      }
+    }
+
   </style>
 </head>
 <body>
