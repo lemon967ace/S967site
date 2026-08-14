@@ -234,6 +234,8 @@
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getMessaging, isSupported as isMessagingSupported, onMessage, onRegistered, onUnregistered, register as registerMessaging } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
 
     const SUPABASE_URL = "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
@@ -249,7 +251,24 @@
       react: `${FUNCTIONS_BASE}/staff-chat-react`,
       roomUser: `${FUNCTIONS_BASE}/staff-chat-room-user`,
       report: `${FUNCTIONS_BASE}/staff-chat-report`,
+      pushRegister: `${FUNCTIONS_BASE}/staff-chat-push-register`,
+      pushDispatch: `${FUNCTIONS_BASE}/staff-chat-push-dispatch`,
     };
+
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyD1sXOfJ5CZumrZG5ZZWL0TCTlsIh_uGHc",
+      authDomain: "s967-52eb4.firebaseapp.com",
+      projectId: "s967-52eb4",
+      storageBucket: "s967-52eb4.firebasestorage.app",
+      messagingSenderId: "1024583311832",
+      appId: "1:1024583311832:web:5ebe51bbab0670b44c52ad"
+    };
+    const FIREBASE_VAPID_KEY = "BD5wsrOP8CuTc_9JQHBHNdeAGsyeoCNvOpBNzhcqRfmisy8iaZYH-Sh5RYCo88oamUkFIo2F12CWboXE-Qt7mpQ";
+    const firebaseApp = initializeApp(FIREBASE_CONFIG);
+    let firebaseMessaging = null;
+    let pushCallbacksBound = false;
+    let pushSetupPromise = null;
+    let initialRequestedRoomId = new URLSearchParams(location.search).get("room") || "";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
@@ -348,6 +367,63 @@
       return result;
     }
 
+    async function uploadPushRegistration(fid,action="register") {
+      if(!fid)return;
+      await request(API.pushRegister,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action,fid})
+      });
+    }
+
+    async function setupPushNotifications({askPermission=false}={}) {
+      if(pushSetupPromise)return pushSetupPromise;
+      pushSetupPromise=(async()=>{
+        if(!("Notification" in window)||!("serviceWorker" in navigator))return false;
+        if(!(await isMessagingSupported()))return false;
+
+        let permission=Notification.permission;
+        if(askPermission&&permission!=="granted")permission=await Notification.requestPermission();
+        if(permission!=="granted")return false;
+
+        const sw=await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        firebaseMessaging??=getMessaging(firebaseApp);
+
+        if(!pushCallbacksBound){
+          pushCallbacksBound=true;
+          onRegistered(firebaseMessaging,(fid)=>{
+            uploadPushRegistration(fid,"register").catch(error=>console.warn("Push registration upload failed",error));
+          });
+          onUnregistered(firebaseMessaging,(fid)=>{
+            uploadPushRegistration(fid,"unregister").catch(()=>{});
+          });
+          // Foreground chat updates come from Supabase Realtime. FCM is used for background push only.
+          onMessage(firebaseMessaging,()=>{});
+        }
+
+        await registerMessaging(firebaseMessaging,{
+          vapidKey:FIREBASE_VAPID_KEY,
+          serviceWorkerRegistration:sw
+        });
+        return true;
+      })();
+      try{return await pushSetupPromise;}finally{pushSetupPromise=null;}
+    }
+
+    async function dispatchPush(messageId){
+      if(!messageId)return;
+      try{
+        await request(API.pushDispatch,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({message_id:messageId})
+        });
+      }catch(error){
+        // The chat message is already saved; push failure must never make sending look failed.
+        console.warn("Push dispatch failed",error);
+      }
+    }
+
     function formatDate(value){
       try{return new Intl.DateTimeFormat(language==="ko"?"ko-KR":language==="ja"?"ja-JP":language==="ru"?"ru-RU":"en-US",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "";}
     }
@@ -376,7 +452,12 @@
       actor=result.actor;
       actorLabel.textContent=actor?.name?`${actor.name} · ${displayRole(actor.kind)}`:"";memberPasswordButton.classList.toggle("hidden",actor?.kind!=="chat");nicknameButton.classList.toggle("hidden",!actor||actor.kind==="admin");
       rooms=result.rooms??[];
-      if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)) currentRoomId=rooms[0]?.id??null;
+      if(initialRequestedRoomId&&rooms.some(r=>r.id===initialRequestedRoomId)){
+        currentRoomId=initialRequestedRoomId;
+        initialRequestedRoomId="";
+      }else if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)){
+        currentRoomId=rooms[0]?.id??null;
+      }
       renderRooms();
       return currentRoomId;
     }
@@ -982,7 +1063,7 @@
 
     async function sendMessage(){
       if(sending||!currentRoomId)return;const body=messageInput.value;if(!body.trim()&&!selectedFiles.length)return;sending=true;sendButton.disabled=true;
-      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
+      try{const r=await request(API.send,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId,body,reply_to_message_id:replyTarget?.id??null})});const id=r.message?.id;if(!id)throw new Error("MESSAGE_ID_MISSING");if(selectedFiles.length){await Promise.allSettled(selectedFiles.map(f=>uploadFile(id,f)));}await dispatchPush(id);messageInput.value="";selectedFiles=[];fileInput.value="";replyTarget=null;renderFiles();renderReplyTarget();await loadLatest(true);}catch{setStatus(text.sendFailed,true);}finally{sending=false;sendButton.disabled=false;}
     }
 
     async function reactToMessage(messageId,emoji){
@@ -1018,7 +1099,7 @@
       if(realtimeSyncPending||!currentRoomId)return;
       realtimeSyncPending=true;
       try{
-        await loadLatest(false,true);
+        await loadLatest(false,false);
         await loadRooms();
       }catch{}finally{
         realtimeSyncPending=false;
@@ -1243,7 +1324,16 @@
     backButton.addEventListener("click",event=>{event.preventDefault();if(history.length>1){history.back();}else{location.href="/";}});
     roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
     refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
-    notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
+    notifyButton.onclick=async()=>{
+      try{
+        const enabled=await setupPushNotifications({askPermission:true});
+        if(!enabled)setStatus(text.notificationDenied,true);
+        else setStatus("");
+      }catch(error){
+        console.error("Push setup failed",error);
+        setStatus(text.notificationDenied,true);
+      }
+    };
     function syncMobileSearchState(){
       if(!window.matchMedia("(max-width:760px)").matches){
         searchPanel.classList.remove("mobile-collapsed");
@@ -1286,7 +1376,9 @@
     window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
     window.addEventListener("beforeunload",()=>{stopRealtime();});
 
-    bootstrap();
+    bootstrap().then(()=>{
+      if(Notification.permission==="granted")setupPushNotifications().catch(error=>console.warn("Push startup sync failed",error));
+    });
   </script>
 </body>
 </html>
