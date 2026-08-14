@@ -230,6 +230,120 @@
       }
     }
 
+  
+    /* =========================================================
+       CHAT VIEWPORT LAYOUT FIX v2
+       - root vertical scrolling/overscroll is enabled for pull-to-refresh
+       - message area always consumes all remaining height
+       - empty state fills that area
+       - composer stays at the visible bottom on mobile
+       ========================================================= */
+
+    html {
+      height: auto !important;
+      min-height: 100% !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+    }
+
+    body {
+      height: auto !important;
+      min-height: 100dvh !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior-y: auto !important;
+      touch-action: pan-y !important;
+    }
+
+    .app {
+      height: 100dvh !important;
+      min-height: 100dvh !important;
+      max-height: 100dvh !important;
+      overflow: hidden !important;
+    }
+
+    .main {
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: 100% !important;
+      overflow: hidden !important;
+
+      grid-template-rows:
+        auto
+        auto
+        auto
+        minmax(0, 1fr)
+        auto !important;
+    }
+
+    .messages {
+      height: auto !important;
+      min-height: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .messages > .empty {
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      min-height: 100% !important;
+
+      display: grid !important;
+      place-items: center !important;
+    }
+
+    .composer {
+      position: relative !important;
+      inset: auto !important;
+      align-self: stretch !important;
+      margin: 0 !important;
+      flex: 0 0 auto !important;
+      z-index: 5;
+
+      padding-bottom:
+        max(
+          9px,
+          env(safe-area-inset-bottom)
+        ) !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        max-height: 100dvh !important;
+
+        grid-template-columns: 1fr !important;
+        grid-template-rows:
+          auto
+          minmax(0, 1fr) !important;
+      }
+
+      .sidebar {
+        min-height: 0 !important;
+        max-height: max-content;
+      }
+
+      .main {
+        min-height: 0 !important;
+        height: 100% !important;
+        max-height: 100% !important;
+      }
+
+      .messages {
+        min-height: 0 !important;
+      }
+
+      .composer {
+        align-self: end !important;
+      }
+    }
+
   </style>
 </head>
 <body>
