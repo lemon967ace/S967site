@@ -100,7 +100,7 @@ export function viewportCenterGrid(state) {
   return nearestValidGridCoordinate(x, y);
 }
 
-export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
+export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, notifyInvalidPlacement = () => {}, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
   if (!(host instanceof HTMLElement)) throw new TypeError("A map canvas host is required.");
   const documentView = engine.getView();
   let state = createViewportState(documentView);
@@ -319,11 +319,66 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     const cell = sceneToGrid(sceneX, sceneY);
     const mode = controller?.getState().mode ?? "select";
     if (mode !== "select" && cell) {
-      const name = mode === "place" ? requestBuildingName() : "";
-      if (mode === "place" && name === null) return;
+      /*
+        General maps have allowed/blocked ranges. Previously the name prompt
+        appeared even when the clicked cell was not placeable, and commitAt()
+        then silently returned null. That looked exactly like a broken build.
+        Validate the target first, before asking for a building name.
+      */
+      const preview =
+        controller?.updatePreview(
+          ...cell
+        );
+
+      if (
+        mode === "place" &&
+        !preview?.valid
+      ) {
+        notifyInvalidPlacement({
+          cell: [...cell],
+          preview,
+        });
+        return;
+      }
+
+      const name =
+        mode === "place"
+          ? requestBuildingName()
+          : "";
+
+      if (
+        mode === "place" &&
+        name === null
+      ) {
+        return;
+      }
+
       let changed;
-      try { changed = controller.commitAt(...cell, { name }); } catch (error) { globalThis.alert?.(error.message); return; }
-      if (changed) { refreshDocument(); interaction.select(changed.id); onSelectionChange(changed); invalidate(); }
+
+      try {
+        changed =
+          controller.commitAt(
+            ...cell,
+            { name }
+          );
+      } catch (error) {
+        globalThis.alert?.(
+          error.message
+        );
+        return;
+      }
+
+      if (changed) {
+        refreshDocument();
+        interaction.select(
+          changed.id
+        );
+        onSelectionChange(
+          changed
+        );
+        invalidate();
+      }
+
       return;
     }
     if (rangeController?.getState().mode === "rangeCreate" && cell) { rangeController.click(cell); onRangeStateChange(rangeController.getState()); invalidate(); return; }
