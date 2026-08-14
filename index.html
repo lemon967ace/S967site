@@ -510,6 +510,412 @@
       }
     }
 
+  
+  
+    /* ===== Final viewport layout =====
+       One screen only. Desktop: 2/2/1 buttons. Mobile: 1/1/1/1/1.
+    */
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      height: 100svh;
+      min-height: 100svh;
+    }
+
+    main {
+      width: 100%;
+      height: 100svh;
+      min-height: 0;
+      padding:
+        clamp(56px, 7svh, 82px)
+        clamp(16px, 4vw, 40px)
+        clamp(8px, 1.2svh, 14px);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .server {
+      flex: 0 0 auto;
+      margin: 0;
+
+      font-size:
+        clamp(
+          3.5rem,
+          min(13vw, 12svh),
+          7rem
+        );
+
+      line-height: .9;
+    }
+
+    .headline {
+      flex: 0 0 auto;
+      margin: clamp(12px, 2svh, 24px) 0 0;
+
+      font-size:
+        clamp(
+          1rem,
+          min(3.3vw, 2.8svh),
+          1.72rem
+        );
+
+      line-height: 1.2;
+    }
+
+    .tagline {
+      flex: 0 0 auto;
+      margin: clamp(5px, .9svh, 10px) 0 0;
+
+      font-size:
+        clamp(
+          .76rem,
+          min(2.25vw, 1.75svh),
+          1rem
+        );
+
+      line-height: 1.2;
+    }
+
+    .buttons {
+      flex: 0 0 auto;
+
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      width: min(420px, calc(100vw - 32px));
+      max-width: 420px;
+
+      gap:
+        clamp(8px, 1svh, 12px)
+        clamp(10px, 1.3vw, 14px);
+
+      /*
+        This flexible margin is the main visual spacer:
+        title stays upper-middle, buttons sit closer to footer.
+      */
+      margin:
+        auto
+        auto
+        0;
+    }
+
+    .button {
+      min-width: 0;
+      width: 100%;
+
+      padding:
+        clamp(9px, 1.25svh, 13px)
+        clamp(12px, 2vw, 20px);
+
+      font-size:
+        clamp(.8rem, min(2.1vw, 1.55svh), .96rem);
+
+      line-height: 1.15;
+    }
+
+    .group-buy-button {
+      grid-column: 1 / -1;
+    }
+
+    footer {
+      flex: 0 0 auto;
+
+      margin-top:
+        clamp(12px, 1.9svh, 24px);
+
+      padding: 0 0 2px;
+
+      font-size:
+        clamp(.58rem, min(1.55vw, 1.05svh), .72rem);
+
+      line-height: 1.25;
+    }
+
+    .source-link {
+      margin-top:
+        clamp(2px, .45svh, 5px);
+
+      font-size:
+        clamp(.54rem, min(1.35vw, .95svh), .66rem);
+    }
+
+    /* Thin full-width notice: enough for up to two text lines. */
+    .announcement-ticker {
+      position: relative;
+      flex: 0 0 auto;
+
+      width: 100vw;
+      min-height: 0;
+      height: clamp(42px, 5.4svh, 48px);
+
+      margin:
+        calc(-1 * clamp(56px, 7svh, 82px))
+        0
+        clamp(12px, 1.8svh, 20px);
+
+      margin-left: calc(50% - 50vw);
+
+      border: 0;
+      border-radius: 0;
+
+      background: rgba(18, 18, 16, .95);
+
+      box-shadow:
+        0 4px 14px rgba(0, 0, 0, .12);
+
+      overflow: hidden;
+    }
+
+    .announcement-label {
+      position: absolute;
+      z-index: 2;
+
+      top: 3px;
+      left: 12px;
+
+      padding: 0;
+
+      color: #d3a900;
+
+      font-size:
+        clamp(.5rem, min(1.5vw, .85svh), .6rem);
+
+      font-weight: 850;
+      letter-spacing: .1em;
+    }
+
+    .announcement-viewport {
+      height: 100%;
+    }
+
+    .announcement-slide {
+      padding:
+        clamp(10px, 1.25svh, 12px)
+        clamp(14px, 4vw, 54px)
+        4px;
+
+      color: #f0c400;
+
+      font-size:
+        clamp(.68rem, min(2vw, 1.35svh), .9rem);
+
+      font-weight: 800;
+      line-height: 1.22;
+
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+
+      overflow: hidden;
+    }
+
+    /* Mobile keeps five full-width buttons in one column. */
+    @media (max-width: 600px) {
+      main {
+        padding:
+          clamp(50px, 6.4svh, 66px)
+          14px
+          clamp(6px, .9svh, 10px);
+      }
+
+      .buttons {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+
+        width: min(360px, calc(100vw - 28px));
+
+        gap:
+          clamp(5px, .8svh, 8px);
+      }
+
+      .button,
+      .group-buy-button {
+        flex: 0 0 auto;
+        width: 100%;
+
+        padding:
+          clamp(7px, 1svh, 10px)
+          12px;
+
+        font-size:
+          clamp(.74rem, 1.45svh, .88rem);
+      }
+
+      footer {
+        margin-top:
+          clamp(7px, 1.2svh, 14px);
+
+        max-width:
+          calc(100vw - 92px);
+
+        font-size:
+          clamp(.52rem, .92svh, .62rem);
+
+        line-height: 1.18;
+      }
+
+      .source-link {
+        margin-top: 2px;
+        font-size:
+          clamp(.5rem, .84svh, .58rem);
+      }
+
+      .announcement-ticker {
+        height:
+          clamp(40px, 5svh, 44px);
+
+        margin-top:
+          calc(-1 * clamp(50px, 6.4svh, 66px));
+
+        margin-bottom:
+          clamp(8px, 1.25svh, 14px);
+      }
+
+      .announcement-slide {
+        padding:
+          9px
+          12px
+          3px;
+
+        font-size:
+          clamp(.64rem, 1.2svh, .78rem);
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          clamp(50px, 7svh, 62px);
+      }
+    }
+
+    /* Short screens: compress proportionally instead of scrolling. */
+    @media (max-height: 720px) {
+      main {
+        padding-top:
+          clamp(44px, 5.7svh, 58px);
+
+        padding-bottom: 4px;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            3rem,
+            min(10.5vw, 9.5svh),
+            5.3rem
+          );
+      }
+
+      .headline {
+        margin-top: 8px;
+
+        font-size:
+          clamp(.9rem, 2.35svh, 1.28rem);
+      }
+
+      .tagline {
+        margin-top: 3px;
+
+        font-size:
+          clamp(.68rem, 1.55svh, .86rem);
+      }
+
+      .buttons {
+        gap: 5px 8px;
+      }
+
+      .button {
+        padding: 7px 10px;
+      }
+
+      footer {
+        margin-top: 6px;
+      }
+
+      .announcement-ticker {
+        height: 38px;
+
+        margin-top:
+          calc(-1 * clamp(44px, 5.7svh, 58px));
+
+        margin-bottom: 6px;
+      }
+
+      .announcement-slide {
+        padding: 8px 12px 2px;
+        font-size: .66rem;
+      }
+    }
+
+    @media (max-height: 600px) {
+      main {
+        padding-top: 38px;
+      }
+
+      .server {
+        font-size:
+          clamp(2.6rem, min(8.6vw, 8svh), 4.2rem);
+      }
+
+      .headline {
+        margin-top: 5px;
+        font-size: .86rem;
+      }
+
+      .tagline {
+        margin-top: 2px;
+        font-size: .64rem;
+      }
+
+      .buttons {
+        gap: 4px 7px;
+      }
+
+      .button {
+        padding: 6px 9px;
+        font-size: .72rem;
+      }
+
+      footer {
+        margin-top: 4px;
+        font-size: .5rem;
+        line-height: 1.12;
+      }
+
+      .source-link {
+        font-size: .48rem;
+      }
+
+      .announcement-ticker {
+        height: 34px;
+        margin-top: -38px;
+        margin-bottom: 4px;
+      }
+
+      .announcement-label {
+        top: 2px;
+        font-size: .47rem;
+      }
+
+      .announcement-slide {
+        padding: 7px 10px 2px;
+        font-size: .61rem;
+      }
+    }
+
   </style>
 </head>
 
@@ -893,14 +1299,20 @@ document.addEventListener('click', () => {
                 "en"
               );
 
-        return [
-          "ko",
-          "en",
-          "ja",
-          "ru",
-        ].includes(value)
-          ? value
-          : "en";
+        const resolved =
+          [
+            "ko",
+            "en",
+            "ja",
+            "ru",
+          ].includes(value)
+            ? value
+            : "en";
+
+        document.documentElement.lang =
+          resolved;
+
+        return resolved;
       }
 
       /*
