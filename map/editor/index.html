@@ -2465,20 +2465,258 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       }
     }
 
+    const rangeDraftSettings = {
+      color: RANGE_COLORS[0],
+      locked: false,
+    };
+
     function renderRangePanel(selected = rangeController?.getSelectedRange() ?? null) {
       if (!rangeController) return;
-      const labels = RANGE_TEXT[language] ?? RANGE_TEXT.en, ranges = PNSMapEngine.getDocument().ranges;
-      filtersTitle.textContent = labels.title; filtersHost.replaceChildren();
-      const controls = document.createElement("div"), color = document.createElement("input");
-      color.type = "color"; color.value = RANGE_COLORS[0]; color.disabled = readOnly;
-      const locked = document.createElement("label"); locked.innerHTML = `<input type="checkbox"> ${labels.locked}`; locked.querySelector("input").disabled = readOnly;
-      for (const [kind, label] of [["allowed", labels.newAllowed], ["blocked", labels.newBlocked]]) { const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.disabled = readOnly; button.onclick = () => { cancelAreaModes(); rangeController.startCreate({ kind, color: color.value, locked: locked.querySelector("input").checked }); renderRangePanel(); mapRenderer.invalidate(); }; controls.append(button); }
-      const confirm = document.createElement("button"); confirm.type = "button"; confirm.textContent = labels.confirm; confirm.disabled = readOnly || !rangeController.getState().previewCells.length; confirm.onclick = () => { try { rangeController.commit(); mapRenderer.refresh(); renderRangePanel(); } catch (error) { window.alert(error?.code === "RANGE_OVERLAP" ? (RANGE_OVERLAP_TEXT[language] ?? RANGE_OVERLAP_TEXT.en) : error.message); } };
-      const cancel = document.createElement("button"); cancel.type = "button"; cancel.textContent = labels.cancel; cancel.disabled = readOnly || rangeController.getState().mode !== "rangeCreate"; cancel.onclick = () => { rangeController.cancel(); renderRangePanel(); mapRenderer.invalidate(); };
-      controls.append(color, locked, confirm, cancel); filtersHost.append(controls);
-      const list = document.createElement("div"); if (!ranges.length) list.textContent = labels.empty;
-      for (const item of ranges) { const button = document.createElement("button"); button.type = "button"; button.textContent = `${item.kind === "allowed" ? labels.allowed : labels.blocked} · ${item.cells.length} ${labels.cells}${item.locked ? ` · ${labels.locked}` : ""}`; button.style.borderLeft = `8px solid ${item.color}`; button.classList.toggle("active", item.id === selected?.id); button.onclick = () => { rangeController.selectAtCell(item.cells[0]); renderRangePanel(item); mapRenderer.invalidate(); }; list.append(button); } filtersHost.append(list);
-      if (selected) { const edit = document.createElement("label"); edit.innerHTML = `<input type="checkbox"${selected.locked ? " checked" : ""}> ${labels.locked}`; const checkbox = edit.querySelector("input"); checkbox.disabled = readOnly; checkbox.onchange = () => { rangeController.editSelected({ locked: checkbox.checked }); mapRenderer.refresh(); renderRangePanel(); }; const remove = document.createElement("button"); remove.type = "button"; remove.textContent = labels.remove; remove.disabled = readOnly || selected.locked; remove.onclick = () => { try { rangeController.deleteSelected(); mapRenderer.refresh(); renderRangePanel(); } catch (error) { window.alert(error.message); } }; filtersHost.append(edit, remove); }
+
+      const labels =
+        RANGE_TEXT[language] ??
+        RANGE_TEXT.en;
+      const ranges =
+        PNSMapEngine.getDocument().ranges;
+      const rangeState =
+        rangeController.getState();
+      const activeSettings =
+        rangeState.settings ??
+        rangeDraftSettings;
+
+      filtersTitle.textContent =
+        labels.title;
+      filtersHost.replaceChildren();
+
+      const controls =
+        document.createElement("div");
+      const color =
+        document.createElement("input");
+
+      color.type = "color";
+      color.value =
+        activeSettings.color ??
+        rangeDraftSettings.color;
+      color.disabled = readOnly;
+
+      color.oninput = () => {
+        rangeDraftSettings.color =
+          color.value;
+      };
+
+      const locked =
+        document.createElement("label");
+
+      locked.innerHTML =
+        `<input type="checkbox"> ${labels.locked}`;
+
+      const lockedInput =
+        locked.querySelector("input");
+
+      lockedInput.checked =
+        Boolean(
+          activeSettings.locked
+        );
+      lockedInput.disabled =
+        readOnly;
+
+      lockedInput.onchange = () => {
+        rangeDraftSettings.locked =
+          lockedInput.checked;
+      };
+
+      for (
+        const [kind, label]
+        of [
+          ["allowed", labels.newAllowed],
+          ["blocked", labels.newBlocked],
+        ]
+      ) {
+        const button =
+          document.createElement("button");
+
+        button.type = "button";
+        button.textContent = label;
+        button.disabled = readOnly;
+
+        button.classList.toggle(
+          "active",
+          rangeState.mode ===
+            "rangeCreate" &&
+            rangeState.settings?.kind ===
+              kind
+        );
+
+        button.onclick = () => {
+          /*
+            범위 종류를 선택하면 패널이 다시 렌더링되지만,
+            사용자가 먼저 고른 색상/잠금 설정은 그대로 유지한다.
+          */
+          rangeDraftSettings.color =
+            color.value;
+          rangeDraftSettings.locked =
+            lockedInput.checked;
+
+          cancelAreaModes();
+
+          rangeController.startCreate({
+            kind,
+            color:
+              rangeDraftSettings.color,
+            locked:
+              rangeDraftSettings.locked,
+          });
+
+          renderRangePanel();
+          mapRenderer.invalidate();
+        };
+
+        controls.append(button);
+      }
+
+      const confirm =
+        document.createElement("button");
+
+      confirm.type = "button";
+      confirm.textContent =
+        labels.confirm;
+      confirm.disabled =
+        readOnly ||
+        !rangeController.getState()
+          .previewCells.length;
+
+      confirm.onclick = () => {
+        try {
+          rangeController.commit();
+          mapRenderer.refresh();
+          renderRangePanel();
+        } catch (error) {
+          window.alert(
+            error?.code ===
+              "RANGE_OVERLAP"
+              ? (
+                  RANGE_OVERLAP_TEXT[
+                    language
+                  ] ??
+                  RANGE_OVERLAP_TEXT.en
+                )
+              : error.message
+          );
+        }
+      };
+
+      const cancel =
+        document.createElement("button");
+
+      cancel.type = "button";
+      cancel.textContent =
+        labels.cancel;
+      cancel.disabled =
+        readOnly ||
+        rangeController.getState()
+          .mode !==
+          "rangeCreate";
+
+      cancel.onclick = () => {
+        rangeController.cancel();
+        renderRangePanel();
+        mapRenderer.invalidate();
+      };
+
+      controls.append(
+        color,
+        locked,
+        confirm,
+        cancel
+      );
+      filtersHost.append(controls);
+
+      const list =
+        document.createElement("div");
+
+      if (!ranges.length) {
+        list.textContent =
+          labels.empty;
+      }
+
+      for (const item of ranges) {
+        const button =
+          document.createElement("button");
+
+        button.type = "button";
+        button.textContent =
+          `${item.kind === "allowed" ? labels.allowed : labels.blocked} · ${item.cells.length} ${labels.cells}${item.locked ? ` · ${labels.locked}` : ""}`;
+        button.style.borderLeft =
+          `8px solid ${item.color}`;
+
+        button.classList.toggle(
+          "active",
+          item.id === selected?.id
+        );
+
+        button.onclick = () => {
+          rangeController.selectAtCell(
+            item.cells[0]
+          );
+          renderRangePanel(item);
+          mapRenderer.invalidate();
+        };
+
+        list.append(button);
+      }
+
+      filtersHost.append(list);
+
+      if (selected) {
+        const edit =
+          document.createElement("label");
+
+        edit.innerHTML =
+          `<input type="checkbox"${selected.locked ? " checked" : ""}> ${labels.locked}`;
+
+        const checkbox =
+          edit.querySelector("input");
+
+        checkbox.disabled =
+          readOnly;
+
+        checkbox.onchange = () => {
+          rangeController.editSelected({
+            locked:
+              checkbox.checked,
+          });
+          mapRenderer.refresh();
+          renderRangePanel();
+        };
+
+        const remove =
+          document.createElement("button");
+
+        remove.type = "button";
+        remove.textContent =
+          labels.remove;
+        remove.disabled =
+          readOnly ||
+          selected.locked;
+
+        remove.onclick = () => {
+          try {
+            rangeController.deleteSelected();
+            mapRenderer.refresh();
+            renderRangePanel();
+          } catch (error) {
+            window.alert(
+              error.message
+            );
+          }
+        };
+
+        filtersHost.append(
+          edit,
+          remove
+        );
+      }
+
       renderBuildingFilters();
     }
 
