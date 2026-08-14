@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Change Password | S967</title>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="/theme.js"></script>
+  <script src="/language.js" defer></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100dvh;font-family:system-ui,sans-serif}
+    main{width:min(520px,calc(100% - 28px));margin:8vh auto 80px}
+    .panel{padding:20px;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+    h1{margin:0 0 8px;font-size:1.35rem}
+    .muted{color:var(--muted);font-size:.88rem;line-height:1.55}
+    label{display:grid;gap:5px;margin-top:13px;font-size:.82rem}
+    input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover);color:var(--text);font:inherit}
+    button,.back{display:inline-flex;align-items:center;justify-content:center;padding:10px 13px;border:1px solid var(--border);border-radius:10px;background:var(--surface-hover);color:var(--text);font:inherit;text-decoration:none;cursor:pointer}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .status{min-height:1.4em;margin-top:12px;color:var(--muted);font-size:.82rem}
+    .status.error{color:#c2410c}
+    .hidden{display:none!important}
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <h1 id="title">Change Password</h1>
+      <p id="lead" class="muted">Change the password for your Member account.</p>
+
+      <label>
+        <span id="currentLabel">Current password</span>
+        <input id="currentPassword" type="password" autocomplete="current-password">
+      </label>
+
+      <label>
+        <span id="newLabel">New password</span>
+        <input id="newPassword" type="password" minlength="10" autocomplete="new-password">
+      </label>
+
+      <label>
+        <span id="confirmLabel">Confirm new password</span>
+        <input id="confirmPassword" type="password" minlength="10" autocomplete="new-password">
+      </label>
+
+      <div class="actions">
+        <button id="saveButton" type="button">Change Password</button>
+        <a id="backButton" class="back" href="/staff/chat/">Back to Chat</a>
+      </div>
+
+      <div id="status" class="status"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+
+    const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const $=id=>document.getElementById(id);
+
+    const TEXT={
+      ko:{
+        title:"비밀번호 변경",lead:"Member 계정의 비밀번호를 변경합니다.",
+        current:"현재 비밀번호",next:"새 비밀번호",confirm:"새 비밀번호 확인",
+        save:"비밀번호 변경",back:"채팅으로 돌아가기",
+        required:"모든 항목을 입력하세요.",min:"새 비밀번호는 10자 이상이어야 합니다.",
+        mismatch:"새 비밀번호가 서로 일치하지 않습니다.",same:"새 비밀번호는 현재 비밀번호와 다르게 입력하세요.",
+        wrong:"현재 비밀번호가 틀렸습니다.",checking:"확인 중…",saving:"변경 중…",
+        done:"비밀번호를 변경했습니다.",login:"먼저 Member 계정으로 채팅에 로그인하세요.",
+        failed:"비밀번호를 변경하지 못했습니다."
+      },
+      en:{
+        title:"Change Password",lead:"Change the password for your Member account.",
+        current:"Current password",next:"New password",confirm:"Confirm new password",
+        save:"Change Password",back:"Back to Chat",
+        required:"Enter all fields.",min:"The new password must be at least 10 characters.",
+        mismatch:"The new passwords do not match.",same:"The new password must be different from the current password.",
+        wrong:"The current password is incorrect.",checking:"Checking…",saving:"Changing…",
+        done:"Your password has been changed.",login:"Sign in to Chat with your Member account first.",
+        failed:"Could not change the password."
+      },
+      ja:{
+        title:"パスワード変更",lead:"Memberアカウントのパスワードを変更します。",
+        current:"現在のパスワード",next:"新しいパスワード",confirm:"新しいパスワード（確認）",
+        save:"パスワード変更",back:"チャットに戻る",
+        required:"すべての項目を入力してください。",min:"新しいパスワードは10文字以上にしてください。",
+        mismatch:"新しいパスワードが一致しません。",same:"現在とは異なるパスワードを入力してください。",
+        wrong:"現在のパスワードが正しくありません。",checking:"確認中…",saving:"変更中…",
+        done:"パスワードを変更しました。",login:"先にMemberアカウントでチャットにログインしてください。",
+        failed:"パスワードを変更できませんでした。"
+      },
+      ru:{
+        title:"Изменить пароль",lead:"Изменение пароля учётной записи Member.",
+        current:"Текущий пароль",next:"Новый пароль",confirm:"Подтвердите новый пароль",
+        save:"Изменить пароль",back:"Вернуться в чат",
+        required:"Заполните все поля.",min:"Новый пароль должен содержать не менее 10 символов.",
+        mismatch:"Новые пароли не совпадают.",same:"Новый пароль должен отличаться от текущего.",
+        wrong:"Текущий пароль неверен.",checking:"Проверка…",saving:"Изменение…",
+        done:"Пароль изменён.",login:"Сначала войдите в чат под учётной записью Member.",
+        failed:"Не удалось изменить пароль."
+      }
+    };
+
+    let language=typeof getCurrentLanguage==="function"?getCurrentLanguage():"en";
+    let text=TEXT[language]??TEXT.en;
+
+    function applyText(){
+      text=TEXT[language]??TEXT.en;
+      document.documentElement.lang=language;
+      document.title=`${text.title} | S967`;
+      $("title").textContent=text.title;
+      $("lead").textContent=text.lead;
+      $("currentLabel").textContent=text.current;
+      $("newLabel").textContent=text.next;
+      $("confirmLabel").textContent=text.confirm;
+      $("saveButton").textContent=text.save;
+      $("backButton").textContent=text.back;
+    }
+
+    function status(message="",error=false){
+      $("status").textContent=message;
+      $("status").classList.toggle("error",error);
+    }
+
+    async function changePassword(){
+      const current=$("currentPassword").value;
+      const next=$("newPassword").value;
+      const confirm=$("confirmPassword").value;
+
+      if(!current||!next||!confirm){status(text.required,true);return;}
+      if(next.length<10){status(text.min,true);return;}
+      if(next!==confirm){status(text.mismatch,true);return;}
+      if(next===current){status(text.same,true);return;}
+
+      const button=$("saveButton");
+      button.disabled=true;
+
+      try{
+        status(text.checking);
+
+        const {data:{session}}=await supabase.auth.getSession();
+        const email=session?.user?.email;
+
+        if(!session||!email){
+          status(text.login,true);
+          return;
+        }
+
+        /*
+          Reauthenticate with the current password before changing it.
+          The internal email is taken from the authenticated session and
+          is never shown to the user.
+        */
+        const {error:reauthError}=await supabase.auth.signInWithPassword({
+          email,
+          password:current
+        });
+
+        if(reauthError){
+          const msg=String(reauthError.message??"");
+          if(/invalid login credentials/i.test(msg)){
+            status(text.wrong,true);
+          }else{
+            status(`${text.failed} (${msg})`,true);
+          }
+          return;
+        }
+
+        status(text.saving);
+
+        const {error:updateError}=await supabase.auth.updateUser({
+          password:next
+        });
+
+        if(updateError)throw updateError;
+
+        $("currentPassword").value="";
+        $("newPassword").value="";
+        $("confirmPassword").value="";
+        status(text.done);
+      }catch(error){
+        status(`${text.failed}${error?.message?` (${error.message})`:""}`,true);
+      }finally{
+        button.disabled=false;
+      }
+    }
+
+    $("saveButton").onclick=changePassword;
+    $("confirmPassword").addEventListener("keydown",e=>{
+      if(e.key==="Enter"&&!e.isComposing){
+        e.preventDefault();
+        changePassword();
+      }
+    });
+
+    window.addEventListener("s967languagechange",event=>{
+      language=event.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");
+      applyText();
+    });
+
+    applyText();
+
+    const {data:{session}}=await supabase.auth.getSession();
+    if(!session)status(text.login,true);
+  </script>
+</body>
+</html>
