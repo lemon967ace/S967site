@@ -31,6 +31,7 @@
     .bar{display:flex;align-items:center;gap:8px;padding:10px 12px}
     .bar h1{margin:0;font-size:1.02rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bar button,.bar a,.notify-button{border:1px solid var(--border);background:var(--surface-hover);border-radius:8px;padding:7px 9px;text-decoration:none}
+    .search-toggle{display:none}
     .actor{font-size:.74rem;color:var(--muted);white-space:nowrap}
     .searchbar{padding:8px;display:grid;grid-template-columns:minmax(130px,1fr) auto auto auto auto;gap:6px;align-items:end}
     .searchbar label{display:grid;gap:3px;color:var(--muted);font-size:.7rem}
@@ -102,7 +103,9 @@
       .rooms{display:flex;overflow:auto;gap:5px}
       .room-button{width:auto;min-width:max-content}
       .main{min-height:0}
+      .search-toggle{display:inline-flex;align-items:center;justify-content:center}
       .searchbar{grid-template-columns:1fr 1fr}
+      .searchbar.mobile-collapsed{display:none}
       .search-text-label{grid-column:1/-1}
       .message{max-width:88%}
       .actor{display:none}
@@ -149,7 +152,7 @@
         <a id="backButton" href="/">Back</a>
       </header>
 
-      <section class="searchbar panel">
+      <section id="searchPanel" class="searchbar panel mobile-collapsed">
         <label class="search-text-label">
           <span id="searchTextLabel">Text</span>
           <input id="searchText" type="search" maxlength="100">
@@ -250,7 +253,6 @@
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
-    const FALLBACK_POLL_MS = 15000;
     const MESSAGE_BATCH_SIZE = 20;
     const MAX_FILES = 5;
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -275,8 +277,6 @@
     let loading = false;
     let sending = false;
     let realtimeChannel = null;
-    let fallbackTimer = null;
-    let refreshTimer = null;
     let notificationBaseline = null;
     let loadingOlder = false;
     let roomLoadGeneration = 0;
@@ -284,7 +284,7 @@
     const messageMap = new Map();
     let currentSearch = {q:"",date:""};
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
 
     function setText(){
       document.documentElement.lang=language;
@@ -309,6 +309,7 @@
       searchTextLabel.textContent=text.text;
       searchDateLabel.textContent=text.date;
       searchButton.textContent=text.search;
+      searchToggleButton.title=text.search;
       clearSearchButton.textContent=text.clear;
       olderButton.textContent=text.older;
       notifyButton.title=text.notification;
@@ -452,6 +453,62 @@
       if((message.unread_count??0)>0){const u=document.createElement("span");u.className="unread-number";u.textContent=String(message.unread_count);u.title="Unread people";foot.append(u);}
       article.append(foot);
       return article;
+    }
+
+    function messageRenderSignature(message){
+      const copy={...message};
+      if(Array.isArray(copy.attachments)){
+        copy.attachments=copy.attachments.map(a=>({
+          id:a.id,
+          message_id:a.message_id,
+          original_name:a.original_name,
+          mime_type:a.mime_type,
+          size_bytes:a.size_bytes,
+          created_at:a.created_at
+        }));
+      }
+      return JSON.stringify(copy);
+    }
+
+    function mergeStableAttachmentUrls(previous,next){
+      if(!previous?.attachments?.length||!next?.attachments?.length)return next;
+      const oldById=new Map(previous.attachments.map(a=>[String(a.id),a]));
+      return {
+        ...next,
+        attachments:next.attachments.map(a=>{
+          const old=oldById.get(String(a.id));
+          return old?.signed_url ? {...a,signed_url:old.signed_url} : a;
+        })
+      };
+    }
+
+    function renderMessagesSelective(changedIds=new Set()){
+      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      if(!items.length){
+        const empty=document.createElement("div");empty.className="empty";empty.textContent=text.empty;
+        messagesHost.replaceChildren(empty);olderButton.classList.add("hidden");return;
+      }
+
+      const wanted=new Set(items.map(item=>String(item.id)));
+      for(const existing of [...messagesHost.querySelectorAll("[data-message-id]")]){
+        if(!wanted.has(String(existing.dataset.messageId)))existing.remove();
+      }
+
+      let cursor=messagesHost.firstElementChild;
+      for(const item of items){
+        const id=String(item.id);
+        let existing=messagesHost.querySelector(`[data-message-id="${CSS.escape(id)}"]`);
+        if(!existing||changedIds.has(id)){
+          const replacement=renderMessage(item);
+          if(existing){existing.replaceWith(replacement);existing=replacement;}
+          else{messagesHost.insertBefore(replacement,cursor);existing=replacement;}
+        }
+        if(existing!==cursor){
+          messagesHost.insertBefore(existing,cursor);
+        }
+        cursor=existing.nextElementSibling;
+      }
+      olderButton.classList.toggle("hidden",!hasMore);
     }
 
     function renderMessages(){
@@ -772,10 +829,18 @@
         currentSignalTopic=r.signal_topic??null;
         chatTitle.textContent=r.room?.name??text.title;
         if(initial)messageMap.clear();
-        for(const m of r.messages??[])messageMap.set(m.id,m);
+        const changedIds=new Set();
+        for(const incoming of r.messages??[]){
+          const previous=messageMap.get(incoming.id);
+          const merged=mergeStableAttachmentUrls(previous,incoming);
+          if(!previous||messageRenderSignature(previous)!==messageRenderSignature(merged)){
+            changedIds.add(String(incoming.id));
+          }
+          messageMap.set(incoming.id,merged);
+        }
         hasMore=Boolean(r.has_more);
         initialUnreadAnchor=r.initial_unread_message_id??null;
-        renderMessages();
+        if(initial)renderMessages();else renderMessagesSelective(changedIds);
 
         if(initial&&unread>0){
           const anchorId=initialUnreadAnchor??r.messages?.[0]?.id;
@@ -919,21 +984,32 @@
       try{await request(API.delete,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:id})});await loadLatest(false);}catch(e){setStatus(e.message,true);}
     }
 
-    function scheduleRefresh(){
-      clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>loadLatest(false,true).then(loadRooms).catch(()=>{}),120);
+    let realtimeSyncPending=false;
+    async function syncRealtimeChange(){
+      if(realtimeSyncPending||!currentRoomId)return;
+      realtimeSyncPending=true;
+      try{
+        await loadLatest(false,true);
+        await loadRooms();
+      }catch{}finally{
+        realtimeSyncPending=false;
+      }
     }
 
     function startRealtime(){
-      stopRealtime();if(!currentRoomId)return;
-      if(!currentSignalTopic)return;realtimeChannel=supabase.channel(currentSignalTopic,{config:{private:false}}).on("broadcast",{event:"changed"},scheduleRefresh).subscribe();
+      stopRealtime();if(!currentRoomId||!currentSignalTopic)return;
+      realtimeChannel=supabase
+        .channel(currentSignalTopic,{config:{private:false}})
+        .on("broadcast",{event:"changed"},syncRealtimeChange)
+        .subscribe();
     }
-    function stopRealtime(){if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null;}if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}}
-    function startFallback(){stopFallback();fallbackTimer=setInterval(()=>{if(!document.hidden)loadLatest(false).then(loadRooms).catch(()=>{});},FALLBACK_POLL_MS);}
-    function stopFallback(){if(fallbackTimer){clearInterval(fallbackTimer);fallbackTimer=null;}}
+    function stopRealtime(){
+      realtimeSyncPending=false;
+      if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}
+    }
 
     function showGate(message,{showChatLogin=true}={}){
       stopRealtime();
-      stopFallback();
       app.classList.add("hidden");
       gate.classList.remove("hidden");
       gateMessage.textContent=message;
@@ -975,13 +1051,11 @@
           renderMessages();
           gate.classList.add("hidden");
           app.classList.remove("hidden");
-          startFallback();
           return;
         }
 
         await loadLatest(false,false,{initial:true});
         startRealtime();
-        startFallback();
       }catch(e){
         if(e?.status===401||e?.status===403){
           await showAccessFailure(e);
@@ -1141,7 +1215,25 @@
     roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
     refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
     notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
-    searchButton.onclick=navigateSearch;
+    function syncMobileSearchState(){
+      if(!window.matchMedia("(max-width:760px)").matches){
+        searchPanel.classList.remove("mobile-collapsed");
+        searchToggleButton.setAttribute("aria-expanded","true");
+        return;
+      }
+      const open=!searchPanel.classList.contains("mobile-collapsed");
+      searchToggleButton.setAttribute("aria-expanded",String(open));
+    }
+    searchToggleButton.onclick=()=>{
+      if(!window.matchMedia("(max-width:760px)").matches)return;
+      searchPanel.classList.toggle("mobile-collapsed");
+      syncMobileSearchState();
+      if(!searchPanel.classList.contains("mobile-collapsed"))searchText.focus();
+    };
+    window.addEventListener("resize",syncMobileSearchState);
+    syncMobileSearchState();
+
+    searchButton.onclick=async()=>{await navigateSearch();if(window.matchMedia("(max-width:760px)").matches){searchPanel.classList.add("mobile-collapsed");syncMobileSearchState();}};
     clearSearchButton.onclick=async()=>{searchText.value="";searchDate.value="";currentSearch={q:"",date:""};messageMap.clear();await loadLatest(false,false,{initial:true}).catch(()=>{});};
     searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
     searchDate.onchange=()=>{
@@ -1162,9 +1254,8 @@
       if(messagesHost.scrollTop<80&&hasMore&&!loadingOlder)loadOlder();
       if(nearBottom())markRead();
     },{passive:true});
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(loadRooms).catch(()=>{});} });
     window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
-    window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
+    window.addEventListener("beforeunload",()=>{stopRealtime();});
 
     bootstrap();
   </script>
