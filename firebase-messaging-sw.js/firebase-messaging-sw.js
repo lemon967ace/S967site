@@ -19,8 +19,8 @@ messaging.onBackgroundMessage((payload) => {
   const body = data.body || "새 채팅 메시지가 있습니다.";
   const roomId = data.room_id || "";
   const url = roomId
-    ? `/staff/chat/?room=${encodeURIComponent(roomId)}`
-    : "/staff/chat/";
+  ? `/chat/?room=${encodeURIComponent(roomId)}`
+: "/chat/";
 
   self.registration.showNotification(title, {
     body,
