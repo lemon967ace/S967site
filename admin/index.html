@@ -1793,6 +1793,16 @@
 
       <input id="embeddedAnnAnnouncementId" type="hidden">
 
+      <div class="row" style="margin-top:9px;margin-bottom:9px">
+        <button
+          id="embeddedAnnGroupBuyPreset"
+          type="button"
+          class="preset"
+        >
+          공동구매 프리셋
+        </button>
+      </div>
+
       <div class="lang-grid">
         <label>한국어<textarea id="embeddedAnnAKo"></textarea></label>
         <label>English<textarea id="embeddedAnnAEn"></textarea></label>
@@ -11090,7 +11100,7 @@ window.addEventListener(
     const $=id=>document.getElementById(id);
 
     const gate=$("embeddedAnnGate"),gateMessage=$("embeddedAnnGateMessage"),staffLogin=$("embeddedAnnStaffLogin"),staffId=$("embeddedAnnStaffId"),staffPassword=$("embeddedAnnStaffPassword"),staffLoginButton=$("embeddedAnnStaffLoginButton"),app=$("embeddedAnnApp"),actorHost=$("embeddedAnnActor");
-    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList"),announcementListEmpty=$("embeddedAnnAnnouncementListEmpty"),refreshAnnouncements=$("embeddedAnnRefreshAnnouncements");
+    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList"),announcementListEmpty=$("embeddedAnnAnnouncementListEmpty"),refreshAnnouncements=$("embeddedAnnRefreshAnnouncements"),groupBuyPreset=$("embeddedAnnGroupBuyPreset");
     const rId=$("embeddedAnnRoutineId"),rName=$("embeddedAnnRName"),rAnchor=$("embeddedAnnRAnchor"),rRepeat=$("embeddedAnnRRepeat"),rHours=$("embeddedAnnRHours"),rOffset=$("embeddedAnnROffset"),rEnabled=$("embeddedAnnREnabled"),rKo=$("embeddedAnnRKo"),rEn=$("embeddedAnnREn"),rJa=$("embeddedAnnRJa"),rRu=$("embeddedAnnRRu"),saveRoutine=$("embeddedAnnSaveRoutine"),cancelRoutineEdit=$("embeddedAnnCancelRoutineEdit"),routineStatus=$("embeddedAnnRoutineStatus"),routineList=$("embeddedAnnRoutineList"),wkPreset=$("embeddedAnnWkPreset"),periodPreset=$("embeddedAnnPeriodPreset");
 
     let data={announcements:[],routines:[]};
@@ -11243,6 +11253,14 @@ window.addEventListener(
     }
 
     async function deleteAnnouncement(item){if(!confirm("이 공지사항을 삭제할까요?"))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
+
+    groupBuyPreset.onclick=()=>{
+      aKo.value="공동구매가 진행중입니다.";
+      aEn.value="A group purchase is currently in progress.";
+      aJa.value="共同購入を実施中です。";
+      aRu.value="Сейчас проходит совместная закупка.";
+      status(announcementStatus,"공동구매 프리셋을 입력했습니다.");
+    };
 
     saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,"저장 중…");const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value),enabled:editingAnnouncementEnabled};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,"저장했습니다.");}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
     cancelAnnouncementEdit.onclick=clearAnnouncement;
