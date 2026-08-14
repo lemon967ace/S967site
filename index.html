@@ -685,15 +685,18 @@
       text-transform: uppercase;
     }
 
+    .source-links {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 5px;
+      margin-top: clamp(2px, .45svh, 5px);
+    }
+
     .source-link {
       display: inline-block;
 
-      margin-top:
-        clamp(
-          2px,
-          .45svh,
-          5px
-        );
+      margin-top: 0;
 
       color: #555c68;
 
@@ -709,6 +712,13 @@
       text-transform: none;
 
       text-decoration: none;
+    }
+
+    .source-link-separator {
+      color: #555c68;
+      font-size: inherit;
+      line-height: 1;
+      user-select: none;
     }
 
     .source-link:hover {
@@ -2774,21 +2784,91 @@
 
         <br>
 
-        <a
-          class="source-link"
-          href="https://github.com/lemon967ace/S967site"
-          target="_blank"
-          rel="noopener noreferrer"
-          data-i18n="sourceCode"
-        >
-          View source code
-        </a>
+        <span class="source-links">
+          <a
+            class="source-link"
+            href="https://github.com/lemon967ace/S967site"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-i18n="sourceCode"
+          >
+            View source code
+          </a>
+
+          <span class="source-link-separator">·</span>
+
+          <a
+            class="source-link privacy-notice-link"
+            id="privacyNoticeLink"
+            href="/privacyNotice"
+          >
+            Privacy Notice
+          </a>
+        </span>
 
       </footer>
 
     </div>
 
   </main>
+
+
+  <!-- =======================================================
+       PRIVACY NOTICE LINK
+       ======================================================= -->
+  <script>
+    (() => {
+      const privacyNoticeLink =
+        document.getElementById("privacyNoticeLink");
+
+      if (!privacyNoticeLink) {
+        return;
+      }
+
+      const labels = {
+        ko: "개인정보 안내",
+        en: "Privacy Notice",
+        ja: "プライバシーに関するお知らせ",
+        ru: "Уведомление о конфиденциальности"
+      };
+
+      function updatePrivacyNoticeLink() {
+        const current =
+          typeof getCurrentLanguage === "function"
+            ? getCurrentLanguage()
+            : (
+                localStorage.getItem("s967_language") ||
+                "en"
+              );
+
+        const language =
+          Object.prototype.hasOwnProperty.call(labels, current)
+            ? current
+            : "en";
+
+        privacyNoticeLink.textContent =
+          labels[language];
+      }
+
+      updatePrivacyNoticeLink();
+
+      window.addEventListener(
+        "languagechange",
+        updatePrivacyNoticeLink
+      );
+
+      const observer =
+        new MutationObserver(updatePrivacyNoticeLink);
+
+      observer.observe(
+        document.documentElement,
+        {
+          attributes: true,
+          attributeFilter: ["lang"]
+        }
+      );
+    })();
+  </script>
 
 
   <!-- =======================================================
