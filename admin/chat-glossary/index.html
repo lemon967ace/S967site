@@ -152,8 +152,16 @@
           .catch(() => ({}));
 
       if (!response.ok) {
+        const detail =
+          [
+            result.error,
+            result.code,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+
         throw new Error(
-          result.error ||
+          detail ||
           `HTTP_${response.status}`,
         );
       }
