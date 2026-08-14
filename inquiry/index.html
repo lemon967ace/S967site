@@ -272,6 +272,18 @@
       line-height: 1.6;
     }
 
+    .contact-retention-note {
+      margin:
+        10px
+        0
+        0;
+
+      color: var(--muted);
+
+      font-size: .82rem;
+      line-height: 1.55;
+    }
+
     .actions {
       display: flex;
       justify-content: center;
@@ -802,6 +814,13 @@
           placeholder="Enter your contact information."
         >
 
+        <p
+          id="contactRetentionNote"
+          class="contact-retention-note"
+        >
+          Optional contact information is periodically deleted based on one month after submission.
+        </p>
+
       </section>
 
 
@@ -860,6 +879,38 @@
       document.getElementById(
         "formStatus"
       );
+
+    const contactRetentionNote =
+      document.getElementById(
+        "contactRetentionNote"
+      );
+
+    const CONTACT_RETENTION_TEXT = {
+      ko:
+        "선택 연락처는 접수 후 1개월을 기준으로 정기 삭제됩니다.",
+      en:
+        "Optional contact information is periodically deleted based on one month after submission.",
+      ja:
+        "任意で提供された連絡先情報は、受付後1か月を基準に定期的に削除されます。",
+      ru:
+        "Необязательные контактные данные регулярно удаляются по истечении одного месяца с момента обращения.",
+    };
+
+    function renderContactRetentionNote() {
+      const language =
+        typeof getCurrentLanguage ===
+          "function"
+          ? getCurrentLanguage()
+          : "en";
+
+      contactRetentionNote.textContent =
+        CONTACT_RETENTION_TEXT[
+          language
+        ] ??
+        CONTACT_RETENTION_TEXT.en;
+    }
+
+    renderContactRetentionNote();
 async function checkInquiryAvailability() {
   try {
     const response =
@@ -1060,6 +1111,8 @@ setTimeout(
     window.addEventListener(
       "s967languagechange",
       () => {
+        renderContactRetentionNote();
+
         if (
           formStatus.textContent
         ) {
