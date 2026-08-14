@@ -344,6 +344,102 @@
       }
     }
 
+  
+    /* =========================================================
+       CHAT HEIGHT DISTRIBUTION FIX v3
+       정확한 역할 분리:
+       - header / search / older / composer = 내용 높이만 사용
+       - messages = 남는 높이 전부 사용
+       - empty = messages 안에서 그 높이를 전부 채움
+       ========================================================= */
+
+    .main {
+      display: flex !important;
+      flex-direction: column !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      gap: 8px !important;
+      overflow: hidden !important;
+    }
+
+    .main > .bar,
+    .main > .searchbar,
+    .main > .older,
+    .main > .composer {
+      flex: 0 0 auto !important;
+    }
+
+    .main > .messages {
+      flex: 1 1 0 !important;
+      min-height: 0 !important;
+      height: auto !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .main > .messages > .empty {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+      width: 100% !important;
+
+      display: grid !important;
+      place-items: center !important;
+    }
+
+    .main > .composer {
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      align-self: stretch !important;
+      margin: 0 !important;
+      padding-top: 9px !important;
+      padding-right: 9px !important;
+      padding-left: 9px !important;
+      padding-bottom:
+        max(
+          9px,
+          env(safe-area-inset-bottom)
+        ) !important;
+    }
+
+    .main > .composer .status:empty {
+      min-height: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        max-height: 100dvh !important;
+
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows:
+          auto
+          minmax(0, 1fr) !important;
+      }
+
+      .main {
+        min-height: 0 !important;
+        height: 100% !important;
+        max-height: 100% !important;
+      }
+
+      .main > .messages {
+        flex: 1 1 0 !important;
+      }
+
+      .main > .composer {
+        flex: 0 0 auto !important;
+      }
+    }
+
   </style>
 </head>
 <body>
