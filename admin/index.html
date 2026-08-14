@@ -3450,92 +3450,275 @@ accountPermissionDialog
 
 function renderChatOnlyAccounts(accounts) {
   if (!chatOnlyAccounts) return;
+
   chatOnlyAccounts.replaceChildren();
 
-  const allAccounts = Array.isArray(accounts) ? accounts : [];
+  const allAccounts =
+    Array.isArray(accounts)
+      ? accounts
+      : [];
+
   if (!allAccounts.length) {
-    const empty = document.createElement("div");
+    const empty =
+      document.createElement("div");
+
     empty.className = "small";
-    empty.textContent = "채팅 전용 계정이 없습니다.";
-    chatOnlyAccounts.appendChild(empty);
+    empty.textContent =
+      "채팅 전용 계정이 없습니다.";
+
+    chatOnlyAccounts.appendChild(
+      empty
+    );
+
     return;
   }
 
   for (const account of allAccounts) {
-    const row = document.createElement("div");
-    row.className = "manage-item";
-    if (!account.is_active) row.classList.add("item-inactive");
+    const row =
+      document.createElement("div");
 
-    const content = document.createElement("div");
+    row.className = "manage-item";
+
+    if (!account.is_active) {
+      row.classList.add(
+        "item-inactive"
+      );
+    }
+
+    const content =
+      document.createElement("div");
+
     content.style.flex = "1";
 
-    const name = document.createElement("div");
+    const name =
+      document.createElement("div");
+
     name.className = "manage-name";
-    name.textContent = account.display_name;
+    name.textContent =
+      account.display_name;
 
-    const state = document.createElement("div");
+    const state =
+      document.createElement("div");
+
     state.className = "manage-note";
-    state.textContent = `권한: 채팅 전용 · ${account.is_active ? "Active" : "Disabled"}`;
-    content.append(name, state);
+    state.textContent =
+      `권한: 채팅 전용 · ${
+        account.is_active
+          ? "Active"
+          : "Disabled"
+      }`;
 
-    const actions = document.createElement("div");
-    actions.className = "manage-actions";
+    content.append(
+      name,
+      state
+    );
 
-    const resetButton = document.createElement("button");
+    const actions =
+      document.createElement("div");
+
+    actions.className =
+      "manage-actions";
+
+    const resetButton =
+      document.createElement("button");
+
     resetButton.type = "button";
-    resetButton.textContent = "Reset Password";
-    resetButton.onclick = async () => {
-      const password = prompt(`Enter a new temporary password for ${account.display_name}:`);
-      if (password === null) return;
-      if (password.length < 10) {
-        alert("Password must be at least 10 characters.");
-        return;
-      }
-      resetButton.disabled = true;
-      try {
-        await chatRoomAdminApiRequest("POST", {
-          action: "reset_chat_password",
-          user_id: account.user_id,
-          password,
-        });
-        alert("Password has been reset.");
-      } catch (error) {
-        alert(error.message || "Could not reset password.");
-      } finally {
-        resetButton.disabled = false;
-      }
-    };
+    resetButton.textContent =
+      "Reset Password";
 
-    const toggleButton = document.createElement("button");
+    resetButton.addEventListener(
+      "click",
+      async () => {
+        const password =
+          prompt(
+            `Enter a new temporary password for ${account.display_name}:`
+          );
+
+        if (password === null) {
+          return;
+        }
+
+        if (
+          password.length < 10
+        ) {
+          alert(
+            "Password must be at least 10 characters."
+          );
+          return;
+        }
+
+        resetButton.disabled = true;
+
+        try {
+          await chatRoomAdminApiRequest(
+            "POST",
+            {
+              action:
+                "reset_chat_password",
+              user_id:
+                account.user_id,
+              password,
+            }
+          );
+
+          alert(
+            "Password has been reset."
+          );
+        } catch (error) {
+          alert(
+            error.message ||
+              "Could not reset password."
+          );
+        } finally {
+          resetButton.disabled =
+            false;
+        }
+      }
+    );
+
+    const toggleButton =
+      document.createElement("button");
+
     toggleButton.type = "button";
-    toggleButton.textContent = account.is_active ? "Disable" : "Enable";
-    if (account.is_active) toggleButton.classList.add("danger");
-    toggleButton.onclick = async () => {
-      const nextActive = !account.is_active;
-      const verb = nextActive ? "enable" : "disable";
-      if (!confirm(`${verb} chat-only account "${account.display_name}"?`)) return;
-      toggleButton.disabled = true;
-      try {
-        await chatRoomAdminApiRequest("POST", {
-          action: "set_chat_user_active",
-          user_id: account.user_id,
-          is_active: nextActive,
-        });
-        await loadStaffAccounts();
-      } catch (error) {
-        alert(error.message || `Could not ${verb} chat-only account.`);
-        toggleButton.disabled = false;
+    toggleButton.textContent =
+      account.is_active
+        ? "Disable"
+        : "Enable";
+
+    if (account.is_active) {
+      toggleButton.classList.add(
+        "danger"
+      );
+    }
+
+    toggleButton.addEventListener(
+      "click",
+      async () => {
+        const nextActive =
+          !account.is_active;
+
+        const verb =
+          nextActive
+            ? "enable"
+            : "disable";
+
+        if (
+          !confirm(
+            `${verb} chat-only account "${account.display_name}"?`
+          )
+        ) {
+          return;
+        }
+
+        toggleButton.disabled = true;
+
+        try {
+          await chatRoomAdminApiRequest(
+            "POST",
+            {
+              action:
+                "set_chat_user_active",
+              user_id:
+                account.user_id,
+              is_active:
+                nextActive,
+            }
+          );
+
+          await loadStaffAccounts();
+        } catch (error) {
+          alert(
+            error.message ||
+              `Could not ${verb} chat-only account.`
+          );
+
+          toggleButton.disabled =
+            false;
+        }
       }
-    };
+    );
 
-    const permissionButton = document.createElement("button");
-    permissionButton.type = "button";
-    permissionButton.textContent = "권한";
-    permissionButton.onclick = () => openPermissionDialog(account, "chat");
+    const permissionButton =
+      document.createElement("button");
 
-    actions.append(resetButton, toggleButton, permissionButton);
-    row.append(content, actions);
-    chatOnlyAccounts.appendChild(row);
+    permissionButton.type =
+      "button";
+    permissionButton.textContent =
+      "권한";
+
+    permissionButton.addEventListener(
+      "click",
+      () => {
+        openPermissionDialog(
+          account,
+          "chat"
+        );
+      }
+    );
+
+    const deleteButton =
+      document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.classList.add(
+      "danger"
+    );
+    deleteButton.textContent =
+      "Delete";
+
+    deleteButton.addEventListener(
+      "click",
+      async () => {
+        const confirmed =
+          confirm(
+            `Delete chat-only account "${account.display_name}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        deleteButton.disabled = true;
+
+        try {
+          await chatRoomAdminApiRequest(
+            "POST",
+            {
+              action:
+                "delete_chat_user",
+              user_id:
+                account.user_id,
+            }
+          );
+
+          await loadStaffAccounts();
+        } catch (error) {
+          alert(
+            error.message ||
+              "Could not delete chat-only account."
+          );
+
+          deleteButton.disabled =
+            false;
+        }
+      }
+    );
+
+    actions.append(
+      resetButton,
+      toggleButton,
+      permissionButton,
+      deleteButton
+    );
+
+    row.append(
+      content,
+      actions
+    );
+
+    chatOnlyAccounts.appendChild(
+      row
+    );
   }
 }
 
@@ -3599,9 +3782,43 @@ function renderChatOnlyAccounts(accounts) {
       visibleStaff
     );
 
+    /*
+      staff_chat_users can retain an inactive shadow row after a
+      permission conversion. A currently active Staff account must
+      never appear in the Chat-only list merely because that shadow
+      row still exists.
+    */
+    const activeStaffIds =
+      new Set(
+        (
+          staffResult.accounts ??
+          []
+        )
+          .filter(
+            (account) =>
+              account.role === "staff" &&
+              account.is_active === true
+          )
+          .map(
+            (account) =>
+              account.user_id
+          )
+      );
+
+    const visibleChatOnly =
+      (
+        chatResult.chat_users ??
+        []
+      )
+        .filter(
+          (account) =>
+            !activeStaffIds.has(
+              account.user_id
+            )
+        );
+
     renderChatOnlyAccounts(
-      chatResult.chat_users ??
-      []
+      visibleChatOnly
     );
 
     setStatus(
@@ -10099,39 +10316,86 @@ addGroupBuyEmailRecipientButton
     createStaffButton.addEventListener(
   "click",
   async () => {
-    const accountId = staffIdInput.value.trim();
-    const password = staffPassword.value;
+    const accountId =
+      staffIdInput.value.trim();
 
-    if (!accountId || !password) {
-      setStatus(staffStatus, "Account ID와 임시 비밀번호를 모두 입력하세요.", true);
-      return;
-    }
-    if (!/^[A-Za-z0-9._-]+$/.test(accountId)) {
-      setStatus(staffStatus, "Account ID may contain only letters, numbers, periods, underscores, and hyphens.", true);
-      return;
-    }
-    if (password.length < 10) {
-      setStatus(staffStatus, "임시 비밀번호는 10자 이상이어야 합니다.", true);
+    const password =
+      staffPassword.value;
+
+    if (
+      !accountId ||
+      !password
+    ) {
+      setStatus(
+        staffStatus,
+        "Account ID와 임시 비밀번호를 모두 입력하세요.",
+        true
+      );
       return;
     }
 
-    createStaffButton.disabled = true;
-    setStatus(staffStatus, "채팅 전용 계정을 생성하는 중…");
+    if (
+      !/^[A-Za-z0-9._-]+$/
+        .test(accountId)
+    ) {
+      setStatus(
+        staffStatus,
+        "Account ID may contain only letters, numbers, periods, underscores, and hyphens.",
+        true
+      );
+      return;
+    }
+
+    if (
+      password.length < 10
+    ) {
+      setStatus(
+        staffStatus,
+        "임시 비밀번호는 10자 이상이어야 합니다.",
+        true
+      );
+      return;
+    }
+
+    createStaffButton.disabled =
+      true;
+
+    setStatus(
+      staffStatus,
+      "채팅 전용 계정을 생성하는 중…"
+    );
 
     try {
-      await chatRoomAdminApiRequest("POST", {
-        action: "create_chat_user",
-        chat_id: accountId,
-        password,
-      });
+      await chatRoomAdminApiRequest(
+        "POST",
+        {
+          action:
+            "create_chat_user",
+          chat_id:
+            accountId,
+          password,
+        }
+      );
+
       staffIdInput.value = "";
       staffPassword.value = "";
+
       await loadStaffAccounts();
-      setStatus(staffStatus, "채팅 전용 계정을 생성했습니다. 필요하면 권한 버튼에서 Staff로 변경하세요.");
+
+      setStatus(
+        staffStatus,
+        "채팅 전용 계정을 생성했습니다. 필요하면 권한 버튼에서 Staff로 변경하세요."
+      );
     } catch (error) {
-      setStatus(staffStatus, error.message || "채팅 전용 계정을 생성하지 못했습니다.", true);
+      setStatus(
+        staffStatus,
+        error.message ||
+          "채팅 전용 계정을 생성하지 못했습니다.",
+        true
+      );
     } finally {
-      createStaffButton.disabled = false;
+      createStaffButton.disabled =
+        false;
     }
   }
 );
