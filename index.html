@@ -1499,6 +1499,91 @@
       }
     }
 
+  
+    /* ===== FOOTER-BOTTOM BALANCED LAYOUT =====
+       Footer is always at the bottom of the viewport.
+       Flexible vertical space is distributed above the buttons,
+       never dumped between buttons and footer.
+    */
+
+    .home-content {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      grid-template-rows:
+        minmax(0, 1fr)
+        auto
+        minmax(clamp(22px, 3svh, 42px), .72fr)
+        auto
+        clamp(14px, 2svh, 26px)
+        auto !important;
+
+      align-items: center !important;
+      justify-items: center !important;
+
+      width: 100% !important;
+    }
+
+    .home-hero {
+      grid-row: 2 !important;
+      align-self: center !important;
+    }
+
+    .buttons {
+      grid-row: 4 !important;
+      align-self: center !important;
+    }
+
+    footer {
+      grid-row: 6 !important;
+      align-self: end !important;
+
+      position: static !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+
+      text-align: center !important;
+    }
+
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          minmax(0, .72fr)
+          auto
+          minmax(clamp(14px, 2svh, 28px), .48fr)
+          auto
+          clamp(9px, 1.3svh, 16px)
+          auto !important;
+      }
+    }
+
+    @media (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          minmax(0, .55fr)
+          auto
+          minmax(10px, .34fr)
+          auto
+          7px
+          auto !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          minmax(0, .3fr)
+          auto
+          minmax(6px, .2fr)
+          auto
+          4px
+          auto !important;
+      }
+    }
+
   </style>
 </head>
 
