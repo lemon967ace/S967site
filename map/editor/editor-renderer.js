@@ -610,6 +610,43 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
       return;
     }
+    if (
+      rangeController?.getState().mode ===
+        "rangePreset" &&
+      cell
+    ) {
+      try {
+        const result =
+          rangeController.placePresetAt(
+            cell
+          );
+
+        if (
+          result?.complete
+        ) {
+          refreshDocument();
+          rangeController
+            ?.normalizeSelection();
+
+          onRangeSelectionChange(
+            rangeController
+              ?.getSelectedRange?.() ??
+              null
+          );
+        }
+      } catch (error) {
+        notifyRangePresetError(
+          error
+        );
+      }
+
+      onRangeStateChange(
+        rangeController.getState()
+      );
+      invalidate();
+      return;
+    }
+
     if (rangeController?.getState().mode === "rangeCreate" && cell) { rangeController.click(cell); onRangeStateChange(rangeController.getState()); invalidate(); return; }
     const building =
       hitTestBuildings(
@@ -1190,15 +1227,28 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         activeTouches.size >= 2
       ) {
         beginPinchGesture();
-      } else {
-        pinchGesture = null;
-
+      } else if (
+        wasPinching ||
+        activeTouches.size === 1
+      ) {
         /*
-          Do not continue the gesture as an old one-finger drag.
-          The remaining finger must start a fresh gesture.
+          This pointer belonged to a multi-touch gesture.
+          Do not let the remaining finger inherit the old tap/pan candidate.
         */
+        pinchGesture = null;
         panning = null;
         clickCandidate = null;
+      } else {
+        /*
+          Single-finger touch:
+          keep clickCandidate until the normal pointer-up tap test below.
+
+          The previous code cleared clickCandidate here for EVERY touch
+          pointer-up, so isTapSelectionCandidate() always received null.
+          Result: tapping could never place buildings, Mountain presets,
+          or complete ordinary range clicks on mobile.
+        */
+        pinchGesture = null;
       }
 
       if (
