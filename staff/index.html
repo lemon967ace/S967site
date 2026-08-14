@@ -535,7 +535,35 @@
       }
     }
 
-  </style>
+  
+    .staff-inquiry-details {
+      margin-top: 10px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+    }
+
+    .staff-inquiry-pagination {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .staff-inquiry-pagination button {
+      min-width: 38px;
+      padding: 7px 9px;
+    }
+
+    .staff-inquiry-pagination button.is-active {
+      border-color: var(--text);
+      background: transparent;
+      box-shadow: inset 0 0 0 1px var(--text);
+    }
+
+</style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
 
@@ -994,6 +1022,20 @@
   data-staff-section="inquiry"
 >
   <section class="panel">
+    <div class="row">
+      <h2 id="staffInquiryHistoryTitle" style="margin:0;flex:1;">Inquiry History</h2>
+      <button id="staffInquiryRefreshButton" type="button">Refresh</button>
+    </div>
+
+    <p id="staffInquiryHistoryLead" class="small">
+      View submitted inquiries. Staff accounts cannot delete inquiry records.
+    </p>
+
+    <div id="staffInquirySubmissions"></div>
+    <div id="staffInquiryPagination" class="staff-inquiry-pagination"></div>
+    <div id="staffInquirySubmissionsStatus" class="status"></div>
+  </section>
+  <section class="panel">
     <h2 data-i18n="staffInquiryEmailTitle">
       Inquiry Automatic Email Recipients
     </h2>
@@ -1364,7 +1406,27 @@
 
     const STAFF_GROUPBUY_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-groupbuy";
+
+    const STAFF_INQUIRY_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-inquiry";
     
+let staffInquiryPage = 1;
+let staffInquiryLoaded = false;
+let staffInquiryData = {
+  inquiries: [],
+  inquiry_pagination: {
+    page: 1,
+    page_size: 5,
+    total: 0,
+    total_pages: 1,
+  },
+};
+
+const staffInquirySubmissions = document.getElementById("staffInquirySubmissions");
+const staffInquiryPagination = document.getElementById("staffInquiryPagination");
+const staffInquirySubmissionsStatus = document.getElementById("staffInquirySubmissionsStatus");
+const staffInquiryRefreshButton = document.getElementById("staffInquiryRefreshButton");
+
 let wkData = {
   applications: [],
 };
@@ -4075,6 +4137,261 @@ async function loadWkApplications() {
   }
 }
     
+
+    const STAFF_INQUIRY_TEXT = {
+      ko: {
+        title:"문의 내역",
+        refresh:"새로고침",
+        lead:"접수된 문의를 확인할 수 있습니다. Staff 계정에서는 문의를 삭제할 수 없습니다.",
+        loading:"문의 내역을 불러오는 중…",
+        empty:"접수된 문의가 없습니다.",
+        total:"총 {count}건",
+        other:"기타",
+        language:"언어",
+        contactMethod:"연락처 종류",
+        contact:"연락처",
+        loadFailed:"문의 내역을 불러오지 못했습니다."
+      },
+      en: {
+        title:"Inquiry History",
+        refresh:"Refresh",
+        lead:"You can view submitted inquiries. Staff accounts cannot delete inquiry records.",
+        loading:"Loading inquiries…",
+        empty:"No inquiries have been submitted.",
+        total:"{count} total",
+        other:"Other",
+        language:"Language",
+        contactMethod:"Contact method",
+        contact:"Contact",
+        loadFailed:"Failed to load inquiry history."
+      },
+      ja: {
+        title:"お問い合わせ履歴",
+        refresh:"更新",
+        lead:"受け付けたお問い合わせを確認できます。Staffアカウントではお問い合わせを削除できません。",
+        loading:"お問い合わせ履歴を読み込み中…",
+        empty:"受け付けたお問い合わせはありません。",
+        total:"全{count}件",
+        other:"その他",
+        language:"言語",
+        contactMethod:"連絡方法",
+        contact:"連絡先",
+        loadFailed:"お問い合わせ履歴を読み込めませんでした。"
+      },
+      ru: {
+        title:"История обращений",
+        refresh:"Обновить",
+        lead:"Здесь можно просматривать полученные обращения. Staff не может удалять обращения.",
+        loading:"Загрузка обращений…",
+        empty:"Обращений пока нет.",
+        total:"Всего: {count}",
+        other:"Другое",
+        language:"Язык",
+        contactMethod:"Способ связи",
+        contact:"Контакт",
+        loadFailed:"Не удалось загрузить историю обращений."
+      }
+    };
+
+    function staffInquiryText(){
+      const lang =
+        typeof getCurrentLanguage === "function"
+          ? getCurrentLanguage()
+          : (localStorage.getItem("s967_language") || "en");
+      return STAFF_INQUIRY_TEXT[lang] ?? STAFF_INQUIRY_TEXT.en;
+    }
+
+    function applyStaffInquiryLanguage(){
+      const t=staffInquiryText();
+      const set=(id,value)=>{
+        const el=document.getElementById(id);
+        if(el)el.textContent=value;
+      };
+      set("staffInquiryHistoryTitle",t.title);
+      set("staffInquiryRefreshButton",t.refresh);
+      set("staffInquiryHistoryLead",t.lead);
+      if(staffInquiryLoaded)renderStaffInquirySubmissions();
+    }
+
+
+    async function staffInquiryRequest(page=1){
+      const {
+        data: sessionData
+      } = await supabase.auth.getSession();
+
+      const accessToken =
+        sessionData.session?.access_token;
+
+      if(!accessToken){
+        throw new Error(
+          translate("staffSessionExpired")
+        );
+      }
+
+      const response=await fetch(
+        `${STAFF_INQUIRY_API_URL}?page=${encodeURIComponent(page)}`,
+        {
+          method:"GET",
+          headers:{
+            Authorization:`Bearer ${accessToken}`
+          }
+        }
+      );
+
+      const result=await response.json().catch(()=>({}));
+
+      if(!response.ok){
+        throw new Error(
+          result.error ||
+          staffInquiryText().loadFailed
+        );
+      }
+
+      return result;
+    }
+
+    function renderStaffInquiryPagination(pagination){
+      if(!staffInquiryPagination)return;
+      staffInquiryPagination.replaceChildren();
+
+      const totalPages=Math.max(
+        1,
+        Number(pagination?.total_pages ?? 1)
+      );
+      const current=Math.min(
+        totalPages,
+        Math.max(1,Number(pagination?.page ?? staffInquiryPage))
+      );
+
+      if(totalPages<=1)return;
+
+      const makeButton=(label,page,active=false)=>{
+        const button=document.createElement("button");
+        button.type="button";
+        button.textContent=label;
+        if(active)button.classList.add("is-active");
+        button.disabled=active;
+        button.addEventListener("click",async()=>{
+          staffInquiryPage=page;
+          await loadStaffInquiryData();
+        });
+        return button;
+      };
+
+      if(current>1){
+        staffInquiryPagination.append(
+          makeButton("‹",current-1)
+        );
+      }
+
+      const first=Math.max(1,current-2);
+      const last=Math.min(totalPages,first+4);
+      const start=Math.max(1,last-4);
+
+      for(let page=start;page<=last;page+=1){
+        staffInquiryPagination.append(
+          makeButton(String(page),page,page===current)
+        );
+      }
+
+      if(current<totalPages){
+        staffInquiryPagination.append(
+          makeButton("›",current+1)
+        );
+      }
+    }
+
+    function renderStaffInquirySubmissions(){
+      if(!staffInquirySubmissions)return;
+
+      const t=staffInquiryText();
+      const list=Array.isArray(staffInquiryData.inquiries)
+        ? staffInquiryData.inquiries
+        : [];
+
+      staffInquirySubmissions.replaceChildren();
+
+      for(const inquiry of list){
+        const card=document.createElement("div");
+        card.className="application-card";
+
+        const title=document.createElement("div");
+        title.className="manage-name";
+        title.textContent=
+          `${inquiry.category ?? t.other} · ${formatDateTime(inquiry.created_at)}`;
+
+        const meta=document.createElement("div");
+        meta.className="manage-note";
+        meta.style.marginTop="6px";
+        meta.textContent=
+          `${t.language} ${inquiry.language ?? "-"} · `+
+          `${t.contactMethod} ${inquiry.contact_method ?? "-"} · `+
+          `${t.contact} ${inquiry.contact ?? "-"}`;
+
+        const details=document.createElement("div");
+        details.className="staff-inquiry-details";
+        details.textContent=
+          inquiry.details ??
+          inquiry.content ??
+          inquiry.message ??
+          "-";
+
+        // Intentionally no actions/delete button: Staff inquiry access is read-only.
+        card.append(title,meta,details);
+        staffInquirySubmissions.append(card);
+      }
+
+      if(!list.length){
+        const empty=document.createElement("div");
+        empty.className="small";
+        empty.textContent=t.empty;
+        staffInquirySubmissions.append(empty);
+      }
+
+      const pagination=
+        staffInquiryData.inquiry_pagination ?? {
+          page:staffInquiryPage,
+          total:list.length,
+          total_pages:1
+        };
+
+      staffInquiryPage=Number(
+        pagination.page ?? staffInquiryPage
+      );
+
+      renderStaffInquiryPagination(pagination);
+
+      if(staffInquirySubmissionsStatus){
+        staffInquirySubmissionsStatus.textContent=
+          t.total.replace(
+            "{count}",
+            String(Number(pagination.total ?? list.length))
+          );
+        staffInquirySubmissionsStatus.classList.remove("error");
+      }
+    }
+
+    async function loadStaffInquiryData(){
+      if(!staffInquirySubmissionsStatus)return;
+
+      staffInquirySubmissionsStatus.textContent=
+        staffInquiryText().loading;
+      staffInquirySubmissionsStatus.classList.remove("error");
+
+      try{
+        staffInquiryData=
+          await staffInquiryRequest(staffInquiryPage);
+        staffInquiryLoaded=true;
+        renderStaffInquirySubmissions();
+      }catch(error){
+        console.error(error);
+        staffInquirySubmissionsStatus.textContent=
+          error.message ||
+          staffInquiryText().loadFailed;
+        staffInquirySubmissionsStatus.classList.add("error");
+      }
+    }
+
     function translate(key) {
       if (
         typeof getTranslation ===
@@ -5264,6 +5581,8 @@ setTranslatedStatus(
       );
 
 
+    applyStaffInquiryLanguage();
+
     refreshImagesButton
       .addEventListener(
         "click",
@@ -5275,6 +5594,19 @@ setTranslatedStatus(
     "click",
     loadWkApplications
   );
+
+    staffInquiryRefreshButton
+      ?.addEventListener(
+        "click",
+        async () => {
+          staffInquiryRefreshButton.disabled=true;
+          try{
+            await loadStaffInquiryData();
+          }finally{
+            staffInquiryRefreshButton.disabled=false;
+          }
+        }
+      );
 
     staffTabs.forEach(
       (button) => {
@@ -5315,6 +5647,13 @@ if (
   loadStaffEmailRecipients(
     "inquiry"
   );
+}
+
+if (
+  target === "inquiry" &&
+  !staffInquiryLoaded
+) {
+  loadStaffInquiryData();
 }
 
 if (
@@ -5365,6 +5704,8 @@ if (
         updateDocumentTitle();
 
         refreshTranslatedStatuses();
+
+        applyStaffInquiryLanguage();
 
         /*
           Delete / Block / Unblock 등은
