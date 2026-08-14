@@ -243,17 +243,17 @@
   justify-content: center;
 
   gap:
-    clamp(14px, 1.6vw, 24px);
+    clamp(12px, 1.4vw, 18px);
 
-  width: min(760px, 100%);
-  max-width: none;
+  width: min(420px, 100%);
+  max-width: 420px;
 
-  margin: clamp(52px, 6vh, 82px) auto 0;
+  margin: clamp(96px, 14vh, 180px) auto 0;
 }
 
     .button {
-  flex: 1 1 180px;
-  min-width: 180px;
+  flex: 1 1 calc(50% - 9px);
+  min-width: 0;
 
       padding: 15px 24px;
 
@@ -299,12 +299,12 @@
     }
 
     .group-buy-button {
-  flex-basis: 100%;
+  flex: 1 1 100%;
 }
 
     footer {
-      margin-top: auto;
-      padding-top: clamp(72px, 10vh, 130px);
+      margin-top: clamp(34px, 5vh, 64px);
+      padding-top: 0;
       padding-bottom: 4px;
 
       color: #626875;
@@ -457,6 +457,14 @@
       .tagline {
         margin-top: 16px;
       }
+
+      .buttons {
+        margin-top: clamp(110px, 16vh, 210px);
+      }
+
+      footer {
+        margin-top: clamp(38px, 5vh, 68px);
+      }
     }
 
     @media (max-width: 480px) {
@@ -492,11 +500,13 @@
       }
 
       .buttons {
-        margin-top: 42px;
+        width: min(100%, 378px);
+        margin-top: clamp(56px, 9vh, 88px);
       }
 
       footer {
-        padding-top: 64px;
+        margin-top: 42px;
+        padding-top: 0;
       }
     }
 
