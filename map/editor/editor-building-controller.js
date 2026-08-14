@@ -44,7 +44,13 @@ export function createBuildingController({ engine, history = null, onChange = ()
       const building = engine.addBuilding(new Building({ name, typeId: palette.typeId, x, y, width: palette.size, height: palette.size, affiliation: affiliation ?? palette.defaultAffiliation, locked: false }));
       const state = snapshotBuilding(building);
       history?.record({ description: "create", undo() { engine.deleteBuilding(state.id); selectedBuildingId = null; }, redo() { engine.addBuilding(state); selectedBuildingId = state.id; } });
-      selectedBuildingId = building.id; preview = null; notifyMutation(); emit(); return building;
+      selectedBuildingId = building.id;
+      mode = EDITOR_MODES.SELECT;
+      palette = null;
+      preview = null;
+      notifyMutation();
+      emit();
+      return building;
     }
     if (mode === EDITOR_MODES.MOVE) {
       const before = snapshotBuilding(selected());
