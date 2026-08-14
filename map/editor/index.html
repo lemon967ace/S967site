@@ -2718,6 +2718,18 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         bulkDeleteController,
         rangeEraseController,
         buildingFilter,
+        notifyInvalidPlacement: () => {
+          const message =
+            language === "ko"
+              ? "이 위치에는 건물을 배치할 수 없습니다. 허용 범위 안의 빈 칸을 선택하세요."
+              : language === "ja"
+                ? "この位置には建物を配置できません。許可範囲内の空いているマスを選択してください。"
+                : language === "ru"
+                  ? "В этом месте нельзя разместить здание. Выберите свободную клетку внутри разрешённой области."
+                  : "A building cannot be placed here. Choose an empty cell inside the allowed area.";
+
+          window.alert(message);
+        },
         requestBuildingName: () => {
           const value =
             window.prompt(
