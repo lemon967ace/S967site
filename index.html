@@ -487,11 +487,16 @@
     .server {
       margin: 0;
 
+      /*
+        전체 화면에서 기존보다 약 12% 확대
+      */
       font-size:
-        clamp(
-          3.45rem,
-          min(13vw,11.5svh),
-          7rem
+        calc(
+          clamp(
+            3.45rem,
+            min(13vw,11.5svh),
+            7rem
+          ) * 1.12
         );
 
       line-height: .9;
@@ -507,11 +512,16 @@
         0
         0;
 
+      /*
+        제목과 동일한 1.12배 확대
+      */
       font-size:
-        clamp(
-          1rem,
-          min(3.3vw,2.7svh),
-          1.72rem
+        calc(
+          clamp(
+            1rem,
+            min(3.3vw,2.7svh),
+            1.72rem
+          ) * 1.12
         );
 
       line-height: 1.18;
@@ -527,11 +537,16 @@
         0
         0;
 
+      /*
+        제목과 동일한 1.12배 확대
+      */
       font-size:
-        clamp(
-          .76rem,
-          min(2.2vw,1.7svh),
-          1rem
+        calc(
+          clamp(
+            .76rem,
+            min(2.2vw,1.7svh),
+            1rem
+          ) * 1.12
         );
 
       color: #aeb4bf;
@@ -569,10 +584,6 @@
 
       margin: 0;
 
-      /*
-        기본 데스크톱 간격.
-        기존보다 조금 넓게 설정.
-      */
       gap:
         clamp(12px,1.35vw,20px)
         clamp(14px,1.8vw,24px);
@@ -721,7 +732,6 @@
     /* =========================================================
        LARGE DESKTOP
        1440px+
-       버튼 그룹을 조금 넓히고 간격을 확실히 확보
        ========================================================= */
 
     @media (min-width: 1440px) and (min-height: 800px) {
@@ -760,36 +770,41 @@
 
     /* =========================================================
        QHD
-       2560px+
-       화면이 충분히 크면 버튼 사이를 더 넓게
+       1920px+
        ========================================================= */
 
     @media (min-width: 1920px) and (min-height: 900px) {
 
       .server {
         font-size:
-          clamp(
-            6.2rem,
-            min(6vw,10svh),
-            8.4rem
+          calc(
+            clamp(
+              6.2rem,
+              min(6vw,10svh),
+              8.4rem
+            ) * 1.12
           );
       }
 
       .headline {
         font-size:
-          clamp(
-            1.45rem,
-            min(1.55vw,2.35svh),
-            2rem
+          calc(
+            clamp(
+              1.45rem,
+              min(1.55vw,2.35svh),
+              2rem
+            ) * 1.12
           );
       }
 
       .tagline {
         font-size:
-          clamp(
-            .95rem,
-            min(1vw,1.55svh),
-            1.25rem
+          calc(
+            clamp(
+              .95rem,
+              min(1vw,1.55svh),
+              1.25rem
+            ) * 1.12
           );
       }
 
@@ -803,9 +818,6 @@
 
         max-width: 620px;
 
-        /*
-          화면이 커질수록 버튼 사이 공간도 증가
-        */
         gap:
           clamp(20px,1.1vw,32px)
           clamp(24px,1.6vw,38px);
@@ -871,28 +883,34 @@
 
       .server {
         font-size:
-          clamp(
-            8rem,
-            min(6.2vw,10.5svh),
-            11rem
+          calc(
+            clamp(
+              8rem,
+              min(6.2vw,10.5svh),
+              11rem
+            ) * 1.12
           );
       }
 
       .headline {
         font-size:
-          clamp(
-            1.8rem,
-            min(1.4vw,2.4svh),
-            2.55rem
+          calc(
+            clamp(
+              1.8rem,
+              min(1.4vw,2.4svh),
+              2.55rem
+            ) * 1.12
           );
       }
 
       .tagline {
         font-size:
-          clamp(
-            1.15rem,
-            min(.9vw,1.5svh),
-            1.55rem
+          calc(
+            clamp(
+              1.15rem,
+              min(.9vw,1.5svh),
+              1.55rem
+            ) * 1.12
           );
       }
 
@@ -906,9 +924,6 @@
 
         max-width: 760px;
 
-        /*
-          4K에서는 버튼끼리 확실하게 분리
-        */
         gap:
           clamp(24px,1vw,38px)
           clamp(28px,1.35vw,44px);
@@ -995,28 +1010,34 @@
 
       .server {
         font-size:
-          clamp(
-            9.5rem,
-            min(5.4vw,9.8svh),
-            13rem
+          calc(
+            clamp(
+              9.5rem,
+              min(5.4vw,9.8svh),
+              13rem
+            ) * 1.12
           );
       }
 
       .headline {
         font-size:
-          clamp(
-            2.15rem,
-            min(1.15vw,2.1svh),
-            3rem
+          calc(
+            clamp(
+              2.15rem,
+              min(1.15vw,2.1svh),
+              3rem
+            ) * 1.12
           );
       }
 
       .tagline {
         font-size:
-          clamp(
-            1.35rem,
-            min(.72vw,1.3svh),
-            1.8rem
+          calc(
+            clamp(
+              1.35rem,
+              min(.72vw,1.3svh),
+              1.8rem
+            ) * 1.12
           );
       }
 
@@ -1034,8 +1055,6 @@
     /* =========================================================
        MOBILE
        600px 이하
-       
-       여기서 버튼을 확실하게 키움.
        ========================================================= */
 
     @media (max-width: 600px) {
@@ -1095,12 +1114,18 @@
           auto;
       }
 
+      /*
+        모바일에서도 3개 문구를 모두 동일하게 1.12배
+      */
+
       .server {
         font-size:
-          clamp(
-            3.35rem,
-            15vw,
-            5rem
+          calc(
+            clamp(
+              3.35rem,
+              15vw,
+              5rem
+            ) * 1.12
           );
       }
 
@@ -1108,10 +1133,12 @@
         margin-top: 12px;
 
         font-size:
-          clamp(
-            1.05rem,
-            4.4vw,
-            1.35rem
+          calc(
+            clamp(
+              1.05rem,
+              4.4vw,
+              1.35rem
+            ) * 1.12
           );
       }
 
@@ -1119,10 +1146,12 @@
         margin-top: 6px;
 
         font-size:
-          clamp(
-            .78rem,
-            3.2vw,
-            .95rem
+          calc(
+            clamp(
+              .78rem,
+              3.2vw,
+              .95rem
+            ) * 1.12
           );
       }
 
@@ -1157,10 +1186,6 @@
 
         width: 100%;
 
-        /*
-          모바일에서 얇아 보이지 않도록
-          버튼 자체 높이를 확실히 확보
-        */
         min-height: 48px;
 
         padding:
@@ -1265,10 +1290,12 @@
 
       .server {
         font-size:
-          clamp(
-            2.9rem,
-            min(10vw,9svh),
-            5.1rem
+          calc(
+            clamp(
+              2.9rem,
+              min(10vw,9svh),
+              5.1rem
+            ) * 1.12
           );
       }
 
@@ -1276,10 +1303,12 @@
         margin-top: 7px;
 
         font-size:
-          clamp(
-            .9rem,
-            2.25svh,
-            1.22rem
+          calc(
+            clamp(
+              .9rem,
+              2.25svh,
+              1.22rem
+            ) * 1.12
           );
       }
 
@@ -1287,10 +1316,12 @@
         margin-top: 3px;
 
         font-size:
-          clamp(
-            .68rem,
-            1.5svh,
-            .84rem
+          calc(
+            clamp(
+              .68rem,
+              1.5svh,
+              .84rem
+            ) * 1.12
           );
       }
 
@@ -1358,23 +1389,27 @@
 
       .server {
         font-size:
-          clamp(
-            2.45rem,
-            min(8vw,7.5svh),
-            3.9rem
+          calc(
+            clamp(
+              2.45rem,
+              min(8vw,7.5svh),
+              3.9rem
+            ) * 1.12
           );
       }
 
       .headline {
         margin-top: 5px;
 
-        font-size: .82rem;
+        font-size:
+          calc(.82rem * 1.12);
       }
 
       .tagline {
         margin-top: 2px;
 
-        font-size: .62rem;
+        font-size:
+          calc(.62rem * 1.12);
       }
 
       .buttons {
@@ -1440,11 +1475,9 @@
       }
     }
 
-  
+
     /* =========================================================
        ANNOUNCEMENT / CORNER LINKS OFFSET
-       공지가 보일 때 좌측 상단 Staff / Chat / Map 버튼을
-       공지 배너 아래로 자연스럽게 내려줍니다.
        ========================================================= */
 
     body.has-announcement .corner-links {
@@ -1461,7 +1494,11 @@
         );
     }
 
-    /* 제목 위 여백은 기존보다 아주 조금만 증가 */
+
+    /* =========================================================
+       HOME CONTENT TOP SPACE
+       ========================================================= */
+
     .home-content {
       grid-template-rows:
         clamp(24px,3.6svh,54px)
@@ -1478,7 +1515,9 @@
         auto;
     }
 
+
     @media (max-width: 600px) {
+
       body.has-announcement .corner-links {
         top:
           calc(
@@ -1507,7 +1546,9 @@
       }
     }
 
+
     @media (max-width: 600px) and (max-height: 720px) {
+
       body.has-announcement .corner-links {
         top:
           calc(
@@ -1520,20 +1561,21 @@
       }
     }
 
+
     @media (max-height: 600px) {
+
       body.has-announcement .corner-links {
         top: 40px;
       }
     }
 
-  
+
     /* =========================================================
        ANNOUNCEMENT LARGE DISPLAY SCALING
-       일반 화면의 배너 높이는 유지하고,
-       QHD/4K 이상에서만 배너와 글씨를 함께 확대합니다.
        ========================================================= */
 
     @media (min-width: 1920px) and (min-height: 900px) {
+
       .announcement-ticker {
         height:
           clamp(
@@ -1584,7 +1626,9 @@
       }
     }
 
+
     @media (min-width: 2560px) and (min-height: 1200px) {
+
       .announcement-ticker {
         height:
           clamp(
@@ -1635,7 +1679,9 @@
       }
     }
 
+
     @media (min-width: 3400px) and (min-height: 1600px) {
+
       .announcement-ticker {
         height:
           clamp(
@@ -1686,33 +1732,37 @@
       }
     }
 
-  
+
     /* =========================================================
        ROOT SCROLL / MOBILE PULL-TO-REFRESH
-       콘텐츠는 여전히 한 화면 안에 맞추되,
-       브라우저의 세로 스크롤/오버스크롤 제스처는 막지 않습니다.
        ========================================================= */
 
     html {
       height: auto !important;
       min-height: 100% !important;
+
       overflow-x: hidden !important;
       overflow-y: auto !important;
+
       overscroll-behavior-y: auto !important;
     }
 
     body {
       height: auto !important;
       min-height: 100svh !important;
+
       overflow-x: hidden !important;
       overflow-y: auto !important;
+
       overscroll-behavior-y: auto !important;
+
       touch-action: pan-y !important;
     }
 
     main {
       min-height: 100svh !important;
       height: 100svh !important;
+
       overflow: hidden !important;
     }
 
@@ -1851,6 +1901,7 @@
           data-theme-choice="system"
           role="menuitemradio"
         >
+
           <span class="theme-choice-icon">
             ◐
           </span>
@@ -1858,6 +1909,7 @@
           <span data-i18n="themeSystem">
             System
           </span>
+
         </button>
 
         <button
@@ -1865,6 +1917,7 @@
           data-theme-choice="light"
           role="menuitemradio"
         >
+
           <span class="theme-choice-icon">
             ☀
           </span>
@@ -1872,6 +1925,7 @@
           <span data-i18n="themeLight">
             Light
           </span>
+
         </button>
 
         <button
@@ -1879,6 +1933,7 @@
           data-theme-choice="dark"
           role="menuitemradio"
         >
+
           <span class="theme-choice-icon">
             ☾
           </span>
@@ -1886,6 +1941,7 @@
           <span data-i18n="themeDark">
             Dark
           </span>
+
         </button>
 
       </div>
