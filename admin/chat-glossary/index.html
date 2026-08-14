@@ -83,6 +83,9 @@
   </main>
 
   <script>
+     if (window.top !== window.self) {
+      window.top.location.replace(window.location.href);
+    }
     const API =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-glossary-admin";
 
