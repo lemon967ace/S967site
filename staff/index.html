@@ -563,6 +563,45 @@
       box-shadow: inset 0 0 0 1px var(--text);
     }
 
+
+    /* Chat unread badge */
+    .chat-tab-button {
+      position: relative;
+      overflow: visible;
+    }
+
+    .chat-tab-badge {
+      position: absolute;
+      top: -7px;
+      right: -8px;
+
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid var(--surface);
+      border-radius: 999px;
+
+      background: #d93838;
+      color: #fff;
+
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .chat-tab-badge.hidden {
+      display: none !important;
+    }
+
 </style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
@@ -880,12 +919,18 @@
         </button>
         
 <button
+  id="chatTabButton"
   type="button"
-  class="staff-tab"
+  class="staff-tab chat-tab-button"
   onclick="location.href='https://s967.org/chat'"
   title="Chat"
 >
   💬
+  <span
+    id="chatUnreadBadge"
+    class="chat-tab-badge hidden"
+    aria-label="Unread chat messages"
+  ></span>
 </button>
       </div>
 
@@ -1409,6 +1454,9 @@
 
     const STAFF_INQUIRY_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-inquiry";
+
+    const STAFF_CHAT_LIST_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-list";
     
 let staffInquiryPage = 1;
 let staffInquiryLoaded = false;
@@ -1533,6 +1581,22 @@ const staffIdInput =
       document.querySelectorAll(
         "[data-staff-section]"
       );
+
+    const chatTabButton =
+      document.getElementById(
+        "chatTabButton"
+      );
+
+    const chatUnreadBadge =
+      document.getElementById(
+        "chatUnreadBadge"
+      );
+
+    const CHAT_UNREAD_POLL_MS =
+      15000;
+
+    let chatUnreadTimer =
+      null;
 
     const refreshWkButton =
       document.getElementById(
@@ -5150,7 +5214,165 @@ async function loadWkApplications() {
     }
 
 
+
+    function renderChatUnreadBadge(
+      unreadCount
+    ) {
+      if (!chatUnreadBadge) {
+        return;
+      }
+
+      const count =
+        Math.max(
+          0,
+          Number(unreadCount) || 0
+        );
+
+      if (count <= 0) {
+        chatUnreadBadge.textContent =
+          "";
+
+        chatUnreadBadge.classList.add(
+          "hidden"
+        );
+
+        if (chatTabButton) {
+          chatTabButton.removeAttribute(
+            "aria-label"
+          );
+        }
+
+        return;
+      }
+
+      chatUnreadBadge.textContent =
+        count > 99
+          ? "99+"
+          : String(count);
+
+      chatUnreadBadge.classList.remove(
+        "hidden"
+      );
+
+      if (chatTabButton) {
+        chatTabButton.setAttribute(
+          "aria-label",
+          `Chat · ${count} unread`
+        );
+      }
+    }
+
+
+    async function loadChatUnreadBadge() {
+      try {
+        const {
+          data: sessionData
+        } =
+          await supabase.auth
+            .getSession();
+
+        const token =
+          sessionData.session
+            ?.access_token;
+
+        if (!token) {
+          renderChatUnreadBadge(0);
+          return;
+        }
+
+        const response =
+          await fetch(
+            `${STAFF_CHAT_LIST_API_URL}?view=rooms`,
+            {
+              method: "GET",
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+              cache: "no-store",
+            }
+          );
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            response.status === 403
+          ) {
+            renderChatUnreadBadge(0);
+          }
+
+          return;
+        }
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        const rooms =
+          Array.isArray(result.rooms)
+            ? result.rooms
+            : [];
+
+        const totalUnread =
+          rooms.reduce(
+            (sum, room) =>
+              sum +
+              Math.max(
+                0,
+                Number(
+                  room?.unread_count
+                ) || 0
+              ),
+            0
+          );
+
+        renderChatUnreadBadge(
+          totalUnread
+        );
+
+      } catch (error) {
+        console.warn(
+          "Chat unread badge refresh failed",
+          error
+        );
+      }
+    }
+
+
+    function stopChatUnreadPolling() {
+      if (chatUnreadTimer !== null) {
+        clearInterval(
+          chatUnreadTimer
+        );
+
+        chatUnreadTimer =
+          null;
+      }
+    }
+
+
+    function startChatUnreadPolling() {
+      stopChatUnreadPolling();
+
+      loadChatUnreadBadge();
+
+      chatUnreadTimer =
+        window.setInterval(
+          () => {
+            loadChatUnreadBadge();
+          },
+          CHAT_UNREAD_POLL_MS
+        );
+    }
+
+
     function showLogin() {
+  stopChatUnreadPolling();
+  renderChatUnreadBadge(0);
+
   loadingPanel.classList.add(
     "hidden"
   );
@@ -5201,6 +5423,7 @@ async function loadWkApplications() {
     user.email || "";
 
   loadImages();
+  startChatUnreadPolling();
 }
 
     function showLoading() {
@@ -5780,6 +6003,27 @@ groupBuyEmailAddButton.addEventListener(
   }
 );
     
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (
+          document.visibilityState ===
+          "visible"
+        ) {
+          loadChatUnreadBadge();
+        }
+      }
+    );
+
+    window.addEventListener(
+      "focus",
+      () => {
+        loadChatUnreadBadge();
+      }
+    );
+
+
     openExistingSession();
 
     
