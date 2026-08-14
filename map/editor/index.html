@@ -2104,6 +2104,27 @@
     let minimap = null;
     let buildingController = null;
 
+    let paletteAffiliation =
+      "";
+
+    function validAffiliationCode(
+      value
+    ) {
+      return (
+        value.length === 0 ||
+        (
+          value.length === 3 &&
+          [...value].every(
+            c =>
+              c.charCodeAt(0) >=
+                33 &&
+              c.charCodeAt(0) <=
+                126
+          )
+        )
+      );
+    }
+
     function cancelAreaModes() {
       bulkDeleteController?.cancel();
       rangeEraseController?.cancel();
@@ -2510,11 +2531,102 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
       const documentData = PNSMapEngine.getDocument();
 
-      const sizeRow = document.createElement("div");
+      const sizeRow =
+        document.createElement(
+          "div"
+        );
+
+      sizeRow.style.cssText =
+        "display:flex;align-items:center;gap:.5rem;flex-wrap:wrap";
+
       sizeRow.innerHTML =
         '<label><input type="radio" name="building-size" value="1" checked>1×1</label> ' +
         '<label><input type="radio" name="building-size" value="2">2×2</label>';
-      buildingTypesHost.append(sizeRow);
+
+      const affiliationInput =
+        document.createElement(
+          "input"
+        );
+
+      affiliationInput.type =
+        "text";
+      affiliationInput.maxLength = 3;
+      affiliationInput.value =
+        paletteAffiliation;
+      affiliationInput.placeholder =
+        language === "ko"
+          ? "소속"
+          : language === "ja"
+            ? "所属"
+            : language === "ru"
+              ? "Альянс"
+              : "Aff.";
+      affiliationInput.autocomplete =
+        "off";
+      affiliationInput.spellcheck =
+        false;
+      affiliationInput.inputMode =
+        "text";
+      affiliationInput.style.cssText =
+        "width:5.5rem;min-width:0;padding:.25rem .4rem";
+      affiliationInput.disabled =
+        readOnly;
+
+      affiliationInput.addEventListener(
+        "input",
+        () => {
+          const value =
+            affiliationInput.value;
+
+          /*
+            Keep case exactly as entered.
+            Printable ASCII only; empty is allowed for ordinary buildings.
+          */
+          const cleaned =
+            [...value]
+              .filter(
+                c =>
+                  c.charCodeAt(0) >=
+                    33 &&
+                  c.charCodeAt(0) <=
+                    126
+              )
+              .join("")
+              .slice(0, 3);
+
+          if (
+            cleaned !== value
+          ) {
+            affiliationInput.value =
+              cleaned;
+          }
+
+          paletteAffiliation =
+            affiliationInput.value;
+
+          const state =
+            buildingController
+              ?.getState?.();
+
+          if (
+            state?.mode ===
+              "place"
+          ) {
+            buildingController
+              ?.setPlacementAffiliation?.(
+                paletteAffiliation
+              );
+          }
+        }
+      );
+
+      sizeRow.append(
+        affiliationInput
+      );
+
+      buildingTypesHost.append(
+        sizeRow
+      );
 
       for (const type of documentData.buildingTypes) {
         const row = document.createElement("div");
@@ -2549,8 +2661,37 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
             sizeRow.querySelector('input:checked').value
           );
 
+          const affiliation =
+            affiliationInput.value;
+
+          if (
+            type.id === "type-01" &&
+            !validAffiliationCode(
+              affiliation
+            )
+          ) {
+            window.alert(
+              language === "ko"
+                ? "보루/전초의 소속은 정확히 3글자의 영문 대소문자, 숫자, 특수문자여야 합니다."
+                : language === "ja"
+                  ? "要塞/前哨の所属は、大文字・小文字を区別する印字可能ASCII文字を正確に3文字入力してください。"
+                  : language === "ru"
+                    ? "Для крепости/форпоста принадлежность должна состоять ровно из 3 печатных ASCII-символов с учётом регистра."
+                    : "Fort/Outpost affiliation must be exactly 3 case-sensitive printable ASCII characters."
+            );
+            affiliationInput.focus();
+            return;
+          }
+
+          paletteAffiliation =
+            affiliation;
+
           cancelAreaModes();
-          buildingController.selectPalette(type.id, size);
+          buildingController.selectPalette(
+            type.id,
+            size,
+            affiliation
+          );
 
           buildingTypesHost
             .querySelectorAll("[data-building-type-select]")
@@ -3296,49 +3437,6 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       rangeController.addAreaPeer(bulkDeleteController);
       rangeController.addAreaPeer(rangeEraseController);
 
-      function requestAllianceAffiliation() {
-        const promptText =
-          {
-            ko: "소속을 입력하세요. 정확히 3글자의 영문 대소문자, 숫자, 특수문자를 사용할 수 있습니다.",
-            en: "Enter the affiliation. Use exactly 3 case-sensitive ASCII letters, numbers, or symbols.",
-            ja: "所属を入力してください。大文字・小文字を区別し、英数字・記号のASCII文字を正確に3文字入力してください。",
-            ru: "Введите принадлежность: ровно 3 ASCII-символа — буквы с учётом регистра, цифры или знаки.",
-          }[language];
-
-        const value =
-          window.prompt(
-            promptText,
-            ""
-          );
-
-        if (value === null) {
-          return null;
-        }
-
-        if (
-          value.length !== 3 ||
-          [...value].some(
-            c =>
-              c.charCodeAt(0) <
-                33 ||
-              c.charCodeAt(0) >
-                126
-          )
-        ) {
-          window.alert(
-            {
-              ko: "소속은 정확히 3글자의 영문 대소문자, 숫자, 특수문자만 사용할 수 있습니다.",
-              en: "Affiliation must be exactly 3 case-sensitive printable ASCII characters.",
-              ja: "所属は大文字・小文字を区別する印字可能ASCII文字を正確に3文字入力してください。",
-              ru: "Принадлежность должна состоять ровно из 3 печатных ASCII-символов с учётом регистра.",
-            }[language]
-          );
-          return null;
-        }
-
-        return value;
-      }
-
       function automaticAllianceBuildingName({
         size,
         affiliation,
@@ -3565,8 +3663,34 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           return name;
         },
 
-        requestBuildingAffiliation: () =>
-          requestAllianceAffiliation(),
+        requestBuildingAffiliation: () => {
+          const affiliation =
+            buildingController
+              ?.getState?.()
+              ?.palette
+              ?.defaultAffiliation ??
+            paletteAffiliation;
+
+          if (
+            !validAffiliationCode(
+              affiliation
+            ) ||
+            affiliation.length !== 3
+          ) {
+            window.alert(
+              language === "ko"
+                ? "보루/전초를 설치하려면 위 소속 입력칸에 정확히 3글자를 입력하세요."
+                : language === "ja"
+                  ? "要塞/前哨を設置するには、上の所属欄に正確に3文字入力してください。"
+                  : language === "ru"
+                    ? "Чтобы установить крепость/форпост, введите ровно 3 символа в поле принадлежности выше."
+                    : "Enter exactly 3 characters in the affiliation field above before placing a Fort/Outpost."
+            );
+            return null;
+          }
+
+          return affiliation;
+        },
 
         resolveBuildingName:
           automaticAllianceBuildingName,
