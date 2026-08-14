@@ -79,6 +79,23 @@
     .chat-login button{padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);font-weight:700}
     .gate-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
     .gate-links a{padding:7px 9px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none}
+
+    .room-tools{display:flex;gap:5px}
+    .room-tools button{min-width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:0 7px}
+    .room-dialog{width:min(520px,calc(100vw - 28px));border:1px solid var(--border);border-radius:15px;padding:0;background:var(--surface-hover);color:var(--text);box-shadow:var(--menu-shadow)}
+    .room-dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
+    .room-dialog-inner{padding:17px}
+    .room-dialog h2{margin:0 0 10px;font-size:1.05rem}
+    .room-dialog input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
+    .room-dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
+    .room-dialog-actions button,.member-row button{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:7px 9px}
+    .member-list,.invite-list{display:grid;gap:6px;margin-top:9px;max-height:240px;overflow:auto}
+    .member-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
+    .member-row .member-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .member-kind{font-size:.68rem;color:var(--muted)}
+    .room-note{color:var(--muted);font-size:.76rem;line-height:1.45}
+    .danger-button{color:#c2410c}
+
     @media(max-width:760px){
       .app{height:100dvh;padding:7px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
       .sidebar{min-height:auto;padding:7px}
@@ -102,6 +119,8 @@
       <button id="chatLoginButton" type="button">Chat login</button>
     </div>
     <div class="gate-links">
+      <a href="/staff/">Staff</a>
+      <a href="/admin/">Admin</a>
       <a href="/">Home</a>
     </div>
   </section>
@@ -110,7 +129,10 @@
     <aside class="sidebar panel">
       <div class="side-head">
         <strong id="roomsTitle">Rooms</strong>
-        <button id="roomRefreshButton" type="button">↻</button>
+        <div class="room-tools">
+          <button id="createRoomButton" type="button" title="Create room">＋</button>
+          <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
+        </div>
       </div>
       <div id="rooms" class="rooms"></div>
     </aside>
@@ -119,6 +141,7 @@
       <header class="bar panel">
         <h1 id="chatTitle">Staff Chat</h1>
         <span id="actor" class="actor"></span>
+        <button id="roomMembersButton" type="button" title="Room members">👥</button>
         <button id="notifyButton" type="button">🔔</button>
         <button id="refreshButton" type="button">↻</button>
         <a id="backButton" href="/">Back</a>
@@ -162,6 +185,39 @@
     </section>
   </main>
 
+
+  <dialog id="createRoomDialog" class="room-dialog">
+    <div class="room-dialog-inner">
+      <h2 id="createRoomTitle">Create room</h2>
+      <input id="newRoomName" type="text" maxlength="100" autocomplete="off">
+      <div id="createRoomStatus" class="status"></div>
+      <div class="room-dialog-actions">
+        <button id="cancelCreateRoomButton" type="button">Cancel</button>
+        <button id="confirmCreateRoomButton" type="button">Create</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="roomMembersDialog" class="room-dialog">
+    <div class="room-dialog-inner">
+      <h2 id="roomMembersTitle">Room members</h2>
+      <div id="roomMembersNote" class="room-note"></div>
+      <div id="roomMemberList" class="member-list"></div>
+
+      <div id="inviteSection">
+        <h3 id="inviteTitle" style="font-size:.9rem;margin:14px 0 5px">Add people</h3>
+        <div id="inviteList" class="invite-list"></div>
+      </div>
+
+      <div id="roomManageStatus" class="status"></div>
+
+      <div class="room-dialog-actions">
+        <button id="deleteRoomButton" type="button" class="danger-button hidden">Delete room</button>
+        <button id="closeRoomMembersButton" type="button">Close</button>
+      </div>
+    </div>
+  </dialog>
+
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
 
@@ -187,10 +243,10 @@
     const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
 
     const TEXT = {
-      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"관리자·스태프 또는 초대된 채팅 계정으로 로그인하세요.",chatLogin:"채팅 로그인",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",from:"시작 날짜",to:"종료 날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다."},
-      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Admin, Staff, or an invited chat account.",chatLogin:"Chat login",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",from:"From",to:"To",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed."},
-      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"管理者・スタッフまたは招待されたチャットアカウントでログインしてください。",chatLogin:"チャットログイン",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",from:"開始日",to:"終了日",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。"},
-      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как администратор, сотрудник или приглашённый пользователь чата.",chatLogin:"Войти в чат",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",from:"С даты",to:"По дату",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены."},
+      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"관리자·스태프 또는 초대된 채팅 계정으로 로그인하세요.",chatLogin:"채팅 로그인",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",from:"시작 날짜",to:"종료 날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",close:"닫기",cancel:"취소",create:"만들기"},
+      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Admin, Staff, or an invited chat account.",chatLogin:"Chat login",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",from:"From",to:"To",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",close:"Close",cancel:"Cancel",create:"Create"},
+      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"管理者・スタッフまたは招待されたチャットアカウントでログインしてください。",chatLogin:"チャットログイン",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",from:"開始日",to:"終了日",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",close:"閉じる",cancel:"キャンセル",create:"作成"},
+      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как администратор, сотрудник или приглашённый пользователь чата.",chatLogin:"Войти в чат",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",from:"С даты",to:"По дату",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",close:"Закрыть",cancel:"Отмена",create:"Создать"},
     };
 
     let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
@@ -211,7 +267,7 @@
     const messageMap = new Map();
     let currentSearch = {q:"",dateFrom:"",dateTo:""};
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status");
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton");
 
     function setText(){
       document.documentElement.lang=language;
@@ -220,6 +276,16 @@
       gateMessage.textContent=text.checking;
       chatLoginButton.textContent=text.chatLogin;
       roomsTitle.textContent=text.rooms;
+      createRoomButton.title=text.createRoom;
+      roomMembersButton.title=text.members;
+      createRoomTitle.textContent=text.createRoom;
+      newRoomName.placeholder=text.roomName;
+      cancelCreateRoomButton.textContent=text.cancel;
+      confirmCreateRoomButton.textContent=text.create;
+      roomMembersTitle.textContent=text.members;
+      inviteTitle.textContent=text.addPeople;
+      deleteRoomButton.textContent=text.deleteRoom;
+      closeRoomMembersButton.textContent=text.close;
       messageInput.placeholder=text.message;
       sendButton.textContent=text.send;
       searchTextLabel.textContent=text.text;
@@ -341,6 +407,161 @@
       olderButton.classList.toggle("hidden",!hasMore);
     }
 
+
+    function selectedRoom(){
+      return rooms.find(room=>room.id===currentRoomId)??null;
+    }
+
+    async function createRoom(){
+      const name=newRoomName.value.trim();
+      if(!name)return;
+      confirmCreateRoomButton.disabled=true;
+      createRoomStatus.textContent="";
+      createRoomStatus.classList.remove("error");
+      try{
+        const result=await request(API.roomUser,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"create_room",name})
+        });
+        createRoomDialog.close();
+        newRoomName.value="";
+        await loadRooms();
+        if(result.room?.id)await selectRoom(result.room.id);
+      }catch(error){
+        createRoomStatus.textContent=error.message;
+        createRoomStatus.classList.add("error");
+      }finally{
+        confirmCreateRoomButton.disabled=false;
+      }
+    }
+
+    function renderMemberRow(member,details){
+      const row=document.createElement("div");
+      row.className="member-row";
+      const name=document.createElement("span");
+      name.className="member-name";
+      name.textContent=member.display_name;
+      const kind=document.createElement("span");
+      kind.className="member-kind";
+      kind.textContent=member.automatic?"Staff · Auto":member.kind;
+      row.append(name,kind);
+
+      if(details.room?.is_owner&&details.room?.room_kind==="private"&&!member.is_owner){
+        const remove=document.createElement("button");
+        remove.type="button";
+        remove.textContent="−";
+        remove.title="Remove";
+        remove.onclick=async()=>{
+          try{
+            await request(API.roomUser,{
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({action:"remove_member",room_id:currentRoomId,user_id:member.user_id})
+            });
+            await openRoomMembers();
+            await loadRooms();
+          }catch(error){
+            roomManageStatus.textContent=error.message;
+            roomManageStatus.classList.add("error");
+          }
+        };
+        row.append(remove);
+      }
+      return row;
+    }
+
+    async function openRoomMembers(){
+      if(!currentRoomId)return;
+      roomManageStatus.textContent="";
+      roomManageStatus.classList.remove("error");
+
+      try{
+        const details=await request(`${API.roomUser}?room_id=${encodeURIComponent(currentRoomId)}`);
+        roomMembersTitle.textContent=`${text.members} · ${details.room?.name??""}`;
+        roomMembersNote.textContent=details.room?.room_kind==="staff_official"?text.officialRoom:"";
+
+        roomMemberList.replaceChildren(...(details.members??[]).map(member=>renderMemberRow(member,details)));
+
+        const memberIds=new Set((details.members??[]).map(member=>member.user_id));
+        const available=(details.directory??[]).filter(account=>!memberIds.has(account.user_id));
+
+        inviteSection.classList.toggle("hidden",!details.room?.can_invite);
+        inviteList.replaceChildren(...available.map(account=>{
+          const row=document.createElement("div");
+          row.className="member-row";
+          const name=document.createElement("span");
+          name.className="member-name";
+          name.textContent=account.display_name;
+          const kind=document.createElement("span");
+          kind.className="member-kind";
+          kind.textContent=account.kind;
+          const add=document.createElement("button");
+          add.type="button";
+          add.textContent="+";
+          add.onclick=async()=>{
+            add.disabled=true;
+            try{
+              await request(API.roomUser,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({action:"add_member",room_id:currentRoomId,user_id:account.user_id})
+              });
+              await openRoomMembers();
+              await loadRooms();
+            }catch(error){
+              roomManageStatus.textContent=error.message;
+              roomManageStatus.classList.add("error");
+            }finally{
+              add.disabled=false;
+            }
+          };
+          row.append(name,kind,add);
+          return row;
+        }));
+
+        if(!available.length&&details.room?.can_invite){
+          const empty=document.createElement("div");
+          empty.className="room-note";
+          empty.textContent="—";
+          inviteList.replaceChildren(empty);
+        }
+
+        deleteRoomButton.classList.toggle("hidden",!details.room?.can_delete);
+        if(!roomMembersDialog.open)roomMembersDialog.showModal();
+      }catch(error){
+        setStatus(error.message,true);
+      }
+    }
+
+    async function deleteCurrentRoom(){
+      if(!currentRoomId||!confirm(text.deleteRoomConfirm))return;
+      deleteRoomButton.disabled=true;
+      try{
+        await request(API.roomUser,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"delete_room",room_id:currentRoomId})
+        });
+        roomMembersDialog.close();
+        stopRealtime();
+        currentRoomId=null;
+        messageMap.clear();
+        await loadRooms();
+        if(currentRoomId){
+          await loadLatest(true);
+          startRealtime();
+        }else{
+          renderMessages();
+        }
+      }catch(error){
+        roomManageStatus.textContent=error.message;
+        roomManageStatus.classList.add("error");
+      }finally{
+        deleteRoomButton.disabled=false;
+      }
+    }
+
     async function translateMessage(message,button,host){
       if(button.disabled)return;const old=button.textContent;button.disabled=true;button.textContent=text.translating;
       try{const r=await request(API.translate,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:message.id,target_language:["ko","en","ja","ru"].includes(language)?language:"en"})});host.replaceChildren();const lab=document.createElement("span");lab.className="translation-label";lab.textContent=`${text.translation} · ${(["ko","en","ja","ru"].includes(language)?language:"en").toUpperCase()}`;const c=document.createElement("span");c.textContent=r.translation??"";host.append(lab,c);host.classList.remove("hidden");}catch{host.textContent=text.translationFailed;host.classList.remove("hidden");}finally{button.disabled=false;button.textContent=old;}
@@ -427,6 +648,14 @@
 
     chatLoginButton.onclick=doChatLogin;
     chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
+    createRoomButton.onclick=()=>{createRoomStatus.textContent="";createRoomStatus.classList.remove("error");newRoomName.value="";createRoomDialog.showModal();newRoomName.focus();};
+    cancelCreateRoomButton.onclick=()=>createRoomDialog.close();
+    confirmCreateRoomButton.onclick=createRoom;
+    newRoomName.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();createRoom();}});
+    roomMembersButton.onclick=openRoomMembers;
+    closeRoomMembersButton.onclick=()=>roomMembersDialog.close();
+    deleteRoomButton.onclick=deleteCurrentRoom;
+    backButton.addEventListener("click",event=>{event.preventDefault();if(history.length>1){history.back();}else{location.href="/";}});
     roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
     refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
     notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
@@ -448,16 +677,6 @@
     window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
 
     bootstrap();
-
-    backButton.addEventListener("click", (event) => {
-  event.preventDefault();
-
-  if (history.length > 1) {
-    history.back();
-  } else {
-    location.href = "/";
-  }
-});
   </script>
 </body>
 </html>
