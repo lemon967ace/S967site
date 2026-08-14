@@ -811,6 +811,14 @@
         Save
       </button>
 
+      <button
+        id="duplicateMapButton"
+        type="button"
+        disabled
+      >
+        Duplicate
+      </button>
+
       <span class="tool-separator" aria-hidden="true"></span>
       <button id="openMapFileButton" type="button" disabled>Open file</button>
       <button id="exportMapFileButton" type="button" disabled>Export to file</button>
@@ -1335,6 +1343,13 @@
         saving:
           "Saving…",
 
+        duplicateMap:
+          "Duplicate",
+        duplicateMapPrompt:
+          "Name for the duplicated map:",
+        duplicateMapDefaultSuffix:
+          " copy",
+
         myMaps:
           "My Maps",
 
@@ -1446,6 +1461,13 @@
 
         saving:
           "저장 중…",
+
+        duplicateMap:
+          "복제",
+        duplicateMapPrompt:
+          "복제할 맵의 이름을 입력하세요.",
+        duplicateMapDefaultSuffix:
+          " 복사본",
 
         myMaps:
           "내 맵",
@@ -1559,6 +1581,13 @@
         saving:
           "保存中…",
 
+        duplicateMap:
+          "複製",
+        duplicateMapPrompt:
+          "複製するマップの名前を入力してください。",
+        duplicateMapDefaultSuffix:
+          " のコピー",
+
         myMaps:
           "マイマップ",
 
@@ -1670,6 +1699,13 @@
 
         saving:
           "Сохранение…",
+
+        duplicateMap:
+          "Дублировать",
+        duplicateMapPrompt:
+          "Введите название копии карты.",
+        duplicateMapDefaultSuffix:
+          " — копия",
 
         myMaps:
           "Мои карты",
@@ -1919,11 +1955,24 @@
       if (nextName === type.name) return;
 
       /*
-        BuildingType.name is already part of the .isomap document.
-        A user rename is deliberately stored as one literal string.
-        Therefore the same custom name is shown in every UI language.
+        getDocument() returns a cloned document, so changing type.name here
+        would only change the temporary UI copy. Update the engine's actual
+        BuildingType instead.
       */
-      type.name = nextName;
+      try {
+        PNSMapEngine.editBuildingType(
+          type.id,
+          {
+            name: nextName,
+          }
+        );
+      } catch (error) {
+        window.alert(
+          error?.message ??
+          String(error)
+        );
+        return;
+      }
 
       setDirty(true);
       renderBuildingPalette();
@@ -2020,6 +2069,11 @@
     const saveButton =
       document.getElementById(
         "saveButton"
+      );
+
+    const duplicateMapButton =
+      document.getElementById(
+        "duplicateMapButton"
       );
 
     const openMapFileButton = document.getElementById("openMapFileButton");
@@ -2812,6 +2866,13 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       saveButton.disabled =
         !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
 
+      if (duplicateMapButton) {
+        duplicateMapButton.disabled =
+          !editable ||
+          !engineReady ||
+          (saveManager?.getState().saving ?? false);
+      }
+
       openMapFileButton.disabled = !editable || (saveManager?.getState().saving ?? false);
       exportMapFileButton.disabled = !enabled || !engineReady;
 
@@ -2832,6 +2893,12 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
       saveButton.textContent =
         text.save;
+
+      if (duplicateMapButton) {
+        duplicateMapButton.textContent =
+          text.duplicateMap ??
+          "Duplicate";
+      }
 
       const fileText = FILE_TEXT[language] ?? FILE_TEXT.en;
       openMapFileButton.textContent = fileText.open;
@@ -3729,6 +3796,100 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         return false;
       }
     }
+
+
+    /*
+      ==========================================================
+      DUPLICATE CURRENT MAP
+      ==========================================================
+
+      Duplicates the exact in-memory state currently being edited,
+      including changes that have not yet been saved to the original.
+      The clone becomes a new unsaved map, so the next Save creates
+      a new server map instead of overwriting the source map.
+    */
+
+    duplicateMapButton?.addEventListener(
+      "click",
+      () => {
+        if (
+          readOnly ||
+          !PNSMapEngine ||
+          (saveManager?.getState().saving ?? false)
+        ) {
+          return;
+        }
+
+        const currentName =
+          mapTitleInput.value.trim() ||
+          text.untitled;
+
+        const suggestedName =
+          `${currentName}${text.duplicateMapDefaultSuffix ?? " copy"}`;
+
+        const entered =
+          window.prompt(
+            text.duplicateMapPrompt ??
+              "Name for the duplicated map:",
+            suggestedName
+          );
+
+        if (entered === null) {
+          return;
+        }
+
+        const nextName =
+          entered.trim();
+
+        if (!nextName) {
+          window.alert(
+            SAVE_ERROR_MESSAGES[language]?.MAP_NAME_REQUIRED ??
+            SAVE_ERROR_MESSAGES.en.MAP_NAME_REQUIRED
+          );
+          return;
+        }
+
+        if (nextName.length > 100) {
+          window.alert(
+            SAVE_ERROR_MESSAGES[language]?.MAP_NAME_TOO_LONG ??
+            SAVE_ERROR_MESSAGES.en.MAP_NAME_TOO_LONG
+          );
+          return;
+        }
+
+        /*
+          Keep the current document itself: it already contains the newest
+          unsaved edits. Clearing currentMapId is what turns this editor
+          session into a new map on the next Save.
+        */
+        currentMapId = null;
+        editorMode = "new";
+        mapTitleInput.value = nextName;
+        saveMetadata = null;
+
+        recoverySourceKind =
+          "imported";
+        recoveryDocumentId =
+          newRecoveryDocumentId();
+        recoveryActiveKey =
+          null;
+
+        nonHistoryDirty = true;
+        dirty = true;
+        mutationRevision += 1;
+
+        history?.clear({
+          saved: false,
+        });
+
+        saveStatusMessage = "";
+        scheduleAutosave();
+        setStaticText();
+        renderDocumentStatus();
+        updateSaveButton();
+        mapRenderer?.refresh?.();
+      }
+    );
 
 
     /*
