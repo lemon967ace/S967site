@@ -633,6 +633,45 @@
   #announcementAdminSection .preset{border-style:dashed}
   @media(max-width:700px){#announcementAdminSection .grid,#announcementAdminSection .lang-grid{grid-template-columns:1fr}}
 
+
+    /* Admin chat unread badge */
+    .admin-chat-tab {
+      position: relative;
+      overflow: visible;
+    }
+
+    .admin-chat-unread-badge {
+      position: absolute;
+      top: -7px;
+      right: -8px;
+
+      min-width: 19px;
+      height: 19px;
+      padding: 0 5px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid var(--surface);
+      border-radius: 999px;
+
+      background: #d93838;
+      color: #fff;
+
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .admin-chat-unread-badge.hidden {
+      display: none !important;
+    }
+
 </style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
@@ -742,11 +781,17 @@
 </button>
 
 <button
+  id="adminChatTabButton"
   type="button"
-  class="admin-tab"
+  class="admin-tab admin-chat-tab"
   data-admin-tab="chat"
 >
   채팅
+  <span
+    id="adminChatUnreadBadge"
+    class="admin-chat-unread-badge hidden"
+    aria-label="읽지 않은 채팅 메시지"
+  ></span>
 </button>
 
 <button
@@ -1930,6 +1975,9 @@
 
     const CHAT_ROOM_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
+
+    const STAFF_CHAT_LIST_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-list";
     
     const WK_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/wk-admin";
@@ -2513,7 +2561,169 @@ const emailExportHistory =
     const uploadsPagination = document.getElementById("uploadsPagination");
     const loadedAdminSections = new Set();
 
+    const adminChatTabButton =
+      document.getElementById(
+        "adminChatTabButton"
+      );
+
+    const adminChatUnreadBadge =
+      document.getElementById(
+        "adminChatUnreadBadge"
+      );
+
+    const ADMIN_CHAT_UNREAD_POLL_MS =
+      15000;
+
+    let adminChatUnreadTimer =
+      null;
+
+
+    function renderAdminChatUnreadBadge(
+      unreadCount
+    ) {
+      if (!adminChatUnreadBadge) {
+        return;
+      }
+
+      const count =
+        Math.max(
+          0,
+          Number(unreadCount) || 0
+        );
+
+      if (count <= 0) {
+        adminChatUnreadBadge.textContent =
+          "";
+
+        adminChatUnreadBadge.classList.add(
+          "hidden"
+        );
+
+        if (adminChatTabButton) {
+          adminChatTabButton.removeAttribute(
+            "aria-label"
+          );
+        }
+
+        return;
+      }
+
+      adminChatUnreadBadge.textContent =
+        count > 99
+          ? "99+"
+          : String(count);
+
+      adminChatUnreadBadge.classList.remove(
+        "hidden"
+      );
+
+      if (adminChatTabButton) {
+        adminChatTabButton.setAttribute(
+          "aria-label",
+          `채팅 · 읽지 않은 메시지 ${count}개`
+        );
+      }
+    }
+
+
+    async function loadAdminChatUnreadBadge() {
+      if (!S967AdminAuth.getToken()) {
+        renderAdminChatUnreadBadge(0);
+        return;
+      }
+
+      try {
+        const response =
+          await authenticatedAdminFetch(
+            `${STAFF_CHAT_LIST_API_URL}?view=rooms`,
+            {
+              method: "GET",
+              cache: "no-store",
+            }
+          );
+
+        if (!response.ok) {
+          if (
+            response.status === 401 ||
+            response.status === 403
+          ) {
+            renderAdminChatUnreadBadge(0);
+          }
+
+          return;
+        }
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        const rooms =
+          Array.isArray(result.rooms)
+            ? result.rooms
+            : [];
+
+        const totalUnread =
+          rooms.reduce(
+            (sum, room) =>
+              sum +
+              Math.max(
+                0,
+                Number(
+                  room?.unread_count
+                ) || 0
+              ),
+            0
+          );
+
+        renderAdminChatUnreadBadge(
+          totalUnread
+        );
+
+      } catch (error) {
+        console.warn(
+          "Admin chat unread badge refresh failed",
+          error
+        );
+      }
+    }
+
+
+    function stopAdminChatUnreadPolling() {
+      if (
+        adminChatUnreadTimer !== null
+      ) {
+        clearInterval(
+          adminChatUnreadTimer
+        );
+
+        adminChatUnreadTimer =
+          null;
+      }
+    }
+
+
+    function startAdminChatUnreadPolling() {
+      stopAdminChatUnreadPolling();
+
+      loadAdminChatUnreadBadge();
+
+      adminChatUnreadTimer =
+        window.setInterval(
+          () => {
+            loadAdminChatUnreadBadge();
+          },
+          ADMIN_CHAT_UNREAD_POLL_MS
+        );
+    }
+
+
     function showLogin(message = "") {
+      stopAdminChatUnreadPolling();
+      renderAdminChatUnreadBadge(0);
+
       adminArea.classList.add("hidden");
       loginPanel.classList.remove("hidden");
       if (message) setStatus(loginStatus, message, true);
@@ -9034,6 +9244,7 @@ try {
 
   // 로그인 성공 화면을 먼저 보여주고 현재 탭 데이터는 비동기로 불러온다.
   loadAdminSectionData("uploads", { force: true });
+  startAdminChatUnreadPolling();
         } catch (error) {
           S967AdminAuth.clearToken();
 
@@ -10496,6 +10707,30 @@ createMapTemplateButton.addEventListener(
   }
 );
 
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState ===
+      "visible" &&
+      S967AdminAuth.getToken()
+    ) {
+      loadAdminChatUnreadBadge();
+    }
+  }
+);
+
+window.addEventListener(
+  "focus",
+  () => {
+    if (S967AdminAuth.getToken()) {
+      loadAdminChatUnreadBadge();
+    }
+  }
+);
+
+
 (async function bootstrapAdminSession() {
   loginButton.disabled = true;
   setStatus(loginStatus, "관리자 세션을 확인하는 중…");
@@ -10512,6 +10747,7 @@ createMapTemplateButton.addEventListener(
     setStatus(loginStatus, "");
     const activeTarget = document.querySelector(".admin-tab.is-active")?.dataset.adminTab || "uploads";
     loadAdminSectionData(activeTarget, { force: true });
+    startAdminChatUnreadPolling();
     if (activeTarget === "announcements") {
       window.dispatchEvent(new Event("s967adminannouncementopen"));
     }
