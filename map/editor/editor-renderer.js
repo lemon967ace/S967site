@@ -168,6 +168,21 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       ),
     ];
 
+    /*
+      Draw each map cell only once.
+
+      Previously, same-affiliation linked territories could geometrically
+      overlap and the semi-transparent fill was painted repeatedly, making
+      the overlap visibly darker. Mountains could also add another layer.
+
+      The final visible owner for a cell is the last eligible range in
+      orderedRanges. Mountains are intentionally ordered last so their
+      obstacle appearance remains visible, but the underlying territory is
+      not alpha-stacked underneath them.
+    */
+    const visibleOwnerByCell =
+      new Map();
+
     for (
       const range
       of orderedRanges
@@ -186,9 +201,82 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
           bounds
         )
       ) {
-      traceCell(cell); context.fillStyle = withAlpha(range.color, 0.29); context.fill(); context.strokeStyle = range.color; context.lineWidth = Math.max(1, (range.locked ? 2.4 : 1.2) * state.zoom); context.stroke();
-      if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.stroke(); }
-      if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
+        visibleOwnerByCell.set(
+          cell.join(","),
+          {
+            range,
+            cell,
+          }
+        );
+      }
+    }
+
+    for (
+      const {
+        range,
+        cell,
+      }
+      of visibleOwnerByCell.values()
+    ) {
+      traceCell(cell);
+      context.fillStyle =
+        withAlpha(
+          range.color,
+          0.29
+        );
+      context.fill();
+
+      context.strokeStyle =
+        range.color;
+      context.lineWidth =
+        Math.max(
+          1,
+          (
+            range.locked
+              ? 2.4
+              : 1.2
+          ) *
+            state.zoom
+        );
+      context.stroke();
+
+      if (
+        range.kind ===
+          "blocked"
+      ) {
+        const vertices =
+          diamondVertices(
+            ...cell
+          );
+        const a =
+          sceneToScreen(
+            ...vertices[3],
+            state
+          );
+        const b =
+          sceneToScreen(
+            ...vertices[1],
+            state
+          );
+
+        context.beginPath();
+        context.moveTo(...a);
+        context.lineTo(...b);
+        context.stroke();
+      }
+
+      if (
+        range.id === selectedId
+      ) {
+        traceCell(cell);
+        context.strokeStyle =
+          "#7C3AED";
+        context.lineWidth =
+          Math.max(
+            2,
+            2.2 * state.zoom
+          );
+        context.stroke();
       }
     }
     const rangeState =
