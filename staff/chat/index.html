@@ -210,6 +210,7 @@
       <div id="roomManageStatus" class="status"></div>
 
       <div class="room-dialog-actions">
+        <button id="leaveRoomButton" type="button" class="danger-button hidden">Leave room</button>
         <button id="deleteRoomButton" type="button" class="danger-button hidden">Delete room</button>
         <button id="closeRoomMembersButton" type="button">Close</button>
       </div>
@@ -256,10 +257,10 @@
     const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
 
     const TEXT = {
-      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고했습니다.",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
-      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Reported.",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
-      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報しました。",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
-      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба отправлена.",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
+      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고했습니다.",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",leaveRoom:"채팅방 나가기",leaveRoomConfirm:"이 채팅방에서 나갈까요?",ownerCannotLeave:"방장은 채팅방을 나갈 수 없습니다.",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
+      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Reported.",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",leaveRoom:"Leave room",leaveRoomConfirm:"Leave this room?",ownerCannotLeave:"The room owner cannot leave the room.",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
+      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報しました。",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",leaveRoom:"チャットルームを退出",leaveRoomConfirm:"このチャットルームから退出しますか？",ownerCannotLeave:"ルーム所有者は退出できません。",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
+      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба отправлена.",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",leaveRoom:"Выйти из комнаты",leaveRoomConfirm:"Выйти из этой комнаты?",ownerCannotLeave:"Владелец комнаты не может выйти.",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
     };
 
     let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
@@ -278,11 +279,12 @@
     let refreshTimer = null;
     let notificationBaseline = null;
     let loadingOlder = false;
+    let roomLoadGeneration = 0;
     let initialUnreadAnchor = null;
     const messageMap = new Map();
     let currentSearch = {q:"",date:""};
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
 
     function setText(){
       document.documentElement.lang=language;
@@ -299,6 +301,7 @@
       confirmCreateRoomButton.textContent=text.create;
       roomMembersTitle.textContent=text.members;
       inviteTitle.textContent=text.addPeople;
+      leaveRoomButton.textContent=text.leaveRoom;
       deleteRoomButton.textContent=text.deleteRoom;
       closeRoomMembersButton.textContent=text.close;
       messageInput.placeholder=text.message;
@@ -377,8 +380,8 @@
       return currentRoomId;
     }
 
-    function buildListUrl({before="",after="",around="",limit=MESSAGE_BATCH_SIZE,initialUnread=false}={}){
-      const p=new URLSearchParams({room_id:currentRoomId??"",limit:String(limit)});
+    function buildListUrl({before="",after="",around="",limit=MESSAGE_BATCH_SIZE,initialUnread=false,roomId=currentRoomId}={}){
+      const p=new URLSearchParams({room_id:roomId??"",limit:String(limit)});
       if(before)p.set("before",before);
       if(after)p.set("after",after);
       if(around)p.set("around",around);
@@ -626,10 +629,47 @@
           inviteList.replaceChildren(empty);
         }
 
+        leaveRoomButton.classList.toggle("hidden",!details.room?.can_leave);
         deleteRoomButton.classList.toggle("hidden",!details.room?.can_delete);
         if(!roomMembersDialog.open)roomMembersDialog.showModal();
       }catch(error){
         setStatus(error.message,true);
+      }
+    }
+
+    async function leaveCurrentRoom(){
+      if(!currentRoomId||!confirm(text.leaveRoomConfirm))return;
+      const leavingRoomId=currentRoomId;
+      leaveRoomButton.disabled=true;
+      try{
+        await request(API.roomUser,{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"leave_room",room_id:leavingRoomId})
+        });
+        roomMembersDialog.close();
+        stopRealtime();
+        roomLoadGeneration++;
+        loading=false;
+        loadingOlder=false;
+        currentRoomId=null;
+        currentSignalTopic=null;
+        messageMap.clear();
+        replyTarget=null;
+        renderReplyTarget();
+        await loadRooms();
+        if(currentRoomId){
+          await loadLatest(false,false,{initial:true});
+          startRealtime();
+        }else{
+          chatTitle.textContent=text.title;
+          renderMessages();
+        }
+      }catch(error){
+        roomManageStatus.textContent=error.message==="ROOM_OWNER_CANNOT_LEAVE"?text.ownerCannotLeave:error.message;
+        roomManageStatus.classList.add("error");
+      }finally{
+        leaveRoomButton.disabled=false;
       }
     }
 
@@ -683,12 +723,16 @@
     }
 
     async function loadLatest(forceScroll=false,notify=false,{initial=false}={}){
-      if(loading||!currentRoomId)return;
+      const requestRoomId=currentRoomId;
+      const requestGeneration=roomLoadGeneration;
+      if(!requestRoomId)return;
+      if(loading&&!initial)return;
       loading=true;
       const previous=newestMessage()?.id??notificationBaseline;
       const unread=currentRoomUnreadCount();
       try{
-        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,initialUnread:initial&&unread>0}));
+        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,initialUnread:initial&&unread>0,roomId:requestRoomId}));
+        if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
         actor=r.actor;
         currentSignalTopic=r.signal_topic??null;
         chatTitle.textContent=r.room?.name??text.title;
@@ -716,12 +760,14 @@
         if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);
         throw e;
       }finally{
-        loading=false;
+        if(requestGeneration===roomLoadGeneration)loading=false;
       }
     }
 
     async function loadOlder(){
       if(loadingOlder||!hasMore||!currentRoomId)return;
+      const requestRoomId=currentRoomId;
+      const requestGeneration=roomLoadGeneration;
       const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
       const earliest=items[0];
       if(!earliest)return;
@@ -730,44 +776,55 @@
       const oldHeight=messagesHost.scrollHeight;
       const oldTop=messagesHost.scrollTop;
       try{
-        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,before:earliest.created_at}));
+        const r=await request(buildListUrl({limit:MESSAGE_BATCH_SIZE,before:earliest.created_at,roomId:requestRoomId}));
+        if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
         for(const m of r.messages??[])messageMap.set(m.id,m);
         hasMore=Boolean(r.has_more);
         renderMessages();
         messagesHost.scrollTop=oldTop+(messagesHost.scrollHeight-oldHeight);
       }catch{
-        setStatus(text.loadFailed,true);
+        if(requestGeneration===roomLoadGeneration)setStatus(text.loadFailed,true);
       }finally{
-        olderButton.disabled=false;
-        loadingOlder=false;
+        if(requestGeneration===roomLoadGeneration){
+          olderButton.disabled=false;
+          loadingOlder=false;
+        }
       }
     }
 
     async function selectRoom(id){
-      if(id===currentRoomId)return;
+      if(!id||id===currentRoomId)return;
       stopRealtime();
+      roomLoadGeneration++;
+      loading=false;
+      loadingOlder=false;
       currentRoomId=id;
       currentSignalTopic=null;
       messageMap.clear();
+      hasMore=false;
+      initialUnreadAnchor=null;
       replyTarget=null;
       renderReplyTarget();
-      currentSearch={q:"",dateFrom:"",dateTo:""};
+      currentSearch={q:"",date:""};
       searchText.value="";
-      dateFrom.value="";
-      dateTo.value="";
+      searchDate.value="";
       renderRooms();
       await loadLatest(false,false,{initial:true}).catch(()=>{});
-      startRealtime();
+      if(currentRoomId===id)startRealtime();
     }
 
     async function navigateSearch(){
+      const requestRoomId=currentRoomId;
+      const requestGeneration=roomLoadGeneration;
       currentSearch={q:searchText.value.trim(),date:searchDate.value};
-      if(!currentSearch.q&&!currentSearch.date)return;
+      if(!requestRoomId||(!currentSearch.q&&!currentSearch.date))return;
       try{
         const result=await request(buildSearchUrl());
+        if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
         const hit=result.search_match??result.messages?.[0]??null;
         if(!hit)return;
-        const around=await request(buildListUrl({around:hit.id,limit:MESSAGE_BATCH_SIZE}));
+        const around=await request(buildListUrl({around:hit.id,limit:MESSAGE_BATCH_SIZE,roomId:requestRoomId}));
+        if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
         messageMap.clear();
         for(const m of around.messages??[])messageMap.set(m.id,m);
         hasMore=Boolean(around.has_more);
@@ -990,6 +1047,7 @@
     saveNicknameButton.onclick=saveNickname;
     nicknameInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();saveNickname();}});
     closeRoomMembersButton.onclick=()=>roomMembersDialog.close();
+    leaveRoomButton.onclick=leaveCurrentRoom;
     deleteRoomButton.onclick=deleteCurrentRoom;
     backButton.addEventListener("click",event=>{event.preventDefault();if(history.length>1){history.back();}else{location.href="/";}});
     roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
