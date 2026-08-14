@@ -746,6 +746,136 @@
       }
     }
 
+  
+    /* =========================================================
+       UNIFIED TOP TOOLBAR v9
+       기존 멤버/알림 버튼의 직사각형 스타일로 통일
+       왼쪽: 닉네임 · 직책 / 오른쪽: 액션 버튼
+       ========================================================= */
+
+    .bar {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      gap: 10px !important;
+      min-width: 0 !important;
+    }
+
+    .bar .actor {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      margin-right: 0 !important;
+
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-actions {
+      flex: 0 1 auto;
+      min-width: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+
+      margin-left: auto;
+    }
+
+    .bar-actions > button,
+    .bar-actions > a,
+    .bar-actions .chat-setting-button {
+      box-sizing: border-box !important;
+
+      width: auto !important;
+      min-width: 42px !important;
+      height: 36px !important;
+      min-height: 36px !important;
+
+      padding: 6px 10px !important;
+
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+
+      background: var(--surface-hover) !important;
+      color: var(--text) !important;
+
+      text-decoration: none !important;
+      font: inherit;
+      line-height: 1 !important;
+
+      flex: 0 0 auto;
+    }
+
+    .bar-actions > button:hover,
+    .bar-actions > a:hover,
+    .bar-actions .chat-setting-button:hover {
+      border-color: var(--border-hover) !important;
+    }
+
+    #chatSettingsToolbarSlot {
+      display: inline-flex !important;
+      flex: 0 0 auto;
+    }
+
+    #chatSettingsToolbarSlot:empty {
+      display: none !important;
+    }
+
+    .chat-settings-pickers.toolbar-position {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 760px) {
+      .bar {
+        gap: 7px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+      }
+
+      .bar .actor {
+        flex: 1 1 auto !important;
+        max-width: 42%;
+        font-size: .82rem;
+      }
+
+      .bar-actions {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .bar-actions::-webkit-scrollbar {
+        display: none;
+      }
+
+      .bar-actions > button,
+      .bar-actions > a,
+      .bar-actions .chat-setting-button {
+        min-width: 40px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 5px 9px !important;
+      }
+
+      .chat-settings-pickers.toolbar-position {
+        gap: 6px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -854,15 +984,50 @@
     <section class="main">
       <header class="bar panel">
         <span id="chatTitle" class="hidden" aria-hidden="true"></span>
+
         <span id="actor" class="actor"></span>
-        <a id="memberPasswordButton" class="hidden" href="/chat/password/" title="Change password">🔑</a>
-        <button id="nicknameButton" class="hidden" type="button" title="Change nickname">✎</button>
-        <button id="roomMembersButton" type="button" title="Room members">👥</button>
-        <button id="searchToggleButton" type="button" title="Search" aria-expanded="false">🔎</button>
-        <button id="notifyButton" type="button">🔔</button>
-        <span id="chatSettingsToolbarSlot"></span>
-        <button id="refreshButton" type="button">↻</button>
-        <a id="backButton" href="/">Back</a>
+
+        <div class="bar-actions">
+          <a
+            id="memberPasswordButton"
+            class="hidden"
+            href="/chat/password/"
+            title="Change password"
+          >🔑</a>
+
+          <button
+            id="nicknameButton"
+            class="hidden"
+            type="button"
+            title="Change nickname"
+          >✎</button>
+
+          <button
+            id="roomMembersButton"
+            type="button"
+            title="Room members"
+          >👥</button>
+
+          <button
+            id="searchToggleButton"
+            type="button"
+            title="Search"
+            aria-expanded="false"
+          >🔎</button>
+
+          <button id="notifyButton" type="button">🔔</button>
+
+          <span id="chatSettingsToolbarSlot"></span>
+
+          <button id="refreshButton" type="button">↻</button>
+
+          <a
+            id="backButton"
+            href="/"
+            title="Back"
+            aria-label="Back"
+          >↩</a>
+        </div>
       </header>
 
       <section id="searchPanel" class="searchbar panel mobile-collapsed">
@@ -1217,6 +1382,9 @@
       clearSearchButton.textContent=text.clear;
       olderButton.textContent=text.older;
       notifyButton.title=text.notification;
+      backButton.textContent="↩";
+      backButton.title=text.back;
+      backButton.setAttribute("aria-label",text.back);
       memberPasswordButton.title=text.password;
       nicknameButton.title=text.nickname;
       nicknameTitle.textContent=text.nickname;
