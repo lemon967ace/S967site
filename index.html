@@ -394,9 +394,9 @@
 
       font-size:
         clamp(
-          .65rem,
-          min(1.95vw,1.3svh),
-          .86rem
+          .70rem,
+          min(2.05vw,1.38svh),
+          .92rem
         );
 
       font-weight: 800;
@@ -1238,9 +1238,9 @@
 
         font-size:
           clamp(
-            .64rem,
-            1.2svh,
-            .78rem
+            .68rem,
+            1.28svh,
+            .84rem
           );
       }
     }
@@ -1340,7 +1340,7 @@
           10px
           2px;
 
-        font-size: .62rem;
+        font-size: .65rem;
       }
     }
 
@@ -1414,7 +1414,7 @@
           9px
           1px;
 
-        font-size: .58rem;
+        font-size: .61rem;
       }
     }
 
@@ -1437,6 +1437,252 @@
       .privacy-popover {
         width:
           calc(100vw - 32px);
+      }
+    }
+
+  
+    /* =========================================================
+       ANNOUNCEMENT / CORNER LINKS OFFSET
+       공지가 보일 때 좌측 상단 Staff / Chat / Map 버튼을
+       공지 배너 아래로 자연스럽게 내려줍니다.
+       ========================================================= */
+
+    body.has-announcement .corner-links {
+      top:
+        calc(
+          var(
+            --corner-control-edge,
+            clamp(18px, 1.15vw, 28px)
+          )
+          +
+          clamp(38px, 5svh, 44px)
+          +
+          6px
+        );
+    }
+
+    /* 제목 위 여백은 기존보다 아주 조금만 증가 */
+    .home-content {
+      grid-template-rows:
+        clamp(24px,3.6svh,54px)
+        auto
+        minmax(
+          clamp(52px,7.5svh,100px),
+          1fr
+        )
+        auto
+        minmax(
+          clamp(18px,2.6svh,34px),
+          .38fr
+        )
+        auto;
+    }
+
+    @media (max-width: 600px) {
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            clamp(14px,2svh,20px)
+            +
+            clamp(36px,4.8svh,42px)
+            +
+            5px
+          );
+      }
+
+      .home-content {
+        grid-template-rows:
+          clamp(12px,2svh,23px)
+          auto
+          minmax(
+            clamp(18px,3.2svh,34px),
+            .55fr
+          )
+          auto
+          minmax(
+            clamp(8px,1.2svh,16px),
+            .22fr
+          )
+          auto;
+      }
+    }
+
+    @media (max-width: 600px) and (max-height: 720px) {
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            clamp(12px,1.7svh,18px)
+            +
+            34px
+            +
+            4px
+          );
+      }
+    }
+
+    @media (max-height: 600px) {
+      body.has-announcement .corner-links {
+        top: 40px;
+      }
+    }
+
+  
+    /* =========================================================
+       ANNOUNCEMENT LARGE DISPLAY SCALING
+       일반 화면의 배너 높이는 유지하고,
+       QHD/4K 이상에서만 배너와 글씨를 함께 확대합니다.
+       ========================================================= */
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            44px,
+            3.2svh,
+            52px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          9px
+          clamp(22px,3vw,64px)
+          4px;
+
+        font-size:
+          clamp(
+            .84rem,
+            min(.78vw,1.22svh),
+            1rem
+          );
+      }
+
+      .announcement-label {
+        top: 3px;
+        left: 16px;
+
+        font-size:
+          clamp(
+            .54rem,
+            min(.5vw,.78svh),
+            .64rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(44px,3.2svh,52px)
+            +
+            7px
+          );
+      }
+    }
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            52px,
+            3.4svh,
+            64px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          11px
+          clamp(28px,3vw,84px)
+          5px;
+
+        font-size:
+          clamp(
+            1rem,
+            min(.68vw,1.18svh),
+            1.22rem
+          );
+      }
+
+      .announcement-label {
+        top: 4px;
+        left: 20px;
+
+        font-size:
+          clamp(
+            .62rem,
+            min(.42vw,.7svh),
+            .76rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(52px,3.4svh,64px)
+            +
+            8px
+          );
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .announcement-ticker {
+        height:
+          clamp(
+            62px,
+            3.6svh,
+            76px
+          );
+      }
+
+      .announcement-slide {
+        padding:
+          13px
+          clamp(36px,2.8vw,104px)
+          6px;
+
+        font-size:
+          clamp(
+            1.15rem,
+            min(.58vw,1.08svh),
+            1.38rem
+          );
+      }
+
+      .announcement-label {
+        top: 5px;
+        left: 24px;
+
+        font-size:
+          clamp(
+            .70rem,
+            min(.36vw,.62svh),
+            .84rem
+          );
+      }
+
+      body.has-announcement .corner-links {
+        top:
+          calc(
+            var(
+              --corner-control-edge,
+              clamp(18px,1.15vw,28px)
+            )
+            +
+            clamp(62px,3.6svh,76px)
+            +
+            9px
+          );
       }
     }
 
@@ -2162,9 +2408,7 @@
         clearTimer();
 
 
-        if (
-          pages.length <= 1
-        ) {
+        if (!pages.length) {
           return;
         }
 
