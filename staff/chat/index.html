@@ -121,7 +121,7 @@
         <span id="actor" class="actor"></span>
         <button id="notifyButton" type="button">🔔</button>
         <button id="refreshButton" type="button">↻</button>
-        <a id="backButton" href="#" onclick="history.back(); return false;">Back</a>
+        <a id="backButton" href="/">Back</a>
       </header>
 
       <section class="searchbar panel">
@@ -448,6 +448,16 @@
     window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
 
     bootstrap();
+
+    backButton.addEventListener("click", (event) => {
+  event.preventDefault();
+
+  if (history.length > 1) {
+    history.back();
+  } else {
+    location.href = "/";
+  }
+});
   </script>
 </body>
 </html>
