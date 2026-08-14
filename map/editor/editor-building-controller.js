@@ -22,6 +22,23 @@ export function createBuildingController({ engine, history = null, onChange = ()
     if (![1, 2].includes(size)) throw new RangeError("Building size must be 1 or 2.");
     palette = { typeId, size, defaultAffiliation }; mode = EDITOR_MODES.PLACE; preview = null; emit();
   }
+  function setPlacementAffiliation(
+    affiliation
+  ) {
+    if (
+      mode !==
+        EDITOR_MODES.PLACE ||
+      !palette
+    ) {
+      return;
+    }
+
+    palette.defaultAffiliation =
+      affiliation;
+    preview = null;
+    emit();
+  }
+
   function startMove() {
     ensureEditable(); const building = selected();
     if (!building) throw new RangeError("Select a building first.");
@@ -33,51 +50,336 @@ export function createBuildingController({ engine, history = null, onChange = ()
     if (mode === EDITOR_MODES.SELECT) { preview = null; return null; }
     const building = mode === EDITOR_MODES.MOVE ? selected() : null;
     const width = building?.width ?? palette.size, height = building?.height ?? palette.size;
-    const result = engine.canPlaceBuilding({ x, y, width, height, ignoreBuildingId: building?.id ?? null });
-    preview = { x, y, width, height, typeId: building?.typeId ?? palette.typeId, valid: result.canPlace, cells: result.occupiedCells };
+    const result = engine.canPlaceBuilding({
+      x,
+      y,
+      width,
+      height,
+      typeId:
+        building?.typeId ??
+        palette.typeId,
+      affiliation:
+        building?.affiliation ??
+        palette.defaultAffiliation ??
+        "",
+      ignoreBuildingId:
+        building?.id ??
+        null,
+    });
+    preview = {
+      x,
+      y,
+      width,
+      height,
+      typeId:
+        building?.typeId ??
+        palette.typeId,
+      valid:
+        result.canPlace,
+      cells:
+        result.occupiedCells,
+      linkedRangeCells:
+        result.linkedRangeCells ??
+        [],
+      linkedRangeReason:
+        result.linkedRangeReason ??
+        null,
+    };
     emit(); return preview;
   }
-  function commitAt(x, y, { name, affiliation } = {}) {
-    ensureEditable(); updatePreview(x, y);
-    if (!preview?.valid) return null;
-    if (mode === EDITOR_MODES.PLACE) {
-      const building = engine.addBuilding(new Building({ name, typeId: palette.typeId, x, y, width: palette.size, height: palette.size, affiliation: affiliation ?? palette.defaultAffiliation, locked: false }));
-      const state = snapshotBuilding(building);
-      history?.record({ description: "create", undo() { engine.deleteBuilding(state.id); selectedBuildingId = null; }, redo() { engine.addBuilding(state); selectedBuildingId = state.id; } });
-      selectedBuildingId = building.id;
-      mode = EDITOR_MODES.SELECT;
+  function commitAt(
+    x,
+    y,
+    {
+      name,
+      affiliation,
+    } = {}
+  ) {
+    ensureEditable();
+    updatePreview(x, y);
+
+    if (!preview?.valid) {
+      return null;
+    }
+
+    if (
+      mode ===
+      EDITOR_MODES.PLACE
+    ) {
+      const beforeRanges =
+        engine.getDocument().ranges.map(
+          snapshotRange
+        );
+
+      const building =
+        engine.addBuilding(
+          new Building({
+            name,
+            typeId:
+              palette.typeId,
+            x,
+            y,
+            width:
+              palette.size,
+            height:
+              palette.size,
+            affiliation:
+              affiliation ??
+              palette.defaultAffiliation,
+            locked: false,
+          })
+        );
+
+      const state =
+        snapshotBuilding(
+          building
+        );
+      const afterRanges =
+        engine.getDocument().ranges.map(
+          snapshotRange
+        );
+
+      history?.record({
+        description: "create",
+        undo() {
+          engine.deleteBuilding(
+            state.id
+          );
+          engine.restoreRanges(
+            beforeRanges
+          );
+          selectedBuildingId =
+            null;
+        },
+        redo() {
+          engine.addBuilding(
+            state
+          );
+          engine.restoreRanges(
+            afterRanges
+          );
+          selectedBuildingId =
+            state.id;
+        },
+      });
+
+      selectedBuildingId =
+        building.id;
+      mode =
+        EDITOR_MODES.SELECT;
       palette = null;
       preview = null;
       notifyMutation();
       emit();
       return building;
     }
-    if (mode === EDITOR_MODES.MOVE) {
-      const before = snapshotBuilding(selected());
-      if (before.x === x && before.y === y) { mode = EDITOR_MODES.SELECT; preview = null; emit(); return selected(); }
-      const building = engine.moveBuilding(selectedBuildingId, x, y), after = snapshotBuilding(building);
-      history?.record({ description: "move", undo() { engine.restoreBuildingState(before); selectedBuildingId = before.id; }, redo() { engine.restoreBuildingState(after); selectedBuildingId = after.id; } });
-      mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return building;
+
+    if (
+      mode ===
+      EDITOR_MODES.MOVE
+    ) {
+      const before =
+        snapshotBuilding(
+          selected()
+        );
+      const beforeRanges =
+        engine.getDocument().ranges.map(
+          snapshotRange
+        );
+
+      if (
+        before.x === x &&
+        before.y === y
+      ) {
+        mode =
+          EDITOR_MODES.SELECT;
+        preview = null;
+        emit();
+        return selected();
+      }
+
+      const building =
+        engine.moveBuilding(
+          selectedBuildingId,
+          x,
+          y
+        );
+      const after =
+        snapshotBuilding(
+          building
+        );
+      const afterRanges =
+        engine.getDocument().ranges.map(
+          snapshotRange
+        );
+
+      history?.record({
+        description: "move",
+        undo() {
+          engine.restoreBuildingState(
+            before
+          );
+          engine.restoreRanges(
+            beforeRanges
+          );
+          selectedBuildingId =
+            before.id;
+        },
+        redo() {
+          engine.restoreBuildingState(
+            after
+          );
+          engine.restoreRanges(
+            afterRanges
+          );
+          selectedBuildingId =
+            after.id;
+        },
+      });
+
+      mode =
+        EDITOR_MODES.SELECT;
+      preview = null;
+      notifyMutation();
+      emit();
+      return building;
     }
+
     return null;
   }
   function deleteSelected() {
-    ensureEditable(); if (!selectedBuildingId) return null;
-    const state = snapshotBuilding(selected());
-    const removed = engine.deleteBuilding(selectedBuildingId);
-    history?.record({ description: "delete", undo() { engine.addBuilding(state); selectedBuildingId = state.id; }, redo() { engine.deleteBuilding(state.id); selectedBuildingId = null; } });
-    selectedBuildingId = null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return removed;
+    ensureEditable();
+    if (!selectedBuildingId) {
+      return null;
+    }
+
+    const state =
+      snapshotBuilding(
+        selected()
+      );
+    const beforeRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    const removed =
+      engine.deleteBuilding(
+        selectedBuildingId
+      );
+
+    const afterRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    history?.record({
+      description: "delete",
+      undo() {
+        engine.addBuilding(
+          state
+        );
+        engine.restoreRanges(
+          beforeRanges
+        );
+        selectedBuildingId =
+          state.id;
+      },
+      redo() {
+        engine.deleteBuilding(
+          state.id
+        );
+        engine.restoreRanges(
+          afterRanges
+        );
+        selectedBuildingId =
+          null;
+      },
+    });
+
+    selectedBuildingId =
+      null;
+    mode =
+      EDITOR_MODES.SELECT;
+    preview = null;
+    notifyMutation();
+    emit();
+    return removed;
   }
-  function editSelected(changes) {
-    ensureEditable(); if (!selectedBuildingId) throw new RangeError("Select a building first.");
-    const before = snapshotBuilding(selected()), edited = engine.editBuilding(selectedBuildingId, changes), after = snapshotBuilding(edited);
-    if (sameBuildingState(before, after)) { emit(); return edited; }
-    history?.record({ description: "edit", undo() { engine.restoreBuildingState(before); selectedBuildingId = before.id; }, redo() { engine.restoreBuildingState(after); selectedBuildingId = after.id; } });
-    notifyMutation(); emit(); return edited;
+  function editSelected(
+    changes
+  ) {
+    ensureEditable();
+
+    if (!selectedBuildingId) {
+      throw new RangeError(
+        "Select a building first."
+      );
+    }
+
+    const before =
+      snapshotBuilding(
+        selected()
+      );
+    const beforeRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    const edited =
+      engine.editBuilding(
+        selectedBuildingId,
+        changes
+      );
+    const after =
+      snapshotBuilding(
+        edited
+      );
+    const afterRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    if (
+      sameBuildingState(
+        before,
+        after
+      )
+    ) {
+      emit();
+      return edited;
+    }
+
+    history?.record({
+      description: "edit",
+      undo() {
+        engine.restoreBuildingState(
+          before
+        );
+        engine.restoreRanges(
+          beforeRanges
+        );
+        selectedBuildingId =
+          before.id;
+      },
+      redo() {
+        engine.restoreBuildingState(
+          after
+        );
+        engine.restoreRanges(
+          afterRanges
+        );
+        selectedBuildingId =
+          after.id;
+      },
+    });
+
+    notifyMutation();
+    emit();
+    return edited;
   }
   function notifyMutation() { onDirty(history ? !history.isAtSavedState() : true); }
   function undo() { ensureEditable(); const command = history?.undo(); if (!command) return null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return command; }
   function redo() { ensureEditable(); const command = history?.redo(); if (!command) return null; mode = EDITOR_MODES.SELECT; preview = null; notifyMutation(); emit(); return command; }
   function selected() { return engine.getDocument().buildings.find(item => item.id === selectedBuildingId) ?? null; }
-  return { getState: snapshot, selectBuilding, normalizeSelection, selectPalette, startMove, updatePreview, commitAt, cancelMode, deleteSelected, editSelected, undo, redo, getSelectedBuilding: selected, setRangeController(value) { rangePeer = value; }, addAreaPeer(value) { areaPeers.add(value); } };
+  return { getState: snapshot, selectBuilding, normalizeSelection, selectPalette, setPlacementAffiliation, startMove, updatePreview, commitAt, cancelMode, deleteSelected, editSelected, undo, redo, getSelectedBuilding: selected, setRangeController(value) { rangePeer = value; }, addAreaPeer(value) { areaPeers.add(value); } };
 }

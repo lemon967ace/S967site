@@ -12,7 +12,24 @@ export function serializeDocument(document) {
   return structuredCloneSafe({ format: DOCUMENT_FORMAT, version: DOCUMENT_VERSION, title: document.title, map: MAP_INFO,
     building_types: document.buildingTypes.map(({ id, name, color }) => ({ id, name, color })),
     buildings: document.buildings.map(item => ({ id: item.id, name: item.name, type_id: item.typeId, x: item.x, y: item.y, width: item.width, height: item.height, affiliation: item.affiliation, locked: item.locked })),
-    ranges: document.ranges.map(item => ({ id: item.id, kind: item.kind, color: item.color, locked: item.locked, cells: item.cells.map(cell => [...cell]) })),
+    ranges: document.ranges.map(item => ({
+      id: item.id,
+      kind: item.kind,
+      color: item.color,
+      locked: item.locked,
+      cells: item.cells.map(cell => [...cell]),
+      ...(item.linked
+        ? {
+            linked: true,
+            source_building_id:
+              item.sourceBuildingId,
+            affiliation:
+              item.affiliation,
+            active:
+              item.active !== false,
+          }
+        : {}),
+    })),
     fixed_building_types: document.fixedBuildingTypes.map(({ id, name, color, width, height }) => ({ id, name, color, width, height })),
     fixed_buildings: document.fixedBuildings.map(item => ({ id: item.id, name: item.name, type_id: item.typeId, x: item.x, y: item.y, color: item.color, priority: item.priority })),
     fixed_ranges: document.fixedRanges.map(item => ({ id: item.id, kind: item.kind, color: item.color, priority: item.priority, cells: item.cells.map(cell => [...cell]) })),
@@ -33,7 +50,22 @@ export function parseDocument(input) {
     const document = new MapDocument({ title: requireString(data.title, "title"),
       buildingTypes: data.building_types.map(item => new BuildingType({ id: requireString(item?.id, "building type id"), name: requireString(item?.name, "building type name"), color: requireString(item?.color, "building type color") })),
       buildings: data.buildings.map(item => new Building({ id: requireString(item?.id, "building id"), name: requireString(item?.name, "building name"), type_id: requireString(item?.type_id, "building type_id"), x: requireInteger(item?.x, "building x"), y: requireInteger(item?.y, "building y"), width: requireInteger(item?.width, "building width"), height: requireInteger(item?.height, "building height"), affiliation: item?.affiliation ?? "", locked: Boolean(item?.locked) })),
-      ranges: (data.ranges ?? []).map(item => new MapRange({ id: requireString(item?.id, "range id"), kind: requireString(item?.kind, "range kind"), color: requireString(item?.color, "range color"), locked: Boolean(item?.locked), cells: item?.cells })),
+      ranges: (data.ranges ?? []).map(item => new MapRange({
+        id: requireString(item?.id, "range id"),
+        kind: requireString(item?.kind, "range kind"),
+        color: requireString(item?.color, "range color"),
+        locked: Boolean(item?.locked),
+        cells: item?.cells,
+        linked: Boolean(item?.linked),
+        source_building_id:
+          item?.source_building_id ??
+          null,
+        affiliation:
+          item?.affiliation ??
+          "",
+        active:
+          item?.active !== false,
+      })),
       fixedBuildingTypes: (data.fixed_building_types ?? []).map(item => new FixedBuildingType({ id: requireString(item?.id, "fixed building type id"), name: requireString(item?.name, "fixed building type name"), color: requireString(item?.color, "fixed building type color"), width: requireInteger(item?.width, "fixed building type width"), height: requireInteger(item?.height, "fixed building type height") })),
       fixedBuildings: (data.fixed_buildings ?? []).map(item => new FixedBuilding({ id: requireString(item?.id, "fixed building id"), name: requireString(item?.name, "fixed building name"), type_id: requireString(item?.type_id, "fixed building type_id"), x: requireInteger(item?.x, "fixed building x"), y: requireInteger(item?.y, "fixed building y"), color: item?.color ?? (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.color ?? "#EEEEEE", priority: Number.isInteger(item?.priority) ? item.priority : 0, width: (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.width, height: (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.height })),
       fixedRanges: (data.fixed_ranges ?? []).map(item => new FixedRange({ id: requireString(item?.id, "fixed range id"), kind: requireString(item?.kind, "fixed range kind"), color: requireString(item?.color, "fixed range color"), priority: Number.isInteger(item?.priority) ? item.priority : 0, cells: item?.cells })),

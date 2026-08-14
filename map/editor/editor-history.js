@@ -33,6 +33,15 @@ export function snapshotRange(range) {
     locked: range.locked,
     priority: range.priority,
     fixed: range.fixed,
+    linked: Boolean(range.linked),
+    sourceBuildingId:
+      range.sourceBuildingId ??
+      null,
+    affiliation:
+      range.affiliation ??
+      "",
+    active:
+      range.active !== false,
     cells: Object.freeze(range.cells.map(cell => Object.freeze([...cell]))),
   });
 }

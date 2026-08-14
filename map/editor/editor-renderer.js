@@ -100,7 +100,7 @@ export function viewportCenterGrid(state) {
   return nearestValidGridCoordinate(x, y);
 }
 
-export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, notifyInvalidPlacement = () => {}, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
+export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, requestBuildingAffiliation = () => null, resolveBuildingName = () => null, notifyInvalidPlacement = () => {}, confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
   if (!(host instanceof HTMLElement)) throw new TypeError("A map canvas host is required.");
   const documentView = engine.getView();
   let state = createViewportState(documentView);
@@ -155,10 +155,28 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function drawRanges() {
     const bounds = visibleGridBounds(state, 1), selectedId = rangeController?.getState().selectedRangeId;
-    for (const range of mapDocument.ranges) for (const cell of visibleRangeCells(range, bounds)) {
+    for (
+      const range
+      of mapDocument.ranges
+    ) {
+      if (
+        range.linked &&
+        range.active === false
+      ) {
+        continue;
+      }
+
+      for (
+        const cell
+        of visibleRangeCells(
+          range,
+          bounds
+        )
+      ) {
       traceCell(cell); context.fillStyle = withAlpha(range.color, 0.29); context.fill(); context.strokeStyle = range.color; context.lineWidth = Math.max(1, (range.locked ? 2.4 : 1.2) * state.zoom); context.stroke();
       if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.stroke(); }
       if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
+      }
     }
     const preview = rangeController?.getState().previewCells ?? [];
     for (const cell of preview) { traceCell(cell); context.fillStyle = "rgba(124,58,237,.22)"; context.fill(); context.strokeStyle = "#7C3AED"; context.lineWidth = 2; context.stroke(); }
@@ -319,12 +337,40 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     const cell = sceneToGrid(sceneX, sceneY);
     const mode = controller?.getState().mode ?? "select";
     if (mode !== "select" && cell) {
-      /*
-        General maps have allowed/blocked ranges. Previously the name prompt
-        appeared even when the clicked cell was not placeable, and commitAt()
-        then silently returned null. That looked exactly like a broken build.
-        Validate the target first, before asking for a building name.
-      */
+      const placementState =
+        controller?.getState?.() ??
+        {};
+
+      const isAllianceStructure =
+        mode === "place" &&
+        placementState.palette?.typeId ===
+          "type-01";
+
+      let affiliation =
+        placementState.palette
+          ?.defaultAffiliation ??
+        "";
+      let name = "";
+
+      if (isAllianceStructure) {
+        affiliation =
+          requestBuildingAffiliation({
+            size:
+              placementState.palette
+                ?.size ??
+              1,
+          });
+
+        if (affiliation === null) {
+          return;
+        }
+
+        controller
+          ?.setPlacementAffiliation?.(
+            affiliation
+          );
+      }
+
       const preview =
         controller?.updatePreview(
           ...cell
@@ -341,16 +387,21 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         return;
       }
 
-      const name =
-        mode === "place"
-          ? requestBuildingName()
-          : "";
+      if (mode === "place") {
+        name =
+          isAllianceStructure
+            ? resolveBuildingName({
+                size:
+                  placementState.palette
+                    ?.size ??
+                  1,
+                affiliation,
+              })
+            : requestBuildingName();
 
-      if (
-        mode === "place" &&
-        name === null
-      ) {
-        return;
+        if (name === null) {
+          return;
+        }
       }
 
       let changed;
@@ -359,7 +410,10 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         changed =
           controller.commitAt(
             ...cell,
-            { name }
+            {
+              name,
+              affiliation,
+            }
           );
       } catch (error) {
         globalThis.alert?.(

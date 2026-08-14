@@ -101,14 +101,157 @@ export function createRangeController({ engine, history, buildingController = nu
     selectedRangeId = after.at(-1)?.id ?? null; mode = "select"; startCell = null; previewCells = [];
     history.record({ description: "rangeCreate", undo() { engine.restoreRanges(before); selectedRangeId = null; }, redo() { engine.restoreRanges(after); selectedRangeId = after.at(-1)?.id ?? null; } }); notify(); emit(); return result;
   }
-  function selectAtCell(cell) { const ranges = engine.getDocument().ranges; selectedRangeId = [...ranges].reverse().find(item => item.cells.some(value => value[0] === cell[0] && value[1] === cell[1]))?.id ?? null; emit(); return selected(); }
-  function editSelected({ locked }) { ensureWritable(); const item = selected(); if (!item) return null; if (item.locked === Boolean(locked)) return item; const before = engine.getDocument().ranges.map(snapshotRange); const edited = engine.editRange(item.id, { locked }); const after = engine.getDocument().ranges.map(snapshotRange); history.record({ description: "rangeEdit", undo() { engine.restoreRanges(before); selectedRangeId = item.id; }, redo() { engine.restoreRanges(after); selectedRangeId = item.id; } }); notify(); emit(); return edited; }
+  function selectAtCell(cell) {
+    const ranges =
+      engine.getDocument().ranges;
+
+    /*
+      Linked alliance ranges are system-controlled and may overlap each other,
+      so normal range selection intentionally ignores them.
+    */
+    selectedRangeId =
+      [...ranges]
+        .reverse()
+        .find(
+          item =>
+            !item.linked &&
+            item.cells.some(
+              value =>
+                value[0] ===
+                  cell[0] &&
+                value[1] ===
+                  cell[1]
+            )
+        )?.id ??
+      null;
+
+    emit();
+    return selected();
+  }
+  function editSelected({ locked }) {
+    ensureWritable();
+    const item = selected();
+    if (!item) return null;
+    if (item.linked) {
+      throw new RangeError(
+        "Building-linked ranges cannot be edited directly."
+      );
+    }
+    if (
+      item.locked ===
+      Boolean(locked)
+    ) {
+      return item;
+    }
+    const before =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+    const edited =
+      engine.editRange(
+        item.id,
+        { locked }
+      );
+    const after =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+    history.record({
+      description: "rangeEdit",
+      undo() {
+        engine.restoreRanges(before);
+        selectedRangeId = item.id;
+      },
+      redo() {
+        engine.restoreRanges(after);
+        selectedRangeId = item.id;
+      },
+    });
+    notify();
+    emit();
+    return edited;
+  }
+
+  function setAffiliationColor(
+    affiliation,
+    color
+  ) {
+    ensureWritable();
+
+    const before =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    const changed =
+      engine.setLinkedRangeAffiliationColor(
+        affiliation,
+        color
+      );
+
+    if (!changed.length) {
+      return [];
+    }
+
+    const after =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    history.record({
+      description:
+        "linkedRangeColor",
+      undo() {
+        engine.restoreRanges(before);
+      },
+      redo() {
+        engine.restoreRanges(after);
+      },
+    });
+
+    notify();
+    emit();
+    return changed;
+  }
   function deleteSelected() { ensureWritable(); const item = selected(); if (!item) return null; const before = engine.getDocument().ranges.map(snapshotRange); const deleted = engine.deleteRange(item.id); const after = engine.getDocument().ranges.map(snapshotRange); history.record({ description: "rangeDelete", undo() { engine.restoreRanges(before); selectedRangeId = item.id; }, redo() { engine.restoreRanges(after); selectedRangeId = null; } }); selectedRangeId = null; notify(); emit(); return deleted; }
   function cancel() { mode = "select"; settings = null; startCell = null; previewCells = []; emit(); }
   function selected() { return engine.getDocument().ranges.find(item => item.id === selectedRangeId) ?? null; }
   function normalizeSelection() { if (selectedRangeId && !selected()) selectedRangeId = null; return selectedRangeId; }
   function undo() { const command = history.undo(); if (!command) return null; mode = "select"; previewCells = []; notify(); emit(); return command; }
   function redo() { const command = history.redo(); if (!command) return null; mode = "select"; previewCells = []; notify(); emit(); return command; }
-  const api = { startCreate, hover, click, commit, selectAtCell, editSelected, deleteSelected, cancel, undo, redo, normalizeSelection, addAreaPeer(value) { areaPeers.add(value); }, getSelectedRange: selected, getState: () => ({ mode, settings: settings && { ...settings }, startCell: startCell && [...startCell], previewCells: previewCells.map(cell => [...cell]), selectedRangeId }) };
+  const api = {
+    startCreate,
+    hover,
+    click,
+    commit,
+    selectAtCell,
+    editSelected,
+    deleteSelected,
+    setAffiliationColor,
+    cancel,
+    undo,
+    redo,
+    normalizeSelection,
+    addAreaPeer(value) {
+      areaPeers.add(value);
+    },
+    getSelectedRange:
+      selected,
+    getState: () => ({
+      mode,
+      settings:
+        settings && {
+          ...settings,
+        },
+      startCell:
+        startCell &&
+        [...startCell],
+      previewCells:
+        previewCells.map(
+          cell => [...cell]
+        ),
+      selectedRangeId,
+    }),
+  };
   return api;
 }

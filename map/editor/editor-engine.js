@@ -10,6 +10,8 @@ import {
   MAP_MIN_Y,
   MapDocument,
   MapRange,
+  createUniqueId,
+  isValidMapCell,
 } from "./editor-model.js";
 import { OccupancyManager } from "./editor-occupancy.js";
 import { parseDocument, serializeDocument } from "./editor-document.js";
@@ -36,6 +38,813 @@ let document = null;
 let occupancy = null;
 let readOnly = false;
 let documentMode = "map";
+
+export const ALLIANCE_STRUCTURE_TYPE_ID =
+  "type-01";
+
+const DEFAULT_LINKED_RANGE_COLOR =
+  "#B07AA1";
+
+function gridToUv(
+  x,
+  y
+) {
+  return [
+    (x + y) / 2,
+    (y - x) / 2,
+  ];
+}
+
+function uvToGrid(
+  u,
+  v
+) {
+  return [
+    u - v,
+    u + v,
+  ];
+}
+
+function specialStructureRole(
+  building
+) {
+  if (
+    building?.typeId !==
+    ALLIANCE_STRUCTURE_TYPE_ID
+  ) {
+    return null;
+  }
+
+  if (
+    building.width === 2 &&
+    building.height === 2
+  ) {
+    return "fort";
+  }
+
+  if (
+    building.width === 1 &&
+    building.height === 1
+  ) {
+    return "outpost";
+  }
+
+  return null;
+}
+
+/*
+  Linked territory shape.
+
+  1x1:
+    building itself excluded; 5 cells outward on all four u/v sides.
+
+  2x2 fort:
+    building footprint excluded;
+    +u and +v = 6 cells;
+    -u and -v = 5 cells.
+
+  Returning null means the complete requested territory would extend
+  outside the valid map, so placement must be rejected rather than clipping it.
+*/
+export function linkedRangeCellsForBuilding(
+  building
+) {
+  const role =
+    specialStructureRole(
+      building
+    );
+
+  if (!role) {
+    return [];
+  }
+
+  const occupied =
+    building.occupiedCells();
+  const uv =
+    occupied.map(
+      ([x, y]) =>
+        gridToUv(x, y)
+    );
+
+  const minU =
+    Math.min(
+      ...uv.map(
+        item => item[0]
+      )
+    );
+  const maxU =
+    Math.max(
+      ...uv.map(
+        item => item[0]
+      )
+    );
+  const minV =
+    Math.min(
+      ...uv.map(
+        item => item[1]
+      )
+    );
+  const maxV =
+    Math.max(
+      ...uv.map(
+        item => item[1]
+      )
+    );
+
+  const negative =
+    5;
+  const positive =
+    role === "fort"
+      ? 6
+      : 5;
+
+  const occupiedKeys =
+    new Set(
+      occupied.map(
+        cell =>
+          cell.join(",")
+      )
+    );
+
+  const cells = [];
+
+  for (
+    let u =
+      minU - negative;
+    u <=
+      maxU + positive;
+    u++
+  ) {
+    for (
+      let v =
+        minV - negative;
+      v <=
+        maxV + positive;
+      v++
+    ) {
+      const cell =
+        uvToGrid(u, v);
+
+      if (
+        !isValidMapCell(
+          ...cell
+        )
+      ) {
+        return null;
+      }
+
+      if (
+        !occupiedKeys.has(
+          cell.join(",")
+        )
+      ) {
+        cells.push(cell);
+      }
+    }
+  }
+
+  return cells;
+}
+
+function linkedRangeForBuilding(
+  building
+) {
+  return document.ranges.find(
+    item =>
+      item.linked &&
+      item.sourceBuildingId ===
+        building.id
+  ) ?? null;
+}
+
+function affiliationColor(
+  affiliation,
+  excludeRangeId = null
+) {
+  const match =
+    document.ranges.find(
+      item =>
+        item.linked &&
+        item.id !==
+          excludeRangeId &&
+        item.affiliation ===
+          affiliation
+    );
+
+  return (
+    match?.color ??
+    DEFAULT_LINKED_RANGE_COLOR
+  );
+}
+
+function linkedCellsConflictWithManualRange(
+  cells,
+  ignoreLinkedRangeId = null
+) {
+  const keys =
+    new Set(
+      cells.map(
+        cell =>
+          cell.join(",")
+      )
+    );
+
+  return document.ranges.some(
+    range =>
+      range.id !==
+        ignoreLinkedRangeId &&
+      !range.linked &&
+      range.cells.some(
+        cell =>
+          keys.has(
+            cell.join(",")
+          )
+      )
+  );
+}
+
+function isOutpostInsideOwnLinkedTerritory(
+  building,
+  ignoreBuildingId = null
+) {
+  const cell =
+    building.occupiedCells()[0];
+
+  return document.ranges.some(
+    range => {
+      if (
+        !range.linked ||
+        range.active === false ||
+        range.affiliation !==
+          building.affiliation
+      ) {
+        return false;
+      }
+
+      if (
+        range.sourceBuildingId ===
+          ignoreBuildingId
+      ) {
+        return false;
+      }
+
+      return range.cells.some(
+        value =>
+          value[0] ===
+            cell[0] &&
+          value[1] ===
+            cell[1]
+      );
+    }
+  );
+}
+
+function validateAffiliationCode(
+  value
+) {
+  const text =
+    String(
+      value ??
+      ""
+    );
+
+  return (
+    text.length === 3 &&
+    [...text].every(
+      c =>
+        c.charCodeAt(0) >=
+          33 &&
+        c.charCodeAt(0) <=
+          126
+    )
+  );
+}
+
+function allianceStructureCounts(
+  affiliation,
+  ignoreBuildingId = null
+) {
+  let fort = 0;
+  let outpost = 0;
+
+  for (
+    const building
+    of document.buildings
+  ) {
+    if (
+      building.id ===
+        ignoreBuildingId ||
+      building.affiliation !==
+        affiliation ||
+      building.typeId !==
+        ALLIANCE_STRUCTURE_TYPE_ID
+    ) {
+      continue;
+    }
+
+    const role =
+      specialStructureRole(
+        building
+      );
+
+    if (role === "fort") {
+      fort++;
+    } else if (
+      role === "outpost"
+    ) {
+      outpost++;
+    }
+  }
+
+  return {
+    fort,
+    outpost,
+  };
+}
+
+/*
+  The central purple ground is blocked for 2x2 Fort placement
+  by fixed-range color only, as requested.
+*/
+const FORT_BLOCKED_FIXED_RANGE_COLORS =
+  new Set([
+    "#b07aa1",
+  ]);
+
+function fortTouchesBlockedPurple(
+  building
+) {
+  const occupied =
+    new Set(
+      building
+        .occupiedCells()
+        .map(
+          cell =>
+            cell.join(",")
+        )
+    );
+
+  return document.fixedRanges.some(
+    range =>
+      FORT_BLOCKED_FIXED_RANGE_COLORS
+        .has(
+          String(
+            range.color ??
+            ""
+          ).toLowerCase()
+        ) &&
+      range.cells.some(
+        cell =>
+          occupied.has(
+            cell.join(",")
+          )
+      )
+  );
+}
+
+function recomputeLinkedRangeActivity() {
+  if (!document) {
+    return;
+  }
+
+  const rangesByBuildingId =
+    new Map(
+      document.ranges
+        .filter(
+          range =>
+            range.linked
+        )
+        .map(
+          range => [
+            range.sourceBuildingId,
+            range,
+          ]
+        )
+    );
+
+  const buildingsByAffiliation =
+    new Map();
+
+  for (
+    const building
+    of document.buildings
+  ) {
+    if (
+      building.typeId !==
+        ALLIANCE_STRUCTURE_TYPE_ID
+    ) {
+      continue;
+    }
+
+    const role =
+      specialStructureRole(
+        building
+      );
+
+    if (!role) {
+      continue;
+    }
+
+    const list =
+      buildingsByAffiliation.get(
+        building.affiliation
+      ) ?? [];
+
+    list.push({
+      building,
+      role,
+    });
+
+    buildingsByAffiliation.set(
+      building.affiliation,
+      list
+    );
+  }
+
+  /*
+    Activity is reachability from the affiliation's Fort.
+
+    - Fort territory is the root and is ON.
+    - An Outpost becomes ON only when the Outpost's own occupied cell lies
+      inside territory that is already ON for the same affiliation.
+    - Iteration allows Fort -> Outpost1 -> Outpost2 -> ... chains.
+    - Outposts that only justify each other form a disconnected cycle, so
+      none of them become reachable and their territories stay OFF.
+  */
+  const activeBuildingIds =
+    new Set();
+
+  for (
+    const entries
+    of buildingsByAffiliation.values()
+  ) {
+    const fortEntries =
+      entries.filter(
+        entry =>
+          entry.role === "fort"
+      );
+
+    for (
+      const entry
+      of fortEntries
+    ) {
+      activeBuildingIds.add(
+        entry.building.id
+      );
+    }
+
+    let changed = true;
+
+    while (changed) {
+      changed = false;
+
+      const activeCells =
+        new Set();
+
+      for (
+        const sourceId
+        of activeBuildingIds
+      ) {
+        const sourceRange =
+          rangesByBuildingId.get(
+            sourceId
+          );
+
+        if (!sourceRange) {
+          continue;
+        }
+
+        for (
+          const cell
+          of sourceRange.cells
+        ) {
+          activeCells.add(
+            cell.join(",")
+          );
+        }
+      }
+
+      for (
+        const entry
+        of entries
+      ) {
+        if (
+          entry.role !== "outpost" ||
+          activeBuildingIds.has(
+            entry.building.id
+          )
+        ) {
+          continue;
+        }
+
+        const ownCell =
+          entry.building
+            .occupiedCells()[0]
+            .join(",");
+
+        if (
+          activeCells.has(
+            ownCell
+          )
+        ) {
+          activeBuildingIds.add(
+            entry.building.id
+          );
+          changed = true;
+        }
+      }
+    }
+  }
+
+  document.ranges =
+    document.ranges.map(
+      range => {
+        if (!range.linked) {
+          return range;
+        }
+
+        return new MapRange({
+          ...range,
+          linked: true,
+          sourceBuildingId:
+            range.sourceBuildingId,
+          affiliation:
+            range.affiliation,
+          active:
+            activeBuildingIds.has(
+              range.sourceBuildingId
+            ),
+        });
+      }
+    );
+}
+
+function linkedRangeCheck(
+  building,
+  {
+    ignoreLinkedRangeId =
+      null,
+    ignoreBuildingId =
+      null,
+  } = {}
+) {
+  const role =
+    specialStructureRole(
+      building
+    );
+
+  if (!role) {
+    return {
+      allowed: true,
+      cells: [],
+      reason: null,
+    };
+  }
+
+  if (
+    !validateAffiliationCode(
+      building.affiliation
+    )
+  ) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "INVALID_AFFILIATION",
+    };
+  }
+
+  const counts =
+    allianceStructureCounts(
+      building.affiliation,
+      ignoreBuildingId
+    );
+
+  if (
+    role === "fort" &&
+    counts.fort >= 1
+  ) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "FORT_LIMIT_REACHED",
+    };
+  }
+
+  if (
+    role === "outpost" &&
+    counts.outpost >= 5
+  ) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "OUTPOST_LIMIT_REACHED",
+    };
+  }
+
+  if (
+    role === "fort" &&
+    fortTouchesBlockedPurple(
+      building
+    )
+  ) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "FORT_ON_PURPLE_GROUND",
+    };
+  }
+
+  if (
+    role === "outpost" &&
+    !isOutpostInsideOwnLinkedTerritory(
+      building,
+      ignoreBuildingId
+    )
+  ) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "OUTPOST_OUTSIDE_OWN_RANGE",
+    };
+  }
+
+  const cells =
+    linkedRangeCellsForBuilding(
+      building
+    );
+
+  if (!cells) {
+    return {
+      allowed: false,
+      cells: [],
+      reason:
+        "LINKED_RANGE_OUTSIDE_MAP",
+    };
+  }
+
+  if (
+    linkedCellsConflictWithManualRange(
+      cells,
+      ignoreLinkedRangeId
+    )
+  ) {
+    return {
+      allowed: false,
+      cells,
+      reason:
+        "LINKED_RANGE_OVERLAP",
+    };
+  }
+
+  return {
+    allowed: true,
+    cells,
+    reason: null,
+  };
+}
+
+function upsertLinkedRange(
+  building
+) {
+  const role =
+    specialStructureRole(
+      building
+    );
+  const existing =
+    linkedRangeForBuilding(
+      building
+    );
+
+  if (!role) {
+    if (existing) {
+      document.ranges =
+        document.ranges.filter(
+          item =>
+            item.id !==
+              existing.id
+        );
+    }
+    return null;
+  }
+
+  const check =
+    linkedRangeCheck(
+      building,
+      {
+        ignoreLinkedRangeId:
+          existing?.id ??
+          null,
+        ignoreBuildingId:
+          building.id,
+      }
+    );
+
+  if (!check.allowed) {
+    throw new RangeError(
+      check.reason
+    );
+  }
+
+  const next =
+    new MapRange({
+      id:
+        existing?.id ??
+        createUniqueId(),
+      kind: "allowed",
+      color:
+        affiliationColor(
+          building.affiliation,
+          existing?.id ??
+            null
+        ),
+      cells:
+        check.cells,
+      linked: true,
+      sourceBuildingId:
+        building.id,
+      affiliation:
+        building.affiliation,
+      active:
+        existing?.active !== false,
+    });
+
+  if (existing) {
+    const index =
+      document.ranges.findIndex(
+        item =>
+          item.id ===
+            existing.id
+      );
+    document.ranges[index] =
+      next;
+  } else {
+    document.ranges.push(next);
+  }
+
+  return new MapRange(next);
+}
+
+function removeLinkedRange(
+  buildingId
+) {
+  const removed =
+    document.ranges.filter(
+      item =>
+        item.linked &&
+        item.sourceBuildingId ===
+          buildingId
+    );
+
+  document.ranges =
+    document.ranges.filter(
+      item =>
+        !(
+          item.linked &&
+          item.sourceBuildingId ===
+            buildingId
+        )
+    );
+
+  return removed.map(
+    item =>
+      new MapRange(item)
+  );
+}
+
+function validateSpecialCandidate(
+  candidate,
+  {
+    ignoreBuildingId =
+      null,
+  } = {}
+) {
+  const existingRange =
+    ignoreBuildingId
+      ? document.ranges.find(
+          item =>
+            item.linked &&
+            item.sourceBuildingId ===
+              ignoreBuildingId
+        )
+      : null;
+
+  return linkedRangeCheck(
+    candidate,
+    {
+      ignoreLinkedRangeId:
+        existingRange?.id ??
+        null,
+      ignoreBuildingId:
+        ignoreBuildingId ??
+        candidate.id,
+    }
+  );
+}
 
 export function initialMapView({
   minX = MAP_MIN_X,
@@ -69,6 +878,7 @@ export function createNewDocument({
       });
   document.view = initialMapView();
   occupancy = new OccupancyManager([...document.fixedBuildings, ...document.buildings]);
+  recomputeLinkedRangeActivity();
   readOnly = Boolean(locked);
   return getDocument();
 }
@@ -107,6 +917,7 @@ export function loadDocument(data, options = {}) {
   documentMode = "map";
   document = parseDocument(data);
   occupancy = new OccupancyManager([...document.fixedBuildings, ...document.buildings]);
+  recomputeLinkedRangeActivity();
   readOnly = Boolean(options.readOnly);
   return getDocument();
 }
@@ -158,14 +969,81 @@ export function setView({ centerX, centerY, zoom }) {
 // Regular map editing
 // ---------------------------------------------------------------------------
 
-export function canPlaceBuilding({ x, y, width, height, ignoreBuildingId = null }) {
+export function canPlaceBuilding({
+  x,
+  y,
+  width,
+  height,
+  typeId = null,
+  type_id = null,
+  affiliation = "",
+  ignoreBuildingId = null,
+}) {
   requireDocument();
-  const result = occupancy.checkPosition({ x, y, width, height, ignoreBuildingId });
-  const rules = evaluatePlacementCells(result.occupiedCells, document);
+
+  const result =
+    occupancy.checkPosition({
+      x,
+      y,
+      width,
+      height,
+      ignoreBuildingId,
+    });
+
+  const rules =
+    evaluatePlacementCells(
+      result.occupiedCells,
+      document
+    );
+
+  let linkedRangeResult = {
+    allowed: true,
+    cells: [],
+    reason: null,
+  };
+
+  const effectiveTypeId =
+    typeId ??
+    type_id;
+
+  if (effectiveTypeId) {
+    const candidate =
+      new Building({
+        id:
+          ignoreBuildingId ??
+          createUniqueId(),
+        name: "Preview",
+        typeId:
+          effectiveTypeId,
+        x,
+        y,
+        width,
+        height,
+        affiliation,
+        locked: false,
+      });
+
+    linkedRangeResult =
+      validateSpecialCandidate(
+        candidate,
+        {
+          ignoreBuildingId,
+        }
+      );
+  }
+
   return {
     ...result,
-    rangeBlockedCells: rules.blockedCells,
-    canPlace: result.canPlace && rules.allowed,
+    rangeBlockedCells:
+      rules.blockedCells,
+    linkedRangeCells:
+      linkedRangeResult.cells,
+    linkedRangeReason:
+      linkedRangeResult.reason,
+    canPlace:
+      result.canPlace &&
+      rules.allowed &&
+      linkedRangeResult.allowed,
   };
 }
 
@@ -175,35 +1053,139 @@ export function addBuilding(data) {
   if (!document.buildingTypes.some(type => type.id === building.typeId)) {
     throw new RangeError(`Unknown building type ID: ${building.typeId}`);
   }
-  if (!canPlaceBuilding(building).canPlace) throw new RangeError("Building cannot be placed.");
-  occupancy.addBuilding(building);
-  document.buildings.push(building);
-  return new Building(building);
+  if (
+    !canPlaceBuilding({
+      ...building,
+      typeId:
+        building.typeId,
+      affiliation:
+        building.affiliation,
+    }).canPlace
+  ) {
+    throw new RangeError(
+      "Building cannot be placed."
+    );
+  }
+
+  occupancy.addBuilding(
+    building
+  );
+  document.buildings.push(
+    building
+  );
+
+  try {
+    upsertLinkedRange(
+      building
+    );
+    recomputeLinkedRangeActivity();
+  } catch (error) {
+    occupancy.removeBuilding(
+      building.id
+    );
+    document.buildings =
+      document.buildings.filter(
+        item =>
+          item.id !==
+            building.id
+      );
+    throw error;
+  }
+
+  return new Building(
+    building
+  );
 }
 
-export function moveBuilding(buildingId, newX, newY) {
+export function moveBuilding(
+  buildingId,
+  newX,
+  newY
+) {
   ensureWritable();
-  requireUserBuilding(buildingId);
-  const current = occupancy.requireBuilding(buildingId);
-  const rules = canPlaceBuilding({
-    x: newX,
-    y: newY,
-    width: current.width,
-    height: current.height,
-    ignoreBuildingId: buildingId,
-  });
-  if (!rules.canPlace) throw new RangeError("Building cannot be moved.");
-  const moved = occupancy.moveBuilding(buildingId, newX, newY);
-  return new Building(moved);
+  requireUserBuilding(
+    buildingId
+  );
+
+  const current =
+    occupancy.requireBuilding(
+      buildingId
+    );
+
+  const rules =
+    canPlaceBuilding({
+      x: newX,
+      y: newY,
+      width: current.width,
+      height: current.height,
+      typeId: current.typeId,
+      affiliation:
+        current.affiliation,
+      ignoreBuildingId:
+        buildingId,
+    });
+
+  if (!rules.canPlace) {
+    throw new RangeError(
+      "Building cannot be moved."
+    );
+  }
+
+  const originalX =
+    current.x;
+  const originalY =
+    current.y;
+
+  const moved =
+    occupancy.moveBuilding(
+      buildingId,
+      newX,
+      newY
+    );
+
+  try {
+    upsertLinkedRange(
+      moved
+    );
+    recomputeLinkedRangeActivity();
+  } catch (error) {
+    occupancy.moveBuilding(
+      buildingId,
+      originalX,
+      originalY
+    );
+    throw error;
+  }
+
+  return new Building(
+    moved
+  );
 }
 
 export function deleteBuilding(buildingId) {
   ensureWritable();
   const building = requireUserBuilding(buildingId);
   if (building.locked) throw new RangeError("Locked buildings cannot be deleted.");
-  const removed = occupancy.removeBuilding(buildingId);
-  document.buildings = document.buildings.filter(item => item.id !== buildingId);
-  return new Building(removed);
+  const removed =
+    occupancy.removeBuilding(
+      buildingId
+    );
+
+  document.buildings =
+    document.buildings.filter(
+      item =>
+        item.id !==
+          buildingId
+    );
+
+  removeLinkedRange(
+    buildingId
+  );
+  recomputeLinkedRangeActivity();
+
+  return new Building(
+    removed
+  );
 }
 
 export function deleteBuildings(buildingIds) {
@@ -212,9 +1194,29 @@ export function deleteBuildings(buildingIds) {
   const targets = document.buildings.filter(item => ids.has(item.id));
   if (targets.some(item => item.locked)) throw new RangeError("Locked buildings cannot be deleted.");
   if (targets.length !== ids.size) throw new RangeError("Unknown building ID.");
-  document.buildings = document.buildings.filter(item => !ids.has(item.id));
+  document.buildings =
+    document.buildings.filter(
+      item =>
+        !ids.has(item.id)
+    );
+
+  document.ranges =
+    document.ranges.filter(
+      item =>
+        !(
+          item.linked &&
+          ids.has(
+            item.sourceBuildingId
+          )
+        )
+    );
+
   rebuildOccupancy();
-  return targets.map(item => new Building(item));
+  recomputeLinkedRangeActivity();
+  return targets.map(
+    item =>
+      new Building(item)
+  );
 }
 
 export function restoreBuildings(states) {
@@ -224,7 +1226,22 @@ export function restoreBuildings(states) {
   const nextOccupancy = new OccupancyManager([...document.fixedBuildings, ...next]);
   document.buildings = next;
   occupancy = nextOccupancy;
-  return additions.map(item => new Building(item));
+
+  for (
+    const addition
+    of additions
+  ) {
+    upsertLinkedRange(
+      addition
+    );
+  }
+
+  recomputeLinkedRangeActivity();
+
+  return additions.map(
+    item =>
+      new Building(item)
+  );
 }
 
 export function editBuilding(buildingId, changes = {}) {
@@ -247,20 +1264,47 @@ export function editBuilding(buildingId, changes = {}) {
   if (!document.buildingTypes.some(type => type.id === candidate.typeId)) {
     throw new RangeError(`Unknown building type ID: ${candidate.typeId}`);
   }
-  const check = canPlaceBuilding({
-    x: candidate.x,
-    y: candidate.y,
-    width: candidate.width,
-    height: candidate.height,
-    ignoreBuildingId: current.id,
-  });
+  const check =
+    canPlaceBuilding({
+      x: candidate.x,
+      y: candidate.y,
+      width: candidate.width,
+      height: candidate.height,
+      typeId:
+        candidate.typeId,
+      affiliation:
+        candidate.affiliation,
+      ignoreBuildingId:
+        current.id,
+    });
   if (!check.canPlace) throw new RangeError("Building cannot be resized at its current position.");
   occupancy.removeBuilding(current.id);
   try { occupancy.addBuilding(candidate); }
   catch (error) { occupancy.addBuilding(current); throw error; }
   const index = document.buildings.findIndex(item => item.id === buildingId);
-  document.buildings[index] = candidate;
-  return new Building(candidate);
+  document.buildings[index] =
+    candidate;
+
+  try {
+    upsertLinkedRange(
+      candidate
+    );
+    recomputeLinkedRangeActivity();
+  } catch (error) {
+    occupancy.removeBuilding(
+      candidate.id
+    );
+    occupancy.addBuilding(
+      current
+    );
+    document.buildings[index] =
+      current;
+    throw error;
+  }
+
+  return new Building(
+    candidate
+  );
 }
 
 export function restoreBuildingState(data) {
@@ -270,19 +1314,39 @@ export function restoreBuildingState(data) {
     throw new RangeError(`Unknown building type ID: ${candidate.typeId}`);
   }
   const current = requireUserBuilding(candidate.id);
-  const check = canPlaceBuilding({
-    x: candidate.x,
-    y: candidate.y,
-    width: candidate.width,
-    height: candidate.height,
-    ignoreBuildingId: current.id,
-  });
+  const check =
+    canPlaceBuilding({
+      x: candidate.x,
+      y: candidate.y,
+      width: candidate.width,
+      height: candidate.height,
+      typeId:
+        candidate.typeId,
+      affiliation:
+        candidate.affiliation,
+      ignoreBuildingId:
+        current.id,
+    });
   if (!check.canPlace) throw new RangeError("Building state cannot be restored.");
   occupancy.removeBuilding(current.id);
   try { occupancy.addBuilding(candidate); }
   catch (error) { occupancy.addBuilding(current); throw error; }
-  document.buildings[document.buildings.findIndex(item => item.id === candidate.id)] = candidate;
-  return new Building(candidate);
+  document.buildings[
+    document.buildings.findIndex(
+      item =>
+        item.id ===
+          candidate.id
+    )
+  ] = candidate;
+
+  upsertLinkedRange(
+    candidate
+  );
+  recomputeLinkedRangeActivity();
+
+  return new Building(
+    candidate
+  );
 }
 
 export function commitRange(data) {
@@ -309,7 +1373,15 @@ export function editRange(rangeId, { locked }) {
   ensureWritable();
   const index = document.ranges.findIndex(item => item.id === rangeId);
   if (index < 0) throw new RangeError(`Unknown range ID: ${rangeId}`);
-  const current = document.ranges[index];
+  const current =
+    document.ranges[index];
+
+  if (current.linked) {
+    throw new RangeError(
+      "Building-linked ranges cannot be edited directly."
+    );
+  }
+
   const edited = new MapRange({
     id: current.id,
     kind: current.kind,
@@ -325,18 +1397,87 @@ export function deleteRange(rangeId) {
   ensureWritable();
   const index = document.ranges.findIndex(item => item.id === rangeId);
   if (index < 0) throw new RangeError(`Unknown range ID: ${rangeId}`);
-  const current = document.ranges[index];
+  const current =
+    document.ranges[index];
+
+  if (current.linked) {
+    throw new RangeError(
+      "Building-linked ranges cannot be deleted directly."
+    );
+  }
+
   if (current.locked) throw new RangeError("Locked ranges cannot be deleted.");
   document.ranges.splice(index, 1);
   return new MapRange(current);
 }
 
+export function setLinkedRangeAffiliationColor(
+  affiliation,
+  color
+) {
+  ensureWritable();
+
+  const normalized =
+    String(
+      affiliation ??
+      ""
+    ).trim();
+
+  const changed = [];
+
+  document.ranges =
+    document.ranges.map(
+      item => {
+        if (
+          !item.linked ||
+          item.affiliation !==
+            normalized
+        ) {
+          return item;
+        }
+
+        const edited =
+          new MapRange({
+            ...item,
+            color,
+            linked: true,
+            sourceBuildingId:
+              item.sourceBuildingId,
+            affiliation:
+              item.affiliation,
+          });
+
+        changed.push(
+          edited
+        );
+
+        return edited;
+      }
+    );
+
+  return changed.map(
+    item =>
+      new MapRange(item)
+  );
+}
+
 export function restoreRanges(ranges) {
   ensureWritable();
-  const restored = ranges.map(item => new MapRange(item));
-  new MapDocument({ ...document, ranges: restored });
-  document.ranges = restored;
-  return getDocument().ranges;
+  const restored =
+    ranges.map(
+      item =>
+        new MapRange(item)
+    );
+
+  document.ranges =
+    restored;
+
+  recomputeLinkedRangeActivity();
+
+  return document.ranges.map(
+    item =>
+      new MapRange(item)
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -708,6 +1849,7 @@ export const PNSMapEngine = {
   commitRange,
   editRange,
   deleteRange,
+  setLinkedRangeAffiliationColor,
   restoreRanges,
   addFixedBuildingType,
   editFixedBuildingType,

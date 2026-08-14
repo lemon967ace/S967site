@@ -123,18 +123,143 @@ export class FixedBuilding extends Building {
 }
 
 export class MapRange {
-  constructor({ kind, color, locked = false, cells, id = createUniqueId() }) {
-    this.id = validateNonEmptyText(id, "Range ID");
-    this.kind = validateNonEmptyText(kind, "Range kind");
-this.color = validateColor(color, "Range color");
-    if (!new Set(["allowed", "blocked"]).has(this.kind)) throw new RangeError("Range kind must be allowed or blocked.");
-    if (!Array.isArray(cells)) throw new TypeError("Range cells must be an array.");
-    const unique = new Map(cells.map(cell => {
-      if (!Array.isArray(cell) || cell.length !== 2 || !isValidMapCell(cell[0], cell[1])) throw new RangeError("Range contains an invalid map cell.");
-      return [`${cell[0]},${cell[1]}`, [cell[0], cell[1]]];
-    }));
-    if (!unique.size) throw new RangeError("Range must contain at least one cell.");
-    this.cells = [...unique.values()]; this.locked = Boolean(locked);
+  constructor({
+    kind,
+    color,
+    locked = false,
+    cells,
+    id = createUniqueId(),
+    linked = false,
+    sourceBuildingId = null,
+    source_building_id = null,
+    affiliation = "",
+    active = true,
+  }) {
+    this.id =
+      validateNonEmptyText(
+        id,
+        "Range ID"
+      );
+    this.kind =
+      validateNonEmptyText(
+        kind,
+        "Range kind"
+      );
+    this.color =
+      validateColor(
+        color,
+        "Range color"
+      );
+
+    if (
+      !new Set([
+        "allowed",
+        "blocked",
+      ]).has(this.kind)
+    ) {
+      throw new RangeError(
+        "Range kind must be allowed or blocked."
+      );
+    }
+
+    if (!Array.isArray(cells)) {
+      throw new TypeError(
+        "Range cells must be an array."
+      );
+    }
+
+    const unique =
+      new Map(
+        cells.map(cell => {
+          if (
+            !Array.isArray(cell) ||
+            cell.length !== 2 ||
+            !isValidMapCell(
+              cell[0],
+              cell[1]
+            )
+          ) {
+            throw new RangeError(
+              "Range contains an invalid map cell."
+            );
+          }
+
+          return [
+            `${cell[0]},${cell[1]}`,
+            [cell[0], cell[1]],
+          ];
+        })
+      );
+
+    if (!unique.size) {
+      throw new RangeError(
+        "Range must contain at least one cell."
+      );
+    }
+
+    this.cells =
+      [...unique.values()];
+    this.linked =
+      Boolean(linked);
+
+    const sourceId =
+      sourceBuildingId ??
+      source_building_id;
+
+    if (this.linked) {
+      this.sourceBuildingId =
+        validateNonEmptyText(
+          sourceId,
+          "Linked range source building ID"
+        );
+
+      if (
+        typeof affiliation !==
+        "string"
+      ) {
+        throw new TypeError(
+          "Linked range affiliation must be a string."
+        );
+      }
+
+      this.affiliation =
+        affiliation.trim();
+      this.active =
+        active !== false;
+
+      if (
+        this.affiliation &&
+        (
+          this.affiliation.length !==
+            3 ||
+          [...this.affiliation].some(
+            c =>
+              c.charCodeAt(0) <
+                33 ||
+              c.charCodeAt(0) >
+                126
+          )
+        )
+      ) {
+        throw new RangeError(
+          "Linked range affiliation must be exactly three printable ASCII characters."
+        );
+      }
+
+      /*
+        Building-linked ranges are system controlled.
+        The user may change their affiliation color through the dedicated
+        affiliation-color control, but cannot unlock/edit/delete the range.
+      */
+      this.locked = true;
+    } else {
+      this.sourceBuildingId =
+        null;
+      this.affiliation = "";
+      this.active = true;
+      this.locked =
+        Boolean(locked);
+    }
   }
 }
 
@@ -177,9 +302,117 @@ export class MapDocument {
     }
     const typeIds = new Set(this.buildingTypes.map(item => item.id));
     for (const building of this.buildings) if (!typeIds.has(building.typeId)) throw new RangeError(`Unknown building type ID: ${building.typeId}`);
+    for (
+      const range
+      of this.ranges
+    ) {
+      if (!range.linked) {
+        continue;
+      }
+
+      const source =
+        this.buildings.find(
+          item =>
+            item.id ===
+              range.sourceBuildingId
+        );
+
+      if (!source) {
+        throw new RangeError(
+          `Linked range source building not found: ${range.sourceBuildingId}`
+        );
+      }
+
+      if (
+        source.typeId !==
+          "type-01"
+      ) {
+        throw new RangeError(
+          "Linked ranges must belong to type-01 alliance structures."
+        );
+      }
+    }
+
     const fixedTypeIds = new Set(this.fixedBuildingTypes.map(item => item.id));
     const fixedTypes = new Map(this.fixedBuildingTypes.map(item => [item.id, item]));
     for (const building of this.fixedBuildings) { const type = fixedTypes.get(building.typeId); if (!fixedTypeIds.has(building.typeId)) throw new RangeError(`Unknown fixed building type ID: ${building.typeId}`); if (building.width !== type.width || building.height !== type.height) throw new RangeError("Fixed building size must match its type."); }
-    buildRangeCellOwnerIndex(this, { throwOnOverlap: true });
+    /*
+      Manual ranges keep the old no-overlap rule.
+      Building-linked ranges are the only user ranges allowed to overlap
+      one another. They may also overlay fixed/base-map ranges because the
+      linked range is an alliance-territory overlay, not a replacement for
+      base-map terrain.
+    */
+    for (
+      let i = 0;
+      i < this.ranges.length;
+      i++
+    ) {
+      const left =
+        this.ranges[i];
+      const leftCells =
+        new Set(
+          left.cells.map(
+            cell => cell.join(",")
+          )
+        );
+
+      for (
+        let j = i + 1;
+        j < this.ranges.length;
+        j++
+      ) {
+        const right =
+          this.ranges[j];
+
+        if (
+          left.linked &&
+          right.linked
+        ) {
+          continue;
+        }
+
+        if (
+          right.cells.some(
+            cell =>
+              leftCells.has(
+                cell.join(",")
+              )
+          )
+        ) {
+          throw new RangeError(
+            "Overlapping range cell."
+          );
+        }
+      }
+
+      if (!left.linked) {
+        for (
+          const fixedRange
+          of this.fixedRanges
+        ) {
+          const fixedCells =
+            new Set(
+              fixedRange.cells.map(
+                cell =>
+                  cell.join(",")
+              )
+            );
+
+          if (
+            left.cells.some(
+              cell =>
+                fixedCells.has(
+                  cell.join(",")
+                )
+            )
+          ) {
+            throw new RangeError(
+              "Overlapping range cell."
+            );
+          }
+        }
+      }
+    }
   }
 }

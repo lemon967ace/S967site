@@ -1,4 +1,4 @@
-import { snapshotBuilding } from "./editor-history.js";
+import { snapshotBuilding, snapshotRange } from "./editor-history.js";
 import { rectangleCells } from "./editor-range.js";
 
 export function areaBuildingTargets(buildings, cells) {
@@ -26,9 +26,53 @@ export function createBulkDeleteController({ engine, history, buildingController
     ensureWritable(); if (mode !== "bulkDelete") return null;
     const result = summary();
     if (!result.deletable.length) { cancel(); return { deleted: [], lockedCount: result.locked.length }; }
-    const states = result.deletable.map(snapshotBuilding), ids = states.map(item => item.id);
-    const deleted = engine.deleteBuildings(ids);
-    history.record({ description: "bulkDelete", undo() { engine.restoreBuildings(states); buildingController?.normalizeSelection(); }, redo() { engine.deleteBuildings(ids); buildingController?.normalizeSelection(); } });
+    const states =
+      result.deletable.map(
+        snapshotBuilding
+      );
+    const ids =
+      states.map(
+        item => item.id
+      );
+    const beforeRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    const deleted =
+      engine.deleteBuildings(
+        ids
+      );
+
+    const afterRanges =
+      engine.getDocument().ranges.map(
+        snapshotRange
+      );
+
+    history.record({
+      description:
+        "bulkDelete",
+      undo() {
+        engine.restoreBuildings(
+          states
+        );
+        engine.restoreRanges(
+          beforeRanges
+        );
+        buildingController
+          ?.normalizeSelection();
+      },
+      redo() {
+        engine.deleteBuildings(
+          ids
+        );
+        engine.restoreRanges(
+          afterRanges
+        );
+        buildingController
+          ?.normalizeSelection();
+      },
+    });
     buildingController?.normalizeSelection(); onDirty(!history.isAtSavedState()); cancel();
     return { deleted, lockedCount: result.locked.length };
   }

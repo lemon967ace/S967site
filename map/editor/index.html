@@ -1808,10 +1808,10 @@
       ru: { UNAUTHORIZED: "Войдите снова.", INVALID_SESSION: "Сеанс недействителен. Войдите снова.", SESSION_EXPIRED: "Срок действия сеанса истёк. Войдите снова.", MAP_NAME_REQUIRED: "Введите название карты.", MAP_NAME_TOO_LONG: "Название карты должно содержать не более 100 символов.", INVALID_DOCUMENT_DATA: "Документ карты недействителен.", INVALID_MAP_ID: "Недействительный ID карты.", MAP_NOT_FOUND: "Карта не найдена.", MAP_LIMIT_REACHED: "Можно сохранить не более 5 карт.", DATABASE_ERROR: "Ошибка базы данных помешала сохранению.", MAP_SAVE_FAILED: "Не удалось сохранить карту.", INTERNAL_SERVER_ERROR: "Ошибка сервера помешала сохранению.", NETWORK_ERROR: "Ошибка сети. Изменения сохранены локально." },
     };
     const RANGE_TEXT = {
-      en: { title: "Ranges", allowed: "Allowed", blocked: "Blocked", locked: "Locked", newAllowed: "New allowed range", newBlocked: "New blocked range", confirm: "Confirm range", cancel: "Cancel", remove: "Delete", empty: "No ranges", cells: "cells" },
-      ko: { title: "범위", allowed: "건축 허용", blocked: "건축 금지", locked: "고정", newAllowed: "새 허용 범위", newBlocked: "새 금지 범위", confirm: "범위 확정", cancel: "취소", remove: "삭제", empty: "범위 없음", cells: "칸" },
-      ja: { title: "範囲", allowed: "建築可能", blocked: "建築禁止", locked: "固定", newAllowed: "許可範囲を作成", newBlocked: "禁止範囲を作成", confirm: "範囲を確定", cancel: "キャンセル", remove: "削除", empty: "範囲なし", cells: "セル" },
-      ru: { title: "Области", allowed: "Разрешено", blocked: "Запрещено", locked: "Закреплено", newAllowed: "Новая разрешённая", newBlocked: "Новая запрещённая", confirm: "Подтвердить", cancel: "Отмена", remove: "Удалить", empty: "Областей нет", cells: "ячеек" },
+      en: { title: "Ranges", allowed: "Allowed", blocked: "Blocked", locked: "Locked", newAllowed: "New allowed range", newBlocked: "New blocked range", confirm: "Confirm range", cancel: "Cancel", remove: "Delete", empty: "No ranges", cells: "cells", affiliationColors: "Alliance territory colors", noAffiliation: "No affiliation" },
+      ko: { title: "범위", allowed: "건축 허용", blocked: "건축 금지", locked: "고정", newAllowed: "새 허용 범위", newBlocked: "새 금지 범위", confirm: "범위 확정", cancel: "취소", remove: "삭제", empty: "범위 없음", cells: "칸", affiliationColors: "소속별 영토 색상", noAffiliation: "소속 없음" },
+      ja: { title: "範囲", allowed: "建築可能", blocked: "建築禁止", locked: "固定", newAllowed: "許可範囲を作成", newBlocked: "禁止範囲を作成", confirm: "範囲を確定", cancel: "キャンセル", remove: "削除", empty: "範囲なし", cells: "セル", affiliationColors: "所属別の領地色", noAffiliation: "所属なし" },
+      ru: { title: "Области", allowed: "Разрешено", blocked: "Запрещено", locked: "Закреплено", newAllowed: "Новая разрешённая", newBlocked: "Новая запрещённая", confirm: "Подтвердить", cancel: "Отмена", remove: "Удалить", empty: "Областей нет", cells: "ячеек", affiliationColors: "Цвет территории по альянсу", noAffiliation: "Без принадлежности" },
     };
     const RANGE_OVERLAP_TEXT = {
       en: "A range cannot overlap another range.",
@@ -1857,18 +1857,36 @@
 
     const DEFAULT_BUILDING_TYPE_NAMES = {
       "type-01": {
-        ko: "연맹 보루",
-        en: "Alliance Fort",
-        ja: "ギルド要塞",
-        ru: "Крепость Альянса",
-        legacy: ["건물 종류 1", "Building Type 1"],
+        ko: "연맹 보루 / 전초",
+        en: "Alliance Fort / Outpost",
+        ja: "ギルド要塞 / 前哨",
+        ru: "Крепость / Форпост Альянса",
+        legacy: [
+          "연맹 보루",
+          "Alliance Fort",
+          "ギルド要塞",
+          "Крепость Альянса",
+          "전초",
+          "Outpost",
+          "前哨",
+          "Форпост Альянса",
+          "건물 종류 1",
+          "Building Type 1",
+        ],
       },
       "type-02": {
-        ko: "전초",
-        en: "Outpost",
-        ja: "前哨",
-        ru: "Форпост Альянса",
-        legacy: ["건물 종류 2", "Building Type 2"],
+        ko: "연맹 채집지",
+        en: "Alliance Gathering Site",
+        ja: "ギルド採集地",
+        ru: "Ресурсный пункт Альянса",
+        legacy: [
+          "전초",
+          "Outpost",
+          "前哨",
+          "Форпост Альянса",
+          "건물 종류 2",
+          "Building Type 2",
+        ],
       },
       "type-03": {
         ko: "음향 함정",
@@ -1932,6 +1950,48 @@
       }
 
       return String(type.name ?? type.id ?? "");
+    }
+
+    function getBuildingTypeDisplayNameForSize(
+      type,
+      size
+    ) {
+      if (
+        type?.id !==
+        "type-01"
+      ) {
+        return getBuildingTypeDisplayName(
+          type
+        );
+      }
+
+      if (size === 1) {
+        return (
+          {
+            ko: "전초",
+            en: "Outpost",
+            ja: "前哨",
+            ru: "Форпост Альянса",
+          }[language] ??
+          "Outpost"
+        );
+      }
+
+      if (size === 2) {
+        return (
+          {
+            ko: "연맹 보루",
+            en: "Alliance Fort",
+            ja: "ギルド要塞",
+            ru: "Крепость Альянса",
+          }[language] ??
+          "Alliance Fort"
+        );
+      }
+
+      return getBuildingTypeDisplayName(
+        type
+      );
     }
 
     function renameBuildingType(type) {
@@ -2371,7 +2431,15 @@
       const rows = [
         ...(building.fixed ? [["Layer", "Fixed"]] : []),
         [text.detailName, building.name],
-        [text.detailType, buildingType ? getBuildingTypeDisplayName(buildingType) : building.typeId],
+        [
+          text.detailType,
+          buildingType
+            ? getBuildingTypeDisplayNameForSize(
+                buildingType,
+                building.width
+              )
+            : building.typeId,
+        ],
         [text.detailCoordinate, `(${building.x}, ${building.y})`],
         [text.detailSize, `${building.width}×${building.height}`],
       ];
@@ -2497,7 +2565,13 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
         row.append(button);
 
-        if (!readOnly && DEFAULT_BUILDING_TYPE_NAMES[type.id]) {
+        if (
+          !readOnly &&
+          DEFAULT_BUILDING_TYPE_NAMES[
+            type.id
+          ] &&
+          type.id !== "type-01"
+        ) {
           const renameButton = document.createElement("button");
           renameButton.type = "button";
           renameButton.textContent = "✎";
@@ -2685,15 +2759,145 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       );
       filtersHost.append(controls);
 
+      const linkedRanges =
+        ranges.filter(
+          item => item.linked
+        );
+
+      const affiliations =
+        new Map();
+
+      for (
+        const item
+        of linkedRanges
+      ) {
+        if (
+          !affiliations.has(
+            item.affiliation
+          )
+        ) {
+          affiliations.set(
+            item.affiliation,
+            item.color
+          );
+        }
+      }
+
+      if (affiliations.size) {
+        const colorSection =
+          document.createElement(
+            "div"
+          );
+
+        colorSection.style.cssText =
+          "margin:.65rem 0;padding:.5rem;border:1px solid rgba(127,127,127,.35);border-radius:6px";
+
+        const heading =
+          document.createElement(
+            "div"
+          );
+
+        heading.textContent =
+          labels.affiliationColors;
+        heading.style.cssText =
+          "font-weight:700;margin-bottom:.4rem";
+
+        colorSection.append(
+          heading
+        );
+
+        for (
+          const [
+            affiliation,
+            value,
+          ]
+          of [...affiliations]
+            .sort(
+              (a, b) =>
+                a[0].localeCompare(
+                  b[0]
+                )
+            )
+        ) {
+          const row =
+            document.createElement(
+              "label"
+            );
+
+          row.style.cssText =
+            "display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:.25rem 0";
+
+          const title =
+            document.createElement(
+              "span"
+            );
+
+          title.textContent =
+            affiliation ||
+            labels.noAffiliation;
+
+          const picker =
+            document.createElement(
+              "input"
+            );
+
+          picker.type = "color";
+          picker.value = value;
+          picker.disabled =
+            readOnly;
+
+          picker.addEventListener(
+            "change",
+            () => {
+              try {
+                rangeController
+                  .setAffiliationColor(
+                    affiliation,
+                    picker.value
+                  );
+                mapRenderer.refresh();
+                renderRangePanel();
+              } catch (error) {
+                window.alert(
+                  error?.message ??
+                  String(error)
+                );
+              }
+            }
+          );
+
+          row.append(
+            title,
+            picker
+          );
+          colorSection.append(
+            row
+          );
+        }
+
+        filtersHost.append(
+          colorSection
+        );
+      }
+
+      const manualRanges =
+        ranges.filter(
+          item =>
+            !item.linked
+        );
+
       const list =
         document.createElement("div");
 
-      if (!ranges.length) {
+      if (!manualRanges.length) {
         list.textContent =
           labels.empty;
       }
 
-      for (const item of ranges) {
+      for (
+        const item
+        of manualRanges
+      ) {
         const button =
           document.createElement("button");
 
@@ -3015,6 +3219,97 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       rangeController.addAreaPeer(bulkDeleteController);
       rangeController.addAreaPeer(rangeEraseController);
 
+      function requestAllianceAffiliation() {
+        const promptText =
+          {
+            ko: "소속을 입력하세요. 정확히 3글자의 영문 대소문자, 숫자, 특수문자를 사용할 수 있습니다.",
+            en: "Enter the affiliation. Use exactly 3 case-sensitive ASCII letters, numbers, or symbols.",
+            ja: "所属を入力してください。大文字・小文字を区別し、英数字・記号のASCII文字を正確に3文字入力してください。",
+            ru: "Введите принадлежность: ровно 3 ASCII-символа — буквы с учётом регистра, цифры или знаки.",
+          }[language];
+
+        const value =
+          window.prompt(
+            promptText,
+            ""
+          );
+
+        if (value === null) {
+          return null;
+        }
+
+        if (
+          value.length !== 3 ||
+          [...value].some(
+            c =>
+              c.charCodeAt(0) <
+                33 ||
+              c.charCodeAt(0) >
+                126
+          )
+        ) {
+          window.alert(
+            {
+              ko: "소속은 정확히 3글자의 영문 대소문자, 숫자, 특수문자만 사용할 수 있습니다.",
+              en: "Affiliation must be exactly 3 case-sensitive printable ASCII characters.",
+              ja: "所属は大文字・小文字を区別する印字可能ASCII文字を正確に3文字入力してください。",
+              ru: "Принадлежность должна состоять ровно из 3 печатных ASCII-символов с учётом регистра.",
+            }[language]
+          );
+          return null;
+        }
+
+        return value;
+      }
+
+      function automaticAllianceBuildingName({
+        size,
+        affiliation,
+      }) {
+        if (size === 2) {
+          return (
+            {
+              ko: "보루",
+              en: "Fort",
+              ja: "要塞",
+              ru: "Крепость",
+            }[language] ??
+            "Fort"
+          );
+        }
+
+        const count =
+          PNSMapEngine
+            .getDocument()
+            .buildings
+            .filter(
+              building =>
+                building.typeId ===
+                  "type-01" &&
+                building.width === 1 &&
+                building.height === 1 &&
+                building.affiliation ===
+                  affiliation
+            )
+            .length;
+
+        const baseName =
+          {
+            ko: "전초",
+            en: "Outpost",
+            ja: "前哨",
+            ru: "Форпост",
+          }[language] ??
+          "Outpost";
+
+        return (
+          baseName +
+          String(
+            count + 1
+          )
+        );
+      }
+
       mapRenderer = createMapRenderer({
         host: document.getElementById("mapCanvasHost"),
         engine: PNSMapEngine,
@@ -3023,15 +3318,108 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         bulkDeleteController,
         rangeEraseController,
         buildingFilter,
-        notifyInvalidPlacement: () => {
-          const message =
-            language === "ko"
-              ? "이 위치에는 건물을 배치할 수 없습니다. 허용 범위 안의 빈 칸을 선택하세요."
-              : language === "ja"
-                ? "この位置には建物を配置できません。許可範囲内の空いているマスを選択してください。"
-                : language === "ru"
-                  ? "В этом месте нельзя разместить здание. Выберите свободную клетку внутри разрешённой области."
-                  : "A building cannot be placed here. Choose an empty cell inside the allowed area.";
+        notifyInvalidPlacement: ({
+          preview,
+        }) => {
+          const reason =
+            preview?.linkedRangeReason;
+
+          let message;
+
+          if (
+            reason ===
+            "OUTPOST_OUTSIDE_OWN_RANGE"
+          ) {
+            message =
+              language === "ko"
+                ? "1×1 전초는 같은 소속의 기존 특수 범위 위에만 설치할 수 있습니다."
+                : language === "ja"
+                  ? "1×1の前哨は、同じ所属の既存の専用範囲内にのみ設置できます。"
+                  : language === "ru"
+                    ? "Форпост 1×1 можно установить только внутри существующей специальной территории той же принадлежности."
+                    : "A 1×1 outpost can only be placed inside an existing special territory of the same affiliation.";
+          } else if (
+            reason ===
+            "FORT_LIMIT_REACHED"
+          ) {
+            message =
+              language === "ko"
+                ? "소속 하나당 2×2 보루는 1개만 설치할 수 있습니다."
+                : language === "ja"
+                  ? "所属ごとに2×2要塞は1つだけ設置できます。"
+                  : language === "ru"
+                    ? "Для одной принадлежности можно установить только одну крепость 2×2."
+                    : "Only one 2×2 Fort is allowed per affiliation.";
+          } else if (
+            reason ===
+            "OUTPOST_LIMIT_REACHED"
+          ) {
+            message =
+              language === "ko"
+                ? "소속 하나당 1×1 전초는 최대 5개까지 설치할 수 있습니다."
+                : language === "ja"
+                  ? "所属ごとに1×1前哨は最大5つまで設置できます。"
+                  : language === "ru"
+                    ? "Для одной принадлежности разрешено не более пяти форпостов 1×1."
+                    : "Up to five 1×1 Outposts are allowed per affiliation.";
+          } else if (
+            reason ===
+            "FORT_ON_PURPLE_GROUND"
+          ) {
+            message =
+              language === "ko"
+                ? "2×2 보루는 중앙 보라색 지형에는 설치할 수 없습니다."
+                : language === "ja"
+                  ? "2×2要塞は中央の紫色の地形には設置できません。"
+                  : language === "ru"
+                    ? "Крепость 2×2 нельзя устанавливать на центральной фиолетовой территории."
+                    : "A 2×2 Fort cannot be placed on the central purple ground.";
+          } else if (
+            reason ===
+            "INVALID_AFFILIATION"
+          ) {
+            message =
+              language === "ko"
+                ? "소속은 정확히 3글자의 영문 대소문자, 숫자, 특수문자여야 합니다."
+                : language === "ja"
+                  ? "所属は大文字・小文字を区別する印字可能ASCII文字を正確に3文字入力してください。"
+                  : language === "ru"
+                    ? "Принадлежность должна состоять ровно из 3 печатных ASCII-символов с учётом регистра."
+                    : "Affiliation must be exactly 3 case-sensitive printable ASCII characters.";
+          } else if (
+            reason ===
+            "LINKED_RANGE_OVERLAP"
+          ) {
+            message =
+              language === "ko"
+                ? "보루/전초의 자동 범위가 일반 범위와 겹칩니다. 자동 범위끼리만 서로 겹칠 수 있습니다."
+                : language === "ja"
+                  ? "要塞/前哨の自動範囲が通常範囲と重なっています。自動範囲同士のみ重ねられます。"
+                  : language === "ru"
+                    ? "Автоматическая территория крепости/форпоста пересекается с обычной областью. Пересекаться могут только автоматические территории."
+                    : "The Fort/Outpost automatic territory overlaps a normal range. Only automatic territories may overlap each other.";
+          } else if (
+            reason ===
+            "LINKED_RANGE_OUTSIDE_MAP"
+          ) {
+            message =
+              language === "ko"
+                ? "이 위치에서는 보루/전초의 전체 자동 범위가 맵 밖으로 나갑니다."
+                : language === "ja"
+                  ? "この位置では要塞/前哨の自動範囲全体がマップ外にはみ出します。"
+                  : language === "ru"
+                    ? "В этой позиции полная автоматическая территория крепости/форпоста выходит за пределы карты."
+                    : "The complete Fort/Outpost automatic territory would extend outside the map.";
+          } else {
+            message =
+              language === "ko"
+                ? "이 위치에는 건물을 배치할 수 없습니다."
+                : language === "ja"
+                  ? "この位置には建物を配置できません。"
+                  : language === "ru"
+                    ? "В этом месте нельзя разместить здание."
+                    : "A building cannot be placed here.";
+          }
 
           window.alert(message);
         },
@@ -3058,6 +3446,12 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
           return name;
         },
+
+        requestBuildingAffiliation: () =>
+          requestAllianceAffiliation(),
+
+        resolveBuildingName:
+          automaticAllianceBuildingName,
         editorHost: window.S967EditorHost,
         confirmBulkDelete: ({ deleteCount, lockedCount }) => {
           const labels = BULK_DELETE_TEXT[language] ?? BULK_DELETE_TEXT.en;
