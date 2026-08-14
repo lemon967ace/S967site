@@ -1,1194 +1,5727 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="referrer" content="no-referrer">
-  <title>Staff Chat | S967</title>
-  <link rel="stylesheet" href="/theme.css">
-  <script src="/theme.js" defer></script>
-  <script src="/language.js" defer></script>
-  <script src="/admin/admin-auth.js"></script>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
+  <title>Staff · S967</title>
+
+  <link
+    rel="stylesheet"
+    href="/theme.css"
+  >
+
+  <script
+    src="/theme.js"
+    defer
+  ></script>
+
+  <script
+    src="/language.js"
+    defer
+  ></script>
+
   <style>
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%}
-    body{min-height:100dvh;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--page-bg);color:var(--text)}
-    button,input,textarea{font:inherit;color:inherit}
-    button{cursor:pointer}
-    .hidden{display:none!important}
-    .app{width:min(1180px,100%);height:100dvh;margin:0 auto;padding:12px 12px 76px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px}
-    .panel{border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:15px}
-    .sidebar{min-height:0;padding:10px;display:flex;flex-direction:column;gap:8px}
-    .side-head{display:flex;align-items:center;gap:6px}
-    .side-head strong{flex:1}
-    .rooms{min-height:0;overflow:auto;display:grid;align-content:start;gap:5px}
-    .room-button{width:100%;display:flex;align-items:center;gap:7px;padding:9px;border:1px solid transparent;border-radius:9px;background:transparent;text-align:left}
-    .room-button:hover,.room-button.active{background:var(--surface-hover);border-color:var(--border)}
-    .room-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .badge{min-width:20px;height:20px;padding:0 5px;display:grid;place-items:center;border-radius:999px;background:var(--text);color:var(--page-bg);font-size:.68rem;font-weight:800}
-    .main{min-width:0;min-height:0;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:8px}
-    .bar{display:flex;align-items:center;gap:8px;padding:10px 12px}
-    .bar h1{margin:0;font-size:1.02rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .bar button,.bar a,.notify-button{border:1px solid var(--border);background:var(--surface-hover);border-radius:8px;padding:7px 9px;text-decoration:none}
-    .actor{font-size:.74rem;color:var(--muted);white-space:nowrap}
-    .searchbar{padding:8px;display:grid;grid-template-columns:minmax(130px,1fr) auto auto auto auto;gap:6px;align-items:end}
-    .searchbar label{display:grid;gap:3px;color:var(--muted);font-size:.7rem}
-    .searchbar input{min-height:34px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover)}
-    .searchbar button{min-height:34px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:6px 9px}
-    .older{justify-self:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 11px;color:var(--muted)}
-    .messages{min-height:0;overflow:auto;padding:12px;scroll-behavior:smooth}
-    .empty{min-height:180px;display:grid;place-items:center;color:var(--muted)}
-    .message{max-width:min(76%,620px);margin:0 0 12px;padding:9px 11px;border:1px solid var(--border);border-radius:13px;background:var(--surface-hover)}
-    .message.mine{margin-left:auto}
-    .message.admin{border-style:double}
-    .message-head{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:.7rem}
-    .message-author{color:var(--text);font-weight:750}
-    .message-time{margin-left:auto}
-    .message-action{border:0;background:transparent;padding:1px 3px;color:var(--muted);font-size:.7rem}
-    .reply-preview{margin-bottom:6px;padding:6px 8px;border-left:3px solid var(--border-hover);background:var(--surface);border-radius:6px;color:var(--muted);font-size:.76rem;overflow:hidden}
-    .reply-preview strong{color:var(--text)}
-    .reply-preview .snippet{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .message-body{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.48;font-size:.92rem}
-    .reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}.reaction-chip,.reaction-add{border:1px solid var(--border);border-radius:999px;background:var(--surface);padding:3px 7px;font-size:.75rem}.reaction-chip.mine{background:var(--surface-hover);border-color:var(--border-hover);font-weight:800}.reaction-picker{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;padding:6px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}.reaction-picker button{border:0;background:transparent;padding:4px;font-size:1.15rem}
-    .message-foot{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:5px;min-height:16px}
-    .unread-number{font-size:.68rem;font-weight:800;color:var(--muted)}
-    .attachments{display:grid;gap:6px;margin-top:7px}
-    .image-preview{width:min(100%,420px);max-height:300px;object-fit:contain;border:1px solid var(--border);border-radius:9px;cursor:pointer}
-    .attachment{display:flex;gap:8px;align-items:center;padding:6px 7px;border:1px solid var(--border);border-radius:9px;background:var(--surface);text-decoration:none}
-    .attachment-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem}
-    .attachment-size{font-size:.7rem;color:var(--muted)}
-    .translate-button{border:1px solid var(--border);border-radius:999px;background:transparent;padding:3px 7px;color:var(--muted);font-size:.69rem}
-    .translation{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);white-space:pre-wrap;font-size:.84rem;line-height:1.45}
-    .translation-label{display:block;margin-bottom:3px;color:var(--muted);font-size:.68rem}
-    .composer{padding:9px}
-    .replying{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);font-size:.76rem;color:var(--muted)}
-    .replying span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .replying button{border:0;background:transparent;color:var(--muted)}
-    .file-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px}
-    .file-chip{max-width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:999px;font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .compose-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px;align-items:end}
-    .file-button,.send-button{min-height:40px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:7px 11px;font-weight:700}
-    textarea{min-height:40px;max-height:150px;resize:none;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);padding:9px 10px;outline:none;line-height:1.4}
-    .status{min-height:1.1em;margin-top:5px;color:var(--muted);font-size:.72rem}
-    .status.error{color:#c2410c}
-    .gate{width:min(520px,calc(100% - 28px));margin:10vh auto;padding:22px;border:1px solid var(--border);border-radius:15px;background:var(--surface);box-shadow:var(--shadow)}
-    .gate h1{margin-top:0}
-    .chat-login{display:grid;gap:8px;margin-top:14px}
-    .chat-login input{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover)}
-    .chat-login button{padding:9px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);font-weight:700}
-    .gate-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
-    .gate-links a{padding:7px 9px;border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none}
+    .top-pickers {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1100;
 
-    .room-tools{display:flex;gap:5px}
-    .room-tools button{min-width:30px;height:30px;border:1px solid var(--border);border-radius:8px;background:var(--surface-hover);padding:0 7px}
-    .room-dialog{width:min(520px,calc(100vw - 28px));border:1px solid var(--border);border-radius:15px;padding:0;background:var(--surface-hover);color:var(--text);box-shadow:var(--menu-shadow)}
-    .room-dialog::backdrop{background:rgba(0,0,0,.5);backdrop-filter:blur(2px)}
-    .room-dialog-inner{padding:17px}
-    .room-dialog h2{margin:0 0 10px;font-size:1.05rem}
-    .room-dialog input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
-    .room-dialog-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:10px}
-    .room-dialog-actions button,.member-row button{border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:7px 9px}
-    .member-list,.invite-list{display:grid;gap:6px;margin-top:9px;max-height:240px;overflow:auto}
-    .member-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}
-    .member-row .member-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .member-kind{font-size:.68rem;color:var(--muted)}
-    .room-note{color:var(--muted);font-size:.76rem;line-height:1.45}
-    .danger-button{color:#c2410c}
-
-    @media(max-width:760px){
-      .app{height:100dvh;padding:7px 7px 68px;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
-      .sidebar{min-height:auto;padding:7px}
-      .rooms{display:flex;overflow:auto;gap:5px}
-      .room-button{width:auto;min-width:max-content}
-      .main{min-height:0}
-      .searchbar{grid-template-columns:1fr 1fr}
-      .search-text-label{grid-column:1/-1}
-      .message{max-width:88%}
-      .actor{display:none}
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
     }
 
-    /* Shared bottom-right Language + Theme controls */
-    .top-pickers{
-      position:fixed;
-      right:18px;
-      bottom:18px;
-      z-index:1400;
-      display:flex;
-      align-items:flex-end;
-      gap:8px;
-    }
     .top-pickers .language-picker,
-    .top-pickers .theme-picker{
-      position:relative;
-      inset:auto;
+    .top-pickers .theme-picker {
+      position: relative;
+      inset: auto;
     }
-    .top-pickers .language-menu,
-    .top-pickers .theme-menu{
-      top:auto;
-      right:0;
-      bottom:calc(100% + 8px);
+
+    .language-button,
+    .top-pickers .theme-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    @media(max-width:480px){
-      .top-pickers{
-        right:14px;
-        bottom:14px;
+
+    .language-menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      top: auto;
+
+      min-width: 140px;
+      padding: 6px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--surface);
+      box-shadow: var(--shadow);
+
+      display: none;
+    }
+
+    .language-picker.is-open
+    .language-menu {
+      display: block;
+    }
+
+    .language-menu button {
+      width: 100%;
+      padding: 9px 10px;
+
+      border: 0;
+      background: transparent;
+
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .language-menu button:hover {
+      background: var(--surface-hover);
+    }
+
+    .top-pickers .theme-menu {
+      top: auto;
+      bottom: calc(100% + 8px);
+      right: 0;
+    }
+    
+    .group-buy-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.group-buy-form input,
+.group-buy-form select {
+  width: 100%;
+}
+
+.group-buy-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-buy-check input {
+  min-width: auto;
+  flex: none;
+}
+
+.group-buy-card {
+  margin-top: 10px;
+  padding: 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-hover);
+}
+
+.group-buy-card-title {
+  font-weight: 700;
+}
+
+.group-buy-card-meta {
+  margin-top: 5px;
+
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.group-buy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-top: 10px;
+}
+
+.group-buy-application-items {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+#groupBuyEventSelect {
+  width: 100%;
+  padding: 10px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface-hover);
+  color: var(--text);
+
+  font: inherit;
+}
+    
+    .application-card {
+  margin-top: 10px;
+  padding: 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-hover);
+}
+
+.manage-name {
+  font-weight: 700;
+}
+
+.manage-note {
+  margin-top: 4px;
+
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.application-items {
+  margin-top: 7px;
+  line-height: 1.55;
+}
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 36px 20px;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    }
+
+    main {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 7vw, 4rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.15rem;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 20px;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      background: var(--surface);
+      box-shadow: var(--shadow);
+
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input {
+      min-width: 240px;
+      flex: 1;
+
+      padding: 11px 12px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+    }
+
+    button {
+      padding: 10px 13px;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      font: inherit;
+      font-weight: 650;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--border-hover);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 1.4em;
+
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .error {
+      color: #d75555;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+
+    .account-name {
+      margin-top: 6px;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 26px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .staff-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .staff-tab {
+      background: transparent;
+    }
+
+    .staff-tab.is-active {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+    }
+
+    .staff-section {
+      display: none;
+    }
+
+    .staff-section.is-active {
+      display: block;
+    }
+
+    .upload-item {
+      margin-top: 14px;
+      padding: 15px;
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      background: var(--surface-hover);
+    }
+
+    .upload-meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+
+    .upload-images {
+      display: grid;
+
+      grid-template-columns:
+        repeat(
+          auto-fill,
+          minmax(120px, 1fr)
+        );
+
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .upload-image-box {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .upload-image-box img {
+      width: 100%;
+      height: 100%;
+
+      display: block;
+      object-fit: cover;
+    }
+
+    .image-delete-button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+
+      padding: 5px 8px;
+
+      background: rgba(0, 0, 0, 0.72);
+      color: white;
+
+      border-color: transparent;
+
+      font-size: 0.78rem;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+
+      margin-top: 8px;
+      padding: 4px 8px;
+
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .badge-blocked {
+      color: #d75555;
+    }
+
+    .staff-ann-grid,
+    .staff-ann-lang-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .staff-ann-section label {
+      display: grid;
+      gap: 5px;
+      font-size: .78rem;
+    }
+
+    .staff-ann-section textarea {
+      width: 100%;
+      min-height: 78px;
+      resize: vertical;
+      line-height: 1.45;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .staff-ann-section select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .staff-ann-section .cards {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .staff-ann-section .card {
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+    }
+
+    .staff-ann-section .card-head {
+      display: flex;
+      gap: 7px;
+      align-items: flex-start;
+    }
+
+    .staff-ann-section .card-head strong {
+      flex: 1;
+    }
+
+    .staff-ann-section .meta {
+      color: var(--muted);
+      font-size: .72rem;
+      line-height: 1.5;
+    }
+
+    .staff-ann-section .texts {
+      display: grid;
+      gap: 3px;
+      margin-top: 7px;
+      font-size: .79rem;
+    }
+
+    .staff-ann-section .preset {
+      border-style: dashed;
+    }
+
+    @media(max-width:700px){
+      .staff-ann-grid,
+      .staff-ann-lang-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-
-    .message-pending {
-      opacity: .72;
-    }
-
-    .message-pending::after {
-      content: "…";
-      display: inline-block;
-      margin-left: 6px;
-      color: var(--muted);
-      font-size: .78rem;
-      vertical-align: middle;
-    }
   </style>
+  <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
+
 <body>
 
   <div class="top-pickers">
-    <div class="language-picker" data-language-picker>
+    <div
+      class="language-picker"
+      data-language-picker
+    >
+    <button
+      class="language-button"
+      type="button"
+      data-language-button
+      aria-label="Language"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      🌐
+    </button>
+
+    <div
+      class="language-menu"
+      data-language-menu
+      role="menu"
+    >
       <button
-        class="language-button"
         type="button"
-        data-language-button
-        aria-label="Language"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >🌐</button>
+        data-language-choice="ko"
+        role="menuitemradio"
+      >
+        한국어
+      </button>
 
-      <div class="language-menu" data-language-menu role="menu">
-        <button type="button" data-language-choice="ko" role="menuitemradio">한국어</button>
-        <button type="button" data-language-choice="en" role="menuitemradio">English</button>
-        <button type="button" data-language-choice="ja" role="menuitemradio">日本語</button>
-        <button type="button" data-language-choice="ru" role="menuitemradio">Русский</button>
-      </div>
-    </div>
-
-    <div class="theme-picker" data-theme-picker>
       <button
-        class="theme-button"
         type="button"
-        data-theme-button
-        aria-label="Theme"
-        aria-haspopup="true"
-        aria-expanded="false"
-      >◐</button>
+        data-language-choice="en"
+        role="menuitemradio"
+      >
+        English
+      </button>
 
-      <div class="theme-menu" data-theme-menu role="menu">
-        <button type="button" data-theme-choice="system" role="menuitemradio">
-          <span class="theme-choice-icon">◐</span>
-          <span data-i18n="themeSystem">System</span>
-        </button>
-        <button type="button" data-theme-choice="light" role="menuitemradio">
-          <span class="theme-choice-icon">☀</span>
-          <span data-i18n="themeLight">Light</span>
-        </button>
-        <button type="button" data-theme-choice="dark" role="menuitemradio">
-          <span class="theme-choice-icon">☾</span>
-          <span data-i18n="themeDark">Dark</span>
-        </button>
-      </div>
+      <button
+        type="button"
+        data-language-choice="ja"
+        role="menuitemradio"
+      >
+        日本語
+      </button>
+
+      <button
+        type="button"
+        data-language-choice="ru"
+        role="menuitemradio"
+      >
+        Русский
+      </button>
     </div>
   </div>
 
-  <section id="gate" class="gate">
-    <h1 id="gateTitle">Staff Chat</h1>
-    <p id="gateMessage">Checking access…</p>
-    <div id="chatLogin" class="chat-login">
-      <input id="chatId" type="text" autocomplete="username" placeholder="Chat ID">
-      <input id="chatPassword" type="password" autocomplete="current-password" placeholder="Password">
-      <button id="chatLoginButton" type="button">Chat login</button>
+
+  <div
+    class="theme-picker"
+    data-theme-picker
+  >
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      ◐
+    </button>
+
+    <div
+      class="theme-menu"
+      data-theme-menu
+      role="menu"
+    >
+      <button
+        type="button"
+        data-theme-choice="system"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">◐</span>
+
+        <span data-i18n="themeSystem">
+          System
+        </span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="light"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">☀</span>
+
+        <span data-i18n="themeLight">
+          Light
+        </span>
+      </button>
+
+      <button
+        type="button"
+        data-theme-choice="dark"
+        role="menuitemradio"
+      >
+        <span class="theme-choice-icon">☾</span>
+
+        <span data-i18n="themeDark">
+          Dark
+        </span>
+      </button>
     </div>
-    <div class="gate-links">
-      <a href="/">Home</a>
+  </div>
+  </div>
+
+
+  <main>
+    <div class="eyebrow">
+      S967
+    </div>
+
+    <h1 data-i18n="staffTitle">
+      Staff
+    </h1>
+
+<section
+  id="loadingPanel"
+  class="panel"
+>
+  <div
+    class="small"
+    data-i18n="staffLoading"
+  >
+    Loading…
+  </div>
+</section>
+    
+ <section
+  id="loginPanel"
+  class="panel hidden"
+>
+      <h2 data-i18n="staffLogin">
+        Staff Login
+      </h2>
+
+      <div class="row">
+   <input
+  id="staffIdInput"
+  type="text"
+  autocomplete="username"
+  maxlength="50"
+  autocapitalize="characters"
+  spellcheck="false"
+  placeholder="Staff ID"
+  data-i18n-placeholder="staffId"
+>
+
+        <input
+          id="passwordInput"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Password"
+          data-i18n-placeholder="password"
+        >
+
+        <button
+          id="loginButton"
+          type="button"
+          data-i18n="login"
+        >
+          Login
+        </button>
+      </div>
+
+      <div
+        id="loginStatus"
+        class="status"
+      ></div>
+    </section>
+
+
+    <div
+      id="staffArea"
+      class="hidden"
+    >
+      <section class="panel">
+        <div class="row">
+          <div style="flex: 1;">
+            <div
+              class="small"
+              data-i18n="signedInAs"
+            >
+              Signed in as
+            </div>
+
+            <div
+              id="staffName"
+              class="account-name"
+            ></div>
+
+            <div
+              id="staffEmail"
+              class="small"
+            ></div>
+          </div>
+
+          <button
+            id="logoutButton"
+            type="button"
+            data-i18n="logout"
+          >
+            Logout
+          </button>
+        </div>
+      </section>
+
+
+      <section class="panel">
+        <h2 data-i18n="changePassword">
+          Change Password
+        </h2>
+
+        <p
+          class="small"
+          data-i18n="changePasswordLead"
+        >
+          Change your Staff account password.
+        </p>
+
+        <div class="row">
+          <input
+            id="newPasswordInput"
+            type="password"
+            minlength="6"
+            autocomplete="new-password"
+            placeholder="New password"
+            data-i18n-placeholder="newPassword"
+          >
+
+          <input
+            id="confirmPasswordInput"
+            type="password"
+            minlength="6"
+            autocomplete="new-password"
+            placeholder="Confirm new password"
+            data-i18n-placeholder="confirmNewPassword"
+          >
+
+          <button
+            id="changePasswordButton"
+            type="button"
+            data-i18n="changePassword"
+          >
+            Change Password
+          </button>
+        </div>
+
+        <div
+          id="passwordStatus"
+          class="status"
+        ></div>
+      </section>
+
+
+      <div class="staff-tabs">
+        <button
+          type="button"
+          class="staff-tab is-active"
+          data-staff-tab="images"
+          data-i18n="staffTabImages"
+        >
+          Image Management
+        </button>
+
+        <button
+          type="button"
+          class="staff-tab"
+          data-staff-tab="wk"
+          data-i18n="staffTabWk"
+        >
+          WK Applications
+        </button>
+
+        <button
+  type="button"
+  class="staff-tab"
+  data-staff-tab="inquiry"
+  data-i18n="staffTabInquiry"
+>
+  Inquiry
+</button>
+        
+        <button
+          type="button"
+          class="staff-tab"
+          data-staff-tab="groupbuy"
+          data-i18n="staffTabGroupBuy"
+        >
+          Group Purchase
+        </button>
+
+            <button
+          type="button"
+          class="staff-tab"
+          data-staff-tab="announcements"
+          data-i18n="staffTabAnnouncements"
+        >
+          Announcements
+        </button>
+        
+<button
+  type="button"
+  class="staff-tab"
+  onclick="location.href='https://s967.org/staff/chat'"
+  title="Chat"
+>
+  💬
+</button>
+      </div>
+
+
+      <div
+        class="staff-section is-active"
+        data-staff-section="images"
+      >
+        <section class="panel">
+          <div class="row">
+            <h2
+              style="margin: 0; flex: 1;"
+              data-i18n="staffImageTitle"
+            >
+              Image Management
+            </h2>
+
+            <button
+              id="refreshImagesButton"
+              type="button"
+              data-i18n="refresh"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <p
+            class="small"
+            data-i18n="staffImageLead"
+          >
+            Review uploaded images, remove inappropriate images,
+            or block an uploader for 7 days.
+          </p>
+
+          <div
+            id="imageUploads"
+          ></div>
+
+          <div
+            id="imageStatus"
+            class="status"
+          ></div>
+        </section>
+      </div>
+
+
+      <div
+        class="staff-section"
+        data-staff-section="wk"
+      >
+        <section class="panel">
+  <h2 data-i18n="staffWkEmailTitle">
+    WK Automatic Email Recipients
+  </h2>
+
+  <p
+    class="small"
+    data-i18n="staffEmailLead"
+  >
+    You can manage up to 3 email recipients added by you.
+  </p>
+
+  <div
+    id="wkEmailRecipientList"
+  ></div>
+
+  <div class="group-buy-form">
+    <input
+      id="wkEmailNicknameInput"
+      type="text"
+      data-i18n-placeholder="staffEmailNickname"
+      placeholder="Nickname"
+    >
+
+    <input
+      id="wkEmailAddressInput"
+      type="email"
+      data-i18n-placeholder="email"
+      placeholder="Email"
+    >
+
+    <button
+      id="wkEmailAddButton"
+      type="button"
+      data-i18n="staffEmailAdd"
+    >
+      Add Email
+    </button>
+  </div>
+
+  <div
+    id="wkEmailStatus"
+    class="status"
+  ></div>
+</section>
+        <section class="panel">
+          <div class="row">
+            <h2
+              style="margin: 0; flex: 1;"
+              data-i18n="staffWkTitle"
+            >
+              WK Applications
+            </h2>
+
+            <button
+              id="refreshWkButton"
+              type="button"
+              data-i18n="refresh"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <p
+            class="small"
+            data-i18n="staffWkLead"
+          >
+            You can view WK applications.
+          </p>
+
+          <div
+            id="wkApplications"
+          ></div>
+
+          <div
+            id="wkStatus"
+            class="status"
+          ></div>
+        </section>
+      </div>
+
+      <div
+  class="staff-section"
+  data-staff-section="inquiry"
+>
+  <section class="panel">
+    <h2 data-i18n="staffInquiryEmailTitle">
+      Inquiry Automatic Email Recipients
+    </h2>
+
+    <p
+      class="small"
+      data-i18n="staffEmailLead"
+    >
+      You can manage up to 3 email recipients added by you.
+    </p>
+
+    <div
+      id="inquiryEmailRecipientList"
+    ></div>
+
+    <div class="group-buy-form">
+      <input
+        id="inquiryEmailNicknameInput"
+        type="text"
+        data-i18n-placeholder="staffEmailNickname"
+        placeholder="Nickname"
+      >
+
+      <input
+        id="inquiryEmailAddressInput"
+        type="email"
+        data-i18n-placeholder="email"
+        placeholder="Email"
+      >
+
+      <button
+        id="inquiryEmailAddButton"
+        type="button"
+        data-i18n="staffEmailAdd"
+      >
+        Add Email
+      </button>
+    </div>
+
+    <div
+      id="inquiryEmailStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+      
+<div
+  class="staff-section"
+  data-staff-section="groupbuy"
+>
+
+<section class="panel">
+  <h2 data-i18n="staffGroupBuyEmailTitle">
+    Group Purchase Automatic Email Recipients
+  </h2>
+
+  <p
+    class="small"
+    data-i18n="staffEmailLead"
+  >
+    You can manage up to 3 email recipients added by you.
+  </p>
+
+  <div
+    id="groupBuyEmailRecipientList"
+  ></div>
+
+  <div class="group-buy-form">
+    <input
+      id="groupBuyEmailNicknameInput"
+      type="text"
+      data-i18n-placeholder="staffEmailNickname"
+      placeholder="Nickname"
+    >
+
+    <input
+      id="groupBuyEmailAddressInput"
+      type="email"
+      data-i18n-placeholder="email"
+      placeholder="Email"
+    >
+
+    <button
+      id="groupBuyEmailAddButton"
+      type="button"
+      data-i18n="staffEmailAdd"
+    >
+      Add Email
+    </button>
+  </div>
+
+  <div
+    id="groupBuyEmailStatus"
+    class="status"
+  ></div>
+</section>
+  
+  <section class="panel">
+    <h2 data-i18n="groupBuyRounds">
+      Rounds
+    </h2>
+
+    <div
+      id="groupBuyEventList"
+    ></div>
+
+    <div
+      id="groupBuyEventStatus"
+      class="status"
+    ></div>
+
+
+    <h3 data-i18n="groupBuyCreateRound">
+      Create Round
+    </h3>
+
+    <div class="group-buy-form">
+      <input
+        id="newGroupBuyEventTitle"
+        type="text"
+        data-i18n-placeholder="groupBuyRoundName"
+        placeholder="Round name"
+      >
+
+      <label class="small">
+        <span data-i18n="groupBuyStart">
+          Start
+        </span>
+        <span> (KST)</span>
+
+        <input
+          id="newGroupBuyStartAt"
+          type="datetime-local"
+        >
+      </label>
+
+      <label class="small">
+        <span data-i18n="groupBuyEnd">
+          End
+        </span>
+        <span> (KST)</span>
+
+        <input
+          id="newGroupBuyEndAt"
+          type="datetime-local"
+        >
+      </label>
+
+      <button
+        id="addGroupBuyEventButton"
+        type="button"
+        data-i18n="groupBuyAddRound"
+      >
+        Add Round
+      </button>
     </div>
   </section>
 
-  <main id="app" class="app hidden">
-    <aside class="sidebar panel">
-      <div class="side-head">
-        <strong id="roomsTitle">Rooms</strong>
-        <div class="room-tools">
-          <button id="createRoomButton" type="button" title="Create room">＋</button>
-          <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
+
+  <section class="panel">
+    <h2 data-i18n="groupBuySelectedRound">
+      Selected Round
+    </h2>
+
+    <select
+      id="groupBuyEventSelect"
+    ></select>
+
+    <div
+      id="groupBuyDetailStatus"
+      class="status"
+    ></div>
+
+    <div
+      id="groupBuySelectedEvent"
+      class="small"
+    ></div>
+  </section>
+
+
+  <section class="panel">
+    <h2 data-i18n="groupBuyItems">
+      Purchase Items
+    </h2>
+
+    <div
+      id="groupBuyItemList"
+    ></div>
+
+    <div class="group-buy-form">
+      <input
+        id="newGroupBuyItemName"
+        type="text"
+        data-i18n-placeholder="groupBuyItemName"
+        placeholder="Item name"
+      >
+
+      <input
+        id="newGroupBuyItemMax"
+        type="number"
+        min="1"
+        step="1"
+        data-i18n-placeholder="groupBuyMaxQuantity"
+        placeholder="Max quantity"
+      >
+
+      <button
+        id="addGroupBuyItemButton"
+        type="button"
+        data-i18n="groupBuyAddItem"
+      >
+        Add Item
+      </button>
+    </div>
+
+    <div
+      id="groupBuyItemStatus"
+      class="status"
+    ></div>
+  </section>
+
+
+  
+  <section class="panel">
+    <h2 data-i18n="groupBuyApplications">
+      Applications
+    </h2>
+
+    <p
+      class="small"
+      data-i18n="groupBuyApplicationsReadOnly"
+    >
+      Applications are read-only.
+    </p>
+
+    <div
+      id="groupBuyApplicationsList"
+    ></div>
+
+    <div
+      id="groupBuyApplicationsStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
+      <div
+        class="staff-section"
+        data-staff-section="announcements"
+      >
+        <div id="staffAnnGate" class="hidden">
+          <div id="staffAnnGateMessage" class="status"></div>
+        </div>
+        <div id="staffAnnApp">
+
+    <div class="row">
+      <div class="grow">
+        <h1 id="staffAnnAnnPageTitle" style="margin-bottom:4px">공지사항 관리</h1>
+        <div id="staffAnnActor" class="meta"></div>
+      </div>
+      <a id="staffAnnAnnMainLink" class="btn" href="/">메인 페이지</a>
+    </div>
+
+    <section class="panel staff-ann-section">
+      <h2 id="staffAnnAnnGeneralTitle">일반 공지사항</h2>
+      <p id="staffAnnAnnGeneralLead" class="meta">4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.</p>
+
+      <input id="staffAnnAnnouncementId" type="hidden">
+
+      <div class="staff-ann-lang-grid">
+        <label>한국어<textarea id="staffAnnAKo"></textarea></label>
+        <label>English<textarea id="staffAnnAEn"></textarea></label>
+        <label>日本語<textarea id="staffAnnAJa"></textarea></label>
+        <label>Русский<textarea id="staffAnnARu"></textarea></label>
+      </div>
+
+      <div class="staff-ann-grid" style="margin-top:9px">
+        <label><span id="staffAnnAnnStartLabel">표시 시작</span><input id="staffAnnAStart" type="datetime-local"></label>
+        <label><span id="staffAnnAnnEndLabel">표시 종료</span><input id="staffAnnAEnd" type="datetime-local"></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="staffAnnSaveAnnouncement" type="button">공지 저장</button>
+        <button id="staffAnnCancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="staffAnnAnnouncementStatus" class="status"></div>
+      <div id="staffAnnAnnouncementList" class="cards"></div>
+    </section>
+
+    <section class="panel staff-ann-section">
+      <h2 id="staffAnnAnnRoutineTitle">반복 공지 루틴</h2>
+      <p id="staffAnnAnnRoutineLead" class="meta">
+        첫 표시 기간을 기준으로 N일마다 자동 반복합니다.
+        문구에는 <code>{date}</code>, <code>{start}</code>, <code>{end}</code>를 쓸 수 있습니다.
+      </p>
+
+      <div class="row">
+        <button id="staffAnnWkPreset" type="button" class="preset">황무지 모집 프리셋</button>
+        <button id="staffAnnPeriodPreset" type="button" class="preset">일반 기간 공지 프리셋</button>
+      </div>
+
+      <input id="staffAnnRoutineId" type="hidden">
+
+      <div class="staff-ann-grid" style="margin-top:9px">
+        <label><span id="staffAnnAnnRoutineNameLabel">루틴 이름</span><input id="staffAnnRName"></label>
+        <label><span id="staffAnnAnnAnchorLabel">첫 표시 시작</span><input id="staffAnnRAnchor" type="datetime-local"></label>
+        <label><span id="staffAnnAnnRepeatLabel">반복 주기(일)</span><input id="staffAnnRRepeat" type="number" min="1" value="14"></label>
+        <label><span id="staffAnnAnnHoursLabel">한 번 표시되는 시간(시간)</span><input id="staffAnnRHours" type="number" min="1" value="72"></label>
+        <label><span id="staffAnnAnnOffsetLabel">{date} 기준일: 표시 시작일부터 며칠 뒤</span><input id="staffAnnROffset" type="number" value="3"></label>
+        <label><span id="staffAnnAnnEnabledLabel">활성화</span><select id="staffAnnREnabled"><option id="staffAnnAnnEnabledYes" value="true">사용</option><option id="staffAnnAnnEnabledNo" value="false">중지</option></select></label>
+      </div>
+
+      <div class="staff-ann-lang-grid" style="margin-top:9px">
+        <label>한국어<textarea id="staffAnnRKo"></textarea></label>
+        <label>English<textarea id="staffAnnREn"></textarea></label>
+        <label>日本語<textarea id="staffAnnRJa"></textarea></label>
+        <label>Русский<textarea id="staffAnnRRu"></textarea></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="staffAnnSaveRoutine" type="button">루틴 저장</button>
+        <button id="staffAnnCancelRoutineEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="staffAnnRoutineStatus" class="status"></div>
+      <div id="staffAnnRoutineList" class="cards"></div>
+    </section>
+  
         </div>
       </div>
-      <div id="rooms" class="rooms"></div>
-    </aside>
 
-    <section class="main">
-      <header class="bar panel">
-        <h1 id="chatTitle">Staff Chat</h1>
-        <span id="actor" class="actor"></span>
-        <button id="roomMembersButton" type="button" title="Room members">👥</button>
-        <button id="notifyButton" type="button">🔔</button>
-        <button id="refreshButton" type="button">↻</button>
-        <a id="backButton" href="/">Back</a>
-      </header>
+     
+    </div>
 
-      <section class="searchbar panel">
-        <label class="search-text-label">
-          <span id="searchTextLabel">Text</span>
-          <input id="searchText" type="search" maxlength="100">
-        </label>
-        <label>
-          <span id="dateFromLabel">From</span>
-          <input id="dateFrom" type="date">
-        </label>
-        <label>
-          <span id="dateToLabel">To</span>
-          <input id="dateTo" type="date">
-        </label>
-        <button id="searchButton" type="button">Search</button>
-        <button id="clearSearchButton" type="button">Clear</button>
-      </section>
 
-      <button id="olderButton" class="older hidden" type="button">Load older</button>
-
-      <section id="messages" class="messages panel" aria-live="polite"></section>
-
-      <section class="composer panel">
-        <div id="replying" class="replying hidden">
-          <span id="replyingText"></span>
-          <button id="cancelReplyButton" type="button">×</button>
-        </div>
-        <div id="fileList" class="file-list hidden"></div>
-        <div class="compose-row">
-          <button id="fileButton" class="file-button" type="button">＋</button>
-          <textarea id="messageInput" maxlength="4000" rows="1" placeholder="Message"></textarea>
-          <button id="sendButton" class="send-button" type="button">Send</button>
-        </div>
-        <input id="fileInput" type="file" multiple hidden accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.csv,.xlsx,.docx,.zip,image/jpeg,image/png,image/webp,image/gif,application/pdf,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/zip">
-        <div id="status" class="status"></div>
-      </section>
-    </section>
+    <a
+      class="back"
+      href="/"
+      data-i18n="backHome"
+    >
+      ← Back to Home
+    </a>
   </main>
 
 
-  <dialog id="createRoomDialog" class="room-dialog">
-    <div class="room-dialog-inner">
-      <h2 id="createRoomTitle">Create room</h2>
-      <input id="newRoomName" type="text" maxlength="100" autocomplete="off">
-      <div id="createRoomStatus" class="status"></div>
-      <div class="room-dialog-actions">
-        <button id="cancelCreateRoomButton" type="button">Cancel</button>
-        <button id="confirmCreateRoomButton" type="button">Create</button>
-      </div>
-    </div>
-  </dialog>
-
-  <dialog id="roomMembersDialog" class="room-dialog">
-    <div class="room-dialog-inner">
-      <h2 id="roomMembersTitle">Room members</h2>
-      <div id="roomMembersNote" class="room-note"></div>
-      <div id="roomMemberList" class="member-list"></div>
-
-      <div id="inviteSection">
-        <h3 id="inviteTitle" style="font-size:.9rem;margin:14px 0 5px">Add people</h3>
-        <div id="inviteList" class="invite-list"></div>
-      </div>
-
-      <div id="roomManageStatus" class="status"></div>
-
-      <div class="room-dialog-actions">
-        <button id="deleteRoomButton" type="button" class="danger-button hidden">Delete room</button>
-        <button id="closeRoomMembersButton" type="button">Close</button>
-      </div>
-    </div>
-  </dialog>
-
   <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+    import {
+      createClient
+    } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const SUPABASE_URL = "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
-    const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
-    const API = {
-      list: `${FUNCTIONS_BASE}/staff-chat-list`,
-      send: `${FUNCTIONS_BASE}/staff-chat-send`,
-      upload: `${FUNCTIONS_BASE}/staff-chat-upload`,
-      file: `${FUNCTIONS_BASE}/staff-chat-file`,
-      delete: `${FUNCTIONS_BASE}/staff-chat-delete`,
-      translate: `${FUNCTIONS_BASE}/staff-chat-translate`,
-      read: `${FUNCTIONS_BASE}/staff-chat-read`,
-      react: `${FUNCTIONS_BASE}/staff-chat-react`,
-      roomUser: `${FUNCTIONS_BASE}/staff-chat-room-user`,
-      report: `${FUNCTIONS_BASE}/staff-chat-report`,
-    };
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-    const $ = id => document.getElementById(id);
-    const FALLBACK_POLL_MS = 15000;
-    const MAX_FILES = 5;
-    const MAX_FILE_BYTES = 10 * 1024 * 1024;
-    const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
+    const SUPABASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
 
-    const TEXT = {
-      ko:{title:"채팅",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"스태프 또는 초대된 채팅 계정으로 로그인하세요.",chatLogin:"채팅 로그인",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고했습니다.",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",from:"시작 날짜",to:"종료 날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",close:"닫기",cancel:"취소",create:"만들기"},
-      en:{title:"Chat",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff, or an invited chat account.",chatLogin:"Chat login",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Reported.",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",from:"From",to:"To",clear:"Clear",older:"Load older",empty:"No messages yet.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",close:"Close",cancel:"Cancel",create:"Create"},
-      ja:{title:"チャット",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"スタッフまたは招待されたチャットアカウントでログインしてください。",chatLogin:"チャットログイン",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報しました。",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",from:"開始日",to:"終了日",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",close:"閉じる",cancel:"キャンセル",create:"作成"},
-      ru:{title:"Чат",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как сотрудник или приглашённый пользователь чата.",chatLogin:"Войти в чат",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба отправлена.",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",from:"С даты",to:"По дату",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",close:"Закрыть",cancel:"Отмена",create:"Создать"},
-    };
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
 
-    let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
-    let text = TEXT[language] ?? TEXT.en;
-    let actor = null;
-    let rooms = [];
-    let currentRoomId = null;
-    let currentSignalTopic = null;
-    let replyTarget = null;
-    let selectedFiles = [];
-    let hasMore = false;
-    let loading = false;
-    let sending = false;
-    let realtimeChannel = null;
-    let fallbackTimer = null;
-    let refreshTimer = null;
-    let notificationBaseline = null;
-    const messageMap = new Map();
-    let optimisticSequence = 0;
-    const pendingMessageIds = new Set();
+    const STAFF_EMAIL_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-email-recipients";
+    
+    const STAFF_IMAGE_API_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-image-admin";
 
-    function makeOptimisticMessageId(){
-      optimisticSequence += 1;
-      return `local-${Date.now()}-${optimisticSequence}`;
-    }
+    const STORAGE_BASE =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/storage/v1/object/public/inquiry-uploads/";
 
-    function cloneReactionState(message){
-      return {
-        reactions: Array.isArray(message.reactions)
-          ? message.reactions.map(item => ({...item}))
-          : [],
-        my_reaction: message.my_reaction ?? null,
-      };
-    }
+    const STAFF_WK_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-wk";
 
-    function setOptimisticReaction(message, emoji){
-      const previous = message.my_reaction ?? null;
-      const reactions = Array.isArray(message.reactions)
-        ? message.reactions.map(item => ({...item}))
-        : [];
+    const STAFF_GROUPBUY_API_URL =
+  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-groupbuy";
+    
+let wkData = {
+  applications: [],
+};
 
-      const byEmoji = new Map(
-        reactions.map(item => [
-          item.emoji,
-          {
-            emoji: item.emoji,
-            count: Number(item.count ?? 0),
-          },
-        ])
+let wkLoaded = false;
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
       );
 
-      if(previous){
-        const item = byEmoji.get(previous);
-        if(item){
-          item.count = Math.max(0, item.count - 1);
-          if(item.count === 0) byEmoji.delete(previous);
-          else byEmoji.set(previous, item);
-        }
-      }
+const loadingPanel =
+  document.getElementById(
+    "loadingPanel"
+  );
+    
+    const loginPanel =
+      document.getElementById(
+        "loginPanel"
+      );
 
-      const next = previous === emoji ? null : emoji;
+    const staffArea =
+      document.getElementById(
+        "staffArea"
+      );
 
-      if(next){
-        const item = byEmoji.get(next) ?? {emoji: next, count: 0};
-        item.count += 1;
-        byEmoji.set(next, item);
-      }
+const staffIdInput =
+  document.getElementById(
+    "staffIdInput"
+  );
 
-      message.reactions = [...byEmoji.values()];
-      message.my_reaction = next;
+    const passwordInput =
+      document.getElementById(
+        "passwordInput"
+      );
 
-      return next;
-    }
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
 
-    const translationViewCache = new Map();
-    let currentSearch = {q:"",dateFrom:"",dateTo:""};
+    const loginStatus =
+      document.getElementById(
+        "loginStatus"
+      );
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),dateFrom=$("dateFrom"),dateTo=$("dateTo"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),dateFromLabel=$("dateFromLabel"),dateToLabel=$("dateToLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton");
+    const logoutButton =
+      document.getElementById(
+        "logoutButton"
+      );
 
-    function setText(){
-      document.documentElement.lang=language;
-      document.title=`${text.title} | S967`;
-      $("gateTitle").textContent=text.title;
-      gateMessage.textContent=text.checking;
-      chatLoginButton.textContent=text.chatLogin;
-      roomsTitle.textContent=text.rooms;
-      createRoomButton.title=text.createRoom;
-      roomMembersButton.title=text.members;
-      createRoomTitle.textContent=text.createRoom;
-      newRoomName.placeholder=text.roomName;
-      cancelCreateRoomButton.textContent=text.cancel;
-      confirmCreateRoomButton.textContent=text.create;
-      roomMembersTitle.textContent=text.members;
-      inviteTitle.textContent=text.addPeople;
-      deleteRoomButton.textContent=text.deleteRoom;
-      closeRoomMembersButton.textContent=text.close;
-      messageInput.placeholder=text.message;
-      sendButton.textContent=text.send;
-      searchTextLabel.textContent=text.text;
-      dateFromLabel.textContent=text.from;
-      dateToLabel.textContent=text.to;
-      searchButton.textContent=text.search;
-      clearSearchButton.textContent=text.clear;
-      olderButton.textContent=text.older;
-      notifyButton.title=text.notification;
-      renderRooms();
-      renderMessages();
-      renderReplyTarget();
-    }
+    const staffName =
+      document.getElementById(
+        "staffName"
+      );
 
-    function setStatus(message="",error=false){
-      statusHost.textContent=message;
-      statusHost.classList.toggle("error",error);
-    }
+    const staffEmail =
+      document.getElementById(
+        "staffEmail"
+      );
 
-    async function accessToken(){
-      const adminToken=globalThis.S967AdminAuth?.getToken?.();
-      if(adminToken) return {token:adminToken,kind:"admin"};
-      const {data}=await supabase.auth.getSession();
-      const token=data.session?.access_token;
-      return token?{token,kind:"auth"}:null;
-    }
+    const newPasswordInput =
+      document.getElementById(
+        "newPasswordInput"
+      );
 
-    async function request(url,options={}){
-      const auth=await accessToken();
-      if(!auth?.token){const e=new Error("UNAUTHORIZED");e.status=401;throw e;}
-      const headers=new Headers(options.headers??{});
-      headers.set("Authorization",`Bearer ${auth.token}`);
-      const response=await fetch(url,{...options,headers});
-      const result=await response.json().catch(()=>({}));
-      if(!response.ok){const e=new Error(result.error||`HTTP_${response.status}`);e.status=response.status;throw e;}
-      return result;
-    }
+    const confirmPasswordInput =
+      document.getElementById(
+        "confirmPasswordInput"
+      );
 
-    function formatDate(value){
-      try{return new Intl.DateTimeFormat(language==="ko"?"ko-KR":language==="ja"?"ja-JP":language==="ru"?"ru-RU":"en-US",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "";}
-    }
-    function formatBytes(bytes){const n=Number(bytes)||0;if(n<1024)return`${n} B`;if(n<1048576)return`${(n/1024).toFixed(1)} KB`;return`${(n/1048576).toFixed(1)} MB`;}
-    function nearBottom(){return messagesHost.scrollHeight-messagesHost.scrollTop-messagesHost.clientHeight<120;}
-    function newestMessage(){return [...messageMap.values()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]??null;}
+    const changePasswordButton =
+      document.getElementById(
+        "changePasswordButton"
+      );
 
-    function renderRooms(){
-      if(!roomsHost)return;
-      roomsHost.replaceChildren(...rooms.map(room=>{
-        const b=document.createElement("button");b.type="button";b.className="room-button";b.classList.toggle("active",room.id===currentRoomId);
-        const n=document.createElement("span");n.className="room-name";n.textContent=room.name;
-        b.append(n);
-        if((room.unread_count??0)>0){const badge=document.createElement("span");badge.className="badge";badge.textContent=String(room.unread_count);b.append(badge);}
-        b.onclick=()=>selectRoom(room.id);
-        return b;
-      }));
-    }
+    const passwordStatus =
+      document.getElementById(
+        "passwordStatus"
+      );
 
-    async function loadRooms(){
-      const result=await request(`${API.list}?view=rooms`);
-      actor=result.actor;
-      actorLabel.textContent=actor?.name?`${actor.name} · ${actor.kind}`:"";
-      rooms=result.rooms??[];
-      if(!currentRoomId||!rooms.some(r=>r.id===currentRoomId)) currentRoomId=rooms[0]?.id??null;
-      renderRooms();
-      return currentRoomId;
-    }
+    const imageUploads =
+      document.getElementById(
+        "imageUploads"
+      );
 
-    function buildListUrl({before="",limit=30}={}){
-      const p=new URLSearchParams({room_id:currentRoomId??"",limit:String(limit)});
-      if(before)p.set("before",before);
-      if(currentSearch.q)p.set("q",currentSearch.q);
-      if(currentSearch.dateFrom)p.set("date_from",currentSearch.dateFrom);
-      if(currentSearch.dateTo)p.set("date_to",currentSearch.dateTo);
-      return`${API.list}?${p.toString()}`;
-    }
+    const imageStatus =
+      document.getElementById(
+        "imageStatus"
+      );
 
-    async function openAttachment(a){
-      try{const r=await request(`${API.file}?id=${encodeURIComponent(a.id)}`);if(r.url)window.open(r.url,"_blank","noopener,noreferrer");}catch(e){setStatus(e.message,true);}
-    }
+    const refreshImagesButton =
+      document.getElementById(
+        "refreshImagesButton"
+      );
 
-    function renderMessage(message){
-      const article=document.createElement("article");article.className="message";if(message.is_optimistic)article.classList.add("message-pending");
-      if(message.is_mine)article.classList.add("mine");
-      if(message.author_kind==="admin")article.classList.add("admin");
+    const staffTabs =
+      document.querySelectorAll(
+        "[data-staff-tab]"
+      );
 
-      const head=document.createElement("div");head.className="message-head";
-      const author=document.createElement("span");author.className="message-author";author.textContent=message.author_name;
-      const time=document.createElement("span");time.className="message-time";time.textContent=formatDate(message.created_at);
-      head.append(author,time);
+    const staffSections =
+      document.querySelectorAll(
+        "[data-staff-section]"
+      );
 
-      if(!message.is_deleted){
-        const reply=document.createElement("button");reply.type="button";reply.className="message-action";reply.textContent=text.reply;reply.onclick=()=>{replyTarget={id:message.id,author_name:message.author_name,body:message.body};renderReplyTarget();messageInput.focus();};
-        head.append(reply);
+    const refreshWkButton =
+      document.getElementById(
+        "refreshWkButton"
+      );
 
-        if(message.can_report){
-          const report=document.createElement("button");report.type="button";report.className="message-action";report.textContent=text.report;report.onclick=()=>reportMessage(message.id);
-          head.append(report);
-        }
+    const wkApplications =
+      document.getElementById(
+        "wkApplications"
+      );
 
-        if(message.can_delete){const del=document.createElement("button");del.type="button";del.className="message-action";del.textContent=text.delete;del.onclick=()=>deleteMessage(message.id);head.append(del);}
-      }
+    const wkStatus =
+      document.getElementById(
+        "wkStatus"
+      );
 
-      article.append(head);
+const groupBuyEventList =
+  document.getElementById(
+    "groupBuyEventList"
+  );
 
-      if(message.reply_to){const rp=document.createElement("div");rp.className="reply-preview";if(message.reply_to.deleted){rp.textContent=text.deletedReply;}else{const strong=document.createElement("strong");strong.textContent=message.reply_to.author_name;const sn=document.createElement("div");sn.className="snippet";sn.textContent=message.reply_to.body;rp.append(strong,sn);}article.append(rp);}
+const groupBuyEventStatus =
+  document.getElementById(
+    "groupBuyEventStatus"
+  );
 
-      if(message.is_deleted){
-        const body=document.createElement("div");
-        body.className="message-body";
-        body.textContent=text.deletedMessage;
-        article.append(body);
-      }else if(message.body){
-        const body=document.createElement("div");body.className="message-body";body.textContent=message.body;article.append(body);
-      }
+const groupBuyEventSelect =
+  document.getElementById(
+    "groupBuyEventSelect"
+  );
 
-      if(!message.is_deleted&&message.attachments?.length){const host=document.createElement("div");host.className="attachments";for(const a of message.attachments){if(String(a.mime_type??"").startsWith("image/")&&a.signed_url){const img=document.createElement("img");img.className="image-preview";img.src=a.signed_url;img.alt=a.original_name;img.loading="lazy";img.onclick=()=>openAttachment(a);host.append(img);}const link=document.createElement("a");link.className="attachment";link.href="#";const name=document.createElement("span");name.className="attachment-name";name.textContent=a.original_name;const size=document.createElement("span");size.className="attachment-size";size.textContent=formatBytes(a.size_bytes);link.append(name,size);link.onclick=e=>{e.preventDefault();openAttachment(a);};host.append(link);}article.append(host);}
+const groupBuyDetailStatus =
+  document.getElementById(
+    "groupBuyDetailStatus"
+  );
 
-      if(!message.is_deleted&&String(message.body??"").trim()){
-        const targetLanguage=["ko","en","ja","ru"].includes(language)?language:"en";
-        const translationKey=`${message.id}:${targetLanguage}`;
-        const tr=document.createElement("button");
-        tr.type="button";
-        tr.className="translate-button";
-        tr.textContent=`🌐 ${text.translate}`;
-        const th=document.createElement("div");
-        th.className="translation hidden";
+const groupBuySelectedEvent =
+  document.getElementById(
+    "groupBuySelectedEvent"
+  );
 
-        const cachedTranslation=translationViewCache.get(translationKey);
-        if(cachedTranslation){
-          const lab=document.createElement("span");
-          lab.className="translation-label";
-          lab.textContent=`${text.translation} · ${targetLanguage.toUpperCase()}`;
-          const c=document.createElement("span");
-          c.textContent=cachedTranslation;
-          th.append(lab,c);
-          th.classList.remove("hidden");
-        }
+const newGroupBuyEventTitle =
+  document.getElementById(
+    "newGroupBuyEventTitle"
+  );
 
-        tr.onclick=()=>translateMessage(message,tr,th);
-        article.append(tr,th);
-      }
+const newGroupBuyStartAt =
+  document.getElementById(
+    "newGroupBuyStartAt"
+  );
 
-      if(!message.is_deleted){
-      const reactions=document.createElement("div");reactions.className="reactions";
-      const reactionData=message.reactions??{counts:{},my_reaction:null};
-      for(const emoji of REACTIONS){const count=Number(reactionData.counts?.[emoji]??0);if(!count)continue;const b=document.createElement("button");b.type="button";b.className="reaction-chip";if(reactionData.my_reaction===emoji)b.classList.add("mine");b.textContent=`${emoji} ${count}`;b.onclick=()=>reactToMessage(message.id,emoji);reactions.append(b);}
-      const add=document.createElement("button");add.type="button";add.className="reaction-add";add.textContent="☺+";add.title="Reaction";
-      const picker=document.createElement("div");picker.className="reaction-picker hidden";for(const emoji of REACTIONS){const b=document.createElement("button");b.type="button";b.textContent=emoji;b.onclick=()=>reactToMessage(message.id,emoji);picker.append(b);}
-      add.onclick=()=>picker.classList.toggle("hidden");reactions.append(add);article.append(reactions,picker);
-      }
+const newGroupBuyEndAt =
+  document.getElementById(
+    "newGroupBuyEndAt"
+  );
 
-      const foot=document.createElement("div");foot.className="message-foot";
-      if((message.unread_count??0)>0){const u=document.createElement("span");u.className="unread-number";u.textContent=String(message.unread_count);u.title="Unread people";foot.append(u);}
-      article.append(foot);
-      return article;
-    }
+const addGroupBuyEventButton =
+  document.getElementById(
+    "addGroupBuyEventButton"
+  );
 
-    function renderMessages(){
-      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-      if(!items.length){const empty=document.createElement("div");empty.className="empty";empty.textContent=text.empty;messagesHost.replaceChildren(empty);olderButton.classList.add("hidden");return;}
-      messagesHost.replaceChildren(...items.map(renderMessage));
-      olderButton.classList.toggle("hidden",!hasMore);
-    }
+const groupBuyItemList =
+  document.getElementById(
+    "groupBuyItemList"
+  );
+
+const newGroupBuyItemName =
+  document.getElementById(
+    "newGroupBuyItemName"
+  );
+
+const newGroupBuyItemMax =
+  document.getElementById(
+    "newGroupBuyItemMax"
+  );
+
+const addGroupBuyItemButton =
+  document.getElementById(
+    "addGroupBuyItemButton"
+  );
+
+const groupBuyItemStatus =
+  document.getElementById(
+    "groupBuyItemStatus"
+  );
+
+const groupBuyApplicationsList =
+  document.getElementById(
+    "groupBuyApplicationsList"
+  );
+
+const groupBuyApplicationsStatus =
+  document.getElementById(
+    "groupBuyApplicationsStatus"
+  );
+    
+const wkEmailRecipientList =
+  document.getElementById(
+    "wkEmailRecipientList"
+  );
+
+const wkEmailNicknameInput =
+  document.getElementById(
+    "wkEmailNicknameInput"
+  );
+
+const wkEmailAddressInput =
+  document.getElementById(
+    "wkEmailAddressInput"
+  );
+
+const wkEmailAddButton =
+  document.getElementById(
+    "wkEmailAddButton"
+  );
+
+const wkEmailStatus =
+  document.getElementById(
+    "wkEmailStatus"
+  );
 
 
-    function selectedRoom(){
-      return rooms.find(room=>room.id===currentRoomId)??null;
-    }
+const inquiryEmailRecipientList =
+  document.getElementById(
+    "inquiryEmailRecipientList"
+  );
 
-    async function createRoom(){
-      const name=newRoomName.value.trim();
-      if(!name)return;
-      confirmCreateRoomButton.disabled=true;
-      createRoomStatus.textContent="";
-      createRoomStatus.classList.remove("error");
-      try{
-        const result=await request(API.roomUser,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"create_room",name})
-        });
-        createRoomDialog.close();
-        newRoomName.value="";
-        await loadRooms();
-        if(result.room?.id)await selectRoom(result.room.id);
-      }catch(error){
-        createRoomStatus.textContent=error.message;
-        createRoomStatus.classList.add("error");
-      }finally{
-        confirmCreateRoomButton.disabled=false;
-      }
-    }
+const inquiryEmailNicknameInput =
+  document.getElementById(
+    "inquiryEmailNicknameInput"
+  );
 
-    function renderMemberRow(member,details){
-      const row=document.createElement("div");
-      row.className="member-row";
-      const name=document.createElement("span");
-      name.className="member-name";
-      name.textContent=member.display_name;
-      const kind=document.createElement("span");
-      kind.className="member-kind";
-      kind.textContent=member.automatic?"Staff · Auto":member.kind;
-      row.append(name,kind);
+const inquiryEmailAddressInput =
+  document.getElementById(
+    "inquiryEmailAddressInput"
+  );
 
-      if(details.room?.is_owner&&details.room?.room_kind==="private"&&!member.is_owner){
-        const remove=document.createElement("button");
-        remove.type="button";
-        remove.textContent="−";
-        remove.title="Remove";
-        remove.onclick=async()=>{
-          try{
-            await request(API.roomUser,{
-              method:"POST",
-              headers:{"Content-Type":"application/json"},
-              body:JSON.stringify({action:"remove_member",room_id:currentRoomId,user_id:member.user_id})
-            });
-            await openRoomMembers();
-            await loadRooms();
-          }catch(error){
-            roomManageStatus.textContent=error.message;
-            roomManageStatus.classList.add("error");
+const inquiryEmailAddButton =
+  document.getElementById(
+    "inquiryEmailAddButton"
+  );
+
+const inquiryEmailStatus =
+  document.getElementById(
+    "inquiryEmailStatus"
+  );
+
+
+const groupBuyEmailRecipientList =
+  document.getElementById(
+    "groupBuyEmailRecipientList"
+  );
+
+const groupBuyEmailNicknameInput =
+  document.getElementById(
+    "groupBuyEmailNicknameInput"
+  );
+
+const groupBuyEmailAddressInput =
+  document.getElementById(
+    "groupBuyEmailAddressInput"
+  );
+
+const groupBuyEmailAddButton =
+  document.getElementById(
+    "groupBuyEmailAddButton"
+  );
+
+const groupBuyEmailStatus =
+  document.getElementById(
+    "groupBuyEmailStatus"
+  );
+
+    const staffEmailData = {
+  wk: [],
+  inquiry: [],
+  group_buy: [],
+};
+
+const staffEmailLoaded = {
+  wk: false,
+  inquiry: false,
+  group_buy: false,
+};
+    
+    let groupBuyData = {
+  events: [],
+};
+
+let groupBuyDetail = {
+  event: null,
+  items: [],
+  applications: [],
+};
+
+let selectedGroupBuyEventId =
+  null;
+
+let groupBuyLoaded =
+  false;
+
+
+    let imageData = {
+      uploads: [],
+      blocked: [],
+    };
+
+    async function staffEmailRequest(
+  method,
+  type,
+  body = null
+) {
+  const {
+    data: sessionData
+  } =
+    await supabase.auth
+      .getSession();
+
+  const token =
+    sessionData.session
+      ?.access_token;
+
+  if (!token) {
+    throw new Error(
+      translate(
+        "staffSessionExpired"
+      )
+    );
+  }
+
+  let url =
+    STAFF_EMAIL_API_URL;
+
+  const options = {
+    method,
+
+    headers: {
+      "Authorization":
+        `Bearer ${token}`,
+    },
+  };
+
+  if (method === "GET") {
+    url +=
+      `?type=${
+        encodeURIComponent(type)
+      }`;
+
+  } else {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify({
+        type,
+        ...(body ?? {}),
+      });
+  }
+
+  const response =
+    await fetch(
+      url,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      translate(
+        "staffEmailRequestFailed"
+      )
+    );
+  }
+
+  return result;
+}
+
+    function getStaffEmailElements(
+  type
+) {
+  if (type === "wk") {
+    return {
+      list:
+        wkEmailRecipientList,
+      nicknameInput:
+        wkEmailNicknameInput,
+      emailInput:
+        wkEmailAddressInput,
+      addButton:
+        wkEmailAddButton,
+      status:
+        wkEmailStatus,
+    };
+  }
+
+  if (type === "inquiry") {
+    return {
+      list:
+        inquiryEmailRecipientList,
+      nicknameInput:
+        inquiryEmailNicknameInput,
+      emailInput:
+        inquiryEmailAddressInput,
+      addButton:
+        inquiryEmailAddButton,
+      status:
+        inquiryEmailStatus,
+    };
+  }
+
+  return {
+    list:
+      groupBuyEmailRecipientList,
+    nicknameInput:
+      groupBuyEmailNicknameInput,
+    emailInput:
+      groupBuyEmailAddressInput,
+    addButton:
+      groupBuyEmailAddButton,
+    status:
+      groupBuyEmailStatus,
+  };
+}
+
+    function renderStaffEmailRecipients(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  const recipients =
+    staffEmailData[type] ?? [];
+
+  elements.list.innerHTML =
+    "";
+
+  if (
+    recipients.length === 0
+  ) {
+    elements.list.textContent =
+      translate(
+        "staffEmailNone"
+      );
+
+  } else {
+    recipients.forEach(
+      (recipient) => {
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className =
+          "group-buy-card";
+
+
+        const title =
+          document.createElement(
+            "div"
+          );
+
+        title.className =
+          "group-buy-card-title";
+
+        title.textContent =
+          recipient.nickname;
+
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+        meta.className =
+          "group-buy-card-meta";
+
+        meta.textContent =
+          `${recipient.email} · ${
+            recipient.active
+              ? translate(
+                  "groupBuyActive"
+                )
+              : translate(
+                  "groupBuyInactive"
+                )
+          }`;
+
+
+        const actions =
+          document.createElement(
+            "div"
+          );
+
+        actions.className =
+          "group-buy-actions";
+
+
+        const toggleButton =
+          document.createElement(
+            "button"
+          );
+
+        toggleButton.type =
+          "button";
+
+        toggleButton.textContent =
+          recipient.active
+            ? translate(
+                "groupBuySetInactive"
+              )
+            : translate(
+                "groupBuySetActive"
+              );
+
+        toggleButton.addEventListener(
+          "click",
+          async () => {
+            await updateStaffEmailRecipient(
+              type,
+              recipient.id,
+              {
+                active:
+                  !recipient.active,
+              }
+            );
           }
-        };
-        row.append(remove);
-      }
-      return row;
-    }
+        );
 
-    async function openRoomMembers(){
-      if(!currentRoomId)return;
-      roomManageStatus.textContent="";
-      roomManageStatus.classList.remove("error");
 
-      try{
-        const details=await request(`${API.roomUser}?room_id=${encodeURIComponent(currentRoomId)}`);
-        roomMembersTitle.textContent=`${text.members} · ${details.room?.name??""}`;
-        roomMembersNote.textContent=details.room?.room_kind==="staff_official"?text.officialRoom:"";
+        const editButton =
+          document.createElement(
+            "button"
+          );
 
-        roomMemberList.replaceChildren(...(details.members??[]).map(member=>renderMemberRow(member,details)));
+        editButton.type =
+          "button";
 
-        const memberIds=new Set((details.members??[]).map(member=>member.user_id));
-        const available=(details.directory??[]).filter(account=>!memberIds.has(account.user_id));
+        editButton.textContent =
+          translate(
+            "groupBuyEdit"
+          );
 
-        inviteSection.classList.toggle("hidden",!details.room?.can_invite);
-        inviteList.replaceChildren(...available.map(account=>{
-          const row=document.createElement("div");
-          row.className="member-row";
-          const name=document.createElement("span");
-          name.className="member-name";
-          name.textContent=account.display_name;
-          const kind=document.createElement("span");
-          kind.className="member-kind";
-          kind.textContent=account.kind;
-          const add=document.createElement("button");
-          add.type="button";
-          add.textContent="+";
-          add.onclick=async()=>{
-            add.disabled=true;
-            try{
-              await request(API.roomUser,{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({action:"add_member",room_id:currentRoomId,user_id:account.user_id})
-              });
-              await openRoomMembers();
-              await loadRooms();
-            }catch(error){
-              roomManageStatus.textContent=error.message;
-              roomManageStatus.classList.add("error");
-            }finally{
-              add.disabled=false;
+        editButton.addEventListener(
+          "click",
+          async () => {
+            const nickname =
+              prompt(
+                translate(
+                  "staffEmailNickname"
+                ),
+                recipient.nickname
+              );
+
+            if (
+              nickname === null
+            ) {
+              return;
             }
-          };
-          row.append(name,kind,add);
-          return row;
-        }));
 
-        if(!available.length&&details.room?.can_invite){
-          const empty=document.createElement("div");
-          empty.className="room-note";
-          empty.textContent="—";
-          inviteList.replaceChildren(empty);
+            const email =
+              prompt(
+                translate(
+                  "email"
+                ),
+                recipient.email
+              );
+
+            if (
+              email === null
+            ) {
+              return;
+            }
+
+            await updateStaffEmailRecipient(
+              type,
+              recipient.id,
+              {
+                nickname:
+                  nickname.trim(),
+
+                email:
+                  email.trim(),
+              }
+            );
+          }
+        );
+
+
+        const deleteButton =
+          document.createElement(
+            "button"
+          );
+
+        deleteButton.type =
+          "button";
+
+        deleteButton.textContent =
+          translate(
+            "delete"
+          );
+
+        deleteButton.addEventListener(
+          "click",
+          async () => {
+            if (
+              !confirm(
+                translate(
+                  "staffEmailDeleteConfirm"
+                )
+              )
+            ) {
+              return;
+            }
+
+            await deleteStaffEmailRecipient(
+              type,
+              recipient.id
+            );
+          }
+        );
+
+
+        actions.appendChild(
+          toggleButton
+        );
+
+        actions.appendChild(
+          editButton
+        );
+
+        actions.appendChild(
+          deleteButton
+        );
+
+        card.appendChild(
+          title
+        );
+
+        card.appendChild(
+          meta
+        );
+
+        card.appendChild(
+          actions
+        );
+
+        elements.list.appendChild(
+          card
+        );
+      }
+    );
+  }
+
+
+  elements.status.textContent =
+    translate(
+      "staffEmailCount"
+    )
+      .replace(
+        "{count}",
+        String(
+          recipients.length
+        )
+      )
+      .replace(
+        "{max}",
+        "3"
+      );
+
+
+  elements.addButton.disabled =
+    recipients.length >= 3;
+}
+
+    async function loadStaffEmailRecipients(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    const result =
+      await staffEmailRequest(
+        "GET",
+        type
+      );
+
+    staffEmailData[type] =
+      result.recipients ??
+      [];
+
+    staffEmailLoaded[type] =
+      true;
+
+    renderStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message,
+      true
+    );
+  }
+}
+
+
+async function addStaffEmailRecipient(
+  type
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  const nickname =
+    elements.nicknameInput
+      .value
+      .trim();
+
+  const email =
+    elements.emailInput
+      .value
+      .trim();
+
+  if (
+    !nickname ||
+    !email
+  ) {
+    setStatus(
+      elements.status,
+      translate(
+        "staffEmailInvalid"
+      ),
+      true
+    );
+
+    return;
+  }
+
+  try {
+    await staffEmailRequest(
+      "POST",
+      type,
+      {
+        nickname,
+        email,
+      }
+    );
+
+    elements.nicknameInput.value =
+      "";
+
+    elements.emailInput.value =
+      "";
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message ===
+        "RECIPIENT_LIMIT_REACHED"
+        ? translate(
+            "staffEmailLimit"
+          )
+        : error.message ===
+            "EMAIL_ALREADY_EXISTS"
+          ? translate(
+              "staffEmailDuplicate"
+            )
+          : error.message,
+      true
+    );
+  }
+}
+
+
+async function updateStaffEmailRecipient(
+  type,
+  id,
+  updates
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    await staffEmailRequest(
+      "PATCH",
+      type,
+      {
+        id,
+        ...updates,
+      }
+    );
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message ===
+        "EMAIL_ALREADY_EXISTS"
+        ? translate(
+            "staffEmailDuplicate"
+          )
+        : error.message,
+      true
+    );
+  }
+}
+
+
+async function deleteStaffEmailRecipient(
+  type,
+  id
+) {
+  const elements =
+    getStaffEmailElements(
+      type
+    );
+
+  try {
+    await staffEmailRequest(
+      "DELETE",
+      type,
+      {
+        id,
+      }
+    );
+
+    await loadStaffEmailRecipients(
+      type
+    );
+
+  } catch (error) {
+    setStatus(
+      elements.status,
+      error.message,
+      true
+    );
+  }
+}
+
+    async function staffGroupBuyRequest(
+  method,
+  body = null,
+  query = ""
+) {
+  const {
+    data: sessionData
+  } =
+    await supabase.auth
+      .getSession();
+
+  const token =
+    sessionData.session
+      ?.access_token;
+
+  if (!token) {
+    throw new Error(
+      translate(
+        "staffSessionExpired"
+      )
+    );
+  }
+
+  const options = {
+    method,
+
+    headers: {
+      "Authorization":
+        `Bearer ${token}`,
+    },
+  };
+
+  if (body !== null) {
+    options.headers[
+      "Content-Type"
+    ] =
+      "application/json";
+
+    options.body =
+      JSON.stringify(body);
+  }
+
+  const response =
+    await fetch(
+      STAFF_GROUPBUY_API_URL +
+      query,
+      options
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      translate(
+        "groupBuyRequestFailed"
+      )
+    );
+  }
+
+  return result;
+}
+
+
+function kstInputToIso(
+  value
+) {
+  const text =
+    String(
+      value ?? ""
+    ).trim();
+
+  if (!text) {
+    return "";
+  }
+
+  const date =
+    new Date(
+      `${text}:00+09:00`
+    );
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return date.toISOString();
+}
+
+
+function isoToKstInput(
+  value
+) {
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const formatter =
+    new Intl.DateTimeFormat(
+      "en-CA",
+      {
+        timeZone:
+          "Asia/Seoul",
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        hour12:
+          false,
+      }
+    );
+
+  const parts =
+    Object.fromEntries(
+      formatter
+        .formatToParts(date)
+        .filter(
+          (part) =>
+            part.type !==
+            "literal"
+        )
+        .map(
+          (part) => [
+            part.type,
+            part.value,
+          ]
+        )
+    );
+
+  return (
+    `${parts.year}-` +
+    `${parts.month}-` +
+    `${parts.day}T` +
+    `${parts.hour}:` +
+    `${parts.minute}`
+  );
+}
+
+
+function formatKstDateTime(
+  value
+) {
+  if (!value) {
+    return "—";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "—";
+  }
+
+  return (
+    new Intl.DateTimeFormat(
+      getLocale(),
+      {
+        timeZone:
+          "Asia/Seoul",
+
+        year:
+          "numeric",
+
+        month:
+          "short",
+
+        day:
+          "numeric",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+      }
+    ).format(date) +
+    " KST"
+  );
+}
+
+
+function renderGroupBuyEvents() {
+  groupBuyEventList.innerHTML =
+    "";
+
+  groupBuyEventSelect.innerHTML =
+    "";
+
+  const events =
+    groupBuyData.events ?? [];
+
+  if (
+    events.length === 0
+  ) {
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "small";
+
+    empty.textContent =
+      translate(
+        "groupBuyNoRounds"
+      );
+
+    groupBuyEventList.appendChild(
+      empty
+    );
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+    option.value =
+      "";
+
+    option.textContent =
+      translate(
+        "groupBuyNoRounds"
+      );
+
+    groupBuyEventSelect.appendChild(
+      option
+    );
+
+    return;
+  }
+
+  events.forEach(
+    (event) => {
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        String(
+          event.id
+        );
+
+      option.textContent =
+        event.title;
+
+      groupBuyEventSelect.appendChild(
+        option
+      );
+
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "group-buy-card";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "group-buy-card-title";
+
+      title.textContent =
+        event.title;
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "group-buy-card-meta";
+
+      meta.textContent =
+        `${
+          event.active
+            ? translate(
+                "groupBuyActive"
+              )
+            : translate(
+                "groupBuyInactive"
+              )
+        } · ${
+          formatKstDateTime(
+            event.start_at
+          )
+        } → ${
+          formatKstDateTime(
+            event.end_at
+          )
+        }`;
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "group-buy-actions";
+
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        event.active
+          ? translate(
+              "groupBuySetInactive"
+            )
+          : translate(
+              "groupBuySetActive"
+            );
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                active:
+                  !event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+          } catch (error) {
+            alert(
+              error.message
+            );
+          }
         }
+      );
 
-        deleteRoomButton.classList.toggle("hidden",!details.room?.can_delete);
-        if(!roomMembersDialog.open)roomMembersDialog.showModal();
-      }catch(error){
-        setStatus(error.message,true);
-      }
-    }
 
-    async function deleteCurrentRoom(){
-      if(!currentRoomId||!confirm(text.deleteRoomConfirm))return;
-      deleteRoomButton.disabled=true;
-      try{
-        await request(API.roomUser,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"delete_room",room_id:currentRoomId})
-        });
-        roomMembersDialog.close();
-        stopRealtime();
-        currentRoomId=null;
-        messageMap.clear();
-        await loadRooms();
-        if(currentRoomId){
-          await loadLatest(true);
-          startRealtime();
-        }else{
-          renderMessages();
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        translate(
+          "groupBuyEdit"
+        );
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const titleValue =
+            prompt(
+              translate(
+                "groupBuyRoundName"
+              ),
+              event.title
+            );
+
+          if (
+            titleValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startValue =
+            prompt(
+              translate(
+                "groupBuyStartKst"
+              ),
+              isoToKstInput(
+                event.start_at
+              )
+            );
+
+          if (
+            startValue ===
+            null
+          ) {
+            return;
+          }
+
+          const endValue =
+            prompt(
+              translate(
+                "groupBuyEndKst"
+              ),
+              isoToKstInput(
+                event.end_at
+              )
+            );
+
+          if (
+            endValue ===
+            null
+          ) {
+            return;
+          }
+
+          const startAt =
+            kstInputToIso(
+              startValue
+            );
+
+          const endAt =
+            kstInputToIso(
+              endValue
+            );
+
+          if (
+            !titleValue.trim() ||
+            !startAt ||
+            !endAt
+          ) {
+            alert(
+              translate(
+                "groupBuyInvalidRound"
+              )
+            );
+
+            return;
+          }
+
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_event",
+
+                id:
+                  event.id,
+
+                title:
+                  titleValue.trim(),
+
+                start_at:
+                  startAt,
+
+                end_at:
+                  endAt,
+
+                active:
+                  event.active,
+              }
+            );
+
+            await loadGroupBuyData();
+
+          } catch (error) {
+            alert(
+              error.message
+            );
+          }
         }
-      }catch(error){
-        roomManageStatus.textContent=error.message;
-        roomManageStatus.classList.add("error");
-      }finally{
-        deleteRoomButton.disabled=false;
-      }
+      );
+
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        editButton
+      );
+
+
+      card.appendChild(
+        title
+      );
+
+      card.appendChild(
+        meta
+      );
+
+      card.appendChild(
+        actions
+      );
+
+
+      groupBuyEventList.appendChild(
+        card
+      );
+    }
+  );
+
+
+  if (
+    selectedGroupBuyEventId
+  ) {
+    groupBuyEventSelect.value =
+      String(
+        selectedGroupBuyEventId
+      );
+  }
+}
+
+
+async function loadGroupBuyDetail(
+  id
+) {
+  selectedGroupBuyEventId =
+    Number(id);
+
+  setStatus(
+    groupBuyDetailStatus,
+    translate(
+      "groupBuyLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffGroupBuyRequest(
+        "GET",
+        null,
+        `?event_id=${
+          encodeURIComponent(id)
+        }`
+      );
+
+    groupBuyDetail = {
+      event:
+        result.event ??
+        null,
+
+      items:
+        result.items ??
+        [],
+
+      applications:
+        result.applications ??
+        [],
+    };
+
+    renderGroupBuySelectedEvent();
+    renderGroupBuyItems();
+    renderGroupBuyApplications();
+
+    clearStatus(
+      groupBuyDetailStatus
+    );
+
+  } catch (error) {
+    setStatus(
+      groupBuyDetailStatus,
+      error.message ||
+      translate(
+        "groupBuyDetailFailed"
+      ),
+      true
+    );
+  }
+}
+
+
+async function loadGroupBuyData() {
+
+
+  setStatus(
+    groupBuyEventStatus,
+    translate(
+      "groupBuyLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffGroupBuyRequest(
+        "GET"
+      );
+
+    groupBuyData = {
+      events:
+        result.events ??
+        [],
+    };
+
+    if (
+      selectedGroupBuyEventId &&
+      !groupBuyData.events.some(
+        (event) =>
+          Number(event.id) ===
+          Number(
+            selectedGroupBuyEventId
+          )
+      )
+    ) {
+      selectedGroupBuyEventId =
+        null;
     }
 
-    async function translateMessage(message,button,host){
-      if(button.disabled)return;
-      const old=button.textContent;
-      const targetLanguage=["ko","en","ja","ru"].includes(language)?language:"en";
-      const translationKey=`${message.id}:${targetLanguage}`;
-
-      button.disabled=true;
-      button.textContent=text.translating;
-
-      try{
-        const r=await request(API.translate,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            message_id:message.id,
-            target_language:targetLanguage
-          })
-        });
-
-        const translated=String(r.translation??"");
-        translationViewCache.set(translationKey,translated);
-
-        host.replaceChildren();
-        const lab=document.createElement("span");
-        lab.className="translation-label";
-        lab.textContent=`${text.translation} · ${targetLanguage.toUpperCase()}`;
-        const c=document.createElement("span");
-        c.textContent=translated;
-        host.append(lab,c);
-        host.classList.remove("hidden");
-      }catch{
-        host.textContent=text.translationFailed;
-        host.classList.remove("hidden");
-      }finally{
-        button.disabled=false;
-        button.textContent=old;
-      }
+    if (
+      !selectedGroupBuyEventId &&
+      groupBuyData.events.length >
+      0
+    ) {
+      selectedGroupBuyEventId =
+        Number(
+          groupBuyData
+            .events[0]
+            .id
+        );
     }
 
-    async function markRead(){
-      if(!currentRoomId||document.hidden||!nearBottom())return;
-      try{await request(API.read,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({room_id:currentRoomId})});await loadRooms();}catch{}
-    }
+    renderGroupBuyEvents();
 
-    function maybeNotify(items,previousNewestId){
-      if(document.visibilityState!=="hidden"||Notification.permission!=="granted")return;
-      const fresh=items.filter(m=>!m.is_mine&&m.id!==previousNewestId).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
-      if(!fresh)return;
-      new Notification(rooms.find(r=>r.id===currentRoomId)?.name??text.title,{body:language==="ko"?"새 채팅 메시지가 있습니다.":language==="ja"?"新しいチャットメッセージがあります。":language==="ru"?"Есть новое сообщение в чате.":"You have a new chat message.",tag:`staff-chat-${currentRoomId}`,renotify:true});
-    }
+    if (
+      selectedGroupBuyEventId
+    ) {
+      await loadGroupBuyDetail(
+        selectedGroupBuyEventId
+      );
 
-    async function loadLatest(forceScroll=false,notify=false){
-      if(loading||!currentRoomId)return;loading=true;const shouldScroll=forceScroll||nearBottom();const previous=newestMessage()?.id??notificationBaseline;
-      try{const r=await request(buildListUrl({limit:30}));actor=r.actor;currentSignalTopic=r.signal_topic??null;chatTitle.textContent=r.room?.name??text.title;for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();if(shouldScroll)messagesHost.scrollTop=messagesHost.scrollHeight;if(notify)maybeNotify(r.messages??[],previous);notificationBaseline=newestMessage()?.id??notificationBaseline;gate.classList.add("hidden");app.classList.remove("hidden");renderRooms();if(shouldScroll)await markRead();}catch(e){if(e.status===401||e.status===403){showGate(text.denied);}else setStatus(text.loadFailed,true);throw e;}finally{loading=false;}
-    }
-
-    async function loadOlder(){
-      const items=[...messageMap.values()].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));const earliest=items[0];if(!earliest)return;olderButton.disabled=true;
-      try{const r=await request(buildListUrl({limit:30,before:earliest.created_at}));for(const m of r.messages??[])messageMap.set(m.id,m);hasMore=Boolean(r.has_more);renderMessages();}catch{setStatus(text.loadFailed,true);}finally{olderButton.disabled=false;}
-    }
-
-    async function selectRoom(id){
-      if(id===currentRoomId)return;stopRealtime();currentRoomId=id;currentSignalTopic=null;messageMap.clear();replyTarget=null;renderReplyTarget();currentSearch={q:"",dateFrom:"",dateTo:""};searchText.value="";dateFrom.value="";dateTo.value="";renderRooms();await loadLatest(true).catch(()=>{});startRealtime();
-    }
-
-    function renderReplyTarget(){
-      replying.classList.toggle("hidden",!replyTarget);
-      replyingText.textContent=replyTarget?`${text.replying} · ${replyTarget.author_name}: ${String(replyTarget.body??"").replace(/\s+/g," ").slice(0,100)}`:"";
-    }
-
-    function renderFiles(){
-      fileList.classList.toggle("hidden",!selectedFiles.length);fileList.replaceChildren(...selectedFiles.map(f=>{const s=document.createElement("span");s.className="file-chip";s.textContent=`${f.name} · ${formatBytes(f.size)}`;return s;}));
-    }
-
-    async function uploadFile(messageId,file){const form=new FormData();form.append("message_id",messageId);form.append("file",file,file.name);return request(API.upload,{method:"POST",body:form});}
-
-    async function sendMessage(){
-      if(sending||!currentRoomId)return;
-
-      const body=messageInput.value;
-      if(!body.trim()&&!selectedFiles.length)return;
-
-      const filesToUpload=[...selectedFiles];
-      const replySnapshot=replyTarget ? {...replyTarget} : null;
-      const optimisticId=makeOptimisticMessageId();
-      const now=new Date().toISOString();
-
-      const optimisticMessage={
-        id:optimisticId,
-        room_id:currentRoomId,
-        author_name:actor?.name ?? actor?.display_name ?? "Me",
-        author_kind:actor?.kind ?? "staff",
-        author_user_id:actor?.user_id ?? actor?.userId ?? null,
-        body,
-        created_at:now,
-        updated_at:now,
-        is_deleted:false,
-        attachments:[],
-        reactions:[],
-        my_reaction:null,
-        can_delete:false,
-        can_report:false,
-        reply_to_message_id:replySnapshot?.id ?? null,
-        reply_to_author_name:replySnapshot?.author_name ?? null,
-        reply_to_body:replySnapshot?.body ?? null,
-        is_optimistic:true,
+    } else {
+      groupBuyDetail = {
+        event: null,
+        items: [],
+        applications: [],
       };
 
-      messageMap.set(optimisticId,optimisticMessage);
-      pendingMessageIds.add(optimisticId);
-      renderMessages();
-      messagesHost.scrollTop=messagesHost.scrollHeight;
-
-      messageInput.value="";
-      selectedFiles=[];
-      fileInput.value="";
-      replyTarget=null;
-      renderFiles();
-      renderReplyTarget();
-
-      sending=true;
-      sendButton.disabled=true;
-
-      try{
-        const r=await request(API.send,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            room_id:currentRoomId,
-            body,
-            reply_to_message_id:replySnapshot?.id??null
-          })
-        });
-
-        const saved=r.message;
-        const id=saved?.id;
-        if(!id)throw new Error("MESSAGE_ID_MISSING");
-
-        messageMap.delete(optimisticId);
-        pendingMessageIds.delete(optimisticId);
-
-        const mergedMessage={
-          ...optimisticMessage,
-          ...saved,
-          is_optimistic:false,
-        };
-        messageMap.set(id,mergedMessage);
-        renderMessages();
-
-        if(filesToUpload.length){
-          await Promise.allSettled(
-            filesToUpload.map(file=>uploadFile(id,file))
-          );
-          // Attachments are server-owned data; refresh only once after uploads finish.
-          await loadLatest(false).catch(()=>{});
-        }
-      }catch(error){
-        messageMap.delete(optimisticId);
-        pendingMessageIds.delete(optimisticId);
-        renderMessages();
-
-        // Restore unsent content so the user does not lose it.
-        if(!messageInput.value){
-          messageInput.value=body;
-          messageInput.style.height="auto";
-          messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;
-        }
-        if(!selectedFiles.length && filesToUpload.length){
-          selectedFiles=filesToUpload;
-          renderFiles();
-        }
-        if(!replyTarget && replySnapshot){
-          replyTarget=replySnapshot;
-          renderReplyTarget();
-        }
-
-        setStatus(text.sendFailed,true);
-      }finally{
-        sending=false;
-        sendButton.disabled=false;
-      }
+      renderGroupBuySelectedEvent();
+      renderGroupBuyItems();
+      renderGroupBuyApplications();
     }
 
-    async function reactToMessage(messageId,emoji){
-      const message=messageMap.get(messageId);
-      if(!message||message.is_optimistic)return;
+    groupBuyLoaded =
+      true;
 
-      const snapshot=cloneReactionState(message);
-      setOptimisticReaction(message,emoji);
-      renderMessages();
+    clearStatus(
+      groupBuyEventStatus
+    );
 
-      try{
-        const result=await request(API.react,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            message_id:messageId,
-            emoji
-          })
-        });
+  } catch (error) {
+    setStatus(
+      groupBuyEventStatus,
+      error.message ||
+      translate(
+        "groupBuyLoadFailed"
+      ),
+      true
+    );
 
-        /*
-          If the endpoint returns the authoritative message/reaction state,
-          merge it. Otherwise keep the optimistic state and let Realtime /
-          fallback reconciliation update it later.
-        */
-        if(result?.message){
-          messageMap.set(messageId,{
-            ...messageMap.get(messageId),
-            ...result.message
-          });
-          renderMessages();
-        }else if(Array.isArray(result?.reactions)){
-          const current=messageMap.get(messageId);
-          if(current){
-            current.reactions=result.reactions;
-            if("my_reaction" in result) current.my_reaction=result.my_reaction;
-            renderMessages();
+  } finally {
+
+  }
+}
+
+
+    function renderGroupBuySelectedEvent() {
+  const event =
+    groupBuyDetail.event;
+
+  if (!event) {
+    groupBuySelectedEvent.textContent =
+      translate(
+        "groupBuySelectRound"
+      );
+
+    return;
+  }
+
+  groupBuySelectedEvent.textContent =
+    `${event.title} · ${
+      event.active
+        ? translate(
+            "groupBuyActive"
+          )
+        : translate(
+            "groupBuyInactive"
+          )
+    } · ${
+      formatKstDateTime(
+        event.start_at
+      )
+    } → ${
+      formatKstDateTime(
+        event.end_at
+      )
+    }`;
+}
+
+
+function renderGroupBuyItems() {
+  groupBuyItemList.innerHTML =
+    "";
+
+  const items =
+    groupBuyDetail.items ??
+    [];
+
+  if (
+    items.length === 0
+  ) {
+    groupBuyItemList.textContent =
+      translate(
+        "groupBuyNoItems"
+      );
+
+    return;
+  }
+
+  items.forEach(
+    (item) => {
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "group-buy-card";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "group-buy-card-title";
+
+      title.textContent =
+        item.name;
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "group-buy-card-meta";
+
+      meta.textContent =
+        `${
+          translate(
+            "groupBuyMaxQuantity"
+          )
+        }: ${
+          Number(
+            item.max_quantity
+          ).toLocaleString(
+            getLocale()
+          )
+        } · ${
+          item.active
+            ? translate(
+                "groupBuyActive"
+              )
+            : translate(
+                "groupBuyInactive"
+              )
+        }`;
+
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "group-buy-actions";
+
+
+      const editButton =
+        document.createElement(
+          "button"
+        );
+
+      editButton.type =
+        "button";
+
+      editButton.textContent =
+        translate(
+          "groupBuyEdit"
+        );
+
+      editButton.addEventListener(
+        "click",
+        async () => {
+          const name =
+            prompt(
+              translate(
+                "groupBuyItemName"
+              ),
+              item.name
+            );
+
+          if (
+            name === null
+          ) {
+            return;
+          }
+
+          const max =
+            prompt(
+              translate(
+                "groupBuyMaxQuantity"
+              ),
+              String(
+                item.max_quantity
+              )
+            );
+
+          if (
+            max === null
+          ) {
+            return;
+          }
+
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  name.trim(),
+
+                max_quantity:
+                  Number(max),
+
+                active:
+                  item.active,
+
+                display_order:
+                  item.display_order,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+          } catch (error) {
+            alert(
+              error.message
+            );
           }
         }
-      }catch(e){
-        const current=messageMap.get(messageId);
-        if(current){
-          current.reactions=snapshot.reactions;
-          current.my_reaction=snapshot.my_reaction;
-          renderMessages();
+      );
+
+
+      const toggleButton =
+        document.createElement(
+          "button"
+        );
+
+      toggleButton.type =
+        "button";
+
+      toggleButton.textContent =
+        item.active
+          ? translate(
+              "groupBuySetInactive"
+            )
+          : translate(
+              "groupBuySetActive"
+            );
+
+      toggleButton.addEventListener(
+        "click",
+        async () => {
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "update_item",
+
+                id:
+                  item.id,
+
+                name:
+                  item.name,
+
+                max_quantity:
+                  item.max_quantity,
+
+                active:
+                  !item.active,
+
+                display_order:
+                  item.display_order,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+          } catch (error) {
+            alert(
+              error.message
+            );
+          }
         }
-        setStatus(e.message,true);
+      );
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.textContent =
+        translate(
+          "delete"
+        );
+
+      deleteButton.addEventListener(
+        "click",
+        async () => {
+          if (
+            !confirm(
+              translate(
+                "groupBuyDeleteItemConfirm"
+              )
+            )
+          ) {
+            return;
+          }
+
+          try {
+            await staffGroupBuyRequest(
+              "POST",
+              {
+                action:
+                  "delete_item",
+
+                id:
+                  item.id,
+              }
+            );
+
+            await loadGroupBuyDetail(
+              selectedGroupBuyEventId
+            );
+
+          } catch (error) {
+            alert(
+              error.message ===
+                "ITEM_IN_USE"
+                ? translate(
+                    "groupBuyItemInUse"
+                  )
+                : error.message
+            );
+          }
+        }
+      );
+
+
+      actions.appendChild(
+        editButton
+      );
+
+      actions.appendChild(
+        toggleButton
+      );
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      card.appendChild(
+        title
+      );
+
+      card.appendChild(
+        meta
+      );
+
+      card.appendChild(
+        actions
+      );
+
+
+      groupBuyItemList.appendChild(
+        card
+      );
+    }
+  );
+}
+
+
+function renderGroupBuyApplications() {
+  groupBuyApplicationsList.innerHTML =
+    "";
+
+  const applications =
+    groupBuyDetail.applications ??
+    [];
+
+  if (
+    applications.length === 0
+  ) {
+    groupBuyApplicationsList.textContent =
+      translate(
+        "groupBuyNoApplications"
+      );
+
+    groupBuyApplicationsStatus.textContent =
+      "";
+
+    return;
+  }
+
+
+  applications.forEach(
+    (application) => {
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "group-buy-card";
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "group-buy-card-title";
+
+      title.textContent =
+        `${
+          application.player_name ??
+          "—"
+        } · ${
+          application.alliance_name ??
+          "—"
+        }`;
+
+
+      const meta =
+        document.createElement(
+          "div"
+        );
+
+      meta.className =
+        "group-buy-card-meta";
+
+      meta.textContent =
+        `${
+          formatKstDateTime(
+            application.created_at
+          )
+        } · ${
+          application.language ??
+          "—"
+        }`;
+
+
+      const items =
+        document.createElement(
+          "div"
+        );
+
+      items.className =
+        "group-buy-application-items";
+
+
+      const selectedItems =
+        application
+          .group_buy_application_items ??
+        [];
+
+
+      if (
+        selectedItems.length === 0
+      ) {
+        items.textContent =
+          translate(
+            "groupBuyNoItemsSelected"
+          );
+
+      } else {
+        items.textContent =
+          selectedItems
+            .map(
+              (entry) =>
+                `${
+                  entry
+                    .group_buy_items
+                    ?.name ??
+                  "—"
+                } × ${
+                  entry.quantity ??
+                  0
+                }`
+            )
+            .join(" · ");
       }
+
+
+      card.appendChild(
+        title
+      );
+
+      card.appendChild(
+        meta
+      );
+
+      card.appendChild(
+        items
+      );
+
+
+      groupBuyApplicationsList
+        .appendChild(
+          card
+        );
     }
+  );
 
-    async function reportMessage(id){
-      const reason=prompt(text.reportReason)??null;
-      if(reason===null)return;
 
-      try{
-        await request(API.report,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({message_id:id,reason})
-        });
-        setStatus(text.reportDone);
-      }catch(error){
-        setStatus(error.message,true);
-      }
-    }
+  groupBuyApplicationsStatus.textContent =
+    translate(
+      "groupBuyTotalApplications"
+    ).replace(
+      "{count}",
+      String(
+        applications.length
+      )
+    );
+}
 
-    async function deleteMessage(id){
-      if(!confirm(text.deleteConfirm))return;
-      try{await request(API.delete,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message_id:id})});await loadLatest(false);}catch(e){setStatus(e.message,true);}
-    }
+    addGroupBuyEventButton
+  .addEventListener(
+    "click",
+    async () => {
+      const title =
+        newGroupBuyEventTitle
+          .value
+          .trim();
 
-    function scheduleRefresh(){
-      clearTimeout(refreshTimer);
-      refreshTimer=setTimeout(()=>{
-        if(loading)return;
-        loadLatest(false,true).then(loadRooms).catch(()=>{});
-      },220);
-    }
+      const startAt =
+        kstInputToIso(
+          newGroupBuyStartAt.value
+        );
 
-    function startRealtime(){
-      stopRealtime();if(!currentRoomId)return;
-      if(!currentSignalTopic)return;realtimeChannel=supabase.channel(currentSignalTopic,{config:{private:false}}).on("broadcast",{event:"changed"},scheduleRefresh).subscribe();
-    }
-    function stopRealtime(){if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null;}if(realtimeChannel){supabase.removeChannel(realtimeChannel);realtimeChannel=null;}}
-    function startFallback(){stopFallback();fallbackTimer=setInterval(()=>{if(!document.hidden)loadLatest(false).then(loadRooms).catch(()=>{});},FALLBACK_POLL_MS);}
-    function stopFallback(){if(fallbackTimer){clearInterval(fallbackTimer);fallbackTimer=null;}}
+      const endAt =
+        kstInputToIso(
+          newGroupBuyEndAt.value
+        );
 
-    function showGate(message){stopRealtime();stopFallback();app.classList.add("hidden");gate.classList.remove("hidden");gateMessage.textContent=message;chatLogin.classList.remove("hidden");}
+      if (
+        !title ||
+        !startAt ||
+        !endAt
+      ) {
+        setStatus(
+          groupBuyEventStatus,
+          translate(
+            "groupBuyInvalidRound"
+          ),
+          true
+        );
 
-    async function bootstrap(){
-      setText();
-      try{await loadRooms();if(!currentRoomId)throw Object.assign(new Error("NO_ROOM"),{status:403});await loadLatest(true);startRealtime();startFallback();}catch(e){showGate(e.status===401||e.status===403?text.denied:text.denied);}
-    }
-
-    function chatLoginErrorMessage(error){
-      const code=String(error?.code??"");
-      const message=String(error?.message??"");
-
-      if(
-        code==="invalid_credentials" ||
-        /invalid login credentials/i.test(message)
-      ){
-        return language==="ko"
-          ? "로그인 정보가 틀렸습니다. 아이디와 비밀번호를 확인하세요."
-          : language==="ja"
-            ? "ログイン情報が正しくありません。IDとパスワードを確認してください。"
-            : language==="ru"
-              ? "Неверные данные для входа. Проверьте ID и пароль."
-              : "Incorrect login information. Check your ID and password.";
-      }
-
-      if(
-        code==="email_not_confirmed" ||
-        /email not confirmed/i.test(message)
-      ){
-        return language==="ko"
-          ? "계정 인증이 완료되지 않았습니다. 관리자에게 문의하세요."
-          : language==="ja"
-            ? "アカウント認証が完了していません。管理者にお問い合わせください。"
-            : language==="ru"
-              ? "Учётная запись не подтверждена. Обратитесь к администратору."
-              : "The account is not confirmed. Contact the administrator.";
-      }
-
-      if(
-        code==="user_banned" ||
-        /banned/i.test(message)
-      ){
-        return language==="ko"
-          ? "비활성화되었거나 이용이 정지된 계정입니다."
-          : language==="ja"
-            ? "無効化または停止されたアカウントです。"
-            : language==="ru"
-              ? "Учётная запись отключена или заблокирована."
-              : "This account is disabled or suspended.";
-      }
-
-      return language==="ko"
-        ? `로그인에 실패했습니다.${message?` (${message})`:""}`
-        : language==="ja"
-          ? `ログインに失敗しました。${message?` (${message})`:""}`
-          : language==="ru"
-            ? `Не удалось войти.${message?` (${message})`:""}`
-            : `Login failed.${message?` (${message})`:""}`;
-    }
-
-    async function doChatLogin(){
-      const id=chatId.value.trim();
-      const password=chatPassword.value;
-
-      if(!id||!password){
-        gateMessage.textContent=
-          language==="ko"
-            ? "아이디와 비밀번호를 입력하세요."
-            : language==="ja"
-              ? "IDとパスワードを入力してください。"
-              : language==="ru"
-                ? "Введите ID и пароль."
-                : "Enter your ID and password.";
         return;
       }
 
-      chatLoginButton.disabled=true;
-      gateMessage.textContent=text.checking;
+      try {
+        const result =
+          await staffGroupBuyRequest(
+            "POST",
+            {
+              action:
+                "create_event",
 
-      try{
-        /*
-          New Chat-only accounts use chat-<id>@s967.org.
-          Accounts converted from Staff to Chat-only intentionally keep
-          their existing <id>@s967.org Supabase Auth email, so try that
-          legacy/current-permission path only if the normal Chat login fails.
-        */
-        const normalized=id.toLowerCase();
-        const candidates=[
-          `chat-${normalized}@s967.org`,
-          `${normalized}@s967.org`
-        ];
+              title,
 
-        let lastError=null;
-        let signedIn=false;
+              start_at:
+                startAt,
 
-        for(const email of candidates){
-          const {error}=await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
+              end_at:
+                endAt,
 
-          if(!error){
-            signedIn=true;
-            break;
+              active:
+                true,
+            }
+          );
+
+        selectedGroupBuyEventId =
+          Number(
+            result.event?.id
+          ) ||
+          null;
+
+        newGroupBuyEventTitle.value =
+          "";
+
+        newGroupBuyStartAt.value =
+          "";
+
+        newGroupBuyEndAt.value =
+          "";
+
+        await loadGroupBuyData();
+
+      } catch (error) {
+        setStatus(
+          groupBuyEventStatus,
+          error.message ===
+            "EVENT_PERIOD_OVERLAP"
+            ? translate(
+                "groupBuyOverlap"
+              )
+            : error.message,
+          true
+        );
+      }
+    }
+  );
+
+
+addGroupBuyItemButton
+  .addEventListener(
+    "click",
+    async () => {
+      if (
+        !selectedGroupBuyEventId
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          translate(
+            "groupBuySelectRoundFirst"
+          ),
+          true
+        );
+
+        return;
+      }
+
+      const name =
+        newGroupBuyItemName
+          .value
+          .trim();
+
+      const maxQuantity =
+        Number(
+          newGroupBuyItemMax.value
+        );
+
+      if (
+        !name ||
+        !Number.isSafeInteger(
+          maxQuantity
+        ) ||
+        maxQuantity <= 0
+      ) {
+        setStatus(
+          groupBuyItemStatus,
+          translate(
+            "groupBuyInvalidItem"
+          ),
+          true
+        );
+
+        return;
+      }
+
+      try {
+        await staffGroupBuyRequest(
+          "POST",
+          {
+            action:
+              "create_item",
+
+            event_id:
+              selectedGroupBuyEventId,
+
+            name,
+
+            max_quantity:
+              maxQuantity,
+
+            active:
+              true,
+
+            display_order:
+              groupBuyDetail
+                .items.length,
           }
+        );
 
-          lastError=error;
+        newGroupBuyItemName.value =
+          "";
 
-          /*
-            Only fall back to the alternate Auth email when credentials
-            were rejected. Other errors should be shown immediately.
-          */
-          const code=String(error?.code??"");
-          const message=String(error?.message??"");
+        newGroupBuyItemMax.value =
+          "";
 
-          if(
-            code!=="invalid_credentials" &&
-            !/invalid login credentials/i.test(message)
-          ){
-            break;
+        await loadGroupBuyDetail(
+          selectedGroupBuyEventId
+        );
+
+        clearStatus(
+          groupBuyItemStatus
+        );
+
+      } catch (error) {
+        setStatus(
+          groupBuyItemStatus,
+          error.message,
+          true
+        );
+      }
+    }
+  );
+
+
+groupBuyEventSelect
+  .addEventListener(
+    "change",
+    async () => {
+      const id =
+        Number(
+          groupBuyEventSelect.value
+        );
+
+      if (
+        !Number.isSafeInteger(id) ||
+        id <= 0
+      ) {
+        return;
+      }
+
+      await loadGroupBuyDetail(
+        id
+      );
+    }
+  );
+
+    
+async function staffWkRequest() {
+  const {
+    data: sessionData
+  } =
+    await supabase.auth
+      .getSession();
+
+  const token =
+    sessionData.session
+      ?.access_token;
+
+  if (!token) {
+    throw new Error(
+      translate(
+        "staffSessionExpired"
+      )
+    );
+  }
+
+  const response =
+    await fetch(
+      STAFF_WK_API_URL,
+      {
+        method: "GET",
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+        },
+      }
+    );
+
+  const result =
+    await response
+      .json()
+      .catch(
+        () => ({})
+      );
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      translate(
+        "wkLoadFailed"
+      )
+    );
+  }
+
+  return result;
+}
+
+
+function formatWkValue(
+  value
+) {
+  const keys = {
+    fighter:
+      "wkFighter",
+
+    shooter:
+      "wkShooter",
+
+    rider:
+      "wkRider",
+
+    all_strong:
+      "wkAllStrong",
+
+    monitor_available:
+      "wkMonitorAvailable",
+
+    monitor_unavailable:
+      "wkMonitorUnavailable",
+
+    captain:
+      "wkCaptain",
+
+    sub_captain:
+      "wkSubCaptain",
+
+    regular:
+      "wkRegular",
+
+    negotiable:
+      "wkNegotiable",
+
+    first_half:
+      "wkFirstHalf",
+
+    second_half:
+      "wkSecondHalf",
+
+    full:
+      "wkFull",
+  };
+
+  const key =
+    keys[value];
+
+  return key
+    ? translate(key)
+    : (
+        value ??
+        "—"
+      );
+}
+
+
+function formatNumber(
+  value
+) {
+  return Number(
+    value ?? 0
+  ).toLocaleString(
+    getLocale()
+  );
+}
+
+
+function renderWkApplications() {
+  wkApplications.innerHTML =
+    "";
+
+  const applications =
+    Array.isArray(
+      wkData.applications
+    )
+      ? wkData.applications
+      : [];
+
+  if (
+    applications.length === 0
+  ) {
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "small";
+
+    empty.textContent =
+      translate(
+        "wkNoApplications"
+      );
+
+    wkApplications.appendChild(
+      empty
+    );
+
+    clearStatus(
+      wkStatus
+    );
+
+    return;
+  }
+
+
+  let lastCycle =
+    null;
+
+
+  for (
+    const application
+    of applications
+  ) {
+    const cycle =
+      Number(
+        application
+          .cycle_number
+      );
+
+
+    if (
+      cycle !==
+      lastCycle
+    ) {
+      const heading =
+        document.createElement(
+          "h3"
+        );
+
+      if (
+        Number.isFinite(
+          cycle
+        )
+      ) {
+        heading.textContent =
+          translate(
+            "wkCycle"
+          ).replace(
+            "{cycle}",
+            String(cycle)
+          );
+
+      } else {
+        heading.textContent =
+          translate(
+            "wkCycleUnknown"
+          );
+      }
+
+      heading.style.margin =
+        lastCycle === null
+          ? "4px 0 10px"
+          : "24px 0 10px";
+
+      wkApplications
+        .appendChild(
+          heading
+        );
+
+      lastCycle =
+        cycle;
+    }
+
+
+    const card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "application-card";
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+    title.className =
+      "manage-name";
+
+    title.textContent =
+      `${
+        application
+          .player_name ??
+        "—"
+      } · ${
+        application
+          .alliance_name_snapshot ??
+        "—"
+      }`;
+
+
+    const meta =
+      document.createElement(
+        "div"
+      );
+
+    meta.className =
+      "manage-note";
+
+    meta.textContent =
+      `${
+        translate(
+          "wkTier"
+        )
+      } ${
+        application
+          .tier_name_snapshot ??
+        "—"
+      } · ${
+        translate(
+          "wkTroopType"
+        )
+      } ${
+        formatWkValue(
+          application
+            .troop_type
+        )
+      } · ${
+        translate(
+          "wkTroopSize"
+        )
+      } ${
+        formatNumber(
+          application
+            .troop_size
+        )
+      } · ${
+        translate(
+          "wkRallySize"
+        )
+      } ${
+        formatNumber(
+          application
+            .rally_size
+        )
+      }`;
+
+
+    const detail =
+      document.createElement(
+        "div"
+      );
+
+    detail.className =
+      "application-items";
+
+    detail.textContent =
+      `${
+        formatWkValue(
+          application
+            .realtime_response
+        )
+      } · ${
+        formatWkValue(
+          application
+            .captain_role
+        )
+      } · ${
+        formatWkValue(
+          application
+            .participation_time
+        )
+      } · ${
+        translate(
+          "wkStatus"
+        )
+      } ${
+        application.status ??
+        "new"
+      }`;
+
+
+    const time =
+      document.createElement(
+        "div"
+      );
+
+    time.className =
+      "manage-note";
+
+    time.style.marginTop =
+      "6px";
+
+    time.textContent =
+      `${
+        translate(
+          "wkSubmitted"
+        )
+      } ${
+        formatDateTime(
+          application
+            .created_at
+        )
+      } · ${
+        translate(
+          "wkLanguage"
+        )
+      } ${
+        application.language ??
+        "—"
+      }`;
+
+
+    card.appendChild(
+      title
+    );
+
+    card.appendChild(
+      meta
+    );
+
+    card.appendChild(
+      detail
+    );
+
+    card.appendChild(
+      time
+    );
+
+
+    wkApplications
+      .appendChild(
+        card
+      );
+  }
+
+
+  wkStatus.textContent =
+    translate(
+      "wkTotal"
+    ).replace(
+      "{count}",
+      String(
+        applications.length
+      )
+    );
+}
+
+
+async function loadWkApplications() {
+  refreshWkButton.disabled =
+    true;
+
+  setStatus(
+    wkStatus,
+    translate(
+      "wkLoading"
+    )
+  );
+
+  try {
+    const result =
+      await staffWkRequest();
+
+    wkData = {
+      applications:
+        result.applications ??
+        [],
+    };
+
+    wkLoaded =
+      true;
+
+    renderWkApplications();
+
+  } catch (error) {
+    console.error(
+      error
+    );
+
+    setStatus(
+      wkStatus,
+      translate(
+        "wkLoadFailed"
+      ),
+      true
+    );
+
+  } finally {
+    refreshWkButton.disabled =
+      false;
+  }
+}
+    
+    function translate(key) {
+      if (
+        typeof getTranslation ===
+        "function"
+      ) {
+        return getTranslation(key);
+      }
+
+      return key;
+    }
+
+
+    function getLocale() {
+      const language =
+        typeof getCurrentLanguage ===
+        "function"
+          ? getCurrentLanguage()
+          : "en";
+
+      const locales = {
+        en: "en-US",
+        ko: "ko-KR",
+        ja: "ja-JP",
+        ru: "ru-RU",
+      };
+
+      return (
+        locales[language] ||
+        "en-US"
+      );
+    }
+
+
+    function formatDateTime(value) {
+      try {
+        return new Intl.DateTimeFormat(
+          getLocale(),
+          {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           }
-        }
-
-        if(!signedIn){
-          throw lastError??new Error("LOGIN_FAILED");
-        }
-
-        gate.classList.add("hidden");
-        await bootstrap();
-      }catch(error){
-        console.error("Chat login failed:",error);
-        gateMessage.textContent=
-          chatLoginErrorMessage(error);
-        chatPassword.focus();
-        chatPassword.select();
-      }finally{
-        chatLoginButton.disabled=false;
+        ).format(
+          new Date(value)
+        );
+      } catch {
+        return "";
       }
     }
 
-    chatLoginButton.onclick=doChatLogin;
-    chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
-    createRoomButton.onclick=()=>{createRoomStatus.textContent="";createRoomStatus.classList.remove("error");newRoomName.value="";createRoomDialog.showModal();newRoomName.focus();};
-    cancelCreateRoomButton.onclick=()=>createRoomDialog.close();
-    confirmCreateRoomButton.onclick=createRoom;
-    newRoomName.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();createRoom();}});
-    roomMembersButton.onclick=openRoomMembers;
-    closeRoomMembersButton.onclick=()=>roomMembersDialog.close();
-    deleteRoomButton.onclick=deleteCurrentRoom;
-    backButton.addEventListener("click",event=>{event.preventDefault();if(history.length>1){history.back();}else{location.href="/";}});
-    roomRefreshButton.onclick=()=>loadRooms().catch(()=>{});
-    refreshButton.onclick=()=>loadLatest(false).then(loadRooms).catch(()=>{});
-    notifyButton.onclick=async()=>{if(!("Notification"in window))return;const p=await Notification.requestPermission();if(p!=="granted")setStatus(text.notificationDenied,true);};
-    searchButton.onclick=async()=>{currentSearch={q:searchText.value.trim(),dateFrom:dateFrom.value,dateTo:dateTo.value};messageMap.clear();await loadLatest(true).catch(()=>{});};
-    clearSearchButton.onclick=async()=>{searchText.value="";dateFrom.value="";dateTo.value="";currentSearch={q:"",dateFrom:"",dateTo:""};messageMap.clear();await loadLatest(true).catch(()=>{});};
-    searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
-    dateFrom.onchange=()=>searchButton.click();
-    dateTo.onchange=()=>searchButton.click();
-    olderButton.onclick=loadOlder;
-    cancelReplyButton.onclick=()=>{replyTarget=null;renderReplyTarget();};
-    fileButton.onclick=()=>fileInput.click();
-    fileInput.onchange=()=>{const files=[...(fileInput.files??[])];if(files.length>MAX_FILES){setStatus(text.tooManyFiles,true);return;}if(files.some(f=>f.size>MAX_FILE_BYTES)){setStatus(text.fileTooLarge,true);return;}selectedFiles=files;setStatus("");renderFiles();};
-    sendButton.onclick=sendMessage;
-    messageInput.addEventListener("input",()=>{messageInput.style.height="auto";messageInput.style.height=`${Math.min(150,messageInput.scrollHeight)}px`;});
-    messageInput.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendMessage();}});
-    messagesHost.addEventListener("scroll",()=>{if(nearBottom())markRead();},{passive:true});
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadLatest(false).then(()=>{markRead();loadRooms();}).catch(()=>{});} });
-    window.addEventListener("s967languagechange",e=>{language=e.detail?.language??(typeof getCurrentLanguage==="function"?getCurrentLanguage():"en");text=TEXT[language]??TEXT.en;setText();});
-    window.addEventListener("beforeunload",()=>{stopRealtime();stopFallback();});
 
-    bootstrap();
+    function setStatus(
+      element,
+      message,
+      isError = false
+    ) {
+      element.textContent =
+        message;
+
+      element.classList.toggle(
+        "error",
+        isError
+      );
+    }
+
+
+    function setTranslatedStatus(
+      element,
+      key,
+      isError = false
+    ) {
+      element.dataset
+        .i18nStatus =
+        key;
+
+      setStatus(
+        element,
+        translate(key),
+        isError
+      );
+    }
+
+
+    function clearStatus(
+      element
+    ) {
+      element.textContent =
+        "";
+
+      element.classList.remove(
+        "error"
+      );
+
+      delete element.dataset
+        .i18nStatus;
+    }
+
+
+    function refreshTranslatedStatuses() {
+      document
+        .querySelectorAll(
+          "[data-i18n-status]"
+        )
+        .forEach(
+          (element) => {
+            element.textContent =
+              translate(
+                element.dataset
+                  .i18nStatus
+              );
+          }
+        );
+    }
+
+
+    function updateDocumentTitle() {
+      document.title =
+        `${translate(
+          "staffTitle"
+        )} · S967`;
+    }
+
+
+    async function staffImageRequest(
+      method,
+      body = null
+    ) {
+      const {
+        data: sessionData
+      } =
+        await supabase.auth
+          .getSession();
+
+      const token =
+        sessionData.session
+          ?.access_token;
+
+      if (!token) {
+        throw new Error(
+          translate(
+            "staffSessionExpired"
+          )
+        );
+      }
+
+      const options = {
+        method,
+
+        headers: {
+          "Authorization":
+            `Bearer ${token}`,
+        },
+      };
+
+      if (body !== null) {
+        options.headers[
+          "Content-Type"
+        ] =
+          "application/json";
+
+        options.body =
+          JSON.stringify(body);
+      }
+
+      const response =
+        await fetch(
+          STAFF_IMAGE_API_URL,
+          options
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          translate(
+            "imageRequestFailed"
+          )
+        );
+      }
+
+      return result;
+    }
+
+
+    function getPublicImageUrl(
+      path
+    ) {
+      return (
+        STORAGE_BASE +
+        path
+          .split("/")
+          .map(
+            encodeURIComponent
+          )
+          .join("/")
+      );
+    }
+
+
+    function getBlock(
+      ipHash
+    ) {
+      return (
+        imageData.blocked.find(
+          (item) =>
+            item.ip_hash ===
+            ipHash
+        ) ??
+        null
+      );
+    }
+
+
+    function isActiveBlock(
+      block
+    ) {
+      if (!block) {
+        return false;
+      }
+
+      if (
+        block.blocked_until ===
+        null
+      ) {
+        return true;
+      }
+
+      return (
+        new Date(
+          block.blocked_until
+        ).getTime() >
+        Date.now()
+      );
+    }
+
+
+    function formatBlock(
+      block
+    ) {
+      if (!block) {
+        return translate(
+          "notBlocked"
+        );
+      }
+
+      if (
+        block.blocked_until ===
+        null
+      ) {
+        return translate(
+          "blockedByAdmin"
+        );
+      }
+
+      const date =
+        formatDateTime(
+          block.blocked_until
+        );
+
+      return translate(
+        "blockedUntil"
+      ).replace(
+        "{date}",
+        date
+      );
+    }
+
+
+    async function loadImages() {
+      refreshImagesButton.disabled =
+        true;
+
+      setTranslatedStatus(
+        imageStatus,
+        "imageLoading"
+      );
+
+      try {
+        const result =
+          await staffImageRequest(
+            "GET"
+          );
+
+        imageData = {
+          uploads:
+            result.uploads ?? [],
+
+          blocked:
+            result.blocked ?? [],
+        };
+
+        renderImages();
+
+        clearStatus(
+          imageStatus
+        );
+
+      } catch (error) {
+        console.error(error);
+
+        setTranslatedStatus(
+          imageStatus,
+          "imageLoadFailed",
+          true
+        );
+
+      } finally {
+        refreshImagesButton.disabled =
+          false;
+      }
+    }
+
+
+    function renderImages() {
+      imageUploads.innerHTML =
+        "";
+
+      const uploads =
+        imageData.uploads ?? [];
+
+      if (
+        uploads.length === 0
+      ) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "small";
+
+        empty.textContent =
+          translate(
+            "noUploadsFound"
+          );
+
+        imageUploads.appendChild(
+          empty
+        );
+
+        return;
+      }
+
+
+      uploads.forEach(
+        (item) => {
+          const container =
+            document.createElement(
+              "div"
+            );
+
+          container.className =
+            "upload-item";
+
+
+          const meta =
+            document.createElement(
+              "div"
+            );
+
+          meta.className =
+            "upload-meta";
+
+
+          const reference =
+            document.createElement(
+              "strong"
+            );
+
+          reference.textContent =
+            item.reference_code ||
+            "—";
+
+          meta.appendChild(
+            reference
+          );
+
+          meta.appendChild(
+            document.createElement(
+              "br"
+            )
+          );
+
+          meta.append(
+            formatDateTime(
+              item.created_at
+            )
+          );
+
+
+          const block =
+            getBlock(
+              item.ip_hash
+            );
+
+          const blocked =
+            isActiveBlock(
+              block
+            );
+
+
+          const badge =
+            document.createElement(
+              "div"
+            );
+
+          badge.className =
+            blocked
+              ? "badge badge-blocked"
+              : "badge";
+
+          badge.textContent =
+            blocked
+              ? formatBlock(block)
+              : translate(
+                  "notBlocked"
+                );
+
+
+          const grid =
+            document.createElement(
+              "div"
+            );
+
+          grid.className =
+            "upload-images";
+
+
+          for (
+            const path
+            of item.storage_paths ||
+              []
+          ) {
+            const box =
+              document.createElement(
+                "div"
+              );
+
+            box.className =
+              "upload-image-box";
+
+
+            const link =
+              document.createElement(
+                "a"
+              );
+
+            link.href =
+              getPublicImageUrl(
+                path
+              );
+
+            link.target =
+              "_blank";
+
+            link.rel =
+              "noopener noreferrer";
+
+
+            const img =
+              document.createElement(
+                "img"
+              );
+
+            img.src =
+              getPublicImageUrl(
+                path
+              );
+
+            img.alt =
+              translate(
+                "communityUpload"
+              );
+
+            img.loading =
+              "lazy";
+
+
+            link.appendChild(
+              img
+            );
+
+
+            const deleteButton =
+              document.createElement(
+                "button"
+              );
+
+            deleteButton.type =
+              "button";
+
+            deleteButton.className =
+              "image-delete-button";
+
+            deleteButton.textContent =
+              translate(
+                "delete"
+              );
+
+
+            deleteButton
+              .addEventListener(
+                "click",
+                async () => {
+                  const confirmed =
+                    confirm(
+                      translate(
+                        "deleteImageConfirm"
+                      )
+                    );
+
+                  if (!confirmed) {
+                    return;
+                  }
+
+                  deleteButton.disabled =
+                    true;
+
+                  try {
+                    await staffImageRequest(
+                      "POST",
+                      {
+                        action:
+                          "delete_image",
+
+                        uploadId:
+                          item.id,
+
+                        storagePath:
+                          path,
+                      }
+                    );
+
+                    await loadImages();
+
+                  } catch (error) {
+                    console.error(
+                      error
+                    );
+
+                    alert(
+                      translate(
+                        "deleteImageFailed"
+                      )
+                    );
+
+                    deleteButton.disabled =
+                      false;
+                  }
+                }
+              );
+
+
+            box.appendChild(
+              link
+            );
+
+            box.appendChild(
+              deleteButton
+            );
+
+            grid.appendChild(
+              box
+            );
+          }
+
+
+          const actions =
+            document.createElement(
+              "div"
+            );
+
+          actions.className =
+            "upload-actions";
+
+
+          const blockButton =
+            document.createElement(
+              "button"
+            );
+
+          blockButton.type =
+            "button";
+
+          blockButton.textContent =
+            translate(
+              "block7Days"
+            );
+
+          blockButton.disabled =
+            blocked;
+
+
+          blockButton
+            .addEventListener(
+              "click",
+              async () => {
+                const confirmed =
+                  confirm(
+                    translate(
+                      "block7DaysConfirm"
+                    )
+                  );
+
+                if (!confirmed) {
+                  return;
+                }
+
+                blockButton.disabled =
+                  true;
+
+                try {
+                  await staffImageRequest(
+                    "POST",
+                    {
+                      action:
+                        "block_ip_7d",
+
+                      ipHash:
+                        item.ip_hash,
+                    }
+                  );
+
+                  await loadImages();
+
+                } catch (error) {
+                  console.error(
+                    error
+                  );
+
+                  alert(
+                    translate(
+                      "blockFailed"
+                    )
+                  );
+
+                  blockButton.disabled =
+                    false;
+                }
+              }
+            );
+
+
+          const unblockButton =
+            document.createElement(
+              "button"
+            );
+
+          unblockButton.type =
+            "button";
+
+          unblockButton.textContent =
+            translate(
+              "unblock"
+            );
+
+
+          const canUnblock =
+            blocked &&
+            block?.reason ===
+              "Staff block";
+
+          unblockButton.disabled =
+            !canUnblock;
+
+
+          unblockButton
+            .addEventListener(
+              "click",
+              async () => {
+                const confirmed =
+                  confirm(
+                    translate(
+                      "unblockConfirm"
+                    )
+                  );
+
+                if (!confirmed) {
+                  return;
+                }
+
+                unblockButton.disabled =
+                  true;
+
+                try {
+                  await staffImageRequest(
+                    "POST",
+                    {
+                      action:
+                        "unblock_ip",
+
+                      ipHash:
+                        item.ip_hash,
+                    }
+                  );
+
+                  await loadImages();
+
+                } catch (error) {
+                  console.error(
+                    error
+                  );
+
+                  alert(
+                    translate(
+                      "unblockFailed"
+                    )
+                  );
+
+                  unblockButton.disabled =
+                    false;
+                }
+              }
+            );
+
+
+          actions.appendChild(
+            blockButton
+          );
+
+          actions.appendChild(
+            unblockButton
+          );
+
+
+          container.appendChild(
+            meta
+          );
+
+          container.appendChild(
+            badge
+          );
+
+          container.appendChild(
+            grid
+          );
+
+          container.appendChild(
+            actions
+          );
+
+
+          imageUploads.appendChild(
+            container
+          );
+        }
+      );
+    }
+
+
+    function showLogin() {
+  loadingPanel.classList.add(
+    "hidden"
+  );
+
+  loginPanel.classList.remove(
+    "hidden"
+  );
+
+  staffArea.classList.add(
+    "hidden"
+  );
+
+  staffName.textContent =
+    "";
+
+  staffEmail.textContent =
+    "";
+
+  imageUploads.innerHTML =
+    "";
+
+  imageData = {
+    uploads: [],
+    blocked: [],
+  };
+}
+
+    function showStaff(
+  account,
+  user
+) {
+  loadingPanel.classList.add(
+    "hidden"
+  );
+
+  loginPanel.classList.add(
+    "hidden"
+  );
+
+  staffArea.classList.remove(
+    "hidden"
+  );
+
+  staffName.textContent =
+    account.display_name;
+
+  staffEmail.textContent =
+    user.email || "";
+
+  loadImages();
+}
+
+    function showLoading() {
+  loadingPanel.classList.remove(
+    "hidden"
+  );
+
+  loginPanel.classList.add(
+    "hidden"
+  );
+
+  staffArea.classList.add(
+    "hidden"
+  );
+}
+    
+    async function verifyStaff(
+      user
+    ) {
+      if (!user) {
+        return null;
+      }
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from(
+            "staff_accounts"
+          )
+          .select(
+            "user_id, display_name, role, is_active"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      if (
+        !data ||
+        data.role !== "staff" ||
+        data.is_active !== true
+      ) {
+        return null;
+      }
+
+      return data;
+    }
+
+
+    async function openExistingSession() {
+        showLoading();
+      const {
+        data: {
+          user
+        },
+        error
+      } =
+        await supabase.auth
+          .getUser();
+
+      if (
+        error ||
+        !user
+      ) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const account =
+          await verifyStaff(
+            user
+          );
+
+        if (!account) {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+          showLogin();
+
+          setTranslatedStatus(
+            loginStatus,
+            "staffAccessDenied",
+            true
+          );
+
+          return;
+        }
+
+        showStaff(
+          account,
+          user
+        );
+
+      } catch (error) {
+        console.error(error);
+
+        showLogin();
+
+        setTranslatedStatus(
+          loginStatus,
+          "staffVerifyFailed",
+          true
+        );
+      }
+    }
+
+
+    async function login() {
+     const staffId =
+  staffIdInput
+    .value
+    .trim();
+
+const password =
+  passwordInput.value;
+
+if (
+  !staffId ||
+  !password
+) {
+        setTranslatedStatus(
+          loginStatus,
+          "staffLoginRequired",
+          true
+        );
+
+        return;
+      }
+const normalizedStaffId =
+  staffId.toLowerCase();
+
+if (
+  !/^[a-z0-9._-]+$/.test(
+    normalizedStaffId
+  )
+) {
+  setTranslatedStatus(
+    loginStatus,
+    "staffIdInvalid",
+    true
+  );
+
+  return;
+}
+
+const internalEmail =
+  `${normalizedStaffId}@s967.org`;
+      loginButton.disabled =
+        true;
+
+      setTranslatedStatus(
+        loginStatus,
+        "staffSigningIn"
+      );
+
+      try {
+        const {
+          data,
+          error
+        } =
+        await supabase.auth
+  .signInWithPassword({
+    email: internalEmail,
+    password
+  });
+
+        if (error) {
+          throw error;
+        }
+
+        const user =
+          data.user;
+
+        const account =
+          await verifyStaff(
+            user
+          );
+
+        if (!account) {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+          setTranslatedStatus(
+            loginStatus,
+            "staffAccessDenied",
+            true
+          );
+
+          return;
+        }
+
+      staffIdInput.value =
+  "";
+
+        passwordInput.value =
+          "";
+
+        clearStatus(
+          loginStatus
+        );
+
+        showStaff(
+          account,
+          user
+        );
+
+      } catch (error) {
+        console.error(error);
+
+        setTranslatedStatus(
+          loginStatus,
+          "staffLoginFailed",
+          true
+        );
+
+      } finally {
+        loginButton.disabled =
+          false;
+      }
+    }
+
+
+    loginButton.addEventListener(
+      "click",
+      login
+    );
+
+
+    passwordInput.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key ===
+          "Enter"
+        ) {
+          login();
+        }
+      }
+    );
+
+
+    logoutButton.addEventListener(
+      "click",
+      async () => {
+        logoutButton.disabled =
+          true;
+
+        try {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+        } finally {
+          logoutButton.disabled =
+            false;
+
+          showLogin();
+        }
+      }
+    );
+
+
+    changePasswordButton
+      .addEventListener(
+        "click",
+        async () => {
+          const password =
+            newPasswordInput.value;
+
+          const confirmPassword =
+            confirmPasswordInput.value;
+
+          if (
+            password.length < 6
+          ) {
+            setTranslatedStatus(
+              passwordStatus,
+              "passwordMin6",
+              true
+            );
+
+            return;
+          }
+
+          if (
+            password !==
+            confirmPassword
+          ) {
+            setTranslatedStatus(
+              passwordStatus,
+              "passwordMismatch",
+              true
+            );
+
+            return;
+          }
+
+          changePasswordButton.disabled =
+            true;
+
+          setTranslatedStatus(
+            passwordStatus,
+            "passwordChanging"
+          );
+
+          try {
+          const {
+  error:
+    updateError
+} =
+  await supabase.auth
+    .updateUser({
+      password
+    });
+
+if (updateError) {
+  throw updateError;
+}
+
+
+/*
+  현재 세션은 유지하고
+  같은 Staff 계정의
+  다른 모든 세션을 종료한다.
+*/
+const {
+  error:
+    signOutError
+} =
+  await supabase.auth
+    .signOut({
+      scope: "others"
+    });
+
+if (signOutError) {
+  throw signOutError;
+}
+
+
+newPasswordInput.value =
+  "";
+
+confirmPasswordInput.value =
+  "";
+
+setTranslatedStatus(
+  passwordStatus,
+  "passwordChanged"
+);
+
+          } catch (error) {
+            console.error(error);
+
+            setTranslatedStatus(
+              passwordStatus,
+              "passwordChangeFailed",
+              true
+            );
+
+          } finally {
+            changePasswordButton.disabled =
+              false;
+          }
+        }
+      );
+
+
+    refreshImagesButton
+      .addEventListener(
+        "click",
+        loadImages
+      );
+
+    refreshWkButton
+  .addEventListener(
+    "click",
+    loadWkApplications
+  );
+
+    staffTabs.forEach(
+      (button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const target =
+              button.dataset
+                .staffTab;
+
+            if (
+  target === "wk" &&
+  !wkLoaded
+) {
+  loadWkApplications();
+}
+
+            if (
+  target === "groupbuy" &&
+  !groupBuyLoaded
+) {
+  loadGroupBuyData();
+}
+
+  if (
+  target === "wk" &&
+  !staffEmailLoaded.wk
+) {
+  loadStaffEmailRecipients(
+    "wk"
+  );
+}
+
+if (
+  target === "inquiry" &&
+  !staffEmailLoaded.inquiry
+) {
+  loadStaffEmailRecipients(
+    "inquiry"
+  );
+}
+
+if (
+  target === "groupbuy" &&
+  !staffEmailLoaded.group_buy
+) {
+  loadStaffEmailRecipients(
+    "group_buy"
+  );
+}
+
+if (
+  target === "announcements" &&
+  typeof window.S967LoadStaffAnnouncements === "function"
+) {
+  window.S967LoadStaffAnnouncements();
+}
+            
+            
+            staffTabs.forEach(
+              (item) => {
+                item.classList.toggle(
+                  "is-active",
+                  item === button
+                );
+              }
+            );
+
+            staffSections.forEach(
+              (section) => {
+                section.classList.toggle(
+                  "is-active",
+                  section.dataset
+                    .staffSection ===
+                    target
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+
+
+    window.addEventListener(
+      "s967languagechange",
+      () => {
+        updateDocumentTitle();
+
+        refreshTranslatedStatuses();
+
+        /*
+          Delete / Block / Unblock 등은
+          JS가 동적으로 만든 버튼이므로
+          언어 변경 때 다시 그린다.
+        */
+        if (
+          imageData.uploads.length >
+          0
+        ) {
+          renderImages();
+        } else if (
+          !staffArea.classList
+            .contains("hidden")
+        ) {
+          renderImages();
+        }
+        if (wkLoaded) {
+  renderWkApplications();
+}
+        if (groupBuyLoaded) {
+  renderGroupBuyEvents();
+  renderGroupBuySelectedEvent();
+  renderGroupBuyItems();
+  renderGroupBuyApplications();
+}
+      }
+    );
+
+
+    
+    /*
+      language.js의 초기 적용이 끝난 뒤에도
+      탭 제목과 브라우저 제목을 맞춘다.
+    */
+    window.addEventListener(
+      "DOMContentLoaded",
+      () => {
+        updateDocumentTitle();
+      }
+    );
+
+wkEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "wk"
+    );
+  }
+);
+
+inquiryEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "inquiry"
+    );
+  }
+);
+
+groupBuyEmailAddButton.addEventListener(
+  "click",
+  () => {
+    addStaffEmailRecipient(
+      "group_buy"
+    );
+  }
+);
+    
+    openExistingSession();
+
+    
   </script>
+
+<script type="module">
+
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const API=`${SUPABASE_URL}/functions/v1/site-announcements`;
+    const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const $=id=>document.getElementById(id);
+
+    const gate=$("staffAnnGate"),gateMessage=$("staffAnnGateMessage"),staffLogin=null,staffId=null,staffPassword=null,staffLoginButton=null,app=$("staffAnnApp"),actorHost=$("staffAnnActor");
+    const aId=$("staffAnnAnnouncementId"),aKo=$("staffAnnAKo"),aEn=$("staffAnnAEn"),aJa=$("staffAnnAJa"),aRu=$("staffAnnARu"),aStart=$("staffAnnAStart"),aEnd=$("staffAnnAEnd"),saveAnnouncement=$("staffAnnSaveAnnouncement"),cancelAnnouncementEdit=$("staffAnnCancelAnnouncementEdit"),announcementStatus=$("staffAnnAnnouncementStatus"),announcementList=$("staffAnnAnnouncementList");
+    const rId=$("staffAnnRoutineId"),rName=$("staffAnnRName"),rAnchor=$("staffAnnRAnchor"),rRepeat=$("staffAnnRRepeat"),rHours=$("staffAnnRHours"),rOffset=$("staffAnnROffset"),rEnabled=$("staffAnnREnabled"),rKo=$("staffAnnRKo"),rEn=$("staffAnnREn"),rJa=$("staffAnnRJa"),rRu=$("staffAnnRRu"),saveRoutine=$("staffAnnSaveRoutine"),cancelRoutineEdit=$("staffAnnCancelRoutineEdit"),routineStatus=$("staffAnnRoutineStatus"),routineList=$("staffAnnRoutineList"),wkPreset=$("staffAnnWkPreset"),periodPreset=$("staffAnnPeriodPreset");
+
+    let data={announcements:[],routines:[]};
+
+    const ANN_TEXT = {
+      ko: {
+        title:"공지사항 관리", checking:"로그인 상태를 확인하고 있습니다.",
+        loginRequired:"관리자 또는 Staff로 로그인하세요.", staffLoginFailed:"Staff 로그인에 실패했습니다.",
+        permissionDenied:"공지사항 권한이 없습니다.", staffLogin:"Staff 로그인",
+        admin:"관리자", staff:"Staff", home:"홈", main:"메인 페이지",
+        generalTitle:"일반 공지사항", generalLead:"4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.",
+        start:"표시 시작", end:"표시 종료", saveAnnouncement:"공지 저장", saveAnnouncementEdit:"공지 수정 저장",
+        cancelEdit:"수정 취소", routineTitle:"반복 공지 루틴",
+        routineLead:"첫 표시 기간을 기준으로 N일마다 자동 반복합니다. 문구에는 {date}, {start}, {end}를 쓸 수 있습니다.",
+        wkPreset:"황무지 모집 프리셋", periodPreset:"일반 기간 공지 프리셋",
+        routineName:"루틴 이름", anchor:"첫 표시 시작", repeat:"반복 주기(일)", hours:"한 번 표시되는 시간(시간)",
+        offset:"{date} 기준일: 표시 시작일부터 며칠 뒤", enabled:"활성화", enabledYes:"사용", enabledNo:"중지",
+        saveRoutine:"루틴 저장", saveRoutineEdit:"루틴 수정 저장", edit:"수정", delete:"삭제",
+        deleteAnnouncementConfirm:"이 공지사항을 삭제할까요?", deleteRoutineConfirm:"이 반복 루틴을 삭제할까요?",
+        saving:"저장 중…", saved:"저장했습니다.", loginNeeded:"로그인이 필요합니다.",
+        firstStart:"첫 시작", everyDays:"일마다", activeHours:"시간 표시", dateOffset:"{date}=+{n}일",
+        presetNote:"반복 주기·표시 시간·기준일은 실제 일정에 맞게 확인해서 입력하세요."
+      },
+      en: {
+        title:"Announcement Management", checking:"Checking login status…",
+        loginRequired:"Sign in as Admin or Staff.", staffLoginFailed:"Staff login failed.",
+        permissionDenied:"You do not have announcement permission.", staffLogin:"Staff Login",
+        admin:"Admin", staff:"Staff", home:"Home", main:"Main Page",
+        generalTitle:"Announcements", generalLead:"All four languages and both start/end times are required. Outside the display period, the notice will not appear on the main page.",
+        start:"Display Start", end:"Display End", saveAnnouncement:"Save Announcement", saveAnnouncementEdit:"Save Announcement Changes",
+        cancelEdit:"Cancel Edit", routineTitle:"Recurring Announcement Routines",
+        routineLead:"Automatically repeats every N days from the first display period. You can use {date}, {start}, and {end} in the text.",
+        wkPreset:"Wasteland Recruitment Preset", periodPreset:"General Period Preset",
+        routineName:"Routine Name", anchor:"First Display Start", repeat:"Repeat Every (days)", hours:"Display Duration (hours)",
+        offset:"{date}: days after display start", enabled:"Enabled", enabledYes:"On", enabledNo:"Off",
+        saveRoutine:"Save Routine", saveRoutineEdit:"Save Routine Changes", edit:"Edit", delete:"Delete",
+        deleteAnnouncementConfirm:"Delete this announcement?", deleteRoutineConfirm:"Delete this recurring routine?",
+        saving:"Saving…", saved:"Saved.", loginNeeded:"Login required.",
+        firstStart:"First start", everyDays:"days", activeHours:"hours shown", dateOffset:"{date}=+{n} days",
+        presetNote:"Check the repeat interval, display duration, and event offset against the actual schedule."
+      },
+      ja: {
+        title:"お知らせ管理", checking:"ログイン状態を確認しています…",
+        loginRequired:"管理者またはStaffとしてログインしてください。", staffLoginFailed:"Staffログインに失敗しました。",
+        permissionDenied:"お知らせの権限がありません。", staffLogin:"Staffログイン",
+        admin:"管理者", staff:"Staff", home:"ホーム", main:"メインページ",
+        generalTitle:"通常のお知らせ", generalLead:"4言語と表示開始・終了時刻をすべて入力してください。表示期間外はメインページに表示されません。",
+        start:"表示開始", end:"表示終了", saveAnnouncement:"お知らせを保存", saveAnnouncementEdit:"変更を保存",
+        cancelEdit:"編集をキャンセル", routineTitle:"繰り返しお知らせルーチン",
+        routineLead:"最初の表示期間を基準にN日ごとに自動で繰り返します。文中で {date}、{start}、{end} を使用できます。",
+        wkPreset:"荒野募集プリセット", periodPreset:"一般期間プリセット",
+        routineName:"ルーチン名", anchor:"最初の表示開始", repeat:"繰り返し周期（日）", hours:"1回の表示時間（時間）",
+        offset:"{date} 基準日：表示開始から何日後", enabled:"有効", enabledYes:"使用", enabledNo:"停止",
+        saveRoutine:"ルーチンを保存", saveRoutineEdit:"ルーチン変更を保存", edit:"編集", delete:"削除",
+        deleteAnnouncementConfirm:"このお知らせを削除しますか？", deleteRoutineConfirm:"この繰り返しルーチンを削除しますか？",
+        saving:"保存中…", saved:"保存しました。", loginNeeded:"ログインが必要です。",
+        firstStart:"最初の開始", everyDays:"日ごと", activeHours:"時間表示", dateOffset:"{date}=+{n}日",
+        presetNote:"繰り返し周期・表示時間・基準日は実際の日程に合わせて確認してください。"
+      },
+      ru: {
+        title:"Управление объявлениями", checking:"Проверка статуса входа…",
+        loginRequired:"Войдите как Admin или Staff.", staffLoginFailed:"Не удалось войти как Staff.",
+        permissionDenied:"Нет доступа к объявлениям.", staffLogin:"Вход Staff",
+        admin:"Администратор", staff:"Staff", home:"Главная", main:"Главная страница",
+        generalTitle:"Обычные объявления", generalLead:"Нужны все четыре языка, а также время начала и окончания. Вне периода показа объявление не отображается на главной странице.",
+        start:"Начало показа", end:"Конец показа", saveAnnouncement:"Сохранить объявление", saveAnnouncementEdit:"Сохранить изменения",
+        cancelEdit:"Отменить редактирование", routineTitle:"Повторяющиеся объявления",
+        routineLead:"Автоматически повторяется каждые N дней от первого периода показа. В тексте можно использовать {date}, {start} и {end}.",
+        wkPreset:"Шаблон набора в Пустошь", periodPreset:"Шаблон периода",
+        routineName:"Название правила", anchor:"Первое начало показа", repeat:"Интервал (дни)", hours:"Длительность показа (часы)",
+        offset:"{date}: дней после начала показа", enabled:"Включено", enabledYes:"Да", enabledNo:"Нет",
+        saveRoutine:"Сохранить правило", saveRoutineEdit:"Сохранить изменения", edit:"Изменить", delete:"Удалить",
+        deleteAnnouncementConfirm:"Удалить это объявление?", deleteRoutineConfirm:"Удалить это повторяющееся правило?",
+        saving:"Сохранение…", saved:"Сохранено.", loginNeeded:"Требуется вход.",
+        firstStart:"Первое начало", everyDays:"дн.", activeHours:"ч. показа", dateOffset:"{date}=+{n} дн.",
+        presetNote:"Сверьте интервал, длительность показа и смещение события с фактическим расписанием."
+      }
+    };
+
+    let annLanguage =
+      typeof getCurrentLanguage === "function"
+        ? getCurrentLanguage()
+        : (localStorage.getItem("s967_language") || "en");
+
+    function annText(){
+      return ANN_TEXT[annLanguage] ?? ANN_TEXT.en;
+    }
+
+    function annLocale(){
+      return annLanguage==="ko"?"ko-KR":annLanguage==="ja"?"ja-JP":annLanguage==="ru"?"ru-RU":"en-US";
+    }
+
+    function applyAnnouncementLanguage(){
+      const t=annText();
+      document.documentElement.lang=annLanguage;
+      document.title=`${t.title} | S967`;
+
+      const set=(id,value)=>{
+        const el=$(id);
+        if(el) el.textContent=value;
+      };
+
+      set("annGateTitle",t.title);
+      set("annPageTitle",t.title);
+      set("staffLoginButton",t.staffLogin);
+      set("annAdminLink",t.admin);
+      set("annStaffLink",t.staff);
+      set("annHomeLink",t.home);
+      set("annMainLink",t.main);
+      set("annGeneralTitle",t.generalTitle);
+      set("annGeneralLead",t.generalLead);
+      set("annStartLabel",t.start);
+      set("annEndLabel",t.end);
+      set("cancelAnnouncementEdit",t.cancelEdit);
+      set("annRoutineTitle",t.routineTitle);
+      set("annRoutineLead",t.routineLead);
+      set("wkPreset",t.wkPreset);
+      set("periodPreset",t.periodPreset);
+      set("annRoutineNameLabel",t.routineName);
+      set("annAnchorLabel",t.anchor);
+      set("annRepeatLabel",t.repeat);
+      set("annHoursLabel",t.hours);
+      set("annOffsetLabel",t.offset);
+      set("annEnabledLabel",t.enabled);
+      set("annEnabledYes",t.enabledYes);
+      set("annEnabledNo",t.enabledNo);
+      set("cancelRoutineEdit",t.cancelEdit);
+
+      saveAnnouncement.textContent =
+        aId.value ? t.saveAnnouncementEdit : t.saveAnnouncement;
+
+      saveRoutine.textContent =
+        rId.value ? t.saveRoutineEdit : t.saveRoutine;
+
+      render();
+    }
+
+    function status(host,message="",error=false){host.textContent=message;host.classList.toggle("error",error);}
+    function localInputValue(value){if(!value)return"";const d=new Date(value);const offset=d.getTimezoneOffset()*60000;return new Date(d.getTime()-offset).toISOString().slice(0,16);}
+    function isoFromLocal(value){return value?new Date(value).toISOString():"";}
+    function fmt(value){try{return new Intl.DateTimeFormat(annLocale(),{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}catch{return value??"";}}
+
+    async function token(){
+      const admin=S967AdminAuth?.getToken?.();
+      if(admin)return admin;
+      const {data}=await supabase.auth.getSession();
+      return data.session?.access_token??null;
+    }
+
+    async function request(method="GET",body=null){
+      const t=await token();
+      if(!t)throw Object.assign(new Error(annText().loginNeeded),{status:401});
+      const options={method,headers:{Authorization:`Bearer ${t}`}};
+      if(body!==null){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
+      const response=await fetch(`${API}?manage=1`,options);
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw Object.assign(new Error(result.error||`HTTP_${response.status}`),{status:response.status});
+      return result;
+    }
+
+    function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
+
+    function render(){
+      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+
+      announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);card.append(head,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent=annText().edit;edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent=annText().delete;del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+
+      routineList.replaceChildren(...(data.routines??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);
+        const detail=document.createElement("div");detail.className="meta";detail.textContent=`${annText().firstStart} ${fmt(item.anchor_start)} · ${item.repeat_every_days} ${annText().everyDays} · ${item.active_hours} ${annText().activeHours} · ${annText().dateOffset.replace("{n}",item.event_offset_days)}`;
+        card.append(head,detail,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent=annText().edit;edit.onclick=()=>editRoutine(item);const del=document.createElement("button");del.textContent=annText().delete;del.onclick=()=>deleteRoutine(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+    }
+
+    async function load(){
+      data=await request();
+      render();
+    }
+
+    function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent=annText().saveAnnouncement;cancelAnnouncementEdit.classList.add("hidden");}
+    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent=annText().saveAnnouncementEdit;cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    async function deleteAnnouncement(item){if(!confirm(annText().deleteAnnouncementConfirm))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
+
+    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,annText().saving);const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,annText().saved);}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
+    cancelAnnouncementEdit.onclick=clearAnnouncement;
+
+    function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent=annText().saveRoutine;cancelRoutineEdit.classList.add("hidden");}
+    function editRoutine(item){rId.value=item.id;rName.value=item.name;rAnchor.value=localInputValue(item.anchor_start);rRepeat.value=item.repeat_every_days;rHours.value=item.active_hours;rOffset.value=item.event_offset_days;rEnabled.value=String(item.enabled);rKo.value=item.text_ko;rEn.value=item.text_en;rJa.value=item.text_ja;rRu.value=item.text_ru;saveRoutine.textContent=annText().saveRoutineEdit;cancelRoutineEdit.classList.remove("hidden");}
+    async function deleteRoutine(item){if(!confirm(annText().deleteRoutineConfirm))return;await request("POST",{action:"delete_routine",id:item.id});await load();}
+
+    wkPreset.onclick=()=>{rName.value="황무지 모집";rRepeat.value="14";rHours.value="72";rOffset.value="3";rKo.value="현재 {date} 황무지 모집 기간입니다.";rEn.value="Recruitment is now open for the {date} Wasteland event.";rJa.value="現在、{date}の荒野イベントの募集期間です。";rRu.value="Сейчас идёт набор на событие «Пустошь» {date}.";status(routineStatus,annText().presetNote);};
+    periodPreset.onclick=()=>{rName.value="기간 안내";rRepeat.value="7";rHours.value="24";rOffset.value="0";rKo.value="{start}~{end} 안내 기간입니다.";rEn.value="The notice period is {start}–{end}.";rJa.value="{start}～{end}は案内期間です。";rRu.value="Период объявления: {start}–{end}.";};
+
+    saveRoutine.onclick=async()=>{saveRoutine.disabled=true;try{status(routineStatus,annText().saving);const payload={action:rId.value?"update_routine":"create_routine",id:rId.value||undefined,name:rName.value,anchor_start:isoFromLocal(rAnchor.value),repeat_every_days:Number(rRepeat.value),active_hours:Number(rHours.value),event_offset_days:Number(rOffset.value),enabled:rEnabled.value==="true",text_ko:rKo.value,text_en:rEn.value,text_ja:rJa.value,text_ru:rRu.value};await request("POST",payload);clearRoutine();await load();status(routineStatus,annText().saved);}catch(e){status(routineStatus,e.message,true);}finally{saveRoutine.disabled=false;}};
+    cancelRoutineEdit.onclick=clearRoutine;
+
+    async function staffSignIn(){
+      const id=staffId.value.trim();
+      const password=staffPassword.value;
+      if(!id||!password)return;
+      staffLoginButton.disabled=true;
+      try{
+        const {error}=await supabase.auth.signInWithPassword({email:`${id.toLowerCase()}@s967.org`,password});
+        if(error)throw error;
+        gate.classList.add("hidden");app.classList.remove("hidden");await load();applyAnnouncementLanguage();
+      }catch{gateMessage.textContent=annText().staffLoginFailed;}
+      finally{staffLoginButton.disabled=false;}
+    }
+    if(staffLoginButton)staffLoginButton.onclick=staffSignIn;
+    if(staffPassword)staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+
+
+    window.addEventListener("s967languagechange",(event)=>{
+      annLanguage =
+        event.detail?.language ??
+        (typeof getCurrentLanguage === "function"
+          ? getCurrentLanguage()
+          : (localStorage.getItem("s967_language") || "en"));
+      applyAnnouncementLanguage();
+    });
+
+    /*
+      When this page is inside the Staff page iframe, changing the parent
+      page language writes the same localStorage key. The storage event
+      reaches this iframe, so keep the inner page synchronized too.
+    */
+    window.addEventListener("storage",(event)=>{
+      if(event.key==="s967_language" && event.newValue){
+        annLanguage=event.newValue;
+        applyAnnouncementLanguage();
+      }
+    });
+
+    applyAnnouncementLanguage();
+
+    async function loadStaffAnnouncementTab(){
+      try{
+        const t=await token();
+        if(!t){
+          gateMessage.textContent=annText().loginRequired;
+          return;
+        }
+        await load();
+        applyAnnouncementLanguage();
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+      }catch(e){
+        gateMessage.textContent=
+          e.status===403
+            ? annText().permissionDenied
+            : (e.message||annText().loginRequired);
+      }
+    }
+
+    window.S967LoadStaffAnnouncements = loadStaffAnnouncementTab;
+
+  
+</script>
 </body>
 </html>
