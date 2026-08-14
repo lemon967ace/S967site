@@ -1584,6 +1584,330 @@
       }
     }
 
+  
+    /* ===== LARGE / 4K DISPLAY SCALING =====
+       Preserve normal FHD/mobile sizing.
+       Increase the whole visual scale progressively on QHD/4K-class viewports.
+    */
+
+    @media (min-width: 1920px) and (min-height: 900px) {
+      .server {
+        font-size:
+          clamp(
+            6.2rem,
+            min(6vw, 10svh),
+            8.4rem
+          ) !important;
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            1.45rem,
+            min(1.55vw, 2.35svh),
+            2rem
+          ) !important;
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            .95rem,
+            min(1vw, 1.55svh),
+            1.25rem
+          ) !important;
+      }
+
+      .buttons {
+        width:
+          clamp(
+            460px,
+            25vw,
+            560px
+          ) !important;
+
+        max-width: 560px !important;
+
+        gap:
+          clamp(12px, .75vw, 18px)
+          clamp(14px, .85vw, 20px) !important;
+      }
+
+      .button {
+        min-height: 54px !important;
+
+        padding:
+          clamp(13px, .8svh, 17px)
+          clamp(18px, 1.25vw, 28px) !important;
+
+        font-size:
+          clamp(
+            .98rem,
+            min(.9vw, 1.45svh),
+            1.18rem
+          ) !important;
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .68rem,
+            min(.6vw, .95svh),
+            .82rem
+          ) !important;
+      }
+
+      .source-link {
+        font-size:
+          clamp(
+            .62rem,
+            min(.53vw, .85svh),
+            .76rem
+          ) !important;
+      }
+    }
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .server {
+        font-size:
+          clamp(
+            8rem,
+            min(6.2vw, 10.5svh),
+            11rem
+          ) !important;
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            1.8rem,
+            min(1.4vw, 2.4svh),
+            2.55rem
+          ) !important;
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            1.15rem,
+            min(.9vw, 1.5svh),
+            1.55rem
+          ) !important;
+      }
+
+      .buttons {
+        width:
+          clamp(
+            560px,
+            24vw,
+            720px
+          ) !important;
+
+        max-width: 720px !important;
+
+        gap:
+          clamp(16px, .7vw, 24px)
+          clamp(18px, .8vw, 28px) !important;
+      }
+
+      .button {
+        min-height: 66px !important;
+
+        padding:
+          clamp(16px, .85svh, 22px)
+          clamp(24px, 1.15vw, 36px) !important;
+
+        font-size:
+          clamp(
+            1.12rem,
+            min(.75vw, 1.35svh),
+            1.42rem
+          ) !important;
+
+        border-radius:
+          clamp(12px, .55vw, 18px) !important;
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .78rem,
+            min(.48vw, .9svh),
+            .96rem
+          ) !important;
+      }
+
+      .source-link {
+        font-size:
+          clamp(
+            .7rem,
+            min(.43vw, .78svh),
+            .88rem
+          ) !important;
+      }
+
+      .home-content {
+        grid-template-rows:
+          minmax(0, 1fr)
+          auto
+          minmax(clamp(34px, 3.6svh, 60px), .72fr)
+          auto
+          clamp(20px, 2.2svh, 34px)
+          auto !important;
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .buttons {
+        width:
+          clamp(
+            680px,
+            20vw,
+            820px
+          ) !important;
+
+        max-width: 820px !important;
+      }
+
+      .button {
+        min-height: 76px !important;
+
+        font-size:
+          clamp(
+            1.3rem,
+            min(.68vw, 1.25svh),
+            1.62rem
+          ) !important;
+      }
+
+      .server {
+        font-size:
+          clamp(
+            9.5rem,
+            min(5.4vw, 9.8svh),
+            13rem
+          ) !important;
+      }
+
+      .headline {
+        font-size:
+          clamp(
+            2.15rem,
+            min(1.15vw, 2.1svh),
+            3rem
+          ) !important;
+      }
+
+      .tagline {
+        font-size:
+          clamp(
+            1.35rem,
+            min(.72vw, 1.3svh),
+            1.8rem
+          ) !important;
+      }
+
+      footer {
+        font-size:
+          clamp(
+            .88rem,
+            min(.4vw, .8svh),
+            1.08rem
+          ) !important;
+      }
+    }
+
+  
+    /* ===== TITLE HIGHER / FOOTER BOTTOM =====
+       Keep footer at the bottom, but bias the hero toward the upper part
+       of the viewport instead of vertically centering the whole stack.
+    */
+
+    .home-content {
+      grid-template-rows:
+        clamp(18px, 3svh, 42px)
+        auto
+        minmax(clamp(26px, 4svh, 54px), .55fr)
+        auto
+        minmax(clamp(16px, 2.2svh, 30px), .28fr)
+        auto !important;
+    }
+
+    .home-hero {
+      grid-row: 2 !important;
+      align-self: start !important;
+    }
+
+    .buttons {
+      grid-row: 4 !important;
+      align-self: start !important;
+    }
+
+    footer {
+      grid-row: 6 !important;
+      align-self: end !important;
+    }
+
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(12px, 2svh, 24px)
+          auto
+          minmax(clamp(14px, 2.5svh, 28px), .35fr)
+          auto
+          minmax(clamp(8px, 1.2svh, 14px), .18fr)
+          auto !important;
+      }
+    }
+
+    @media (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          8px
+          auto
+          minmax(10px, .22fr)
+          auto
+          6px
+          auto !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          4px
+          auto
+          6px
+          auto
+          4px
+          auto !important;
+      }
+    }
+
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .home-content {
+        grid-template-rows:
+          clamp(28px, 3.5svh, 62px)
+          auto
+          minmax(clamp(38px, 4.5svh, 74px), .52fr)
+          auto
+          minmax(clamp(20px, 2.2svh, 38px), .24fr)
+          auto !important;
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(36px, 3.8svh, 78px)
+          auto
+          minmax(clamp(48px, 4.8svh, 90px), .5fr)
+          auto
+          minmax(clamp(24px, 2.3svh, 44px), .22fr)
+          auto !important;
+      }
+    }
+
   </style>
 </head>
 
