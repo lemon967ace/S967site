@@ -933,6 +933,37 @@
       }
     }
 
+  
+    /* ===== Final footer rule: permanently pinned to viewport bottom ===== */
+    footer {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: max(6px, env(safe-area-inset-bottom)) !important;
+
+      width: 100% !important;
+      max-width: none !important;
+
+      margin: 0 !important;
+      padding: 0 clamp(72px, 10vw, 130px) !important;
+
+      text-align: center !important;
+      z-index: 100 !important;
+    }
+
+    @media (max-width: 600px) {
+      footer {
+        bottom: max(5px, env(safe-area-inset-bottom)) !important;
+        padding: 0 76px !important;
+      }
+    }
+
+    @media (max-height: 720px) {
+      footer {
+        bottom: max(3px, env(safe-area-inset-bottom)) !important;
+      }
+    }
+
   </style>
 </head>
 
