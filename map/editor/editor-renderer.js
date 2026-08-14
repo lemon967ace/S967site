@@ -155,9 +155,22 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function drawRanges() {
     const bounds = visibleGridBounds(state, 1), selectedId = rangeController?.getState().selectedRangeId;
+    const orderedRanges = [
+      ...mapDocument.ranges.filter(
+        range =>
+          range.presetId !==
+            "mountain"
+      ),
+      ...mapDocument.ranges.filter(
+        range =>
+          range.presetId ===
+            "mountain"
+      ),
+    ];
+
     for (
       const range
-      of mapDocument.ranges
+      of orderedRanges
     ) {
       if (
         range.linked &&
@@ -178,8 +191,82 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
       }
     }
-    const preview = rangeController?.getState().previewCells ?? [];
-    for (const cell of preview) { traceCell(cell); context.fillStyle = "rgba(124,58,237,.22)"; context.fill(); context.strokeStyle = "#7C3AED"; context.lineWidth = 2; context.stroke(); }
+    const rangeState =
+      rangeController?.getState() ??
+      {};
+    const preview =
+      rangeState.previewCells ??
+      [];
+
+    const preset =
+      rangeState.mode ===
+        "rangePreset"
+        ? rangeState.preset
+        : null;
+
+    for (
+      const cell
+      of preview
+    ) {
+      traceCell(cell);
+
+      if (preset) {
+        context.fillStyle =
+          withAlpha(
+            preset.color,
+            0.38
+          );
+        context.fill();
+        context.strokeStyle =
+          preset.color;
+        context.lineWidth =
+          Math.max(
+            1.5,
+            2.2 * state.zoom
+          );
+        context.stroke();
+
+        if (
+          preset.kind ===
+          "blocked"
+        ) {
+          const vertices =
+            diamondVertices(
+              ...cell
+            );
+          const a =
+            sceneToScreen(
+              ...vertices[3],
+              state
+            );
+          const b =
+            sceneToScreen(
+              ...vertices[1],
+              state
+            );
+
+          context.beginPath();
+          context.moveTo(...a);
+          context.lineTo(...b);
+          context.strokeStyle =
+            preset.color;
+          context.lineWidth =
+            Math.max(
+              1.5,
+              2 * state.zoom
+            );
+          context.stroke();
+        }
+      } else {
+        context.fillStyle =
+          "rgba(124,58,237,.22)";
+        context.fill();
+        context.strokeStyle =
+          "#7C3AED";
+        context.lineWidth = 2;
+        context.stroke();
+      }
+    }
   }
 
   function drawFixedRanges() {

@@ -18,6 +18,12 @@ export function serializeDocument(document) {
       color: item.color,
       locked: item.locked,
       cells: item.cells.map(cell => [...cell]),
+      ...(item.presetId
+        ? {
+            preset_id:
+              item.presetId,
+          }
+        : {}),
       ...(item.linked
         ? {
             linked: true,
@@ -65,6 +71,9 @@ export function parseDocument(input) {
           "",
         active:
           item?.active !== false,
+        preset_id:
+          item?.preset_id ??
+          null,
       })),
       fixedBuildingTypes: (data.fixed_building_types ?? []).map(item => new FixedBuildingType({ id: requireString(item?.id, "fixed building type id"), name: requireString(item?.name, "fixed building type name"), color: requireString(item?.color, "fixed building type color"), width: requireInteger(item?.width, "fixed building type width"), height: requireInteger(item?.height, "fixed building type height") })),
       fixedBuildings: (data.fixed_buildings ?? []).map(item => new FixedBuilding({ id: requireString(item?.id, "fixed building id"), name: requireString(item?.name, "fixed building name"), type_id: requireString(item?.type_id, "fixed building type_id"), x: requireInteger(item?.x, "fixed building x"), y: requireInteger(item?.y, "fixed building y"), color: item?.color ?? (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.color ?? "#EEEEEE", priority: Number.isInteger(item?.priority) ? item.priority : 0, width: (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.width, height: (data.fixed_building_types ?? []).find(type => type?.id === item?.type_id)?.height })),

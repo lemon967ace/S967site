@@ -254,6 +254,8 @@ function linkedCellsConflictWithManualRange(
       range.id !==
         ignoreLinkedRangeId &&
       !range.linked &&
+      range.presetId !==
+        "mountain" &&
       range.cells.some(
         cell =>
           keys.has(
@@ -407,154 +409,242 @@ function recomputeLinkedRangeActivity() {
     return;
   }
 
-  const rangesByBuildingId =
+  const sourceById =
     new Map(
-      document.ranges
-        .filter(
-          range =>
-            range.linked
-        )
-        .map(
-          range => [
-            range.sourceBuildingId,
-            range,
-          ]
-        )
+      document.buildings.map(
+        building => [
+          building.id,
+          building,
+        ]
+      )
     );
 
-  const buildingsByAffiliation =
+  /*
+    Rebuild the full geometric territory every time from the source building.
+    This is important because a later affiliation may previously have been
+    clipped by an earlier affiliation, but must regain those cells if the
+    earlier territory moves away or turns OFF.
+  */
+  const fullCellsByRangeId =
     new Map();
 
   for (
-    const building
-    of document.buildings
+    const range
+    of document.ranges
   ) {
-    if (
-      building.typeId !==
-        ALLIANCE_STRUCTURE_TYPE_ID
-    ) {
+    if (!range.linked) {
       continue;
     }
 
-    const role =
-      specialStructureRole(
-        building
+    const source =
+      sourceById.get(
+        range.sourceBuildingId
       );
 
-    if (!role) {
+    if (!source) {
+      fullCellsByRangeId.set(
+        range.id,
+        range.cells.map(
+          cell => [...cell]
+        )
+      );
       continue;
     }
 
-    const list =
-      buildingsByAffiliation.get(
-        building.affiliation
-      ) ?? [];
+    const cells =
+      linkedRangeCellsForBuilding(
+        source
+      );
 
-    list.push({
-      building,
-      role,
-    });
-
-    buildingsByAffiliation.set(
-      building.affiliation,
-      list
+    fullCellsByRangeId.set(
+      range.id,
+      cells ??
+        range.cells.map(
+          cell => [...cell]
+        )
     );
   }
 
-  /*
-    Activity is reachability from the affiliation's Fort.
-
-    - Fort territory is the root and is ON.
-    - An Outpost becomes ON only when the Outpost's own occupied cell lies
-      inside territory that is already ON for the same affiliation.
-    - Iteration allows Fort -> Outpost1 -> Outpost2 -> ... chains.
-    - Outposts that only justify each other form a disconnected cycle, so
-      none of them become reachable and their territories stay OFF.
-  */
-  const activeBuildingIds =
+  const activeIds =
     new Set();
 
+  /*
+    Forts are roots. Outposts are activated only by already-active,
+    actually-owned territory of the same affiliation.
+  */
   for (
-    const entries
-    of buildingsByAffiliation.values()
+    const range
+    of document.ranges
   ) {
-    const fortEntries =
-      entries.filter(
-        entry =>
-          entry.role === "fort"
-      );
-
-    for (
-      const entry
-      of fortEntries
-    ) {
-      activeBuildingIds.add(
-        entry.building.id
-      );
+    if (!range.linked) {
+      continue;
     }
 
-    let changed = true;
+    const source =
+      sourceById.get(
+        range.sourceBuildingId
+      );
 
-    while (changed) {
-      changed = false;
-
-      const activeCells =
-        new Set();
-
-      for (
-        const sourceId
-        of activeBuildingIds
-      ) {
-        const sourceRange =
-          rangesByBuildingId.get(
-            sourceId
-          );
-
-        if (!sourceRange) {
-          continue;
-        }
-
-        for (
-          const cell
-          of sourceRange.cells
-        ) {
-          activeCells.add(
-            cell.join(",")
-          );
-        }
-      }
-
-      for (
-        const entry
-        of entries
-      ) {
-        if (
-          entry.role !== "outpost" ||
-          activeBuildingIds.has(
-            entry.building.id
-          )
-        ) {
-          continue;
-        }
-
-        const ownCell =
-          entry.building
-            .occupiedCells()[0]
-            .join(",");
-
-        if (
-          activeCells.has(
-            ownCell
-          )
-        ) {
-          activeBuildingIds.add(
-            entry.building.id
-          );
-          changed = true;
-        }
-      }
+    if (
+      source &&
+      specialStructureRole(
+        source
+      ) === "fort"
+    ) {
+      activeIds.add(
+        source.id
+      );
     }
   }
+
+  function calculateOwnedTerritory(
+    activeBuildingIds
+  ) {
+    const ownerByCell =
+      new Map();
+    const effectiveByRangeId =
+      new Map();
+
+    /*
+      document.ranges order is installation order.
+      Therefore an earlier installed affiliation claims a contested cell
+      before a later affiliation sees it.
+
+      Same-affiliation linked ranges may still overlap each other.
+    */
+    for (
+      const range
+      of document.ranges
+    ) {
+      if (
+        !range.linked ||
+        !activeBuildingIds.has(
+          range.sourceBuildingId
+        )
+      ) {
+        continue;
+      }
+
+      const fullCells =
+        fullCellsByRangeId.get(
+          range.id
+        ) ??
+        [];
+
+      const effective = [];
+
+      for (
+        const cell
+        of fullCells
+      ) {
+        const key =
+          cell.join(",");
+        const owner =
+          ownerByCell.get(
+            key
+          );
+
+        if (
+          owner &&
+          owner !==
+            range.affiliation
+        ) {
+          continue;
+        }
+
+        effective.push(
+          [...cell]
+        );
+
+        if (!owner) {
+          ownerByCell.set(
+            key,
+            range.affiliation
+          );
+        }
+      }
+
+      effectiveByRangeId.set(
+        range.id,
+        effective
+      );
+    }
+
+    return {
+      ownerByCell,
+      effectiveByRangeId,
+    };
+  }
+
+  let changed = true;
+  let ownership =
+    calculateOwnedTerritory(
+      activeIds
+    );
+
+  while (changed) {
+    changed = false;
+
+    for (
+      const range
+      of document.ranges
+    ) {
+      if (
+        !range.linked ||
+        activeIds.has(
+          range.sourceBuildingId
+        )
+      ) {
+        continue;
+      }
+
+      const source =
+        sourceById.get(
+          range.sourceBuildingId
+        );
+
+      if (
+        !source ||
+        specialStructureRole(
+          source
+        ) !== "outpost"
+      ) {
+        continue;
+      }
+
+      const ownCell =
+        source
+          .occupiedCells()[0]
+          .join(",");
+
+      if (
+        ownership.ownerByCell.get(
+          ownCell
+        ) ===
+          source.affiliation
+      ) {
+        activeIds.add(
+          source.id
+        );
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      ownership =
+        calculateOwnedTerritory(
+          activeIds
+        );
+    }
+  }
+
+  /*
+    Final ownership pass after reachability stabilises.
+  */
+  ownership =
+    calculateOwnedTerritory(
+      activeIds
+    );
 
   document.ranges =
     document.ranges.map(
@@ -563,6 +653,11 @@ function recomputeLinkedRangeActivity() {
           return range;
         }
 
+        const active =
+          activeIds.has(
+            range.sourceBuildingId
+          );
+
         return new MapRange({
           ...range,
           linked: true,
@@ -570,10 +665,24 @@ function recomputeLinkedRangeActivity() {
             range.sourceBuildingId,
           affiliation:
             range.affiliation,
-          active:
-            activeBuildingIds.has(
-              range.sourceBuildingId
-            ),
+          active,
+          cells:
+            active
+              ? (
+                  ownership
+                    .effectiveByRangeId
+                    .get(
+                      range.id
+                    ) ??
+                  []
+                )
+              : (
+                  fullCellsByRangeId
+                    .get(
+                      range.id
+                    ) ??
+                  range.cells
+                ),
         });
       }
     );
@@ -1359,6 +1468,8 @@ export function commitRange(data) {
       color: candidate.color,
       locked: candidate.locked,
       cells: candidate.cells,
+      presetId:
+        candidate.presetId,
     },
     document.fixedRanges,
   );
@@ -1388,6 +1499,8 @@ export function editRange(rangeId, { locked }) {
     color: current.color,
     locked: Boolean(locked),
     cells: current.cells,
+    presetId:
+      current.presetId,
   });
   document.ranges[index] = edited;
   return new MapRange(edited);

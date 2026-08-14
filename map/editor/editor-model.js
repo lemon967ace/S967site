@@ -134,6 +134,8 @@ export class MapRange {
     source_building_id = null,
     affiliation = "",
     active = true,
+    presetId = null,
+    preset_id = null,
   }) {
     this.id =
       validateNonEmptyText(
@@ -199,6 +201,19 @@ export class MapRange {
 
     this.cells =
       [...unique.values()];
+
+    const effectivePresetId =
+      presetId ??
+      preset_id;
+
+    this.presetId =
+      effectivePresetId == null
+        ? null
+        : validateNonEmptyText(
+            effectivePresetId,
+            "Range preset ID"
+          );
+
     this.linked =
       Boolean(linked);
 
@@ -366,8 +381,20 @@ export class MapDocument {
           this.ranges[j];
 
         if (
-          left.linked &&
-          right.linked
+          (
+            left.linked &&
+            right.linked
+          ) ||
+          (
+            left.linked &&
+            right.presetId ===
+              "mountain"
+          ) ||
+          (
+            right.linked &&
+            left.presetId ===
+              "mountain"
+          )
         ) {
           continue;
         }

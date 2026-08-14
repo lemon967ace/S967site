@@ -42,6 +42,9 @@ export function snapshotRange(range) {
       "",
     active:
       range.active !== false,
+    presetId:
+      range.presetId ??
+      null,
     cells: Object.freeze(range.cells.map(cell => Object.freeze([...cell]))),
   });
 }

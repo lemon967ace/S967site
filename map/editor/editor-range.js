@@ -18,6 +18,9 @@ function snapshotRange(range) {
       "",
     active:
       range.active !== false,
+    presetId:
+      range.presetId ??
+      null,
     cells: Object.freeze(
       range.cells.map(
         cell =>
@@ -33,6 +36,12 @@ export const MOUNTAIN_PRESET = Object.freeze({
   id: "mountain",
   kind: "blocked",
   color: "#7F7F7F",
+
+  /*
+    The preset settings themselves are fixed.
+    The placed obstacle is not locked so it can be selected/deleted
+    if the user placed it incorrectly.
+  */
   locked: false,
   width: 2,
   height: 2,
@@ -53,11 +62,67 @@ export class RangeOverlapError extends RangeError {
   constructor() { super("A range cannot overlap another range."); this.code = "RANGE_OVERLAP"; }
 }
 
-export function applyRangeOverlapRules(existingRanges, { kind, color, locked, cells }, fixedRanges = []) {
-  const candidate = new MapRange({ kind, color, locked, cells });
-  const owners = buildRangeCellOwnerIndex({ fixedRanges, ranges: existingRanges });
-  if (candidate.cells.some(cell => owners.has(cell.join(",")))) throw new RangeOverlapError();
-  return { ranges: [...existingRanges.map(snapshotRange), snapshotRange(candidate)], accepted: candidate.cells.map(cell => [...cell]) };
+export function applyRangeOverlapRules(
+  existingRanges,
+  {
+    kind,
+    color,
+    locked,
+    cells,
+    presetId = null,
+  },
+  fixedRanges = []
+) {
+  const candidate =
+    new MapRange({
+      kind,
+      color,
+      locked,
+      cells,
+      presetId,
+    });
+
+  const rangesForOverlap =
+    candidate.presetId ===
+      "mountain"
+      ? existingRanges.filter(
+          range =>
+            !range.linked
+        )
+      : existingRanges;
+
+  const owners =
+    buildRangeCellOwnerIndex({
+      fixedRanges,
+      ranges:
+        rangesForOverlap,
+    });
+
+  if (
+    candidate.cells.some(
+      cell =>
+        owners.has(
+          cell.join(",")
+        )
+    )
+  ) {
+    throw new RangeOverlapError();
+  }
+
+  return {
+    ranges: [
+      ...existingRanges.map(
+        snapshotRange
+      ),
+      snapshotRange(
+        candidate
+      ),
+    ],
+    accepted:
+      candidate.cells.map(
+        cell => [...cell]
+      ),
+  };
 }
 
 export function visibleRangeCells(range, bounds) {
@@ -99,10 +164,16 @@ export function createRangeController({ engine, history, buildingController = nu
     for (const peer of areaPeers) peer?.cancel();
     buildingController?.cancelMode();
 
-    preset = {
-      ...MOUNTAIN_PRESET,
-      ...next,
-    };
+    preset =
+      next?.id === "mountain" ||
+      !next?.id
+        ? {
+            ...MOUNTAIN_PRESET,
+          }
+        : {
+            ...MOUNTAIN_PRESET,
+            ...next,
+          };
     settings = null;
     mode = "rangePreset";
     startCell = null;
@@ -193,9 +264,9 @@ export function createRangeController({ engine, history, buildingController = nu
       engine.commitRange({
         kind: preset.kind,
         color: preset.color,
-        locked: Boolean(
-          preset.locked
-        ),
+        locked: false,
+        presetId:
+          preset.id,
         cells,
       });
 
@@ -254,7 +325,51 @@ export function createRangeController({ engine, history, buildingController = nu
       result,
     };
   }
-  function hover(cell) { if (mode !== "rangeCreate" || !startCell) return null; previewCells = rectangleCells(startCell, cell); emit(); return previewCells; }
+  function hover(cell) {
+    if (
+      mode === "rangePreset" &&
+      preset
+    ) {
+      const cells =
+        calculateOccupiedCells(
+          cell[0],
+          cell[1],
+          preset.width,
+          preset.height
+        );
+
+      previewCells =
+        cells.every(
+          value =>
+            isValidMapCell(
+              ...value
+            )
+        )
+          ? cells.map(
+              value => [...value]
+            )
+          : [];
+
+      emit();
+      return previewCells;
+    }
+
+    if (
+      mode !== "rangeCreate" ||
+      !startCell
+    ) {
+      return null;
+    }
+
+    previewCells =
+      rectangleCells(
+        startCell,
+        cell
+      );
+
+    emit();
+    return previewCells;
+  }
   function click(cell) {
     if (mode !== "rangeCreate") {
       selectAtCell(cell);
