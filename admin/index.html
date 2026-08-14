@@ -1689,6 +1689,7 @@
       <button id="embeddedChatRefreshReports" type="button">신고 새로고침</button>
       <div id="embeddedChatReportStatus" class="status"></div>
       <div id="embeddedChatReports" class="cards"></div>
+      <div id="embeddedChatReportsPagination" class="admin-pagination"></div>
     </section>
 
     <section class="panel">
@@ -10503,17 +10504,19 @@ createMapTemplateButton.addEventListener(
     const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
     const REPORT_API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-report-admin";
     const $=id=>document.getElementById(id);
-    const gate=$("embeddedChatGate"),gateMessage=$("embeddedChatGateMessage"),app=$("embeddedChatApp"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports");
+    const gate=$("embeddedChatGate"),gateMessage=$("embeddedChatGateMessage"),app=$("embeddedChatApp"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports"),reportsPagination=$("embeddedChatReportsPagination");
     let data={rooms:[],staff:[],chat_users:[],memberships:[]};
+    let reportPage=1;
+    const REPORT_PAGE_SIZE=5;
 
     function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
     async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
-    async function reportRequest(method="GET",body=null){
+    async function reportRequest(method="GET",body=null,url=REPORT_API){
       const token=S967AdminAuth.getToken();
       if(!token)throw new Error("관리자 로그인이 필요합니다.");
       const opt={method,headers:{Authorization:`Bearer ${token}`}};
       if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}
-      const r=await fetch(REPORT_API,opt);
+      const r=await fetch(url,opt);
       const j=await r.json().catch(()=>({}));
       if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);
       return j;
@@ -10567,13 +10570,66 @@ createMapTemplateButton.addEventListener(
 
           const context=document.createElement("div");
           context.className="report-context";
-          for(const item of report.context_snapshot??[]){
-            const line=document.createElement("div");
-            line.className=`context-line ${item.reported?"reported":""}`;
-            line.textContent=`${item.author_name} · ${fmtReportTime(item.created_at)}\n${item.is_deleted?"[삭제된 메시지]":item.body}`;
-            context.append(line);
+
+          const allContext=Array.isArray(report.context_snapshot)
+            ? report.context_snapshot
+            : [];
+
+          const reportedIndex=allContext.findIndex(item=>item?.reported===true);
+
+          const beforeContext=reportedIndex>=0
+            ? allContext.slice(0,reportedIndex)
+            : allContext.filter(item=>!item?.reported);
+
+          const otherContext=reportedIndex>=0
+            ? [
+                ...allContext.slice(0,Math.max(0,reportedIndex-2)),
+                ...allContext.slice(reportedIndex+1)
+              ]
+            : beforeContext.slice(0,-2);
+
+          const defaultContext=reportedIndex>=0
+            ? beforeContext.slice(-2)
+            : beforeContext.slice(-2);
+
+          function appendContextLines(items){
+            context.replaceChildren();
+            for(const item of items){
+              const line=document.createElement("div");
+              line.className="context-line";
+              line.textContent=`${item.author_name} · ${fmtReportTime(item.created_at)}\n${item.is_deleted?"[삭제된 메시지]":item.body}`;
+              context.append(line);
+            }
           }
+
+          appendContextLines(defaultContext);
           card.append(context);
+
+          const expandedContext=allContext.filter(item=>!item?.reported);
+          const hiddenCount=Math.max(0,expandedContext.length-defaultContext.length);
+
+          if(hiddenCount>0){
+            const contextToggle=document.createElement("button");
+            contextToggle.type="button";
+            contextToggle.className="btn";
+            contextToggle.style.marginTop="7px";
+            contextToggle.textContent=`전체 대화 보기 (${hiddenCount}개 더)`;
+
+            let expanded=false;
+            contextToggle.onclick=()=>{
+              expanded=!expanded;
+              appendContextLines(
+                expanded
+                  ? expandedContext
+                  : defaultContext
+              );
+              contextToggle.textContent=expanded
+                ? "대화 접기"
+                : `전체 대화 보기 (${hiddenCount}개 더)`;
+            };
+
+            card.append(contextToggle);
+          }
 
           const evidence=document.createElement("div");
           evidence.className="evidence-links";
@@ -10620,12 +10676,67 @@ createMapTemplateButton.addEventListener(
       }));
     }
 
+    function renderReportPagination(pagination){
+      reportsPagination.replaceChildren();
+
+      const page=Math.max(1,Number(pagination?.page??1));
+      const totalPages=Math.max(1,Number(pagination?.total_pages??1));
+      const total=Math.max(0,Number(pagination?.total??0));
+
+      const prev=document.createElement("button");
+      prev.type="button";
+      prev.textContent="이전";
+      prev.disabled=page<=1;
+      prev.onclick=async()=>{
+        if(page<=1)return;
+        reportPage=page-1;
+        await loadReports();
+      };
+
+      const info=document.createElement("span");
+      info.className="small";
+      info.textContent=`${page} / ${totalPages} 페이지 · 총 ${total}건`;
+
+      const next=document.createElement("button");
+      next.type="button";
+      next.textContent="다음";
+      next.disabled=page>=totalPages;
+      next.onclick=async()=>{
+        if(page>=totalPages)return;
+        reportPage=page+1;
+        await loadReports();
+      };
+
+      reportsPagination.append(prev,info,next);
+    }
+
     async function loadReports(){
       try{
-        const result=await reportRequest();
+        const url=`${REPORT_API}?page=${encodeURIComponent(reportPage)}`;
+        const result=await reportRequest("GET",null,url);
+
+        const pagination=result.pagination??{
+          page:reportPage,
+          page_size:REPORT_PAGE_SIZE,
+          total:(result.reports??[]).length,
+          total_pages:1
+        };
+
+        if(
+          reportPage>Number(pagination.total_pages??1)
+        ){
+          reportPage=Math.max(1,Number(pagination.total_pages??1));
+          return loadReports();
+        }
+
+        reportPage=Number(pagination.page??reportPage);
         renderReports(result.reports??[]);
+        renderReportPagination(pagination);
         status(reportStatus,"");
-      }catch(e){status(reportStatus,e.message,true);}
+      }catch(e){
+        reportsPagination.replaceChildren();
+        status(reportStatus,e.message,true);
+      }
     }
 
     async function load(){data=await request("GET");renderUsers();renderRooms();await loadReports();}
