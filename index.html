@@ -1908,6 +1908,129 @@
       }
     }
 
+  
+    /* ===== VISUAL BALANCE FINAL POSITIONING =====
+       Hero: upper visual zone.
+       Buttons: slightly below the viewport's optical center.
+       Footer: bottom edge.
+    */
+
+    .home-content {
+      position: relative !important;
+
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      grid-template-rows:
+        clamp(18px, 3svh, 44px)
+        auto
+        minmax(clamp(38px, 6svh, 86px), 1fr)
+        auto
+        minmax(clamp(24px, 4svh, 58px), .72fr)
+        auto !important;
+
+      align-items: center !important;
+      justify-items: center !important;
+
+      width: 100% !important;
+      min-height: 0 !important;
+    }
+
+    .home-hero {
+      grid-row: 2 !important;
+      align-self: start !important;
+      margin: 0 !important;
+    }
+
+    .buttons {
+      grid-row: 4 !important;
+      align-self: center !important;
+      margin: 0 !important;
+    }
+
+    footer {
+      grid-row: 6 !important;
+      align-self: end !important;
+      margin: 0 !important;
+    }
+
+    /* Normal desktop: keep the button group's visual center
+       around the lower-middle area instead of true center. */
+    @media (min-width: 601px) and (min-height: 721px) {
+      .home-content {
+        grid-template-rows:
+          clamp(20px, 3.2svh, 48px)
+          auto
+          minmax(clamp(52px, 7.5svh, 100px), 1fr)
+          auto
+          minmax(clamp(18px, 2.6svh, 34px), .38fr)
+          auto !important;
+      }
+    }
+
+    /* Phones: same visual hierarchy, with tighter vertical rhythm. */
+    @media (max-width: 600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(10px, 1.7svh, 20px)
+          auto
+          minmax(clamp(18px, 3.2svh, 34px), .55fr)
+          auto
+          minmax(clamp(8px, 1.2svh, 16px), .22fr)
+          auto !important;
+      }
+    }
+
+    /* Short screens: preserve hierarchy without overflow. */
+    @media (max-height: 720px) {
+      .home-content {
+        grid-template-rows:
+          6px
+          auto
+          minmax(10px, .32fr)
+          auto
+          6px
+          auto !important;
+      }
+    }
+
+    @media (max-height: 600px) {
+      .home-content {
+        grid-template-rows:
+          3px
+          auto
+          6px
+          auto
+          3px
+          auto !important;
+      }
+    }
+
+    /* QHD / 4K: retain the same optical composition.
+       Scaling changes size, not the visual hierarchy. */
+    @media (min-width: 2560px) and (min-height: 1200px) {
+      .home-content {
+        grid-template-rows:
+          clamp(34px, 3.8svh, 72px)
+          auto
+          minmax(clamp(84px, 8svh, 150px), 1fr)
+          auto
+          minmax(clamp(28px, 2.8svh, 50px), .34fr)
+          auto !important;
+      }
+    }
+
+    @media (min-width: 3400px) and (min-height: 1600px) {
+      .home-content {
+        grid-template-rows:
+          clamp(46px, 4svh, 90px)
+          auto
+          minmax(clamp(110px, 8.5svh, 190px), 1fr)
+          auto
+          minmax(clamp(34px, 3svh, 62px), .32fr)
+          auto !important;
+      }
+    }
+
   </style>
 </head>
 
