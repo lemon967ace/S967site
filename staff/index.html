@@ -452,19 +452,86 @@
       color: #d75555;
     }
 
-    .announcements-inner-frame {
-      width: 100%;
-      min-height: 78vh;
-      margin-top: 24px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
+    .staff-ann-grid,
+    .staff-ann-lang-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
     }
 
-    @media (max-width: 600px) {
-      .announcements-inner-frame {
-        min-height: 82vh;
+    .staff-ann-section label {
+      display: grid;
+      gap: 5px;
+      font-size: .78rem;
+    }
+
+    .staff-ann-section textarea {
+      width: 100%;
+      min-height: 78px;
+      resize: vertical;
+      line-height: 1.45;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .staff-ann-section select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .staff-ann-section .cards {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .staff-ann-section .card {
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+    }
+
+    .staff-ann-section .card-head {
+      display: flex;
+      gap: 7px;
+      align-items: flex-start;
+    }
+
+    .staff-ann-section .card-head strong {
+      flex: 1;
+    }
+
+    .staff-ann-section .meta {
+      color: var(--muted);
+      font-size: .72rem;
+      line-height: 1.5;
+    }
+
+    .staff-ann-section .texts {
+      display: grid;
+      gap: 3px;
+      margin-top: 7px;
+      font-size: .79rem;
+    }
+
+    .staff-ann-section .preset {
+      border-style: dashed;
+    }
+
+    @media(max-width:700px){
+      .staff-ann-grid,
+      .staff-ann-lang-grid {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1177,12 +1244,84 @@
         class="staff-section"
         data-staff-section="announcements"
       >
-        <iframe
-          class="announcements-inner-frame"
-          src="/announcements/"
-          title="Announcements"
-          loading="lazy"
-        ></iframe>
+        <div id="staffAnnGate" class="hidden">
+          <div id="staffAnnGateMessage" class="status"></div>
+        </div>
+        <div id="staffAnnApp">
+
+    <div class="row">
+      <div class="grow">
+        <h1 id="staffAnnAnnPageTitle" style="margin-bottom:4px">공지사항 관리</h1>
+        <div id="staffAnnActor" class="meta"></div>
+      </div>
+      <a id="staffAnnAnnMainLink" class="btn" href="/">메인 페이지</a>
+    </div>
+
+    <section class="panel staff-ann-section">
+      <h2 id="staffAnnAnnGeneralTitle">일반 공지사항</h2>
+      <p id="staffAnnAnnGeneralLead" class="meta">4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.</p>
+
+      <input id="staffAnnAnnouncementId" type="hidden">
+
+      <div class="staff-ann-lang-grid">
+        <label>한국어<textarea id="staffAnnAKo"></textarea></label>
+        <label>English<textarea id="staffAnnAEn"></textarea></label>
+        <label>日本語<textarea id="staffAnnAJa"></textarea></label>
+        <label>Русский<textarea id="staffAnnARu"></textarea></label>
+      </div>
+
+      <div class="staff-ann-grid" style="margin-top:9px">
+        <label><span id="staffAnnAnnStartLabel">표시 시작</span><input id="staffAnnAStart" type="datetime-local"></label>
+        <label><span id="staffAnnAnnEndLabel">표시 종료</span><input id="staffAnnAEnd" type="datetime-local"></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="staffAnnSaveAnnouncement" type="button">공지 저장</button>
+        <button id="staffAnnCancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="staffAnnAnnouncementStatus" class="status"></div>
+      <div id="staffAnnAnnouncementList" class="cards"></div>
+    </section>
+
+    <section class="panel staff-ann-section">
+      <h2 id="staffAnnAnnRoutineTitle">반복 공지 루틴</h2>
+      <p id="staffAnnAnnRoutineLead" class="meta">
+        첫 표시 기간을 기준으로 N일마다 자동 반복합니다.
+        문구에는 <code>{date}</code>, <code>{start}</code>, <code>{end}</code>를 쓸 수 있습니다.
+      </p>
+
+      <div class="row">
+        <button id="staffAnnWkPreset" type="button" class="preset">황무지 모집 프리셋</button>
+        <button id="staffAnnPeriodPreset" type="button" class="preset">일반 기간 공지 프리셋</button>
+      </div>
+
+      <input id="staffAnnRoutineId" type="hidden">
+
+      <div class="staff-ann-grid" style="margin-top:9px">
+        <label><span id="staffAnnAnnRoutineNameLabel">루틴 이름</span><input id="staffAnnRName"></label>
+        <label><span id="staffAnnAnnAnchorLabel">첫 표시 시작</span><input id="staffAnnRAnchor" type="datetime-local"></label>
+        <label><span id="staffAnnAnnRepeatLabel">반복 주기(일)</span><input id="staffAnnRRepeat" type="number" min="1" value="14"></label>
+        <label><span id="staffAnnAnnHoursLabel">한 번 표시되는 시간(시간)</span><input id="staffAnnRHours" type="number" min="1" value="72"></label>
+        <label><span id="staffAnnAnnOffsetLabel">{date} 기준일: 표시 시작일부터 며칠 뒤</span><input id="staffAnnROffset" type="number" value="3"></label>
+        <label><span id="staffAnnAnnEnabledLabel">활성화</span><select id="staffAnnREnabled"><option id="staffAnnAnnEnabledYes" value="true">사용</option><option id="staffAnnAnnEnabledNo" value="false">중지</option></select></label>
+      </div>
+
+      <div class="staff-ann-lang-grid" style="margin-top:9px">
+        <label>한국어<textarea id="staffAnnRKo"></textarea></label>
+        <label>English<textarea id="staffAnnREn"></textarea></label>
+        <label>日本語<textarea id="staffAnnRJa"></textarea></label>
+        <label>Русский<textarea id="staffAnnRRu"></textarea></label>
+      </div>
+
+      <div class="row" style="margin-top:9px">
+        <button id="staffAnnSaveRoutine" type="button">루틴 저장</button>
+        <button id="staffAnnCancelRoutineEdit" type="button" class="hidden">수정 취소</button>
+      </div>
+      <div id="staffAnnRoutineStatus" class="status"></div>
+      <div id="staffAnnRoutineList" class="cards"></div>
+    </section>
+  
+        </div>
       </div>
 
      
@@ -5186,6 +5325,13 @@ if (
     "group_buy"
   );
 }
+
+if (
+  target === "announcements" &&
+  typeof window.S967LoadStaffAnnouncements === "function"
+) {
+  window.S967LoadStaffAnnouncements();
+}
             
             
             staffTabs.forEach(
@@ -5293,5 +5439,289 @@ groupBuyEmailAddButton.addEventListener(
     
   </script>
 
+<script type="module">
+
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+    const API=`${SUPABASE_URL}/functions/v1/site-announcements`;
+    const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const $=id=>document.getElementById(id);
+
+    const gate=$("staffAnnGate"),gateMessage=$("staffAnnGateMessage"),staffLogin=null,staffId=null,staffPassword=null,staffLoginButton=null,app=$("staffAnnApp"),actorHost=$("staffAnnActor");
+    const aId=$("staffAnnAnnouncementId"),aKo=$("staffAnnAKo"),aEn=$("staffAnnAEn"),aJa=$("staffAnnAJa"),aRu=$("staffAnnARu"),aStart=$("staffAnnAStart"),aEnd=$("staffAnnAEnd"),saveAnnouncement=$("staffAnnSaveAnnouncement"),cancelAnnouncementEdit=$("staffAnnCancelAnnouncementEdit"),announcementStatus=$("staffAnnAnnouncementStatus"),announcementList=$("staffAnnAnnouncementList");
+    const rId=$("staffAnnRoutineId"),rName=$("staffAnnRName"),rAnchor=$("staffAnnRAnchor"),rRepeat=$("staffAnnRRepeat"),rHours=$("staffAnnRHours"),rOffset=$("staffAnnROffset"),rEnabled=$("staffAnnREnabled"),rKo=$("staffAnnRKo"),rEn=$("staffAnnREn"),rJa=$("staffAnnRJa"),rRu=$("staffAnnRRu"),saveRoutine=$("staffAnnSaveRoutine"),cancelRoutineEdit=$("staffAnnCancelRoutineEdit"),routineStatus=$("staffAnnRoutineStatus"),routineList=$("staffAnnRoutineList"),wkPreset=$("staffAnnWkPreset"),periodPreset=$("staffAnnPeriodPreset");
+
+    let data={announcements:[],routines:[]};
+
+    const ANN_TEXT = {
+      ko: {
+        title:"공지사항 관리", checking:"로그인 상태를 확인하고 있습니다.",
+        loginRequired:"관리자 또는 Staff로 로그인하세요.", staffLoginFailed:"Staff 로그인에 실패했습니다.",
+        permissionDenied:"공지사항 권한이 없습니다.", staffLogin:"Staff 로그인",
+        admin:"관리자", staff:"Staff", home:"홈", main:"메인 페이지",
+        generalTitle:"일반 공지사항", generalLead:"4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.",
+        start:"표시 시작", end:"표시 종료", saveAnnouncement:"공지 저장", saveAnnouncementEdit:"공지 수정 저장",
+        cancelEdit:"수정 취소", routineTitle:"반복 공지 루틴",
+        routineLead:"첫 표시 기간을 기준으로 N일마다 자동 반복합니다. 문구에는 {date}, {start}, {end}를 쓸 수 있습니다.",
+        wkPreset:"황무지 모집 프리셋", periodPreset:"일반 기간 공지 프리셋",
+        routineName:"루틴 이름", anchor:"첫 표시 시작", repeat:"반복 주기(일)", hours:"한 번 표시되는 시간(시간)",
+        offset:"{date} 기준일: 표시 시작일부터 며칠 뒤", enabled:"활성화", enabledYes:"사용", enabledNo:"중지",
+        saveRoutine:"루틴 저장", saveRoutineEdit:"루틴 수정 저장", edit:"수정", delete:"삭제",
+        deleteAnnouncementConfirm:"이 공지사항을 삭제할까요?", deleteRoutineConfirm:"이 반복 루틴을 삭제할까요?",
+        saving:"저장 중…", saved:"저장했습니다.", loginNeeded:"로그인이 필요합니다.",
+        firstStart:"첫 시작", everyDays:"일마다", activeHours:"시간 표시", dateOffset:"{date}=+{n}일",
+        presetNote:"반복 주기·표시 시간·기준일은 실제 일정에 맞게 확인해서 입력하세요."
+      },
+      en: {
+        title:"Announcement Management", checking:"Checking login status…",
+        loginRequired:"Sign in as Admin or Staff.", staffLoginFailed:"Staff login failed.",
+        permissionDenied:"You do not have announcement permission.", staffLogin:"Staff Login",
+        admin:"Admin", staff:"Staff", home:"Home", main:"Main Page",
+        generalTitle:"Announcements", generalLead:"All four languages and both start/end times are required. Outside the display period, the notice will not appear on the main page.",
+        start:"Display Start", end:"Display End", saveAnnouncement:"Save Announcement", saveAnnouncementEdit:"Save Announcement Changes",
+        cancelEdit:"Cancel Edit", routineTitle:"Recurring Announcement Routines",
+        routineLead:"Automatically repeats every N days from the first display period. You can use {date}, {start}, and {end} in the text.",
+        wkPreset:"Wasteland Recruitment Preset", periodPreset:"General Period Preset",
+        routineName:"Routine Name", anchor:"First Display Start", repeat:"Repeat Every (days)", hours:"Display Duration (hours)",
+        offset:"{date}: days after display start", enabled:"Enabled", enabledYes:"On", enabledNo:"Off",
+        saveRoutine:"Save Routine", saveRoutineEdit:"Save Routine Changes", edit:"Edit", delete:"Delete",
+        deleteAnnouncementConfirm:"Delete this announcement?", deleteRoutineConfirm:"Delete this recurring routine?",
+        saving:"Saving…", saved:"Saved.", loginNeeded:"Login required.",
+        firstStart:"First start", everyDays:"days", activeHours:"hours shown", dateOffset:"{date}=+{n} days",
+        presetNote:"Check the repeat interval, display duration, and event offset against the actual schedule."
+      },
+      ja: {
+        title:"お知らせ管理", checking:"ログイン状態を確認しています…",
+        loginRequired:"管理者またはStaffとしてログインしてください。", staffLoginFailed:"Staffログインに失敗しました。",
+        permissionDenied:"お知らせの権限がありません。", staffLogin:"Staffログイン",
+        admin:"管理者", staff:"Staff", home:"ホーム", main:"メインページ",
+        generalTitle:"通常のお知らせ", generalLead:"4言語と表示開始・終了時刻をすべて入力してください。表示期間外はメインページに表示されません。",
+        start:"表示開始", end:"表示終了", saveAnnouncement:"お知らせを保存", saveAnnouncementEdit:"変更を保存",
+        cancelEdit:"編集をキャンセル", routineTitle:"繰り返しお知らせルーチン",
+        routineLead:"最初の表示期間を基準にN日ごとに自動で繰り返します。文中で {date}、{start}、{end} を使用できます。",
+        wkPreset:"荒野募集プリセット", periodPreset:"一般期間プリセット",
+        routineName:"ルーチン名", anchor:"最初の表示開始", repeat:"繰り返し周期（日）", hours:"1回の表示時間（時間）",
+        offset:"{date} 基準日：表示開始から何日後", enabled:"有効", enabledYes:"使用", enabledNo:"停止",
+        saveRoutine:"ルーチンを保存", saveRoutineEdit:"ルーチン変更を保存", edit:"編集", delete:"削除",
+        deleteAnnouncementConfirm:"このお知らせを削除しますか？", deleteRoutineConfirm:"この繰り返しルーチンを削除しますか？",
+        saving:"保存中…", saved:"保存しました。", loginNeeded:"ログインが必要です。",
+        firstStart:"最初の開始", everyDays:"日ごと", activeHours:"時間表示", dateOffset:"{date}=+{n}日",
+        presetNote:"繰り返し周期・表示時間・基準日は実際の日程に合わせて確認してください。"
+      },
+      ru: {
+        title:"Управление объявлениями", checking:"Проверка статуса входа…",
+        loginRequired:"Войдите как Admin или Staff.", staffLoginFailed:"Не удалось войти как Staff.",
+        permissionDenied:"Нет доступа к объявлениям.", staffLogin:"Вход Staff",
+        admin:"Администратор", staff:"Staff", home:"Главная", main:"Главная страница",
+        generalTitle:"Обычные объявления", generalLead:"Нужны все четыре языка, а также время начала и окончания. Вне периода показа объявление не отображается на главной странице.",
+        start:"Начало показа", end:"Конец показа", saveAnnouncement:"Сохранить объявление", saveAnnouncementEdit:"Сохранить изменения",
+        cancelEdit:"Отменить редактирование", routineTitle:"Повторяющиеся объявления",
+        routineLead:"Автоматически повторяется каждые N дней от первого периода показа. В тексте можно использовать {date}, {start} и {end}.",
+        wkPreset:"Шаблон набора в Пустошь", periodPreset:"Шаблон периода",
+        routineName:"Название правила", anchor:"Первое начало показа", repeat:"Интервал (дни)", hours:"Длительность показа (часы)",
+        offset:"{date}: дней после начала показа", enabled:"Включено", enabledYes:"Да", enabledNo:"Нет",
+        saveRoutine:"Сохранить правило", saveRoutineEdit:"Сохранить изменения", edit:"Изменить", delete:"Удалить",
+        deleteAnnouncementConfirm:"Удалить это объявление?", deleteRoutineConfirm:"Удалить это повторяющееся правило?",
+        saving:"Сохранение…", saved:"Сохранено.", loginNeeded:"Требуется вход.",
+        firstStart:"Первое начало", everyDays:"дн.", activeHours:"ч. показа", dateOffset:"{date}=+{n} дн.",
+        presetNote:"Сверьте интервал, длительность показа и смещение события с фактическим расписанием."
+      }
+    };
+
+    let annLanguage =
+      typeof getCurrentLanguage === "function"
+        ? getCurrentLanguage()
+        : (localStorage.getItem("s967_language") || "en");
+
+    function annText(){
+      return ANN_TEXT[annLanguage] ?? ANN_TEXT.en;
+    }
+
+    function annLocale(){
+      return annLanguage==="ko"?"ko-KR":annLanguage==="ja"?"ja-JP":annLanguage==="ru"?"ru-RU":"en-US";
+    }
+
+    function applyAnnouncementLanguage(){
+      const t=annText();
+      document.documentElement.lang=annLanguage;
+      document.title=`${t.title} | S967`;
+
+      const set=(id,value)=>{
+        const el=$(id);
+        if(el) el.textContent=value;
+      };
+
+      set("annGateTitle",t.title);
+      set("annPageTitle",t.title);
+      set("staffLoginButton",t.staffLogin);
+      set("annAdminLink",t.admin);
+      set("annStaffLink",t.staff);
+      set("annHomeLink",t.home);
+      set("annMainLink",t.main);
+      set("annGeneralTitle",t.generalTitle);
+      set("annGeneralLead",t.generalLead);
+      set("annStartLabel",t.start);
+      set("annEndLabel",t.end);
+      set("cancelAnnouncementEdit",t.cancelEdit);
+      set("annRoutineTitle",t.routineTitle);
+      set("annRoutineLead",t.routineLead);
+      set("wkPreset",t.wkPreset);
+      set("periodPreset",t.periodPreset);
+      set("annRoutineNameLabel",t.routineName);
+      set("annAnchorLabel",t.anchor);
+      set("annRepeatLabel",t.repeat);
+      set("annHoursLabel",t.hours);
+      set("annOffsetLabel",t.offset);
+      set("annEnabledLabel",t.enabled);
+      set("annEnabledYes",t.enabledYes);
+      set("annEnabledNo",t.enabledNo);
+      set("cancelRoutineEdit",t.cancelEdit);
+
+      saveAnnouncement.textContent =
+        aId.value ? t.saveAnnouncementEdit : t.saveAnnouncement;
+
+      saveRoutine.textContent =
+        rId.value ? t.saveRoutineEdit : t.saveRoutine;
+
+      render();
+    }
+
+    function status(host,message="",error=false){host.textContent=message;host.classList.toggle("error",error);}
+    function localInputValue(value){if(!value)return"";const d=new Date(value);const offset=d.getTimezoneOffset()*60000;return new Date(d.getTime()-offset).toISOString().slice(0,16);}
+    function isoFromLocal(value){return value?new Date(value).toISOString():"";}
+    function fmt(value){try{return new Intl.DateTimeFormat(annLocale(),{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}catch{return value??"";}}
+
+    async function token(){
+      const admin=S967AdminAuth?.getToken?.();
+      if(admin)return admin;
+      const {data}=await supabase.auth.getSession();
+      return data.session?.access_token??null;
+    }
+
+    async function request(method="GET",body=null){
+      const t=await token();
+      if(!t)throw Object.assign(new Error(annText().loginNeeded),{status:401});
+      const options={method,headers:{Authorization:`Bearer ${t}`}};
+      if(body!==null){options.headers["Content-Type"]="application/json";options.body=JSON.stringify(body);}
+      const response=await fetch(`${API}?manage=1`,options);
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw Object.assign(new Error(result.error||`HTTP_${response.status}`),{status:response.status});
+      return result;
+    }
+
+    function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
+
+    function render(){
+      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+
+      announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);card.append(head,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent=annText().edit;edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent=annText().delete;del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+
+      routineList.replaceChildren(...(data.routines??[]).map(item=>{
+        const card=document.createElement("div");card.className="card";
+        const head=document.createElement("div");head.className="card-head";
+        const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        head.append(title,meta);
+        const detail=document.createElement("div");detail.className="meta";detail.textContent=`${annText().firstStart} ${fmt(item.anchor_start)} · ${item.repeat_every_days} ${annText().everyDays} · ${item.active_hours} ${annText().activeHours} · ${annText().dateOffset.replace("{n}",item.event_offset_days)}`;
+        card.append(head,detail,textBlock(item));
+        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent=annText().edit;edit.onclick=()=>editRoutine(item);const del=document.createElement("button");del.textContent=annText().delete;del.onclick=()=>deleteRoutine(item);actions.append(edit,del);card.append(actions);}
+        return card;
+      }));
+    }
+
+    async function load(){
+      data=await request();
+      render();
+    }
+
+    function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent=annText().saveAnnouncement;cancelAnnouncementEdit.classList.add("hidden");}
+    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent=annText().saveAnnouncementEdit;cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    async function deleteAnnouncement(item){if(!confirm(annText().deleteAnnouncementConfirm))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
+
+    saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,annText().saving);const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,annText().saved);}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
+    cancelAnnouncementEdit.onclick=clearAnnouncement;
+
+    function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent=annText().saveRoutine;cancelRoutineEdit.classList.add("hidden");}
+    function editRoutine(item){rId.value=item.id;rName.value=item.name;rAnchor.value=localInputValue(item.anchor_start);rRepeat.value=item.repeat_every_days;rHours.value=item.active_hours;rOffset.value=item.event_offset_days;rEnabled.value=String(item.enabled);rKo.value=item.text_ko;rEn.value=item.text_en;rJa.value=item.text_ja;rRu.value=item.text_ru;saveRoutine.textContent=annText().saveRoutineEdit;cancelRoutineEdit.classList.remove("hidden");}
+    async function deleteRoutine(item){if(!confirm(annText().deleteRoutineConfirm))return;await request("POST",{action:"delete_routine",id:item.id});await load();}
+
+    wkPreset.onclick=()=>{rName.value="황무지 모집";rRepeat.value="14";rHours.value="72";rOffset.value="3";rKo.value="현재 {date} 황무지 모집 기간입니다.";rEn.value="Recruitment is now open for the {date} Wasteland event.";rJa.value="現在、{date}の荒野イベントの募集期間です。";rRu.value="Сейчас идёт набор на событие «Пустошь» {date}.";status(routineStatus,annText().presetNote);};
+    periodPreset.onclick=()=>{rName.value="기간 안내";rRepeat.value="7";rHours.value="24";rOffset.value="0";rKo.value="{start}~{end} 안내 기간입니다.";rEn.value="The notice period is {start}–{end}.";rJa.value="{start}～{end}は案内期間です。";rRu.value="Период объявления: {start}–{end}.";};
+
+    saveRoutine.onclick=async()=>{saveRoutine.disabled=true;try{status(routineStatus,annText().saving);const payload={action:rId.value?"update_routine":"create_routine",id:rId.value||undefined,name:rName.value,anchor_start:isoFromLocal(rAnchor.value),repeat_every_days:Number(rRepeat.value),active_hours:Number(rHours.value),event_offset_days:Number(rOffset.value),enabled:rEnabled.value==="true",text_ko:rKo.value,text_en:rEn.value,text_ja:rJa.value,text_ru:rRu.value};await request("POST",payload);clearRoutine();await load();status(routineStatus,annText().saved);}catch(e){status(routineStatus,e.message,true);}finally{saveRoutine.disabled=false;}};
+    cancelRoutineEdit.onclick=clearRoutine;
+
+    async function staffSignIn(){
+      const id=staffId.value.trim();
+      const password=staffPassword.value;
+      if(!id||!password)return;
+      staffLoginButton.disabled=true;
+      try{
+        const {error}=await supabase.auth.signInWithPassword({email:`${id.toLowerCase()}@s967.org`,password});
+        if(error)throw error;
+        gate.classList.add("hidden");app.classList.remove("hidden");await load();applyAnnouncementLanguage();
+      }catch{gateMessage.textContent=annText().staffLoginFailed;}
+      finally{staffLoginButton.disabled=false;}
+    }
+    if(staffLoginButton)staffLoginButton.onclick=staffSignIn;
+    if(staffPassword)staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+
+
+    window.addEventListener("s967languagechange",(event)=>{
+      annLanguage =
+        event.detail?.language ??
+        (typeof getCurrentLanguage === "function"
+          ? getCurrentLanguage()
+          : (localStorage.getItem("s967_language") || "en"));
+      applyAnnouncementLanguage();
+    });
+
+    /*
+      When this page is inside the Staff page iframe, changing the parent
+      page language writes the same localStorage key. The storage event
+      reaches this iframe, so keep the inner page synchronized too.
+    */
+    window.addEventListener("storage",(event)=>{
+      if(event.key==="s967_language" && event.newValue){
+        annLanguage=event.newValue;
+        applyAnnouncementLanguage();
+      }
+    });
+
+    applyAnnouncementLanguage();
+
+    async function loadStaffAnnouncementTab(){
+      try{
+        const t=await token();
+        if(!t){
+          gateMessage.textContent=annText().loginRequired;
+          return;
+        }
+        await load();
+        applyAnnouncementLanguage();
+        gate.classList.add("hidden");
+        app.classList.remove("hidden");
+      }catch(e){
+        gateMessage.textContent=
+          e.status===403
+            ? annText().permissionDenied
+            : (e.message||annText().loginRequired);
+      }
+    }
+
+    window.S967LoadStaffAnnouncements = loadStaffAnnouncementTab;
+
+  
+</script>
 </body>
 </html>
