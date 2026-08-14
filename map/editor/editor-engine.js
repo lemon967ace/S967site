@@ -1493,6 +1493,15 @@ export function editRange(rangeId, { locked }) {
     );
   }
 
+  if (
+    current.presetId ===
+      "mountain"
+  ) {
+    return new MapRange(
+      current
+    );
+  }
+
   const edited = new MapRange({
     id: current.id,
     kind: current.kind,
@@ -1519,7 +1528,15 @@ export function deleteRange(rangeId) {
     );
   }
 
-  if (current.locked) throw new RangeError("Locked ranges cannot be deleted.");
+  if (
+    current.locked &&
+    current.presetId !==
+      "mountain"
+  ) {
+    throw new RangeError(
+      "Locked ranges cannot be deleted."
+    );
+  }
   document.ranges.splice(index, 1);
   return new MapRange(current);
 }
