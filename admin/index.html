@@ -10740,7 +10740,7 @@ createMapTemplateButton.addEventListener(
         const card=document.createElement("div");card.className="card";
         const head=document.createElement("div");head.className="card-head";
         const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
-        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind==="admin"?"Staff":item.author_kind==="staff"?"Staff":item.author_kind}`;
         head.append(title,meta);
         const detail=document.createElement("div");detail.className="meta";detail.textContent=`첫 시작 ${fmt(item.anchor_start)} · ${item.repeat_every_days}일마다 · ${item.active_hours}시간 표시 · {date}=+${item.event_offset_days}일`;
         card.append(head,detail,textBlock(item));
