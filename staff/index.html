@@ -5614,13 +5614,13 @@ groupBuyEmailAddButton.addEventListener(
     function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
 
     function render(){
-      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+      actorHost.textContent=data.actor?.name?`${data.actor.name} · ${data.actor.kind==="admin"?"Staff":data.actor.kind==="staff"?"Staff":data.actor.kind}`:"";
 
       announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
         const card=document.createElement("div");card.className="card";
         const head=document.createElement("div");head.className="card-head";
         const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
-        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind==="admin"?"Staff":item.author_kind==="staff"?"Staff":item.author_kind}`;
         head.append(title,meta);card.append(head,textBlock(item));
         if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent=annText().edit;edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent=annText().delete;del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
         return card;
@@ -5630,7 +5630,7 @@ groupBuyEmailAddButton.addEventListener(
         const card=document.createElement("div");card.className="card";
         const head=document.createElement("div");head.className="card-head";
         const title=document.createElement("strong");title.textContent=`${item.enabled?"●":"○"} ${item.name}`;
-        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind==="admin"?"Staff":item.author_kind==="staff"?"Staff":item.author_kind}`;
         head.append(title,meta);
         const detail=document.createElement("div");detail.className="meta";detail.textContent=`${annText().firstStart} ${fmt(item.anchor_start)} · ${item.repeat_every_days} ${annText().everyDays} · ${item.active_hours} ${annText().activeHours} · ${annText().dateOffset.replace("{n}",item.event_offset_days)}`;
         card.append(head,detail,textBlock(item));
