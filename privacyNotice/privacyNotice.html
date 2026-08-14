@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>S967 개인정보 처리방침</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page-bg: #f4f4f6;
+      --surface: rgba(255,255,255,.78);
+      --surface-strong: rgba(255,255,255,.92);
+      --surface-hover: rgba(255,255,255,.98);
+      --text: #18181b;
+      --muted: #71717a;
+      --border: rgba(24,24,27,.12);
+      --border-hover: rgba(24,24,27,.22);
+      --shadow: 0 16px 40px rgba(24,24,27,.08);
+      --menu-shadow: 0 18px 45px rgba(0,0,0,.18);
+      --accent: #18181b;
+      --accent-text: #fff;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --page-bg: #111214;
+      --surface: rgba(28,29,32,.82);
+      --surface-strong: rgba(31,32,35,.95);
+      --surface-hover: rgba(42,43,47,.98);
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --border: rgba(255,255,255,.12);
+      --border-hover: rgba(255,255,255,.24);
+      --shadow: 0 18px 46px rgba(0,0,0,.28);
+      --menu-shadow: 0 20px 48px rgba(0,0,0,.42);
+      --accent: #f4f4f5;
+      --accent-text: #18181b;
+    }
+
+    html[data-theme="light"] {
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--page-bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.24), transparent 35%),
+        var(--page-bg);
+      color: var(--text);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans KR",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+      transition: background-color .2s ease, color .2s ease;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(980px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 88px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 6vw, 3.6rem);
+      line-height: 1.05;
+      letter-spacing: -.045em;
+    }
+
+    .effective-date {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .intro,
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .intro {
+      padding: 20px 22px;
+      line-height: 1.7;
+    }
+
+    .section {
+      margin-top: 16px;
+      padding: 22px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.15rem;
+      line-height: 1.4;
+    }
+
+    h3 {
+      margin: 20px 0 10px;
+      font-size: 1rem;
+    }
+
+    p {
+      margin: 10px 0;
+      line-height: 1.75;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 1.25rem;
+      line-height: 1.72;
+    }
+
+    li + li { margin-top: 4px; }
+
+    .subtle {
+      color: var(--muted);
+    }
+
+    .policy-table-wrap {
+      overflow-x: auto;
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+      background: var(--surface-strong);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    th {
+      font-size: .84rem;
+      background: var(--surface-hover);
+    }
+
+    td {
+      font-size: .88rem;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .settings {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .picker {
+      position: relative;
+    }
+
+    .setting-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-strong);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .setting-button:hover {
+      border-color: var(--border-hover);
+      background: var(--surface-hover);
+    }
+
+    .menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 8px);
+      min-width: 155px;
+      padding: 7px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-strong);
+      box-shadow: var(--menu-shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .menu[hidden] { display: none; }
+
+    .menu button {
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .menu button:hover,
+    .menu button[aria-checked="true"] {
+      background: var(--surface-hover);
+    }
+
+    .menu-note {
+      padding: 8px 10px 4px;
+      color: var(--muted);
+      font-size: .75rem;
+      line-height: 1.45;
+    }
+
+    .contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    footer {
+      margin-top: 24px;
+      padding: 16px 4px 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: .8rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 20px, 980px);
+        padding-top: 34px;
+        padding-bottom: 86px;
+      }
+
+      .intro,
+      .section {
+        border-radius: 14px;
+        padding: 17px;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 10vw, 3rem);
+      }
+
+      .settings {
+        right: 12px;
+        bottom: 12px;
+      }
+
+      .setting-button {
+        width: 38px;
+        height: 38px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="settings" aria-label="페이지 설정">
+    <div class="picker">
+      <button
+        id="languageButton"
+        class="setting-button"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="언어"
+        title="언어"
+      >🌐</button>
+      <div id="languageMenu" class="menu" role="menu" hidden>
+        <button type="button" role="menuitemradio" aria-checked="true">한국어</button>
+        <div class="menu-note">다른 언어는 추후 추가됩니다.</div>
+      </div>
+    </div>
+
+    <div class="picker">
+      <button
+        id="themeButton"
+        class="setting-button"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="테마"
+        title="테마"
+      >◐</button>
+      <div id="themeMenu" class="menu" role="menu" hidden>
+        <button type="button" data-theme-choice="system" role="menuitemradio">◐ 시스템</button>
+        <button type="button" data-theme-choice="light" role="menuitemradio">☀ 밝게</button>
+        <button type="button" data-theme-choice="dark" role="menuitemradio">☾ 어둡게</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <header class="hero">
+      <div class="eyebrow">S967</div>
+      <h1>개인정보 처리방침</h1>
+      <div class="effective-date">시행일: 2026년 8월 14일</div>
+    </header>
+
+    <section class="intro">
+      S967(이하 “사이트”)은 이용자의 개인정보를 중요하게 생각하며 「개인정보 보호법」 등 관련 법령을 준수합니다.
+      사이트는 서비스 제공 및 운영에 필요한 최소한의 개인정보만을 처리하며, 개인정보의 처리 목적이 달성되거나
+      정해진 보유기간이 지난 경우 해당 정보를 지체 없이 파기합니다.
+    </section>
+
+    <section class="section">
+      <h2>1. 처리하는 개인정보와 이용 목적</h2>
+
+      <h3>1) 계정 및 인증</h3>
+      <p>사이트는 Staff 및 채팅 전용 계정을 운영하기 위해 다음 정보를 처리할 수 있습니다.</p>
+      <ul>
+        <li>로그인 ID</li>
+        <li>내부 계정 식별자</li>
+        <li>채팅 닉네임</li>
+        <li>Staff 또는 채팅 전용 등의 계정 권한</li>
+        <li>계정 활성화 상태</li>
+        <li>인증 서비스에서 관리되는 인증정보</li>
+        <li>계정 및 서비스 이용에 필요한 기술적 식별정보</li>
+      </ul>
+      <p><strong>이용 목적:</strong> 이용자 인증, 계정 및 권한 관리, Staff 전용 기능 및 채팅 서비스 제공, 부정 이용 방지, 보안 및 장애 대응</p>
+      <p class="subtle">비밀번호는 사이트 데이터베이스에 평문으로 저장하지 않으며 인증 서비스를 통해 처리합니다.</p>
+
+      <h3>2) 채팅</h3>
+      <ul>
+        <li>채팅 메시지</li>
+        <li>작성자의 닉네임 및 계정 식별정보</li>
+        <li>메시지 작성 시각</li>
+        <li>채팅방 참가·초대·퇴장 기록</li>
+        <li>읽음 상태 및 메시지 반응</li>
+        <li>첨부파일</li>
+        <li>신고가 접수된 경우 신고 대상 메시지와 필요한 범위의 전후 대화</li>
+        <li>푸시 알림을 사용하는 경우 알림 토큰 및 Firebase Installation ID 등 기술적 식별정보</li>
+      </ul>
+      <p><strong>이용 목적:</strong> 채팅 서비스 제공, 대화방 및 참가자 관리, 읽음 상태 제공, 메시지 알림, 신고 처리, 서비스 악용 방지 및 분쟁 대응</p>
+      <p>관리자는 일반적인 운영 목적으로 자신이 참가하지 않은 비공개 채팅방의 대화를 임의로 열람하지 않습니다.</p>
+      <p>비공개 채팅에서 신고가 접수된 경우에는 신고 처리를 위해 필요한 범위에서 신고 대상 메시지와 제한된 전후 문맥을 확인할 수 있습니다.</p>
+
+      <h3>3) 문의 및 신고</h3>
+      <ul>
+        <li>문의 또는 신고 내용</li>
+        <li>관련 이용자의 닉네임 등 신고 처리에 필요한 정보</li>
+        <li>이용자가 답변을 원하는 경우 선택적으로 제공하는 이메일 주소, Discord, Telegram, Kakao 등 연락정보</li>
+        <li>신고와 함께 제공된 첨부자료</li>
+      </ul>
+      <p>연락정보 제공은 선택사항이며, 연락정보를 제공하지 않아도 문의 또는 신고를 제출할 수 있습니다.</p>
+
+      <h3>4) 이미지 및 파일 업로드</h3>
+      <ul>
+        <li>이용자가 업로드한 이미지 또는 파일</li>
+        <li>업로드 시각</li>
+        <li>업로드 관리에 필요한 기술정보</li>
+        <li>부정 이용 방지를 위한 IP 기반 해시 등 식별정보가 생성되는 경우 해당 정보</li>
+      </ul>
+      <p>이용자는 타인의 개인정보·민감정보 또는 저작권 등 타인의 권리를 침해하는 자료를 업로드해서는 안 됩니다.</p>
+
+      <h3>5) 게임 내 신청 및 취합 기능</h3>
+      <ul>
+        <li>게임 닉네임</li>
+        <li>연맹 등 게임 내 소속정보</li>
+        <li>신청 내용</li>
+        <li>병력·수량 등 이용자가 입력한 게임 관련 정보</li>
+        <li>신청 및 수정 시각</li>
+      </ul>
+      <p>사이트에서 사용하는 “공동구매”라는 명칭은 사이트가 상품이나 게임 아이템을 판매하거나 결제를 중개한다는 의미가 아닙니다. 참여자들이 동일한 게임 내 활동을 위해 각자의 계정에서 직접 구매할 항목을 편의상 취합하는 기능입니다.</p>
+
+      <h3>6) Staff 이메일</h3>
+      <p>서비스 운영 관련 이메일을 받기를 원하는 Staff는 자신의 이메일 주소를 선택적으로 등록할 수 있습니다.</p>
+      <ul>
+        <li>처리 항목: Staff 식별정보, Staff가 직접 등록한 이메일 주소</li>
+        <li>이용 목적: 문의 접수 알림, 신청 내역 전달, 신고 알림, 기타 Staff 업무에 필요한 서비스 운영 이메일 전달</li>
+      </ul>
+      <p>Staff 이메일 등록은 선택사항입니다. Staff는 언제든지 자신의 이메일 주소를 삭제할 수 있으며, 삭제가 완료되면 S967 데이터베이스에 저장된 해당 이메일 주소도 즉시 삭제합니다.</p>
+      <p>삭제된 이메일 주소를 비활성 상태의 데이터로 별도 보관하지 않습니다. 다만 이미 외부 이메일 발송 서비스를 통해 전송된 이메일의 발송기록 등은 해당 서비스 제공자의 보유정책에 따라 일정 기간 처리될 수 있습니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>2. 개인정보의 보유 및 이용기간</h2>
+      <p>사이트는 개인정보를 필요한 기간보다 오래 보관하지 않습니다.</p>
+
+      <div class="policy-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>정보</th>
+              <th>보유기간</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>문의·신고 시 선택적으로 제공한 연락정보</td>
+              <td>접수일로부터 <strong>1개월</strong></td>
+            </tr>
+            <tr>
+              <td>Staff가 선택적으로 등록한 이메일 주소</td>
+              <td>등록 중 보유, Staff가 삭제하면 <strong>S967 DB에서 즉시 삭제</strong></td>
+            </tr>
+            <tr>
+              <td>푸시 알림 토큰</td>
+              <td>알림 기능 해제 또는 계정 탈퇴 시 <strong>즉시 삭제</strong></td>
+            </tr>
+            <tr>
+              <td>계정 ID·인증 관련 식별정보 등</td>
+              <td>계정 탈퇴 후 <strong>최대 3개월</strong></td>
+            </tr>
+            <tr>
+              <td>신고 증거자료</td>
+              <td>신고 접수 후 <strong>90일</strong></td>
+            </tr>
+            <tr>
+              <td>탈퇴자가 작성한 채팅 기록</td>
+              <td>탈퇴 후 <strong>최대 3년</strong></td>
+            </tr>
+            <tr>
+              <td>실제 분쟁 또는 법적 절차에 필요한 정보</td>
+              <td>해당 절차 종료 시까지 필요한 최소 범위</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>처리 목적이 위 보유기간보다 먼저 달성된 경우에는 보유기간이 끝나기 전이라도 해당 개인정보를 파기할 수 있습니다.</p>
+      <p>다른 법령에 따라 별도의 보존 의무가 발생하는 경우에는 해당 법령에서 정한 기간 동안 필요한 정보만 별도로 보관할 수 있습니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>3. 계정 탈퇴 및 채팅 기록 처리</h2>
+      <p>계정이 탈퇴 또는 삭제된 경우 로그인 및 서비스 접근 권한을 제거합니다.</p>
+      <p>푸시 알림 토큰은 계정 탈퇴 시 삭제합니다.</p>
+      <p>계정 ID, 이메일 주소, 인증 관련 정보 및 현재 계정과 직접 연결되는 개인정보는 계정 정리, 부정 이용 방지 및 필요한 분쟁 대응을 위해 탈퇴 후 최대 3개월까지 보관할 수 있으며, 이후 파기합니다.</p>
+      <p>다만 채팅 메시지는 다른 이용자와 함께 작성된 대화의 연속성, 서비스 운영기록, 악용행위 확인 및 분쟁 대응을 위해 <strong>탈퇴일로부터 최대 3년간</strong> 보관할 수 있습니다.</p>
+      <p>탈퇴 후 최대 3개월 이내에 보존되는 채팅 기록에서 현재 계정과 직접 연결되는 계정 식별정보를 제거하고, 필요한 경우 작성자를 “탈퇴한 사용자”와 같은 비식별 표시로 전환합니다.</p>
+      <p>이러한 조치는 식별 가능성을 낮추기 위한 것으로, 메시지 본문 자체에 이용자 또는 제3자가 작성한 이름·연락처 등 개인정보가 포함되어 있는 경우 해당 메시지가 항상 법률상 완전한 익명정보가 되는 것은 아닙니다.</p>
+      <p>따라서 사이트는 이러한 채팅 기록도 정해진 목적과 범위에서만 처리하며, 탈퇴 후 최대 3년이 지나면 파기합니다.</p>
+      <p>실제 분쟁이나 법적 절차가 진행 중인 경우에는 해당 사건 처리를 위해 필요한 최소한의 자료만 절차가 종료될 때까지 예외적으로 보관할 수 있습니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>4. 개인정보의 파기</h2>
+      <p>개인정보가 불필요하게 된 경우 사이트는 지체 없이 해당 정보를 파기합니다.</p>
+      <p>전자적으로 저장된 개인정보는 일반적인 서비스 기능을 통해 더 이상 이용하거나 복구할 수 없도록 삭제합니다.</p>
+      <p>법령에 따라 개인정보를 계속 보존해야 하는 경우에는 다른 개인정보와 구분하여 해당 보존 목적을 위해서만 처리합니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>5. 개인정보 처리 위탁 및 외부 서비스</h2>
+
+      <h3>Supabase, Inc.</h3>
+      <p><strong>이용 목적:</strong> 계정 인증, 데이터베이스, 파일 저장, 서버 기능, 서비스 데이터 처리</p>
+      <p><strong>처리될 수 있는 정보:</strong> 계정 식별정보, 닉네임, 채팅 데이터, 문의·신고 및 신청 데이터, 업로드 자료, 서비스 운영에 필요한 기타 데이터</p>
+      <p>S967의 Supabase 프로젝트 데이터베이스는 <strong>싱가포르(ap-southeast-1)</strong> 리전을 사용합니다.</p>
+
+      <h3>Google LLC / Firebase Cloud Messaging</h3>
+      <p><strong>이용 목적:</strong> 채팅 및 서비스 관련 푸시 알림 제공</p>
+      <p><strong>처리될 수 있는 정보:</strong> Firebase Installation ID, 푸시 알림 전달을 위한 기술적 식별정보</p>
+
+      <h3>Plus Five Five, Inc. / Resend</h3>
+      <p><strong>이용 목적:</strong> 문의 알림, 신청 결과 및 신청 내역 전달, 신고 알림, 기타 운영 관련 이메일을 운영자 또는 수신을 희망한 Staff에게 전달</p>
+      <p><strong>처리될 수 있는 정보:</strong> 수신 이메일 주소, 이메일 메타데이터, 이메일 제목과 본문, 문의·신청·신고 등에 포함된 정보, 필요한 경우 첨부자료</p>
+    </section>
+
+    <section class="section">
+      <h2>6. 개인정보의 국외 이전</h2>
+
+      <h3>Supabase</h3>
+      <ul>
+        <li>이전받는 자: Supabase, Inc.</li>
+        <li>주요 저장지역: <strong>싱가포르</strong></li>
+        <li>이전 목적: 인증, 데이터베이스, 파일 저장 및 서버 기능 제공</li>
+        <li>이전 항목: 해당 기능 이용 과정에서 Supabase에 저장·처리되는 개인정보</li>
+        <li>이전 시점 및 방법: 서비스 이용 시 암호화된 네트워크를 통한 전송</li>
+        <li>보유기간: S967의 각 개인정보 보유기간 및 Supabase 서비스 정책에 따른 기간</li>
+      </ul>
+
+      <h3>Google / Firebase</h3>
+      <ul>
+        <li>이전받는 자: Google LLC</li>
+        <li>이전 국가: Google 및 그 처리자가 관련 인프라를 운영하는 국가</li>
+        <li>이전 목적: 푸시 알림 제공</li>
+        <li>이전 항목: Firebase Installation ID 및 푸시 알림 제공에 필요한 기술정보</li>
+        <li>이전 시점 및 방법: 알림 등록·갱신·전송 과정에서 네트워크를 통한 전송</li>
+        <li>보유기간: S967에서는 알림 해제 또는 계정 탈퇴 시 관련 등록정보를 삭제하며, Google 시스템에서의 삭제에는 해당 서비스의 삭제정책이 적용됨</li>
+      </ul>
+
+      <h3>Resend</h3>
+      <ul>
+        <li>이전받는 자: <strong>Plus Five Five, Inc. (Resend)</strong></li>
+        <li>이전 국가: <strong>미국</strong></li>
+        <li>이전 목적: 서비스 운영 관련 이메일 발송</li>
+        <li>이전 항목: 수신 이메일 주소, 이메일 메타데이터 및 이메일 내용에 포함되는 문의·신청·신고 등의 정보</li>
+        <li>이전 시점 및 방법: 이메일 발송 시 암호화된 네트워크를 통한 전송</li>
+        <li>보유기간: S967에서 필요한 기간 및 Resend 서비스 정책에 따른 기간</li>
+      </ul>
+
+      <p>국외 이전을 원하지 않는 이용자는 해당 기능의 사용을 중단하거나 개인정보 삭제 또는 계정 탈퇴를 요청할 수 있습니다. 다만 서비스의 핵심 인프라에 해당하는 경우 해당 정보의 이전을 거부하면 일부 서비스 이용이 어려울 수 있습니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>7. 개인정보의 제3자 제공</h2>
+      <p>사이트는 이용자의 개인정보를 판매하지 않습니다.</p>
+      <p>또한 원칙적으로 개인정보를 수집·이용 목적을 벗어나 임의로 제3자에게 제공하지 않습니다.</p>
+      <p>다만 다음과 같은 경우에는 관련 법령에 따라 개인정보가 제공될 수 있습니다.</p>
+      <ul>
+        <li>이용자가 별도로 동의한 경우</li>
+        <li>법률에 특별한 규정이 있는 경우</li>
+        <li>적법한 절차에 따른 관계기관의 요청에 응하여야 하는 경우</li>
+      </ul>
+      <p>서비스 제공을 위해 Supabase, Firebase, Resend 등에 정보를 처리하도록 하는 것은 위의 개인정보 처리위탁 및 국외이전 항목에서 별도로 안내합니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>8. 이용자의 권리</h2>
+      <p>이용자는 관련 법령에서 정하는 범위에서 자신의 개인정보에 대해 다음 사항을 요청할 수 있습니다.</p>
+      <ul>
+        <li>개인정보 처리 여부 확인 및 열람</li>
+        <li>잘못된 개인정보의 정정</li>
+        <li>개인정보 삭제</li>
+        <li>개인정보 처리정지</li>
+        <li>계정 탈퇴</li>
+        <li>등록한 Staff 이메일 삭제</li>
+        <li>개인정보 처리와 관련된 문의 및 이의 제기</li>
+      </ul>
+      <p>필요한 경우 사이트는 요청자의 본인 여부를 확인한 후 요청을 처리할 수 있습니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>9. 개인정보 보호 및 접근통제</h2>
+      <p>사이트는 개인정보가 분실·도난·유출·변조 또는 훼손되지 않도록 필요한 보호조치를 적용합니다.</p>
+      <ul>
+        <li>관리자, Staff 및 일반 이용자의 권한 분리</li>
+        <li>관리자 기능 접근 제한</li>
+        <li>인증정보의 평문 저장 방지</li>
+        <li>HTTPS를 이용한 통신</li>
+        <li>데이터베이스 접근권한 제한</li>
+        <li>서버용 비밀키의 클라이언트 비공개</li>
+        <li>비공개 채팅방의 관리자 임의 접근 제한</li>
+        <li>신고 처리 시 열람 가능한 대화 범위 제한</li>
+        <li>불필요해진 개인정보 삭제</li>
+        <li>개인정보를 처리하는 Staff의 접근범위 최소화</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>10. 브라우저에 저장되는 정보</h2>
+      <p>사이트는 로그인 또는 인증 상태, 언어 설정, 화면 테마 설정 및 서비스 이용에 필요한 설정정보를 브라우저 저장공간에 저장할 수 있습니다.</p>
+      <p>이러한 정보는 광고 목적의 행동 추적을 위한 것이 아닙니다.</p>
+      <p>사이트가 향후 별도의 분석 또는 광고 추적 서비스를 도입하는 경우에는 실제 처리 내용에 맞게 본 처리방침을 변경합니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>11. 만 14세 미만 이용자</h2>
+      <p>사이트는 만 14세 미만 아동의 개인정보를 법정대리인의 동의 없이 적극적으로 수집하는 것을 목적으로 운영하지 않습니다.</p>
+      <p>만 14세 미만 이용자의 개인정보가 법정대리인의 동의 없이 처리되고 있음을 확인하는 경우 관련 법령에 따라 필요한 조치를 합니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>12. 개인정보 보호 관련 문의</h2>
+      <p>개인정보 열람·정정·삭제, 계정 탈퇴, 개인정보 처리에 대한 문의 또는 기타 개인정보 관련 요청은 아래 연락처로 할 수 있습니다.</p>
+      <p><strong>운영자:</strong> S967 운영자</p>
+      <a class="contact" href="mailto:lemon.967ace@gmail.com">✉ lemon.967ace@gmail.com</a>
+      <p>사이트는 개인정보 관련 요청을 확인한 후 관련 법령과 서비스 운영상 필요한 절차에 따라 처리합니다.</p>
+    </section>
+
+    <section class="section">
+      <h2>13. 개인정보 처리방침의 변경</h2>
+      <p>개인정보의 처리 방법, 외부 서비스, 보유기간 또는 관련 법령 등이 변경되어 본 처리방침을 수정하는 경우 사이트를 통해 변경 내용을 공개합니다.</p>
+      <p>이용자의 권리에 중대한 영향을 미치는 변경이 있는 경우에는 이용자가 변경 내용을 쉽게 확인할 수 있는 방법으로 안내합니다.</p>
+      <p><strong>시행일: 2026년 8월 14일</strong></p>
+    </section>
+
+    <footer>
+      S967 · Privacy Policy
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const languageButton = document.getElementById("languageButton");
+      const languageMenu = document.getElementById("languageMenu");
+      const themeButton = document.getElementById("themeButton");
+      const themeMenu = document.getElementById("themeMenu");
+      const themeChoices = [...themeMenu.querySelectorAll("[data-theme-choice]")];
+
+      const THEME_KEY = "s967-theme";
+
+      function systemTheme() {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+
+      function savedTheme() {
+        const value = localStorage.getItem(THEME_KEY);
+        return ["system", "light", "dark"].includes(value) ? value : "system";
+      }
+
+      function applyTheme(value) {
+        const actual = value === "system" ? systemTheme() : value;
+        root.dataset.theme = actual;
+
+        themeChoices.forEach((button) => {
+          button.setAttribute(
+            "aria-checked",
+            button.dataset.themeChoice === value ? "true" : "false"
+          );
+        });
+
+        themeButton.textContent =
+          value === "light" ? "☀" :
+          value === "dark" ? "☾" :
+          "◐";
+      }
+
+      function closeMenus(except = null) {
+        [
+          [languageButton, languageMenu],
+          [themeButton, themeMenu],
+        ].forEach(([button, menu]) => {
+          if (menu !== except) {
+            menu.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      function toggleMenu(button, menu) {
+        const willOpen = menu.hidden;
+        closeMenus(menu);
+        menu.hidden = !willOpen;
+        button.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      }
+
+      languageButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleMenu(languageButton, languageMenu);
+      });
+
+      themeButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleMenu(themeButton, themeMenu);
+      });
+
+      themeChoices.forEach((button) => {
+        button.addEventListener("click", () => {
+          const value = button.dataset.themeChoice;
+          localStorage.setItem(THEME_KEY, value);
+          applyTheme(value);
+          closeMenus();
+        });
+      });
+
+      document.addEventListener("click", () => closeMenus());
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenus();
+      });
+
+      window.matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          if (savedTheme() === "system") {
+            applyTheme("system");
+          }
+        });
+
+      applyTheme(savedTheme());
+    })();
+  </script>
+</body>
+</html>
