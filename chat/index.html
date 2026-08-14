@@ -488,6 +488,118 @@
       }
     }
 
+  
+    /* =========================================================
+       AUTH GATE VISIBILITY FIX v6
+       인증 전/실패 상태에서는 채팅 UI를 절대 표시하지 않음.
+       이전 모바일 .app { display:grid !important; }가
+       .hidden을 덮어쓰는 문제를 더 높은 우선순위로 차단.
+       ========================================================= */
+
+    #app.hidden {
+      display: none !important;
+    }
+
+    #gate.hidden {
+      display: none !important;
+    }
+
+  
+    /* =========================================================
+       CHAT ANNOUNCEMENT BOX v7
+       Desktop: separate box above room list
+       Mobile: between "Rooms" title and + / refresh controls
+       ========================================================= */
+
+    .chat-announcement {
+      min-width: 0;
+      overflow: hidden;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      background: var(--surface-hover);
+      color: var(--text);
+
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.06),
+        0 2px 8px rgba(0,0,0,.045);
+    }
+
+    .chat-announcement[hidden] {
+      display: none !important;
+    }
+
+    .chat-announcement-inner {
+      min-width: 0;
+      padding: 8px 9px;
+
+      font-size: .76rem;
+      line-height: 1.45;
+    }
+
+    .chat-announcement-text {
+      display: block;
+      min-width: 0;
+
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      opacity: 1;
+      transform: translateY(0);
+
+      transition:
+        opacity .22s ease,
+        transform .22s ease;
+    }
+
+    .chat-announcement-text.is-changing {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+
+    #chatAnnouncementMobile {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .side-head {
+        display: grid !important;
+        grid-template-columns:
+          auto
+          minmax(0, 1fr)
+          auto;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .side-head > strong {
+        flex: none !important;
+      }
+
+      #chatAnnouncementDesktop {
+        display: none !important;
+      }
+
+      #chatAnnouncementMobile:not([hidden]) {
+        display: block !important;
+      }
+
+      #chatAnnouncementMobile {
+        min-width: 0;
+      }
+
+      #chatAnnouncementMobile .chat-announcement-inner {
+        padding: 6px 8px;
+        font-size: .72rem;
+      }
+
+      .room-tools {
+        flex: 0 0 auto;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -508,11 +620,41 @@
     <aside class="sidebar panel">
       <div class="side-head">
         <strong id="roomsTitle">Rooms</strong>
+
+        <div
+          id="chatAnnouncementMobile"
+          class="chat-announcement"
+          hidden
+          aria-live="polite"
+        >
+          <div class="chat-announcement-inner">
+            <span
+              id="chatAnnouncementMobileText"
+              class="chat-announcement-text"
+            ></span>
+          </div>
+        </div>
+
         <div class="room-tools">
           <button id="createRoomButton" type="button" title="Create room">＋</button>
           <button id="roomRefreshButton" type="button" title="Refresh">↻</button>
         </div>
       </div>
+
+      <div
+        id="chatAnnouncementDesktop"
+        class="chat-announcement"
+        hidden
+        aria-live="polite"
+      >
+        <div class="chat-announcement-inner">
+          <span
+            id="chatAnnouncementDesktopText"
+            class="chat-announcement-text"
+          ></span>
+        </div>
+      </div>
+
       <div id="rooms" class="rooms"></div>
     </aside>
 
@@ -648,6 +790,9 @@
     let pushSetupPromise = null;
     let initialRequestedRoomId = new URLSearchParams(location.search).get("room") || "";
 
+    const CHAT_ANNOUNCEMENT_API =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const $ = id => document.getElementById(id);
     const MESSAGE_BATCH_SIZE = 20;
@@ -682,6 +827,154 @@
     let currentSearch = {q:"",date:""};
 
     const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+
+    const chatAnnouncementDesktop =
+      $("chatAnnouncementDesktop");
+    const chatAnnouncementDesktopText =
+      $("chatAnnouncementDesktopText");
+    const chatAnnouncementMobile =
+      $("chatAnnouncementMobile");
+    const chatAnnouncementMobileText =
+      $("chatAnnouncementMobileText");
+
+    let chatAnnouncementPages = [];
+    let chatAnnouncementIndex = 0;
+    let chatAnnouncementTimer = null;
+
+
+    function clearChatAnnouncementTimer(){
+      if(chatAnnouncementTimer!==null){
+        clearInterval(chatAnnouncementTimer);
+        chatAnnouncementTimer=null;
+      }
+    }
+
+    function hideChatAnnouncements(){
+      clearChatAnnouncementTimer();
+      chatAnnouncementPages=[];
+      chatAnnouncementIndex=0;
+
+      if(chatAnnouncementDesktop){
+        chatAnnouncementDesktop.hidden=true;
+      }
+      if(chatAnnouncementMobile){
+        chatAnnouncementMobile.hidden=true;
+      }
+      if(chatAnnouncementDesktopText){
+        chatAnnouncementDesktopText.textContent="";
+      }
+      if(chatAnnouncementMobileText){
+        chatAnnouncementMobileText.textContent="";
+      }
+    }
+
+    function renderChatAnnouncement(index,animate=false){
+      if(!chatAnnouncementPages.length){
+        hideChatAnnouncements();
+        return;
+      }
+
+      const nextIndex=
+        ((Number(index)||0)%chatAnnouncementPages.length+
+          chatAnnouncementPages.length)%
+        chatAnnouncementPages.length;
+
+      const value=
+        chatAnnouncementPages[nextIndex];
+
+      const hosts=[
+        [chatAnnouncementDesktop,chatAnnouncementDesktopText],
+        [chatAnnouncementMobile,chatAnnouncementMobileText],
+      ];
+
+      for(const [box,label] of hosts){
+        if(!box||!label)continue;
+
+        box.hidden=false;
+
+        if(animate&&label.textContent){
+          label.classList.add("is-changing");
+
+          setTimeout(()=>{
+            label.textContent=value;
+            label.classList.remove("is-changing");
+          },180);
+        }else{
+          label.textContent=value;
+          label.classList.remove("is-changing");
+        }
+      }
+
+      chatAnnouncementIndex=nextIndex;
+    }
+
+    function startChatAnnouncementRotation(){
+      clearChatAnnouncementTimer();
+
+      if(chatAnnouncementPages.length<=1){
+        return;
+      }
+
+      chatAnnouncementTimer=setInterval(()=>{
+        renderChatAnnouncement(
+          (chatAnnouncementIndex+1)%
+            chatAnnouncementPages.length,
+          true
+        );
+      },5000);
+    }
+
+    async function loadChatAnnouncements(){
+      try{
+        const response=await fetch(
+          CHAT_ANNOUNCEMENT_API,
+          {cache:"no-store"}
+        );
+
+        if(!response.ok){
+          throw new Error("ANNOUNCEMENT_LOAD_FAILED");
+        }
+
+        const result=await response.json();
+
+        const currentLanguage=
+          ["ko","en","ja","ru"].includes(language)
+            ? language
+            : "en";
+
+        chatAnnouncementPages=
+          (Array.isArray(result?.announcements)
+            ? result.announcements
+            : [])
+            .map(item=>
+              String(
+                item?.texts?.[currentLanguage] ??
+                item?.texts?.en ??
+                ""
+              ).trim()
+            )
+            .filter(Boolean);
+
+        chatAnnouncementIndex=0;
+        clearChatAnnouncementTimer();
+
+        if(!chatAnnouncementPages.length){
+          hideChatAnnouncements();
+          return;
+        }
+
+        renderChatAnnouncement(0,false);
+        startChatAnnouncementRotation();
+
+      }catch(error){
+        console.warn(
+          "Chat announcement load failed",
+          error
+        );
+        hideChatAnnouncements();
+      }
+    }
+
 
     function setText(){
       document.documentElement.lang=language;
@@ -1430,6 +1723,8 @@
         notificationBaseline=newestMessage()?.id??notificationBaseline;
         gate.classList.add("hidden");
         app.classList.remove("hidden");
+      loadChatAnnouncements();
+      loadChatAnnouncements();
         renderRooms();
       }catch(e){
         if(e.status===401||e.status===403){await showAccessFailure(e);}else setStatus(text.loadFailed,true);
@@ -1587,6 +1882,7 @@
     function showGate(message){
       stopRealtime();
       app.classList.add("hidden");
+      hideChatAnnouncements();
       gate.classList.remove("hidden");
       gateMessage.textContent=message;
       chatLogin.classList.remove("hidden");
@@ -1614,6 +1910,7 @@
           renderMessages();
           gate.classList.add("hidden");
           app.classList.remove("hidden");
+      loadChatAnnouncements();
           return;
         }
 
