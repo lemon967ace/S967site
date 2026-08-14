@@ -898,7 +898,7 @@
     </h3>
 
     <p class="small">
-      채팅 전용 계정입니다. 권한 버튼에서 Staff로 전환할 수 있습니다.
+      채팅 전용 권한으로 전환된 계정입니다. 권한 버튼에서 Staff로 다시 전환할 수 있습니다.
     </p>
 
     <div
@@ -1719,8 +1719,18 @@
 
 <div id="announcementAdminSection" class="admin-section" data-admin-section="announcements">
   <section class="panel">
-    <div class="row"><h2 style="margin:0">공지사항 관리</h2><a class="admin-button" href="/">메인 페이지 보기</a></div>
-    <p class="small">4개 언어 공지, 표시 기간, 반복 공지 루틴을 이 탭에서 직접 관리합니다.</p>
+    <div class="row">
+      <h2 style="margin:0;flex:1">공지사항 관리</h2>
+      <button id="embeddedAnnRefreshAnnouncements" type="button">새로고침</button>
+      <a class="admin-button" href="/">메인 페이지 보기</a>
+    </div>
+    <p class="small">현재 등록된 공지사항을 여기서 확인하고 수정·비활성화·삭제할 수 있습니다.</p>
+    <div id="embeddedAnnActor" class="small" style="margin-top:8px"></div>
+    <div style="margin-top:16px">
+      <strong>현재 공지사항</strong>
+      <div id="embeddedAnnAnnouncementList" class="cards"></div>
+      <div id="embeddedAnnAnnouncementListEmpty" class="small hidden" style="margin-top:10px">등록된 공지사항이 없습니다.</div>
+    </div>
   </section>
   <div id="embeddedAnnGate" class="hidden">
     <span id="embeddedAnnGateMessage"></span>
@@ -1731,7 +1741,7 @@
   </div>
   <div id="embeddedAnnApp">
 
-    <section class="panel">
+    <section id="embeddedAnnAnnouncementEditor" class="panel">
       <h2>일반 공지사항</h2>
       <p class="meta">4개 언어와 표시 시작·종료 시각이 모두 필요합니다. 기간 밖에서는 메인 페이지에 표시되지 않습니다.</p>
 
@@ -1754,7 +1764,6 @@
         <button id="embeddedAnnCancelAnnouncementEdit" type="button" class="hidden">수정 취소</button>
       </div>
       <div id="embeddedAnnAnnouncementStatus" class="status"></div>
-      <div id="embeddedAnnAnnouncementList" class="cards"></div>
     </section>
 
     <section class="panel">
@@ -10674,7 +10683,7 @@ createMapTemplateButton.addEventListener(
     const $=id=>document.getElementById(id);
 
     const gate=$("embeddedAnnGate"),gateMessage=$("embeddedAnnGateMessage"),staffLogin=$("embeddedAnnStaffLogin"),staffId=$("embeddedAnnStaffId"),staffPassword=$("embeddedAnnStaffPassword"),staffLoginButton=$("embeddedAnnStaffLoginButton"),app=$("embeddedAnnApp"),actorHost=$("embeddedAnnActor");
-    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList");
+    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList"),announcementListEmpty=$("embeddedAnnAnnouncementListEmpty"),refreshAnnouncements=$("embeddedAnnRefreshAnnouncements");
     const rId=$("embeddedAnnRoutineId"),rName=$("embeddedAnnRName"),rAnchor=$("embeddedAnnRAnchor"),rRepeat=$("embeddedAnnRRepeat"),rHours=$("embeddedAnnRHours"),rOffset=$("embeddedAnnROffset"),rEnabled=$("embeddedAnnREnabled"),rKo=$("embeddedAnnRKo"),rEn=$("embeddedAnnREn"),rJa=$("embeddedAnnRJa"),rRu=$("embeddedAnnRRu"),saveRoutine=$("embeddedAnnSaveRoutine"),cancelRoutineEdit=$("embeddedAnnCancelRoutineEdit"),routineStatus=$("embeddedAnnRoutineStatus"),routineList=$("embeddedAnnRoutineList"),wkPreset=$("embeddedAnnWkPreset"),periodPreset=$("embeddedAnnPeriodPreset");
 
     let data={announcements:[],routines:[]};
@@ -10705,15 +10714,25 @@ createMapTemplateButton.addEventListener(
     function textBlock(item){const div=document.createElement("div");div.className="texts";for(const [label,key] of [["KO","text_ko"],["EN","text_en"],["JA","text_ja"],["RU","text_ru"]]){const row=document.createElement("div");row.textContent=`${label} · ${item[key]}`;div.append(row);}return div;}
 
     function render(){
-      actorHost.textContent=`${data.actor?.name??""} · ${data.actor?.kind??""}`;
+      if(actorHost)actorHost.textContent=data.actor?.name??"";
 
-      announcementList.replaceChildren(...(data.announcements??[]).map(item=>{
+      const announcements=data.announcements??[];
+      announcementListEmpty?.classList.toggle("hidden",announcements.length>0);
+      announcementList.replaceChildren(...announcements.map(item=>{
         const card=document.createElement("div");card.className="card";
+        const now=Date.now(),startMs=new Date(item.starts_at).getTime(),endMs=new Date(item.ends_at).getTime();
+        const lifecycle=now<startMs?"예약":now>endMs?"종료":"게시 중";
         const head=document.createElement("div");head.className="card-head";
-        const title=document.createElement("strong");title.textContent=`${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
-        const meta=document.createElement("span");meta.className="meta";meta.textContent=`${item.author_name} · ${item.author_kind}`;
+        const title=document.createElement("strong");title.textContent=`[${lifecycle}] ${fmt(item.starts_at)} → ${fmt(item.ends_at)}`;
+        const meta=document.createElement("span");meta.className="meta";meta.textContent=item.author_name??"";
         head.append(title,meta);card.append(head,textBlock(item));
-        if(item.can_edit){const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editAnnouncement(item);const del=document.createElement("button");del.textContent="삭제";del.onclick=()=>deleteAnnouncement(item);actions.append(edit,del);card.append(actions);}
+        if(item.can_edit){
+          const actions=document.createElement("div");actions.className="row";actions.style.marginTop="8px";
+          const edit=document.createElement("button");edit.textContent="수정";edit.onclick=()=>editAnnouncement(item);
+          const disable=document.createElement("button");disable.textContent=lifecycle==="종료"?"비활성":"비활성화";disable.disabled=lifecycle==="종료";disable.onclick=()=>disableAnnouncement(item);
+          const del=document.createElement("button");del.textContent="삭제";del.classList.add("danger");del.onclick=()=>deleteAnnouncement(item);
+          actions.append(edit,disable,del);card.append(actions);
+        }
         return card;
       }));
 
@@ -10736,11 +10755,22 @@ createMapTemplateButton.addEventListener(
     }
 
     function clearAnnouncement(){aId.value="";aKo.value=aEn.value=aJa.value=aRu.value="";aStart.value=aEnd.value="";saveAnnouncement.textContent="공지 저장";cancelAnnouncementEdit.classList.add("hidden");}
-    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent="공지 수정 저장";cancelAnnouncementEdit.classList.remove("hidden");scrollTo({top:0,behavior:"smooth"});}
+    function editAnnouncement(item){aId.value=item.id;aKo.value=item.text_ko;aEn.value=item.text_en;aJa.value=item.text_ja;aRu.value=item.text_ru;aStart.value=localInputValue(item.starts_at);aEnd.value=localInputValue(item.ends_at);saveAnnouncement.textContent="공지 수정 저장";cancelAnnouncementEdit.classList.remove("hidden");$("embeddedAnnAnnouncementEditor")?.scrollIntoView({behavior:"smooth",block:"start"});}
+    async function disableAnnouncement(item){
+      if(!confirm("이 공지사항을 지금 비활성화할까요?\n메인 페이지에서는 즉시 표시되지 않게 됩니다."))return;
+      try{
+        status(announcementStatus,"비활성화 중…");
+        await request("POST",{action:"update_announcement",id:item.id,text_ko:item.text_ko,text_en:item.text_en,text_ja:item.text_ja,text_ru:item.text_ru,starts_at:item.starts_at,ends_at:new Date().toISOString()});
+        await load();
+        status(announcementStatus,"비활성화했습니다.");
+      }catch(e){status(announcementStatus,e.message,true);}
+    }
+
     async function deleteAnnouncement(item){if(!confirm("이 공지사항을 삭제할까요?"))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
 
     saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,"저장 중…");const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value)};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,"저장했습니다.");}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
     cancelAnnouncementEdit.onclick=clearAnnouncement;
+    if(refreshAnnouncements)refreshAnnouncements.onclick=()=>load().catch(e=>status(announcementStatus,e.message,true));
 
     function clearRoutine(){rId.value="";rName.value="";rAnchor.value="";rRepeat.value="14";rHours.value="72";rOffset.value="3";rEnabled.value="true";rKo.value=rEn.value=rJa.value=rRu.value="";saveRoutine.textContent="루틴 저장";cancelRoutineEdit.classList.add("hidden");}
     function editRoutine(item){rId.value=item.id;rName.value=item.name;rAnchor.value=localInputValue(item.anchor_start);rRepeat.value=item.repeat_every_days;rHours.value=item.active_hours;rOffset.value=item.event_offset_days;rEnabled.value=String(item.enabled);rKo.value=item.text_ko;rEn.value=item.text_en;rJa.value=item.text_ja;rRu.value=item.text_ru;saveRoutine.textContent="루틴 수정 저장";cancelRoutineEdit.classList.remove("hidden");}
@@ -10766,6 +10796,8 @@ createMapTemplateButton.addEventListener(
     }
     if(staffLoginButton)staffLoginButton.onclick=staffSignIn;
     if(staffPassword)staffPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();staffSignIn();}});
+
+    window.addEventListener("s967adminannouncementopen",()=>{load().catch(e=>status(announcementStatus,e.message,true));});
 
     (async()=>{
       try{
