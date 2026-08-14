@@ -10509,6 +10509,42 @@ createMapTemplateButton.addEventListener(
     let reportPage=1;
     const REPORT_PAGE_SIZE=5;
 
+    const HIDDEN_NO_ACTION_REPORTS_KEY =
+      "s967_admin_hidden_no_action_reports";
+
+    function hiddenNoActionReportIds(){
+      try{
+        const parsed=JSON.parse(
+          localStorage.getItem(
+            HIDDEN_NO_ACTION_REPORTS_KEY
+          ) || "[]"
+        );
+        return new Set(
+          Array.isArray(parsed)
+            ? parsed.map(String)
+            : []
+        );
+      }catch{
+        return new Set();
+      }
+    }
+
+    function hideNoActionReportId(reportId){
+      const ids=hiddenNoActionReportIds();
+      ids.add(String(reportId));
+      localStorage.setItem(
+        HIDDEN_NO_ACTION_REPORTS_KEY,
+        JSON.stringify([...ids])
+      );
+    }
+
+    function visibleReports(reports){
+      const hidden=hiddenNoActionReportIds();
+      return (reports??[]).filter(
+        report=>!hidden.has(String(report.id))
+      );
+    }
+
     function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
     async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
     async function reportRequest(method="GET",body=null,url=REPORT_API){
@@ -10534,8 +10570,18 @@ createMapTemplateButton.addEventListener(
       try{
         status(reportStatus,"처리 중…");
         await reportRequest("POST",{report_id:report.id,action,note});
+
+        if(action==="no_action"){
+          hideNoActionReportId(report.id);
+        }
+
         await loadReports();
-        status(reportStatus,"처리했습니다.");
+        status(
+          reportStatus,
+          action==="no_action"
+            ? "문제없음으로 처리했습니다. 이 목록에서는 숨겼습니다."
+            : "처리했습니다."
+        );
       }catch(e){status(reportStatus,e.message,true);}
     }
 
@@ -10730,7 +10776,13 @@ createMapTemplateButton.addEventListener(
         }
 
         reportPage=Number(pagination.page??reportPage);
-        renderReports(result.reports??[]);
+
+        const reports=
+          visibleReports(
+            result.reports??[]
+          );
+
+        renderReports(reports);
         renderReportPagination(pagination);
         status(reportStatus,"");
       }catch(e){
