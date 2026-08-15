@@ -1085,6 +1085,8 @@
             id="deleteAccountOpenButton"
             class="secondary-button danger-button"
             type="button"
+            aria-expanded="false"
+            aria-controls="deleteAccountPanel"
           >
             Delete Account
           </button>
@@ -4265,9 +4267,28 @@
     deleteAccountOpenButton.addEventListener(
       "click",
       () => {
-        deleteAccountPanel.classList.toggle(
-          "hidden"
-        );
+        const opening =
+          deleteAccountPanel.classList.contains(
+            "hidden"
+          );
+
+        if (opening) {
+          deleteAccountPanel.classList.remove(
+            "hidden"
+          );
+          deleteAccountOpenButton.setAttribute(
+            "aria-expanded",
+            "true"
+          );
+        } else {
+          deleteAccountPanel.classList.add(
+            "hidden"
+          );
+          deleteAccountOpenButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+        }
 
         deleteAccountForm.reset();
         setStatus(
@@ -4275,12 +4296,22 @@
           ""
         );
 
-        if (
-          !deleteAccountPanel.classList.contains(
-            "hidden"
-          )
-        ) {
-          deletePassword.focus();
+        if (opening) {
+          requestAnimationFrame(
+            () => {
+              deleteAccountPanel.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+
+              window.setTimeout(
+                () => {
+                  deletePassword.focus();
+                },
+                250
+              );
+            }
+          );
         }
       }
     );
@@ -4297,6 +4328,10 @@
         deleteAccountPanel.classList.add(
           "hidden"
         );
+        deleteAccountOpenButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
       }
     );
 
@@ -4306,8 +4341,8 @@
       async (event) => {
         event.preventDefault();
 
-        const text =
-          currentText();
+        const activeText =
+          text;
 
         const password =
           deletePassword.value;
@@ -4327,7 +4362,7 @@
         ) {
           setStatus(
             deleteAccountStatus,
-            text.deletePasswordMismatch,
+            activeText.deletePasswordMismatch,
             "error"
           );
           return;
@@ -4335,7 +4370,7 @@
 
         if (
           !window.confirm(
-            text.deleteAccountConfirm1
+            activeText.deleteAccountConfirm1
           )
         ) {
           return;
@@ -4343,7 +4378,7 @@
 
         if (
           !window.confirm(
-            text.deleteAccountConfirm2
+            activeText.deleteAccountConfirm2
           )
         ) {
           return;
@@ -4351,7 +4386,7 @@
 
         if (
           !window.confirm(
-            text.deleteAccountConfirm3
+            activeText.deleteAccountConfirm3
           )
         ) {
           return;
@@ -4365,11 +4400,11 @@
           true;
 
         deleteAccountButton.textContent =
-          text.deletingAccount;
+          activeText.deletingAccount;
 
         setStatus(
           deleteAccountStatus,
-          text.deletingAccount
+          activeText.deletingAccount
         );
 
         try {
@@ -4408,7 +4443,7 @@
             )
           ) {
             throw new Error(
-              text.deleteAccountWrongPassword
+              activeText.deleteAccountWrongPassword
             );
           }
 
@@ -4421,7 +4456,7 @@
               ACCOUNT_ID_KEY
             );
             throw new Error(
-              text.sessionExpired
+              activeText.sessionExpired
             );
           }
 
@@ -4431,7 +4466,7 @@
           ) {
             throw new Error(
               result.error ||
-              text.deleteAccountFailed
+              activeText.deleteAccountFailed
             );
           }
 
@@ -4459,7 +4494,7 @@
 
           setStatus(
             loginStatus,
-            text.deleteAccountSuccess,
+            activeText.deleteAccountSuccess,
             "success"
           );
 
@@ -4467,14 +4502,14 @@
 
           setStatus(
             loginStatus,
-            text.deleteAccountSuccess,
+            activeText.deleteAccountSuccess,
             "success"
           );
         } catch (error) {
           setStatus(
             deleteAccountStatus,
             error?.message ||
-              text.deleteAccountFailed,
+              activeText.deleteAccountFailed,
             "error"
           );
         } finally {
