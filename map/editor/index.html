@@ -2502,7 +2502,7 @@
       url.search = "";
       url.searchParams.set("new", "1");
       url.searchParams.set("recovery", documentId);
-      history.replaceState(history.state, "", url);
+      window.history.replaceState(window.history.state, "", url);
     }
 
     function setSavedMapUrl(mapId) {
@@ -2510,7 +2510,7 @@
       const url = new URL(window.location.href);
       url.search = "";
       url.searchParams.set("map", mapId);
-      history.replaceState(history.state, "", url);
+      window.history.replaceState(window.history.state, "", url);
     }
     async function offerRecovery(snapshot, { missingServer = false } = {}) {
       if (!snapshot || readOnly) return false; const labels = RECOVERY_TEXT[language] ?? RECOVERY_TEXT.en;
