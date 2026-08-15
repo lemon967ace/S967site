@@ -2466,13 +2466,51 @@
       return autosaveController;
     }
     function scheduleAutosave() { if (autosaveReady && !readOnly) ensureAutosaveController().schedule(mutationRevision); }
-    async function findRecovery({ mapId = null, unsaved = false, serverUpdatedAt = null } = {}) {
+    async function findRecovery({ mapId = null, recoveryDocumentId: wantedRecoveryDocumentId = null, unsaved = false, serverUpdatedAt = null } = {}) {
       const accountId = getRecoveryAccountId(); if (!accountId || readOnly) return null;
       let snapshot = null;
-      if (mapId) { const key = recoveryKey(accountId, "saved", mapId, null); snapshot = await recoveryStorage.get(key).catch(async error => { console.error("Invalid recovery removed:", error); await recoveryStorage.delete(key).catch(() => {}); return null; }); }
-      else if (unsaved) snapshot = (await recoveryStorage.list(accountId).catch(() => [])).find(item => item.sourceKind !== "saved") ?? null;
-      if (snapshot && serverUpdatedAt && Date.parse(snapshot.autosavedAt) <= Date.parse(serverUpdatedAt)) { await recoveryStorage.delete(snapshot.key).catch(() => {}); return null; }
+
+      if (mapId) {
+        const key = recoveryKey(accountId, "saved", mapId, null);
+        snapshot = await recoveryStorage.get(key).catch(async error => {
+          console.error("Invalid recovery removed:", error);
+          await recoveryStorage.delete(key).catch(() => {});
+          return null;
+        });
+      } else if (wantedRecoveryDocumentId) {
+        const key = recoveryKey(accountId, "new", null, wantedRecoveryDocumentId);
+        snapshot = await recoveryStorage.get(key).catch(async error => {
+          console.error("Invalid recovery removed:", error);
+          await recoveryStorage.delete(key).catch(() => {});
+          return null;
+        });
+      } else if (unsaved) {
+        snapshot = (await recoveryStorage.list(accountId).catch(() => []))
+          .find(item => item.sourceKind !== "saved") ?? null;
+      }
+
+      if (snapshot && serverUpdatedAt && Date.parse(snapshot.autosavedAt) <= Date.parse(serverUpdatedAt)) {
+        await recoveryStorage.delete(snapshot.key).catch(() => {});
+        return null;
+      }
       return snapshot;
+    }
+
+    function setUnsavedRecoveryUrl(documentId) {
+      if (!documentId) return;
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.searchParams.set("new", "1");
+      url.searchParams.set("recovery", documentId);
+      history.replaceState(history.state, "", url);
+    }
+
+    function setSavedMapUrl(mapId) {
+      if (!mapId) return;
+      const url = new URL(window.location.href);
+      url.search = "";
+      url.searchParams.set("map", mapId);
+      history.replaceState(history.state, "", url);
     }
     async function offerRecovery(snapshot, { missingServer = false } = {}) {
       if (!snapshot || readOnly) return false; const labels = RECOVERY_TEXT[language] ?? RECOVERY_TEXT.en;
@@ -4352,6 +4390,9 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
 
           title:
             (url.searchParams.get("title") ?? "").trim(),
+
+          recoveryDocumentId:
+            (url.searchParams.get("recovery") ?? "").trim(),
         };
       }
 
@@ -4580,9 +4621,10 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
     */
 
     async function prepareNewMap(entry = {}) {
-      autosaveReady = false; ensureAutosaveController().cancel();
-      const token =
-        requireLogin();
+      autosaveReady = false;
+      ensureAutosaveController().cancel();
+
+      const token = requireLogin();
 
       if (!token) {
         setOverlay(
@@ -4590,20 +4632,59 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           "",
           true
         );
-
         return false;
       }
-
 
       setOverlay(
         text.loading,
         text.preparingNew
       );
 
+      currentMapId = null;
+      recoverySourceKind = "new";
+      recoveryActiveKey = null;
 
-      currentMapId =
-        null;
-      recoverySourceKind = "new"; recoveryDocumentId = newRecoveryDocumentId(); recoveryActiveKey = null;
+      /*
+        A reload of an unsaved document must look up that exact recovery
+        document. Do this before checking NEW_MAP_TEMPLATE_KEY because the
+        template transfer is intentionally consumed on the first opening.
+      */
+      if (entry.recoveryDocumentId) {
+        recoveryDocumentId = entry.recoveryDocumentId;
+
+        const exactRecovery = await findRecovery({
+          recoveryDocumentId,
+        });
+
+        if (exactRecovery) {
+          const restored = await offerRecovery(exactRecovery);
+
+          if (restored) {
+            autosaveReady = true;
+            setUnsavedRecoveryUrl(recoveryDocumentId);
+            hideOverlay();
+            setEditorControlsEnabled(true);
+
+            fixedMapSelection =
+              documentHasFixedMap()
+                ? "current"
+                : "empty";
+
+            await loadFixedMapOptions();
+            return true;
+          }
+        }
+
+        /*
+          The URL identifies an unsaved recovery document, but there is no
+          usable snapshot anymore. Do not silently open some other unsaved
+          document and do not manufacture a different map.
+        */
+        setOverlay(text.loadFailed, "", true);
+        return false;
+      }
+
+      recoveryDocumentId = newRecoveryDocumentId();
 
       const title = entry.title || text.untitled;
 
@@ -4655,37 +4736,32 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         return false;
       }
 
-      readOnly =
-        false;
+      readOnly = false;
+      mapTitleInput.value = title;
 
-      mapTitleInput.value =
-        title;
+      /*
+        Put the recovery id in the URL immediately. From this point onward,
+        a reload can identify this exact unsaved document without relying on
+        the already-consumed template transfer.
+      */
+      setUnsavedRecoveryUrl(recoveryDocumentId);
 
-      setDirty(
-        true
-      );
-
+      setDirty(true);
       mountMapRenderer();
       autosaveReady = true;
 
-      await offerRecovery(await findRecovery({ unsaved: true }));
-
       hideOverlay();
-
-      setEditorControlsEnabled(
-        true
-      );
+      setEditorControlsEnabled(true);
 
       fixedMapSelection =
-        entry.templateId;
-      await loadFixedMapOptions({
-        preferredSelection:
-          entry.templateId,
-      });
+        documentHasFixedMap()
+          ? "current"
+          : "empty";
+
+      await loadFixedMapOptions();
 
       return true;
     }
-
 
     /*
       ==========================================================
@@ -5094,6 +5170,8 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         recoveryActiveKey =
           null;
 
+        setUnsavedRecoveryUrl(recoveryDocumentId);
+
         nonHistoryDirty = true;
         dirty = true;
         mutationRevision += 1;
@@ -5161,6 +5239,7 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
             if (accountId && currentMapId) keys.add(recoveryKey(accountId, "saved", currentMapId, null));
             await Promise.all([...keys].filter(Boolean).map(key => recoveryStorage.delete(key).catch(() => {})));
             recoveryActiveKey = null; recoverySourceKind = "saved"; recoveryDocumentId = null;
+            setSavedMapUrl(currentMapId);
           }
           else if (!outcome.skipped) { saveStatusMessage = ""; renderDocumentStatus(); }
         } catch (error) {
@@ -5204,6 +5283,7 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         currentDocument = PNSMapEngine.loadDocument(documentData);
         currentMapId = null;
         recoverySourceKind = "imported"; recoveryDocumentId = newRecoveryDocumentId(); recoveryActiveKey = null;
+        setUnsavedRecoveryUrl(recoveryDocumentId);
         editorMode = "new";
         readOnly = false;
         mapTitleInput.value = currentDocument.title;
