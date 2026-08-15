@@ -75,7 +75,12 @@ export function createBuildingController({ engine, history = null, onChange = ()
     ensureEditable();
     const building = selected();
     if (!building) throw new RangeError("Select a building first.");
-    if (building.locked) throw new RangeError("Locked buildings cannot be moved.");
+    if (building.fixed && engine.getDocumentMode?.() !== "template") {
+      throw new RangeError("Template buildings cannot be moved in a map.");
+    }
+    if (!building.fixed && building.locked) {
+      throw new RangeError("Locked buildings cannot be moved.");
+    }
     for (const peer of areaPeers) peer?.cancel();
     mode = EDITOR_MODES.MOVE;
     palette = null;
@@ -199,6 +204,12 @@ export function createBuildingController({ engine, history = null, onChange = ()
     if (!current) return null;
 
     const fixed = Boolean(current.fixed);
+    if (fixed && engine.getDocumentMode?.() !== "template") {
+      throw new RangeError("Template buildings cannot be deleted from a map.");
+    }
+    if (!fixed && current.locked) {
+      throw new RangeError("Locked buildings cannot be deleted.");
+    }
     const state = fixed ? snapshotFixedBuilding(current) : snapshotBuilding(current);
     const beforeRanges = engine.getDocument().ranges.map(snapshotRange);
 
@@ -236,6 +247,16 @@ export function createBuildingController({ engine, history = null, onChange = ()
     if (!current) throw new RangeError("Select a building first.");
 
     const fixed = Boolean(current.fixed);
+    if (fixed && engine.getDocumentMode?.() !== "template") {
+      throw new RangeError("Template buildings cannot be edited in a map.");
+    }
+    if (
+      !fixed &&
+      current.locked &&
+      Object.keys(changes).some(key => key !== "locked")
+    ) {
+      throw new RangeError("Locked buildings cannot be edited.");
+    }
     const before = fixed ? snapshotFixedBuilding(current) : snapshotBuilding(current);
     const beforeRanges = engine.getDocument().ranges.map(snapshotRange);
 
