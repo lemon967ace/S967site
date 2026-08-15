@@ -247,8 +247,7 @@
       cursor: pointer;
       transition: filter .1s ease;
       vector-effect: non-scaling-stroke;
-      stroke: rgba(50,50,50,.72);
-      stroke-width: 1.2;
+      stroke: none;
     }
 
     .region:hover {
@@ -689,6 +688,16 @@
 
   const COLORING_SAVE_URL =
     `${FUNCTIONS_BASE_URL}/coloring-save`;
+
+  /*
+    Temporary experiment-board fallback.
+    Once coloring-load is deployed, server data takes precedence automatically.
+  */
+  const EXPERIMENT_BOARD_URL =
+    "./csv-board-001.json";
+
+  const LOCAL_TEST_DATA_PREFIX =
+    "s967-coloring-test:";
 
   const SESSION_TOKEN_KEY =
     "s967-map-session-token";
@@ -1793,6 +1802,89 @@
       );
     }
 
+    /*
+      Draw the complete original CSV linework as a visual overlay.
+      Region ownership is intentionally irrelevant here: every source
+      segment is preserved, including segments that do not participate
+      in a closed polygon boundary.
+    */
+    if (
+      Array.isArray(
+        board.overlayLines
+      )
+    ) {
+      const lineLayer =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+
+      lineLayer.setAttribute(
+        "fill",
+        "none"
+      );
+      lineLayer.setAttribute(
+        "stroke",
+        "#111111"
+      );
+      lineLayer.setAttribute(
+        "stroke-width",
+        "2"
+      );
+      lineLayer.setAttribute(
+        "stroke-linecap",
+        "square"
+      );
+      lineLayer.setAttribute(
+        "stroke-linejoin",
+        "miter"
+      );
+      lineLayer.setAttribute(
+        "pointer-events",
+        "none"
+      );
+      lineLayer.setAttribute(
+        "vector-effect",
+        "non-scaling-stroke"
+      );
+
+      for (
+        const line
+        of board.overlayLines
+      ) {
+        const element =
+          document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "line"
+          );
+
+        element.setAttribute(
+          "x1",
+          String(line.x1)
+        );
+        element.setAttribute(
+          "y1",
+          String(line.y1)
+        );
+        element.setAttribute(
+          "x2",
+          String(line.x2)
+        );
+        element.setAttribute(
+          "y2",
+          String(line.y2)
+        );
+
+        lineLayer.append(
+          element
+        );
+      }
+
+      svg.append(
+        lineLayer
+      );
+    }
+
     elements.boardStage.append(
       svg
     );
@@ -2020,6 +2112,68 @@
     };
   }
 
+  function localTestKey(
+    boardId
+  ) {
+    return (
+      LOCAL_TEST_DATA_PREFIX +
+      currentUserId +
+      ":" +
+      boardId
+    );
+  }
+
+  function loadLocalTestData(
+    boardId
+  ) {
+    try {
+      const raw =
+        localStorage.getItem(
+          localTestKey(
+            boardId
+          )
+        );
+
+      return raw
+        ? JSON.parse(raw)
+        : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveLocalTestData() {
+    if (!board) return;
+
+    localStorage.setItem(
+      localTestKey(
+        board.id
+      ),
+      JSON.stringify(
+        state
+      )
+    );
+  }
+
+  async function loadExperimentBoard() {
+    const response =
+      await fetch(
+        EXPERIMENT_BOARD_URL,
+        {
+          cache:
+            "no-store",
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        "EXPERIMENT_BOARD_LOAD_FAILED"
+      );
+    }
+
+    return await response.json();
+  }
+
   async function loadColoring() {
     elements.saveState.textContent =
       t().loading;
@@ -2054,21 +2208,35 @@
         result.ok !== true
       ) {
         /*
-          Coloring backend may not exist yet during this first page step.
-          Treat a missing board as an empty admin-board state rather than
-          making the whole page unusable.
+          Development fallback:
+          use the experimental 143-region board until coloring-load is
+          deployed. This lets the full coloring UI be tested immediately.
         */
-        board = null;
+        board =
+          await loadExperimentBoard();
+
         state =
           normalizeLoadedState(
-            {}
+            loadLocalTestData(
+              board.id
+            )
           );
-        elements.saveState.textContent =
-          "";
+
+        activeColorId =
+          null;
+        interactionMode =
+          "paint";
+        dirty =
+          false;
+
         renderPalette();
+        renderActiveColor();
         renderBaseControls();
         renderLabelButtons();
         renderBoard();
+
+        elements.saveState.textContent =
+          "TEST";
         return;
       }
 
@@ -2102,17 +2270,49 @@
         error
       );
 
-      board = null;
-      state =
-        normalizeLoadedState(
-          {}
+      try {
+        board =
+          await loadExperimentBoard();
+
+        state =
+          normalizeLoadedState(
+            loadLocalTestData(
+              board.id
+            )
+          );
+
+        activeColorId =
+          null;
+        interactionMode =
+          "paint";
+        dirty =
+          false;
+
+        renderPalette();
+        renderActiveColor();
+        renderBaseControls();
+        renderLabelButtons();
+        renderBoard();
+
+        elements.saveState.textContent =
+          "TEST";
+      } catch (fallbackError) {
+        console.error(
+          fallbackError
         );
-      elements.saveState.textContent =
-        "";
-      renderPalette();
-      renderBaseControls();
-      renderLabelButtons();
-      renderBoard();
+
+        board = null;
+        state =
+          normalizeLoadedState(
+            {}
+          );
+        elements.saveState.textContent =
+          t().boardLoadFailed;
+        renderPalette();
+        renderBaseControls();
+        renderLabelButtons();
+        renderBoard();
+      }
     }
   }
 
@@ -2179,8 +2379,21 @@
       console.error(
         error
       );
-      elements.saveState.textContent =
-        t().saveFailed;
+
+      /*
+        Experimental local save only. The production backend will replace
+        this once coloring-save is deployed.
+      */
+      try {
+        saveLocalTestData();
+        dirty =
+          false;
+        elements.saveState.textContent =
+          `${t().saved} · TEST`;
+      } catch {
+        elements.saveState.textContent =
+          t().saveFailed;
+      }
     } finally {
       saving =
         false;
