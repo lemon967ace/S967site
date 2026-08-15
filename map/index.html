@@ -13,7 +13,7 @@
     content="noindex, nofollow"
   >
 
-  <title>IsoMap Editor · S967</title>
+  <title>PNS Map Editor · S967</title>
 
   <link
     rel="stylesheet"
@@ -615,7 +615,44 @@
         bottom: 14px;
       }
     }
-  </style>
+  
+    .account-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .danger-button {
+      border-color: rgba(180, 40, 40, .55);
+      color: #b42318;
+      background: rgba(180, 40, 40, .06);
+    }
+
+    .danger-button:hover {
+      background: rgba(180, 40, 40, .12);
+    }
+
+    .delete-account-panel {
+      margin-top: 14px;
+      border-color: rgba(180, 40, 40, .35);
+    }
+
+    .delete-account-warning {
+      margin: 0 0 14px;
+      line-height: 1.65;
+    }
+
+    .delete-account-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+</style>
 </head>
 
 <body>
@@ -751,7 +788,7 @@
     </div>
 
     <h1>
-      IsoMap Editor
+      PNS Map Editor
     </h1>
 
     <p
@@ -1043,15 +1080,107 @@
           class="account-name"
         ></div>
 
-        <button
-          id="logoutButton"
-          class="secondary-button"
-          type="button"
-        >
-          Log out
-        </button>
+        <div class="account-actions">
+          <button
+            id="deleteAccountOpenButton"
+            class="secondary-button danger-button"
+            type="button"
+          >
+            Delete Account
+          </button>
+
+          <button
+            id="logoutButton"
+            class="secondary-button"
+            type="button"
+          >
+            Log out
+          </button>
+        </div>
 
       </div>
+
+      <section
+        id="deleteAccountPanel"
+        class="panel delete-account-panel hidden"
+      >
+        <h2
+          id="deleteAccountTitle"
+          class="panel-title"
+        >
+          Delete Account
+        </h2>
+
+        <p
+          id="deleteAccountWarning"
+          class="delete-account-warning"
+        >
+          Deleting your account permanently removes your saved maps and Coloring data. This cannot be undone.
+        </p>
+
+        <form id="deleteAccountForm">
+          <div class="field">
+            <label
+              id="deletePasswordLabel"
+              class="label"
+              for="deletePassword"
+            >
+              Password
+            </label>
+
+            <input
+              id="deletePassword"
+              type="password"
+              minlength="8"
+              maxlength="100"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label
+              id="deletePasswordConfirmLabel"
+              class="label"
+              for="deletePasswordConfirm"
+            >
+              Confirm Password
+            </label>
+
+            <input
+              id="deletePasswordConfirm"
+              type="password"
+              minlength="8"
+              maxlength="100"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <div class="delete-account-actions">
+            <button
+              id="deleteAccountCancelButton"
+              class="secondary-button"
+              type="button"
+            >
+              Cancel
+            </button>
+
+            <button
+              id="deleteAccountButton"
+              class="danger-button"
+              type="submit"
+            >
+              Delete Account
+            </button>
+          </div>
+
+          <div
+            id="deleteAccountStatus"
+            class="status"
+          ></div>
+        </form>
+      </section>
 
 
       <section class="panel">
@@ -1145,6 +1274,9 @@
 
     const MAP_REGISTER_URL =
       `${FUNCTIONS_BASE_URL}/map-register`;
+
+    const MAP_ACCOUNT_DELETE_URL =
+      `${FUNCTIONS_BASE_URL}/map-account-delete`;
 
     const MAP_LIST_URL =
       `${FUNCTIONS_BASE_URL}/map-list`;
@@ -1267,6 +1399,39 @@
 
         logout:
           "Log out",
+
+        deleteAccount:
+          "Delete Account",
+
+        deleteAccountWarning:
+          "Deleting your account permanently removes your saved maps, shared-map data linked to those maps, active sessions, and Coloring data. This cannot be undone.",
+
+        deletePasswordConfirm:
+          "Confirm Password",
+
+        deletePasswordMismatch:
+          "Passwords do not match.",
+
+        deleteAccountConfirm1:
+          "Delete this Map Editor account? Your saved maps and Coloring data will be permanently deleted.",
+
+        deleteAccountConfirm2:
+          "This action cannot be undone. Do you still want to delete the account?",
+
+        deleteAccountConfirm3:
+          "Final confirmation: permanently delete this account and all associated Map Editor data?",
+
+        deletingAccount:
+          "Deleting account…",
+
+        deleteAccountFailed:
+          "Could not delete the account.",
+
+        deleteAccountWrongPassword:
+          "Incorrect password.",
+
+        deleteAccountSuccess:
+          "Account deleted.",
 
         myMaps:
           "My Maps",
@@ -1460,6 +1625,39 @@
         logout:
           "로그아웃",
 
+        deleteAccount:
+          "계정 탈퇴",
+
+        deleteAccountWarning:
+          "계정을 탈퇴하면 저장한 맵, 해당 맵과 연결된 공유 데이터, 로그인 세션, 색칠놀이 저장 데이터가 영구적으로 삭제됩니다. 삭제 후 복구할 수 없습니다.",
+
+        deletePasswordConfirm:
+          "비밀번호 확인",
+
+        deletePasswordMismatch:
+          "비밀번호가 일치하지 않습니다.",
+
+        deleteAccountConfirm1:
+          "Map Editor 계정을 탈퇴하시겠습니까? 저장한 맵과 색칠놀이 데이터가 영구적으로 삭제됩니다.",
+
+        deleteAccountConfirm2:
+          "이 작업은 되돌릴 수 없습니다. 그래도 계정을 삭제하시겠습니까?",
+
+        deleteAccountConfirm3:
+          "마지막 확인입니다. 이 계정과 연결된 Map Editor 데이터를 모두 영구 삭제하시겠습니까?",
+
+        deletingAccount:
+          "계정을 삭제하는 중…",
+
+        deleteAccountFailed:
+          "계정을 삭제하지 못했습니다.",
+
+        deleteAccountWrongPassword:
+          "비밀번호가 올바르지 않습니다.",
+
+        deleteAccountSuccess:
+          "계정이 삭제되었습니다.",
+
         myMaps:
           "내 맵",
 
@@ -1652,6 +1850,39 @@
         logout:
           "ログアウト",
 
+        deleteAccount:
+          "アカウント削除",
+
+        deleteAccountWarning:
+          "アカウントを削除すると、保存したマップ、それらに関連する共有データ、ログインセッション、塗り絵の保存データが完全に削除されます。削除後は復元できません。",
+
+        deletePasswordConfirm:
+          "パスワード確認",
+
+        deletePasswordMismatch:
+          "パスワードが一致しません。",
+
+        deleteAccountConfirm1:
+          "Map Editorアカウントを削除しますか？保存したマップと塗り絵データは完全に削除されます。",
+
+        deleteAccountConfirm2:
+          "この操作は元に戻せません。それでもアカウントを削除しますか？",
+
+        deleteAccountConfirm3:
+          "最終確認です。このアカウントと関連するMap Editorデータをすべて完全に削除しますか？",
+
+        deletingAccount:
+          "アカウントを削除しています…",
+
+        deleteAccountFailed:
+          "アカウントを削除できませんでした。",
+
+        deleteAccountWrongPassword:
+          "パスワードが正しくありません。",
+
+        deleteAccountSuccess:
+          "アカウントを削除しました。",
+
         myMaps:
           "マイマップ",
 
@@ -1843,6 +2074,39 @@
 
         logout:
           "Выйти",
+
+        deleteAccount:
+          "Удалить аккаунт",
+
+        deleteAccountWarning:
+          "При удалении аккаунта безвозвратно удаляются сохранённые карты, связанные с ними данные общего доступа, активные сессии и сохранённые данные раскраски. Восстановление невозможно.",
+
+        deletePasswordConfirm:
+          "Повторите пароль",
+
+        deletePasswordMismatch:
+          "Пароли не совпадают.",
+
+        deleteAccountConfirm1:
+          "Удалить аккаунт Map Editor? Сохранённые карты и данные раскраски будут удалены безвозвратно.",
+
+        deleteAccountConfirm2:
+          "Это действие нельзя отменить. Всё равно удалить аккаунт?",
+
+        deleteAccountConfirm3:
+          "Последнее подтверждение: безвозвратно удалить этот аккаунт и все связанные данные Map Editor?",
+
+        deletingAccount:
+          "Удаление аккаунта…",
+
+        deleteAccountFailed:
+          "Не удалось удалить аккаунт.",
+
+        deleteAccountWrongPassword:
+          "Неверный пароль.",
+
+        deleteAccountSuccess:
+          "Аккаунт удалён.",
 
         myMaps:
           "Мои карты",
@@ -2100,6 +2364,46 @@
     const logoutButton =
       document.getElementById(
         "logoutButton"
+      );
+
+    const deleteAccountOpenButton =
+      document.getElementById(
+        "deleteAccountOpenButton"
+      );
+
+    const deleteAccountPanel =
+      document.getElementById(
+        "deleteAccountPanel"
+      );
+
+    const deleteAccountForm =
+      document.getElementById(
+        "deleteAccountForm"
+      );
+
+    const deletePassword =
+      document.getElementById(
+        "deletePassword"
+      );
+
+    const deletePasswordConfirm =
+      document.getElementById(
+        "deletePasswordConfirm"
+      );
+
+    const deleteAccountCancelButton =
+      document.getElementById(
+        "deleteAccountCancelButton"
+      );
+
+    const deleteAccountButton =
+      document.getElementById(
+        "deleteAccountButton"
+      );
+
+    const deleteAccountStatus =
+      document.getElementById(
+        "deleteAccountStatus"
       );
 
     const mapList =
@@ -2368,6 +2672,35 @@
       logoutButton.textContent =
         text.logout;
 
+      deleteAccountOpenButton.textContent =
+        text.deleteAccount;
+
+      document.getElementById(
+        "deleteAccountTitle"
+      ).textContent =
+        text.deleteAccount;
+
+      document.getElementById(
+        "deleteAccountWarning"
+      ).textContent =
+        text.deleteAccountWarning;
+
+      document.getElementById(
+        "deletePasswordLabel"
+      ).textContent =
+        text.password;
+
+      document.getElementById(
+        "deletePasswordConfirmLabel"
+      ).textContent =
+        text.deletePasswordConfirm;
+
+      deleteAccountCancelButton.textContent =
+        text.cancel;
+
+      deleteAccountButton.textContent =
+        text.deleteAccount;
+
       document.getElementById(
         "myMapsTitle"
       ).textContent =
@@ -2466,6 +2799,15 @@
 
       accountArea.classList.add(
         "hidden"
+      );
+
+      deleteAccountPanel.classList.add(
+        "hidden"
+      );
+      deleteAccountForm.reset();
+      setStatus(
+        deleteAccountStatus,
+        ""
       );
     }
 
@@ -3916,6 +4258,242 @@
 
     /*
       ==========================================================
+      ACCOUNT DELETE
+      ==========================================================
+    */
+
+    deleteAccountOpenButton.addEventListener(
+      "click",
+      () => {
+        deleteAccountPanel.classList.toggle(
+          "hidden"
+        );
+
+        deleteAccountForm.reset();
+        setStatus(
+          deleteAccountStatus,
+          ""
+        );
+
+        if (
+          !deleteAccountPanel.classList.contains(
+            "hidden"
+          )
+        ) {
+          deletePassword.focus();
+        }
+      }
+    );
+
+
+    deleteAccountCancelButton.addEventListener(
+      "click",
+      () => {
+        deleteAccountForm.reset();
+        setStatus(
+          deleteAccountStatus,
+          ""
+        );
+        deleteAccountPanel.classList.add(
+          "hidden"
+        );
+      }
+    );
+
+
+    deleteAccountForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const text =
+          currentText();
+
+        const password =
+          deletePassword.value;
+
+        const passwordConfirm =
+          deletePasswordConfirm.value;
+
+        setStatus(
+          deleteAccountStatus,
+          ""
+        );
+
+        if (
+          !password ||
+          password !==
+            passwordConfirm
+        ) {
+          setStatus(
+            deleteAccountStatus,
+            text.deletePasswordMismatch,
+            "error"
+          );
+          return;
+        }
+
+        if (
+          !window.confirm(
+            text.deleteAccountConfirm1
+          )
+        ) {
+          return;
+        }
+
+        if (
+          !window.confirm(
+            text.deleteAccountConfirm2
+          )
+        ) {
+          return;
+        }
+
+        if (
+          !window.confirm(
+            text.deleteAccountConfirm3
+          )
+        ) {
+          return;
+        }
+
+        deleteAccountButton.disabled =
+          true;
+        deleteAccountOpenButton.disabled =
+          true;
+        logoutButton.disabled =
+          true;
+
+        deleteAccountButton.textContent =
+          text.deletingAccount;
+
+        setStatus(
+          deleteAccountStatus,
+          text.deletingAccount
+        );
+
+        try {
+          const response =
+            await fetch(
+              MAP_ACCOUNT_DELETE_URL,
+              {
+                method:
+                  "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                  ...authorizationHeaders(),
+                },
+                body:
+                  JSON.stringify({
+                    password,
+                    passwordConfirm,
+                  }),
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => ({})
+              );
+
+          if (
+            response.status ===
+              401 &&
+            (
+              result.error ===
+                "INVALID_PASSWORD"
+            )
+          ) {
+            throw new Error(
+              text.deleteAccountWrongPassword
+            );
+          }
+
+          if (
+            response.status ===
+              401
+          ) {
+            clearSession();
+            localStorage.removeItem(
+              ACCOUNT_ID_KEY
+            );
+            throw new Error(
+              text.sessionExpired
+            );
+          }
+
+          if (
+            !response.ok ||
+            result.ok !== true
+          ) {
+            throw new Error(
+              result.error ||
+              text.deleteAccountFailed
+            );
+          }
+
+          clearSession();
+
+          localStorage.removeItem(
+            ACCOUNT_ID_KEY
+          );
+
+          currentUser =
+            null;
+          pendingId =
+            "";
+          maps =
+            [];
+          shareStates.clear();
+
+          loginForm.reset();
+          createAccountForm.reset();
+          deleteAccountForm.reset();
+
+          deleteAccountPanel.classList.add(
+            "hidden"
+          );
+
+          setStatus(
+            loginStatus,
+            text.deleteAccountSuccess,
+            "success"
+          );
+
+          showLogin();
+
+          setStatus(
+            loginStatus,
+            text.deleteAccountSuccess,
+            "success"
+          );
+        } catch (error) {
+          setStatus(
+            deleteAccountStatus,
+            error?.message ||
+              text.deleteAccountFailed,
+            "error"
+          );
+        } finally {
+          deleteAccountButton.disabled =
+            false;
+          deleteAccountOpenButton.disabled =
+            false;
+          logoutButton.disabled =
+            false;
+          deleteAccountButton.textContent =
+            currentText()
+              .deleteAccount;
+        }
+      }
+    );
+
+
+    /*
+      ==========================================================
       LOGOUT
       ==========================================================
     */
@@ -3924,6 +4502,14 @@
       "click",
       () => {
         clearSession();
+        localStorage.removeItem(
+          ACCOUNT_ID_KEY
+        );
+
+        deleteAccountForm.reset();
+        deleteAccountPanel.classList.add(
+          "hidden"
+        );
 
         currentUser = null;
         pendingId = "";
