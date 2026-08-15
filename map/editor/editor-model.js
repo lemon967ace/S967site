@@ -352,11 +352,14 @@ export class MapDocument {
     const fixedTypes = new Map(this.fixedBuildingTypes.map(item => [item.id, item]));
     for (const building of this.fixedBuildings) { const type = fixedTypes.get(building.typeId); if (!fixedTypeIds.has(building.typeId)) throw new RangeError(`Unknown fixed building type ID: ${building.typeId}`); if (building.width !== type.width || building.height !== type.height) throw new RangeError("Fixed building size must match its type."); }
     /*
-      Manual ranges keep the old no-overlap rule.
-      Building-linked ranges are the only user ranges allowed to overlap
-      one another. They may also overlay fixed/base-map ranges because the
-      linked range is an alliance-territory overlay, not a replacement for
-      base-map terrain.
+      User-range overlap policy:
+      - ordinary user ranges still may not overlap one another
+      - linked alliance ranges may overlap according to their special rules
+      - linked territory may overlap Mountain
+      - all user ranges may overlap fixed/base-map ranges
+
+      Fixed/base-map terrain and user ranges are separate layers.
+      Buildability is resolved by placement rules: any blocked layer wins.
     */
     for (
       let i = 0;
@@ -413,33 +416,7 @@ export class MapDocument {
         }
       }
 
-      if (!left.linked) {
-        for (
-          const fixedRange
-          of this.fixedRanges
-        ) {
-          const fixedCells =
-            new Set(
-              fixedRange.cells.map(
-                cell =>
-                  cell.join(",")
-              )
-            );
 
-          if (
-            left.cells.some(
-              cell =>
-                fixedCells.has(
-                  cell.join(",")
-                )
-            )
-          ) {
-            throw new RangeError(
-              "Overlapping range cell."
-            );
-          }
-        }
-      }
     }
   }
 }
