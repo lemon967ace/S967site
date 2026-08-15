@@ -1395,7 +1395,7 @@ wkNegotiable: "必要に応じて相談可能",
 
 wkFirstHalf: "前半",
 wkSecondHalf: "後半",
-wkFull: "全時間",
+wkFull: "全体",
 
 groupBuyRounds:
   "回次管理",
