@@ -138,42 +138,10 @@
       color: var(--danger);
     }
 
-    .login-wrap {
-      flex: 1;
-      display: grid;
-      place-items: center;
-      padding: 24px 14px;
-    }
 
-    .login-card {
-      width: min(420px, 100%);
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      padding: 20px;
-    }
 
-    .login-card h2 {
-      margin: 0 0 16px;
-    }
 
-    .field {
-      display: grid;
-      gap: 6px;
-      margin: 12px 0;
-    }
 
-    .field input,
-    .field select {
-      width: 100%;
-      min-height: 42px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      color: var(--text);
-    }
 
     .status {
       min-height: 1.4em;
@@ -536,50 +504,6 @@
     </a>
   </header>
 
-  <main
-    id="loginArea"
-    class="login-wrap"
-  >
-    <section class="login-card">
-      <h2 id="loginTitle">로그인</h2>
-
-      <form id="loginForm">
-        <label class="field">
-          <span id="idLabel">아이디</span>
-          <input
-            id="loginId"
-            autocomplete="username"
-            required
-          >
-        </label>
-
-        <label class="field">
-          <span id="passwordLabel">비밀번호</span>
-          <input
-            id="loginPassword"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-        </label>
-
-        <button
-          id="loginButton"
-          class="primary-button"
-          type="submit"
-          style="width:100%"
-        >
-          로그인
-        </button>
-
-        <div
-          id="loginStatus"
-          class="status"
-          role="status"
-        ></div>
-      </form>
-    </section>
-  </main>
 
   <main
     id="workspace"
@@ -754,9 +678,6 @@
 
   const FUNCTIONS_BASE_URL =
     "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1";
-
-  const MAP_LOGIN_URL =
-    `${FUNCTIONS_BASE_URL}/map-login`;
 
   /*
     Backend endpoints for Coloring will be added next.
@@ -944,15 +865,6 @@
     headerUser: document.getElementById("headerUser"),
     logoutButton: document.getElementById("logoutButton"),
     backLink: document.getElementById("backLink"),
-    loginArea: document.getElementById("loginArea"),
-    loginForm: document.getElementById("loginForm"),
-    loginTitle: document.getElementById("loginTitle"),
-    idLabel: document.getElementById("idLabel"),
-    passwordLabel: document.getElementById("passwordLabel"),
-    loginId: document.getElementById("loginId"),
-    loginPassword: document.getElementById("loginPassword"),
-    loginButton: document.getElementById("loginButton"),
-    loginStatus: document.getElementById("loginStatus"),
     workspace: document.getElementById("workspace"),
     activeColorPill: document.getElementById("activeColorPill"),
     activeColorDot: document.getElementById("activeColorDot"),
@@ -1029,34 +941,6 @@
     };
   }
 
-  function saveSession(
-    session,
-    accountId
-  ) {
-    if (!session?.token) return;
-
-    sessionStorage.setItem(
-      SESSION_TOKEN_KEY,
-      session.token
-    );
-
-    if (session.expiresAt) {
-      sessionStorage.setItem(
-        SESSION_EXPIRES_KEY,
-        session.expiresAt
-      );
-    }
-
-    if (accountId) {
-      localStorage.setItem(
-        ACCOUNT_ID_KEY,
-        String(accountId)
-      );
-      currentUserId =
-        String(accountId);
-    }
-  }
-
   function clearSession() {
     sessionStorage.removeItem(
       SESSION_TOKEN_KEY
@@ -1065,6 +949,39 @@
       SESSION_EXPIRES_KEY
     );
     currentUserId = "";
+  }
+
+  function hasUsableMapSession() {
+    const sessionToken =
+      token();
+
+    if (!sessionToken) {
+      return false;
+    }
+
+    const expires =
+      sessionStorage.getItem(
+        SESSION_EXPIRES_KEY
+      );
+
+    if (
+      expires &&
+      new Date(
+        expires
+      ).getTime() <=
+        Date.now()
+    ) {
+      clearSession();
+      return false;
+    }
+
+    return true;
+  }
+
+  function returnToMapLogin() {
+    window.location.replace(
+      "/map/"
+    );
   }
 
   function makeId() {
@@ -1137,14 +1054,6 @@
 
     elements.pageTitle.textContent =
       text.title;
-    elements.loginTitle.textContent =
-      text.login;
-    elements.idLabel.textContent =
-      text.id;
-    elements.passwordLabel.textContent =
-      text.password;
-    elements.loginButton.textContent =
-      text.loginButton;
     elements.logoutButton.textContent =
       text.logout;
     elements.backLink.textContent =
@@ -1202,25 +1111,7 @@
     renderBoard();
   }
 
-  function showLogin() {
-    elements.loginArea.classList.remove(
-      "hidden"
-    );
-    elements.workspace.classList.add(
-      "hidden"
-    );
-    elements.headerUser.classList.add(
-      "hidden"
-    );
-    elements.logoutButton.classList.add(
-      "hidden"
-    );
-  }
-
   function showWorkspace() {
-    elements.loginArea.classList.add(
-      "hidden"
-    );
     elements.workspace.classList.remove(
       "hidden"
     );
@@ -2154,12 +2045,7 @@
         response.status === 401
       ) {
         clearSession();
-        showLogin();
-        elements.loginStatus.textContent =
-          t().sessionExpired;
-        elements.loginStatus.classList.add(
-          "error"
-        );
+        returnToMapLogin();
         return;
       }
 
@@ -2272,7 +2158,7 @@
         response.status === 401
       ) {
         clearSession();
-        showLogin();
+        returnToMapLogin();
         return;
       }
 
@@ -2304,89 +2190,7 @@
     }
   }
 
-  async function login(
-    id,
-    password
-  ) {
-    elements.loginButton.disabled =
-      true;
-    elements.loginStatus.textContent =
-      "";
-
-    try {
-      const response =
-        await fetch(
-          MAP_LOGIN_URL,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-            body:
-              JSON.stringify({
-                id,
-                password,
-              }),
-          }
-        );
-
-      const result =
-        await response
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (
-        !response.ok ||
-        result.ok !== true ||
-        !result.session?.token
-      ) {
-        throw new Error(
-          result.error ||
-          "LOGIN_FAILED"
-        );
-      }
-
-      saveSession(
-        result.session,
-        id
-      );
-
-      showWorkspace();
-      await loadColoring();
-    } catch (error) {
-      console.error(
-        error
-      );
-      elements.loginStatus.textContent =
-        t().loginFailed;
-      elements.loginStatus.classList.add(
-        "error"
-      );
-    } finally {
-      elements.loginButton.disabled =
-        false;
-    }
-  }
-
-  elements.loginForm
-    .addEventListener(
-      "submit",
-      event => {
-        event.preventDefault();
-
-        login(
-          elements.loginId
-            .value.trim(),
-          elements.loginPassword
-            .value
-        );
-      }
-    );
-
-  elements.languageSelect
+    elements.languageSelect
     .addEventListener(
       "change",
       () => {
@@ -2411,7 +2215,7 @@
           "paint";
         board =
           null;
-        showLogin();
+        returnToMapLogin();
       }
     );
 
@@ -2583,11 +2387,13 @@
   setStaticText();
   renderBaseControls();
 
-  if (token()) {
+  if (
+    hasUsableMapSession()
+  ) {
     showWorkspace();
     loadColoring();
   } else {
-    showLogin();
+    returnToMapLogin();
   }
 })();
 </script>
