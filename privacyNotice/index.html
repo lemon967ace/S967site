@@ -2963,39 +2963,140 @@
           "policyRoot"
         );
 
+      let renderedLanguage = "";
+
+      function normalizeLanguage(value) {
+        const lang = String(value || "")
+          .trim()
+          .toLowerCase()
+          .split("-")[0];
+
+        return POLICY[lang]
+          ? lang
+          : "ko";
+      }
+
       function render(lang) {
         const target =
-          POLICY[lang]
-            ? lang
-            : "ko";
+          normalizeLanguage(lang);
 
-        root.innerHTML =
-          POLICY[target];
+        if (
+          renderedLanguage === target
+        ) {
+          return;
+        }
 
-        document.documentElement.lang =
-          target;
+        renderedLanguage = target;
+        root.innerHTML = POLICY[target];
+
+        if (
+          document.documentElement.lang !==
+            target
+        ) {
+          document.documentElement.lang =
+            target;
+        }
 
         document.title =
           TITLES[target];
       }
 
-      render(
-        document.documentElement.lang ||
-          "ko"
+      function languageFromEvent(event) {
+        return (
+          event?.detail?.language ||
+          event?.detail?.lang ||
+          ""
+        );
+      }
+
+      /*
+       * 이 페이지는 본문 전체를 POLICY 객체에서 다시 그리므로,
+       * 공용 language.js의 세부 구현이나 실행 타이밍 하나에만
+       * 의존하지 않는다.
+       */
+      document.addEventListener(
+        "click",
+        (event) => {
+          const target =
+            event.target instanceof Element
+              ? event.target
+              : null;
+
+          const choice =
+            target?.closest(
+              "[data-language-choice]"
+            );
+
+          if (!choice) {
+            return;
+          }
+
+          const lang =
+            choice.getAttribute(
+              "data-language-choice"
+            );
+
+          if (lang && POLICY[lang]) {
+            render(lang);
+          }
+        },
+        true
       );
+
+      const languageObserver =
+        new MutationObserver(() => {
+          const lang =
+            normalizeLanguage(
+              document.documentElement.lang
+            );
+
+          if (
+            lang !== renderedLanguage
+          ) {
+            render(lang);
+          }
+        });
+
+      languageObserver.observe(
+        document.documentElement,
+        {
+          attributes: true,
+          attributeFilter: ["lang"],
+        }
+      );
+
+      function handleLanguageEvent(event) {
+        const lang =
+          languageFromEvent(event);
+
+        if (lang) {
+          render(lang);
+        }
+      }
 
       window.addEventListener(
         "languagechange",
-        (event) => {
-          if (
-            event.detail &&
-            event.detail.language
-          ) {
-            render(
-              event.detail.language
-            );
-          }
-        }
+        handleLanguageEvent
+      );
+
+      document.addEventListener(
+        "languagechange",
+        handleLanguageEvent
+      );
+
+      window.addEventListener(
+        "languagechanged",
+        handleLanguageEvent
+      );
+
+      document.addEventListener(
+        "languagechanged",
+        handleLanguageEvent
+      );
+
+      render(
+        document.documentElement.lang ||
+          "ko"
       );
     })();
   </script>
