@@ -1031,6 +1031,135 @@ export function loadDocument(data, options = {}) {
   return getDocument();
 }
 
+export function replaceFixedMapTemplate(
+  template = null
+) {
+  ensureWritable();
+
+  if (
+    documentMode !== "map"
+  ) {
+    throw new Error(
+      "Fixed maps can only be changed in map mode."
+    );
+  }
+
+  const parsed =
+    template
+      ? parseTemplate(template)
+      : {
+          fixedBuildingTypes: [],
+          fixedBuildings: [],
+          fixedRanges: [],
+        };
+
+  /*
+    Replace only the fixed-map layer.
+    User buildings, user ranges, building types, title and camera view
+    remain exactly as they are.
+  */
+  const candidate =
+    new MapDocument({
+      title:
+        document.title,
+      buildingTypes:
+        document.buildingTypes,
+      buildings:
+        document.buildings,
+      ranges:
+        document.ranges,
+      fixedBuildingTypes:
+        parsed.fixedBuildingTypes,
+      fixedBuildings:
+        parsed.fixedBuildings,
+      fixedRanges:
+        parsed.fixedRanges,
+      view:
+        document.view,
+    });
+
+  /*
+    Fixed buildings may not collide with existing user buildings.
+  */
+  const nextOccupancy =
+    new OccupancyManager([
+      ...candidate.fixedBuildings,
+      ...candidate.buildings,
+    ]);
+
+  /*
+    A new fixed map must not make an existing user building illegal.
+    This protects user content instead of silently deleting/moving it.
+  */
+  for (
+    const building
+    of candidate.buildings
+  ) {
+    const occupiedCells =
+      building.occupiedCells();
+
+    const rules =
+      evaluatePlacementCells(
+        occupiedCells,
+        candidate
+      );
+
+    if (!rules.allowed) {
+      throw new RangeError(
+        "The selected fixed map conflicts with an existing building."
+      );
+    }
+
+    /*
+      Type-01 2×2 forts retain the special purple-terrain restriction
+      when a fixed map is changed after placement.
+    */
+    if (
+      building.typeId === "type-01" &&
+      building.width === 2 &&
+      building.height === 2
+    ) {
+      const occupied =
+        new Set(
+          occupiedCells.map(
+            cell =>
+              cell.join(",")
+          )
+        );
+
+      const touchesPurple =
+        candidate.fixedRanges.some(
+          range =>
+            String(
+              range.color
+            ).toLowerCase() ===
+              "#b07aa1" &&
+            range.cells.some(
+              cell =>
+                occupied.has(
+                  cell.join(",")
+                )
+            )
+        );
+
+      if (touchesPurple) {
+        throw new RangeError(
+          "The selected fixed map conflicts with an existing Alliance Fort."
+        );
+      }
+    }
+  }
+
+  document =
+    candidate;
+  occupancy =
+    nextOccupancy;
+
+  recomputeLinkedRangeActivity();
+
+  return getDocument();
+}
+
 export function exportDocument() {
   requireDocument();
   if (documentMode !== "map") throw new Error("Template documents must be exported as .isotemplate.");
@@ -1960,6 +2089,7 @@ export const PNSMapEngine = {
   exportTemplateDocument,
   initialMapView,
   loadDocument,
+  replaceFixedMapTemplate,
   exportDocument,
   getDocument,
   getDocumentMode,
