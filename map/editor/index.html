@@ -819,6 +819,15 @@
         Duplicate
       </button>
 
+      <a
+        id="coloringLink"
+        href="/map/coloring/"
+        class="tool-button"
+        style="text-decoration:none"
+      >
+        Coloring
+      </a>
+
       <label
         id="fixedMapPicker"
         style="display:inline-flex;align-items:center;gap:6px"
@@ -1342,6 +1351,13 @@
       TRANSLATIONS
       ==========================================================
     */
+
+    const COLORING_LINK_TEXT = {
+      ko: "색칠놀이",
+      en: "Coloring",
+      ja: "塗り絵",
+      ru: "Раскраска",
+    };
 
     const FIXED_MAP_TEXT = {
       en: {
@@ -2227,6 +2243,11 @@
     const duplicateMapButton =
       document.getElementById(
         "duplicateMapButton"
+      );
+
+    const coloringLink =
+      document.getElementById(
+        "coloringLink"
       );
 
     const fixedMapPicker =
@@ -3860,6 +3881,14 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
         duplicateMapButton.textContent =
           text.duplicateMap ??
           "Duplicate";
+      }
+
+      if (coloringLink) {
+        coloringLink.textContent =
+          COLORING_LINK_TEXT[
+            language
+          ] ??
+          COLORING_LINK_TEXT.en;
       }
 
       renderFixedMapSelector();
