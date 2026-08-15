@@ -2567,6 +2567,7 @@
         moveToolButton.disabled =
           readOnly ||
           !building ||
+          Boolean(building.fixed) ||
           Boolean(building.locked);
       }
 
@@ -2628,6 +2629,14 @@
       selectionHost.append(details);
 
       if (readOnly) return;
+
+      /*
+        Fixed/template buildings belong to the base-map layer.
+        They are selectable for inspection only in the ordinary map editor.
+        User building lock/unlock is a separate feature and must never unlock
+        or expose edit/move/delete controls for fixed/template buildings.
+      */
+      if (building.fixed) return;
 
       const form = document.createElement("form");
       form.className = "selection-edit-form";
