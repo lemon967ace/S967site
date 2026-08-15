@@ -1,0 +1,1484 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grid Region Editor - Step 9</title>
+<style>
+  :root {
+    --bg: #f7f7f7;
+    --panel: #ffffff;
+    --border: #d7d7d7;
+    --text: #222;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .app {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  button {
+    border: 1px solid #bbb;
+    background: #fff;
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button:hover { background: #f0f0f0; }
+  select {
+    border: 1px solid #bbb;
+    background: #fff;
+    padding: 7px 10px;
+    border-radius: 6px;
+  }
+  .hint {
+    margin-left: 8px;
+    font-size: 13px;
+    color: #666;
+  }
+  .canvas-wrap {
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: white;
+    cursor: crosshair;
+  }
+  .status {
+    padding: 7px 12px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: #555;
+  }
+  input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="toolbar">
+    <button id="undoBtn">마지막 작업 취소</button>
+    <select id="deleteMode" title="삭제 단위">
+      <option value="segment">분할 조각 삭제</option>
+      <option value="source">처음 그은 선 전체 삭제</option>
+    </select>
+    <button id="deleteSelectedBtn">선택 선 삭제</button>
+    <button id="validateBtn">검증</button>
+    <button id="clearBtn">전체 삭제</button>
+    <button id="exportBtn">작업 CSV 저장</button>
+    <button id="exportRegionsBtn">구역 CSV 저장</button>
+    <button id="importBtn">CSV 불러오기</button>
+    <input id="fileInput" type="file" accept=".csv,text/csv" />
+    <span class="hint">
+      같은 직선 위에서 겹치거나 맞닿은 선은 최대 선분으로 자동 병합됩니다. 작업 CSV는 선 좌표와 원본선 ID 목록을 보존하고, 구역 CSV에는 자동 구역의 꼭짓점 좌표만 저장됩니다.
+      Shift+클릭: 선 선택 · 일반 클릭(선 밖): 그리기 · 구역 내부 클릭: 구역 선택 · Delete: 선택 선 삭제 · Ctrl+Z/Y: 실행취소/다시실행 · 휠: 확대/축소 · 가운데 버튼 또는 Space+드래그: 화면 이동
+    </span>
+  </div>
+
+  <div class="canvas-wrap" id="wrap">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div class="status" id="status">좌표: -</div>
+</div>
+
+<script>
+(() => {
+  const GRID = 24;
+  const EPS = 1e-9;
+
+  const canvas = document.getElementById('canvas');
+  const wrap = document.getElementById('wrap');
+  const ctx = canvas.getContext('2d');
+  const status = document.getElementById('status');
+  const undoBtn = document.getElementById('undoBtn');
+  const deleteMode = document.getElementById('deleteMode');
+  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+  const validateBtn = document.getElementById('validateBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const exportRegionsBtn = document.getElementById('exportRegionsBtn');
+  const importBtn = document.getElementById('importBtn');
+  const fileInput = document.getElementById('fileInput');
+
+  let dpr = window.devicePixelRatio || 1;
+  let width = 0;
+  let height = 0;
+
+  // 화면 보기 상태. 데이터 좌표와는 완전히 분리된다.
+  let zoom = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+  const MIN_ZOOM = 0.35;
+  const MAX_ZOOM = 4;
+
+  let isPanning = false;
+  let panStart = null;
+  let spaceDown = false;
+  let suppressNextClick = false;
+
+  let lines = [];
+  let regions = [];
+  let activePoint = null;
+  let hoverPoint = null;
+  let selectedLineIndex = -1;
+  let selectedRegionId = null;
+
+  let nextSourceId = 1;
+  let nextRegionId = 1;
+
+  const history = [];
+  const redoStack = [];
+
+  // 직전 구역을 이용해 ID를 최대한 유지한다.
+  let previousRegionsForId = [];
+
+  function cloneLines(src) {
+    return src.map(line => ({
+      a: { x: line.a.x, y: line.a.y },
+      b: { x: line.b.x, y: line.b.y },
+      sourceIds: normalizeSourceIds(line.sourceIds || (line.sourceId != null ? [line.sourceId] : []))
+    }));
+  }
+
+  function cloneRegions(src) {
+    return src.map(r => ({
+      id: r.id,
+      area: r.area,
+      points: r.points.map(p => ({x:p.x, y:p.y}))
+    }));
+  }
+
+  function snapshotState() {
+    return {
+      lines: cloneLines(lines),
+      nextSourceId,
+      nextRegionId,
+      previousRegionsForId: cloneRegions(previousRegionsForId)
+    };
+  }
+
+  function restoreState(s) {
+    lines = cloneLines(s.lines);
+    nextSourceId = s.nextSourceId;
+    nextRegionId = s.nextRegionId;
+    previousRegionsForId = cloneRegions(s.previousRegionsForId || []);
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+    activePoint = null;
+    recomputeRegions();
+  }
+
+  function saveHistory() {
+    history.push(snapshotState());
+    if (history.length > 100) history.shift();
+    redoStack.length = 0;
+  }
+
+  function resize() {
+    const rect = wrap.getBoundingClientRect();
+    width = Math.max(1, Math.floor(rect.width));
+    height = Math.max(1, Math.floor(rect.height));
+    dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function gridToPixel(p) {
+    return {
+      x: p.x * GRID * zoom + offsetX,
+      y: p.y * GRID * zoom + offsetY
+    };
+  }
+
+  function screenToGrid(px, py) {
+    return {
+      x: (px - offsetX) / (GRID * zoom),
+      y: (py - offsetY) / (GRID * zoom)
+    };
+  }
+
+  function eventToGridPoint(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const px = ev.clientX - rect.left;
+    const py = ev.clientY - rect.top;
+    const g = screenToGrid(px, py);
+
+    return {
+      x: Math.round(g.x),
+      y: Math.round(g.y)
+    };
+  }
+
+  function samePoint(a, b) {
+    return !!a && !!b &&
+      Math.abs(a.x - b.x) < EPS &&
+      Math.abs(a.y - b.y) < EPS;
+  }
+
+  function pointKey(p) {
+    return `${p.x.toFixed(10)},${p.y.toFixed(10)}`;
+  }
+
+  function normalizeSourceIds(ids) {
+    return [...new Set((ids || []).filter(v => Number.isFinite(v)))].sort((a, b) => a - b);
+  }
+
+  function mergeSourceIds(...groups) {
+    return normalizeSourceIds(groups.flat());
+  }
+
+  function cross(ax, ay, bx, by) {
+    return ax * by - ay * bx;
+  }
+
+  function segmentIntersection(a, b, c, d) {
+    const r = { x: b.x - a.x, y: b.y - a.y };
+    const s = { x: d.x - c.x, y: d.y - c.y };
+    const rxs = cross(r.x, r.y, s.x, s.y);
+    const qmp = { x: c.x - a.x, y: c.y - a.y };
+    const qmpxr = cross(qmp.x, qmp.y, r.x, r.y);
+
+    if (Math.abs(rxs) < EPS) return null;
+
+    const t = cross(qmp.x, qmp.y, s.x, s.y) / rxs;
+    const u = qmpxr / rxs;
+
+    if (t < -EPS || t > 1 + EPS || u < -EPS || u > 1 + EPS) {
+      return null;
+    }
+
+    return {
+      x: a.x + t * r.x,
+      y: a.y + t * r.y
+    };
+  }
+
+  function pointOnSegmentParameter(p, a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      return Math.abs(dx) < EPS ? 0 : (p.x - a.x) / dx;
+    }
+
+    return Math.abs(dy) < EPS ? 0 : (p.y - a.y) / dy;
+  }
+
+  function uniqueSortedPoints(points, a, b) {
+    const map = new Map();
+
+    for (const p of points) {
+      map.set(pointKey(p), { x: p.x, y: p.y });
+    }
+
+    return [...map.values()].sort((p1, p2) =>
+      pointOnSegmentParameter(p1, a, b) -
+      pointOnSegmentParameter(p2, a, b)
+    );
+  }
+
+  function splitSegment(a, b, splitPoints, sourceIds = []) {
+    const pts = uniqueSortedPoints([a, ...splitPoints, b], a, b);
+    const result = [];
+
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (!samePoint(pts[i], pts[i + 1])) {
+        result.push({
+          a: { ...pts[i] },
+          b: { ...pts[i + 1] },
+          sourceIds: normalizeSourceIds(sourceIds)
+        });
+      }
+    }
+
+    return result;
+  }
+
+  function normalizeLineKey(line) {
+    const a = pointKey(line.a);
+    const b = pointKey(line.b);
+    return a < b ? `${a}|${b}` : `${b}|${a}`;
+  }
+
+  function dedupeLines(src) {
+    const byKey = new Map();
+
+    for (const line of src) {
+      if (samePoint(line.a, line.b)) continue;
+
+      const key = normalizeLineKey(line);
+
+      if (!byKey.has(key)) {
+        byKey.set(key, {
+          a: { ...line.a },
+          b: { ...line.b },
+          sourceIds: normalizeSourceIds(line.sourceIds || [])
+        });
+      } else {
+        const current = byKey.get(key);
+        current.sourceIds = mergeSourceIds(current.sourceIds, line.sourceIds || []);
+      }
+    }
+
+    return [...byKey.values()];
+  }
+
+
+  function isCollinear(a, b, c, d) {
+    const abx = b.x - a.x, aby = b.y - a.y;
+    return Math.abs(cross(abx, aby, c.x - a.x, c.y - a.y)) < EPS &&
+           Math.abs(cross(abx, aby, d.x - a.x, d.y - a.y)) < EPS;
+  }
+
+  function projectScalar(p, origin, dir) {
+    const len2 = dir.x * dir.x + dir.y * dir.y;
+    if (len2 < EPS) return 0;
+    return ((p.x - origin.x) * dir.x + (p.y - origin.y) * dir.y) / len2;
+  }
+
+  function pointFromScalar(origin, dir, t) {
+    return {
+      x: origin.x + dir.x * t,
+      y: origin.y + dir.y * t
+    };
+  }
+
+  function normalizeCollinearLines(srcLines) {
+    let working = srcLines.map(line => ({
+      a: { ...line.a },
+      b: { ...line.b },
+      sourceIds: normalizeSourceIds(line.sourceIds || [])
+    }));
+
+    let changed = true;
+    let guard = 0;
+
+    while (changed && guard++ < 10000) {
+      changed = false;
+
+      outer:
+      for (let i = 0; i < working.length; i++) {
+        for (let j = i + 1; j < working.length; j++) {
+          const A = working[i];
+          const B = working[j];
+
+          if (!isCollinear(A.a, A.b, B.a, B.b)) continue;
+
+          const dir = { x: A.b.x - A.a.x, y: A.b.y - A.a.y };
+          const b0 = projectScalar(B.a, A.a, dir);
+          const b1 = projectScalar(B.b, A.a, dir);
+
+          const amin = 0, amax = 1;
+          const bmin = Math.min(b0, b1), bmax = Math.max(b0, b1);
+
+          if (Math.max(amin, bmin) > Math.min(amax, bmax) + EPS) continue;
+
+          const minT = Math.min(amin, bmin);
+          const maxT = Math.max(amax, bmax);
+
+          const merged = {
+            a: pointFromScalar(A.a, dir, minT),
+            b: pointFromScalar(A.a, dir, maxT),
+            sourceIds: mergeSourceIds(A.sourceIds, B.sourceIds)
+          };
+
+          working.splice(j, 1);
+          working.splice(i, 1, merged);
+          changed = true;
+          break outer;
+        }
+      }
+    }
+
+    return dedupeLines(working);
+  }
+
+  function rebuildAllIntersections(srcLines) {
+    const splitMaps = srcLines.map(() => []);
+
+    for (let i = 0; i < srcLines.length; i++) {
+      for (let j = i + 1; j < srcLines.length; j++) {
+        const a = srcLines[i];
+        const b = srcLines[j];
+        const hit = segmentIntersection(a.a, a.b, b.a, b.b);
+        if (!hit) continue;
+
+        const p = { x: hit.x, y: hit.y };
+        splitMaps[i].push(p);
+        splitMaps[j].push(p);
+      }
+    }
+
+    const rebuilt = [];
+    srcLines.forEach((line, index) => {
+      rebuilt.push(...splitSegment(
+        line.a,
+        line.b,
+        splitMaps[index],
+        line.sourceIds || []
+      ));
+    });
+
+    return dedupeLines(rebuilt);
+  }
+
+  function addLineWithIntersections(a, b, { recordHistory = true, sourceId = null } = {}) {
+    if (samePoint(a, b)) return;
+
+    if (recordHistory) saveHistory();
+    if (sourceId == null) sourceId = nextSourceId++;
+
+    const newRaw = {
+      a: { ...a },
+      b: { ...b },
+      sourceIds: [sourceId]
+    };
+
+    const merged = normalizeCollinearLines([...lines, newRaw]);
+    lines = rebuildAllIntersections(merged);
+    recomputeRegions();
+  }
+
+  function polygonArea(points) {
+    let sum = 0;
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i];
+      const b = points[(i + 1) % points.length];
+      sum += a.x * b.y - b.x * a.y;
+    }
+    return sum / 2;
+  }
+
+  function buildGraph(srcLines) {
+    const vertices = new Map();
+    const adjacency = new Map();
+
+    function ensureVertex(p) {
+      const key = pointKey(p);
+      if (!vertices.has(key)) vertices.set(key, { x: p.x, y: p.y });
+      if (!adjacency.has(key)) adjacency.set(key, new Set());
+      return key;
+    }
+
+    for (const line of srcLines) {
+      const aKey = ensureVertex(line.a);
+      const bKey = ensureVertex(line.b);
+      if (aKey === bKey) continue;
+
+      adjacency.get(aKey).add(bKey);
+      adjacency.get(bKey).add(aKey);
+    }
+
+    const sortedAdj = new Map();
+
+    for (const [key, neighborSet] of adjacency.entries()) {
+      const p = vertices.get(key);
+      const neighbors = [...neighborSet];
+
+      neighbors.sort((ka, kb) => {
+        const a = vertices.get(ka);
+        const b = vertices.get(kb);
+        const aa = Math.atan2(a.y - p.y, a.x - p.x);
+        const ab = Math.atan2(b.y - p.y, b.x - p.x);
+        return aa - ab;
+      });
+
+      sortedAdj.set(key, neighbors);
+    }
+
+    return { vertices, adjacency: sortedAdj };
+  }
+
+  function findRegions(srcLines) {
+    if (srcLines.length < 3) return [];
+
+    const { vertices, adjacency } = buildGraph(srcLines);
+    const visited = new Set();
+    const faces = [];
+
+    for (const [uKey, neighbors] of adjacency.entries()) {
+      for (const vKey of neighbors) {
+        const startDirected = `${uKey}>${vKey}`;
+        if (visited.has(startDirected)) continue;
+
+        const faceKeys = [];
+        let fromKey = uKey;
+        let toKey = vKey;
+        let guard = 0;
+        let closed = false;
+
+        while (guard++ < srcLines.length * 4 + 20) {
+          const dKey = `${fromKey}>${toKey}`;
+
+          if (visited.has(dKey)) {
+            closed = (fromKey === uKey && toKey === vKey);
+            break;
+          }
+
+          visited.add(dKey);
+          faceKeys.push(fromKey);
+
+          const around = adjacency.get(toKey) || [];
+          if (around.length === 0) break;
+
+          const reverseIndex = around.indexOf(fromKey);
+          if (reverseIndex < 0) break;
+
+          const nextIndex = (reverseIndex - 1 + around.length) % around.length;
+          const nextKey = around[nextIndex];
+
+          fromKey = toKey;
+          toKey = nextKey;
+
+          if (fromKey === uKey && toKey === vKey) {
+            closed = true;
+            break;
+          }
+        }
+
+        if (!closed || faceKeys.length < 3) continue;
+
+        const polygon = faceKeys.map(k => vertices.get(k));
+        const area = polygonArea(polygon);
+
+        if (area > EPS) {
+          faces.push({
+            points: polygon.map(p => ({ x: p.x, y: p.y })),
+            area
+          });
+        }
+      }
+    }
+
+    return faces.filter(face => face.area > EPS);
+  }
+
+  function polygonCentroid(points) {
+    let a = 0;
+    let cx = 0;
+    let cy = 0;
+
+    for (let i = 0; i < points.length; i++) {
+      const p = points[i];
+      const q = points[(i + 1) % points.length];
+      const crossValue = p.x * q.y - q.x * p.y;
+
+      a += crossValue;
+      cx += (p.x + q.x) * crossValue;
+      cy += (p.y + q.y) * crossValue;
+    }
+
+    a *= 0.5;
+
+    if (Math.abs(a) < EPS) {
+      const avg = points.reduce(
+        (acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }),
+        { x: 0, y: 0 }
+      );
+
+      return {
+        x: avg.x / points.length,
+        y: avg.y / points.length
+      };
+    }
+
+    return {
+      x: cx / (6 * a),
+      y: cy / (6 * a)
+    };
+  }
+
+
+  function pointInPolygon(p, points) {
+    let inside = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+      const xi = points[i].x, yi = points[i].y;
+      const xj = points[j].x, yj = points[j].y;
+
+      const intersect =
+        ((yi > p.y) !== (yj > p.y)) &&
+        (p.x < (xj - xi) * (p.y - yi) / ((yj - yi) || EPS) + xi);
+
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  function regionSignature(region) {
+    // 같은 형상이면 시작 꼭짓점/순회 위치가 달라도 같은 서명.
+    const pts = region.points.map(p => `${p.x.toFixed(8)},${p.y.toFixed(8)}`);
+    const variants = [];
+
+    function rotations(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        variants.push(arr.slice(i).concat(arr.slice(0, i)).join('|'));
+      }
+    }
+
+    rotations(pts);
+    rotations([...pts].reverse());
+    return variants.sort()[0];
+  }
+
+  function assignStableRegionIds(newFaces) {
+    const exactOld = new Map(previousRegionsForId.map(r => [regionSignature(r), r]));
+    const usedIds = new Set();
+    const assigned = [];
+
+    // 1) 형상이 완전히 동일하면 ID 그대로.
+    for (const face of newFaces) {
+      const exact = exactOld.get(regionSignature(face));
+      if (exact && !usedIds.has(exact.id)) {
+        assigned.push({...face, id: exact.id});
+        usedIds.add(exact.id);
+      } else {
+        assigned.push({...face, id: null});
+      }
+    }
+
+    // 2) 형상이 변했으면 중심점 포함 관계 + 면적 유사도로 가장 가까운 이전 구역과 매칭.
+    for (const face of assigned) {
+      if (face.id) continue;
+
+      const center = polygonCentroid(face.points);
+      let best = null;
+      let bestScore = Infinity;
+
+      for (const old of previousRegionsForId) {
+        if (usedIds.has(old.id)) continue;
+
+        const oldCenter = polygonCentroid(old.points);
+        const contains =
+          pointInPolygon(center, old.points) ||
+          pointInPolygon(oldCenter, face.points);
+
+        if (!contains) continue;
+
+        const areaDiff = Math.abs(face.area - old.area) / Math.max(face.area, old.area, EPS);
+        const dist = Math.hypot(center.x - oldCenter.x, center.y - oldCenter.y);
+        const score = areaDiff * 10 + dist;
+
+        if (score < bestScore) {
+          bestScore = score;
+          best = old;
+        }
+      }
+
+      if (best) {
+        face.id = best.id;
+        usedIds.add(best.id);
+      } else {
+        face.id = `R${String(nextRegionId++).padStart(4, '0')}`;
+      }
+    }
+
+    previousRegionsForId = cloneRegions(assigned);
+    return assigned;
+  }
+
+  function recomputeRegions() {
+    const rawFaces = findRegions(lines);
+    regions = assignStableRegionIds(rawFaces);
+    if (selectedRegionId && !regions.some(r => r.id === selectedRegionId)) {
+      selectedRegionId = null;
+    }
+  }
+
+  function getDanglingLineIndices() {
+    const degree = new Map();
+    function add(k) { degree.set(k, (degree.get(k) || 0) + 1); }
+
+    for (const line of lines) {
+      add(pointKey(line.a));
+      add(pointKey(line.b));
+    }
+
+    const result = new Set();
+    lines.forEach((line, i) => {
+      if ((degree.get(pointKey(line.a)) || 0) < 2 ||
+          (degree.get(pointKey(line.b)) || 0) < 2) {
+        result.add(i);
+      }
+    });
+    return [...result];
+  }
+
+  function validateDrawing(showAlert = true) {
+    const duplicateKeys = new Set();
+    const seen = new Set();
+    for (const line of lines) {
+      const k = normalizeLineKey(line);
+      if (seen.has(k)) duplicateKeys.add(k);
+      seen.add(k);
+    }
+
+    const dangling = getDanglingLineIndices();
+    const message =
+      `검증 결과\n\n` +
+      `자동 구역: ${regions.length}개\n` +
+      `분할 선분: ${lines.length}개\n` +
+      `처음 그은 선: ${new Set(lines.flatMap(l => l.sourceIds || [])).size}개\n` +
+      `열린 끝점을 가진 선분: ${dangling.length}개\n` +
+      `중복 선분: ${duplicateKeys.size}개`;
+
+    if (showAlert) alert(message);
+    return {
+      regions: regions.length,
+      lines: lines.length,
+      sourceLines: new Set(lines.flatMap(l => l.sourceIds || [])).size,
+      dangling: dangling.length,
+      duplicates: duplicateKeys.size
+    };
+  }
+
+  // ---------------------------
+  // CSV
+  // ---------------------------
+
+  function csvEscape(value) {
+    const s = String(value);
+    if (/[",\n\r]/.test(s)) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  }
+
+  function exportCsv() {
+    if (lines.length === 0) {
+      alert('저장할 선이 없습니다.');
+      return;
+    }
+
+    const rows = [['line_id', 'source_ids', 'x1', 'y1', 'x2', 'y2']];
+
+    lines.forEach((line, index) => {
+      rows.push([
+        `L${String(index + 1).padStart(4, '0')}`,
+        (line.sourceIds || []).map(id => `S${String(id).padStart(4, '0')}`).join('|'),
+        line.a.x,
+        line.a.y,
+        line.b.x,
+        line.b.y
+      ]);
+    });
+
+    const csv = '\uFEFF' + rows
+      .map(row => row.map(csvEscape).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'grid-regions.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportRegionsCsv() {
+    const check = validateDrawing(false);
+
+    if (regions.length === 0) {
+      alert('내보낼 닫힌 구역이 없습니다.');
+      return;
+    }
+
+    // 한 꼭짓점당 한 행.
+    // 마지막 꼭짓점에서 첫 꼭짓점으로 닫힌다는 것은 암묵적으로 처리하므로
+    // 첫 좌표를 마지막 행에 중복 저장하지 않는다.
+    if (check.dangling > 0 || check.duplicates > 0) {
+      const proceed = confirm(
+        `검증 경고: 열린 끝점 선분 ${check.dangling}개, 중복 선분 ${check.duplicates}개가 있습니다.\n그래도 구역 CSV를 저장할까요?`
+      );
+      if (!proceed) return;
+    }
+
+    const rows = [[
+      'region_id',
+      'point_order',
+      'x',
+      'y'
+    ]];
+
+    regions.forEach((region) => {
+      const regionId = region.id;
+
+      region.points.forEach((point, pointIndex) => {
+        rows.push([
+          regionId,
+          pointIndex + 1,
+          point.x,
+          point.y
+        ]);
+      });
+    });
+
+    const csv = '\uFEFF' + rows
+      .map(row => row.map(csvEscape).join(','))
+      .join('\r\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'regions.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function parseCsv(text) {
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') {
+            cell += '"';
+            i++;
+          } else {
+            inQuotes = false;
+          }
+        } else {
+          cell += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === ',') {
+          row.push(cell);
+          cell = '';
+        } else if (ch === '\n') {
+          row.push(cell);
+          rows.push(row);
+          row = [];
+          cell = '';
+        } else if (ch !== '\r') {
+          cell += ch;
+        }
+      }
+    }
+
+    row.push(cell);
+    rows.push(row);
+
+    return rows.filter(r => r.some(v => v.trim() !== ''));
+  }
+
+  function importCsvText(text) {
+    const rows = parseCsv(text.replace(/^\uFEFF/, ''));
+
+    if (rows.length < 2) {
+      throw new Error('CSV에 데이터가 없습니다.');
+    }
+
+    const header = rows[0].map(v => v.trim().toLowerCase());
+    const required = ['x1', 'y1', 'x2', 'y2'];
+
+    for (const name of required) {
+      if (!header.includes(name)) {
+        throw new Error(`필수 열이 없습니다: ${name}`);
+      }
+    }
+
+    const iSource = header.includes('source_ids') ? header.indexOf('source_ids') : header.indexOf('source_id');
+    const ix1 = header.indexOf('x1');
+    const iy1 = header.indexOf('y1');
+    const ix2 = header.indexOf('x2');
+    const iy2 = header.indexOf('y2');
+
+    const imported = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+
+      const x1 = Number(row[ix1]);
+      const y1 = Number(row[iy1]);
+      const x2 = Number(row[ix2]);
+      const y2 = Number(row[iy2]);
+
+      if (![x1, y1, x2, y2].every(Number.isFinite)) {
+        throw new Error(`${i + 1}행의 좌표가 올바른 숫자가 아닙니다.`);
+      }
+
+      if (Math.abs(x1 - Math.round(x1)) > EPS ||
+          Math.abs(y1 - Math.round(y1)) > EPS ||
+          Math.abs(x2 - Math.round(x2)) > EPS ||
+          Math.abs(y2 - Math.round(y2)) > EPS) {
+        // 교차 분할된 CSV도 다시 불러올 수 있도록 소수 좌표는 허용한다.
+        // 다만 원래 사용자가 찍는 점은 정수 격자점이다.
+      }
+
+      let sourceIds = [];
+      if (iSource >= 0 && row[iSource]) {
+        sourceIds = String(row[iSource])
+          .split('|')
+          .map(v => {
+            const m = v.match(/(\d+)/);
+            return m ? Number(m[1]) : null;
+          })
+          .filter(Number.isFinite);
+      }
+
+      imported.push({
+        a: { x: x1, y: y1 },
+        b: { x: x2, y: y2 },
+        sourceIds
+      });
+    }
+
+    saveHistory();
+    lines = [];
+    regions = [];
+    previousRegionsForId = [];
+    activePoint = null;
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+
+    const maxImportedSource = Math.max(
+      0,
+      ...imported.flatMap(l => l.sourceIds || [0])
+    );
+    nextSourceId = Math.max(1, maxImportedSource + 1);
+
+    lines = imported.map(line => ({
+      a: { ...line.a },
+      b: { ...line.b },
+      sourceIds: line.sourceIds.length
+        ? normalizeSourceIds(line.sourceIds)
+        : [nextSourceId++]
+    }));
+
+    lines = rebuildAllIntersections(normalizeCollinearLines(lines));
+    recomputeRegions();
+    draw();
+  }
+
+  function distancePointToSegmentScreen(px, py, line) {
+    const a = gridToPixel(line.a);
+    const b = gridToPixel(line.b);
+
+    const vx = b.x - a.x;
+    const vy = b.y - a.y;
+    const wx = px - a.x;
+    const wy = py - a.y;
+
+    const len2 = vx * vx + vy * vy;
+    if (len2 < EPS) {
+      return Math.hypot(px - a.x, py - a.y);
+    }
+
+    let t = (wx * vx + wy * vy) / len2;
+    t = Math.max(0, Math.min(1, t));
+
+    const qx = a.x + t * vx;
+    const qy = a.y + t * vy;
+
+    return Math.hypot(px - qx, py - qy);
+  }
+
+  function findNearestLineIndex(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const px = ev.clientX - rect.left;
+    const py = ev.clientY - rect.top;
+
+    let bestIndex = -1;
+    let bestDistance = Infinity;
+    const threshold = 8;
+
+    lines.forEach((line, index) => {
+      const d = distancePointToSegmentScreen(px, py, line);
+      if (d < bestDistance) {
+        bestDistance = d;
+        bestIndex = index;
+      }
+    });
+
+    return bestDistance <= threshold ? bestIndex : -1;
+  }
+
+  function deleteSelectedLine() {
+    if (selectedLineIndex < 0 || selectedLineIndex >= lines.length) return;
+
+    saveHistory();
+
+    if (deleteMode.value === 'source') {
+      const idsToDelete = new Set(lines[selectedLineIndex].sourceIds || []);
+      lines = lines
+        .map(line => ({
+          ...line,
+          sourceIds: (line.sourceIds || []).filter(id => !idsToDelete.has(id))
+        }))
+        .filter(line => (line.sourceIds || []).length > 0);
+    } else {
+      lines.splice(selectedLineIndex, 1);
+    }
+
+    lines = rebuildAllIntersections(normalizeCollinearLines(lines));
+
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+    activePoint = null;
+    recomputeRegions();
+    draw();
+  }
+
+  function drawGrid() {
+    ctx.save();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#ececec';
+
+    const spacing = GRID * zoom;
+
+    let startX = offsetX % spacing;
+    if (startX < 0) startX += spacing;
+
+    let startY = offsetY % spacing;
+    if (startY < 0) startY += spacing;
+
+    for (let x = startX; x <= width; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(Math.round(x) + 0.5, 0);
+      ctx.lineTo(Math.round(x) + 0.5, height);
+      ctx.stroke();
+    }
+
+    for (let y = startY; y <= height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, Math.round(y) + 0.5);
+      ctx.lineTo(width, Math.round(y) + 0.5);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function drawRegions() {
+    ctx.save();
+
+    regions.forEach((region) => {
+      if (region.points.length < 3) return;
+
+      const first = gridToPixel(region.points[0]);
+      ctx.beginPath();
+      ctx.moveTo(first.x, first.y);
+
+      for (let i = 1; i < region.points.length; i++) {
+        const p = gridToPixel(region.points[i]);
+        ctx.lineTo(p.x, p.y);
+      }
+
+      ctx.closePath();
+
+      const selected = region.id === selectedRegionId;
+      ctx.fillStyle = selected
+        ? 'rgba(220, 150, 60, 0.28)'
+        : 'rgba(80, 120, 180, 0.14)';
+      ctx.fill();
+
+      if (selected) {
+        ctx.strokeStyle = '#c97820';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      const center = gridToPixel(polygonCentroid(region.points));
+      ctx.fillStyle = selected ? '#8a4a00' : '#555';
+      ctx.font = selected ? 'bold 12px system-ui, sans-serif' : '12px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(region.id, center.x, center.y);
+    });
+
+    ctx.restore();
+  }
+
+  function drawLines() {
+    ctx.save();
+    ctx.lineCap = 'round';
+
+    lines.forEach((line, index) => {
+      const a = gridToPixel(line.a);
+      const b = gridToPixel(line.b);
+
+      if (index === selectedLineIndex) {
+        ctx.strokeStyle = '#d64545';
+        ctx.lineWidth = Math.max(3, Math.min(5, 4 * zoom));
+      } else {
+        ctx.strokeStyle = '#202020';
+        ctx.lineWidth = Math.max(1.5, Math.min(3, 2 * zoom));
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  }
+
+  function collectVertices() {
+    const map = new Map();
+
+    for (const line of lines) {
+      map.set(pointKey(line.a), line.a);
+      map.set(pointKey(line.b), line.b);
+    }
+
+    return [...map.values()];
+  }
+
+  function drawVertices() {
+    ctx.save();
+
+    for (const p of collectVertices()) {
+      const q = gridToPixel(p);
+
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, Math.max(2.5, Math.min(4.5, 3 * zoom)), 0, Math.PI * 2);
+      ctx.fillStyle =
+        Number.isInteger(p.x) && Number.isInteger(p.y)
+          ? '#333'
+          : '#b04a4a';
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  function drawPreview() {
+    if (!activePoint || !hoverPoint || samePoint(activePoint, hoverPoint)) return;
+
+    const a = gridToPixel(activePoint);
+    const b = gridToPixel(hoverPoint);
+
+    ctx.save();
+    ctx.setLineDash([7, 5]);
+    ctx.strokeStyle = '#777';
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawPoint(p, radius, fill) {
+    if (!p) return;
+
+    const q = gridToPixel(p);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(q.x, q.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function updateStatus() {
+    const coord = hoverPoint ? `(${hoverPoint.x}, ${hoverPoint.y})` : '-';
+    const selectedLine = selectedLineIndex >= 0
+      ? ` · 선택 선: L${selectedLineIndex + 1} / 원본 ${((lines[selectedLineIndex]?.sourceIds || []).map(id => `S${id}`).join(', ') || '-')}`
+      : '';
+    const selectedRegion = selectedRegionId ? ` · 선택 구역: ${selectedRegionId}` : '';
+    status.textContent =
+      `좌표: ${coord} · 확대: ${Math.round(zoom * 100)}% · 분할 선분: ${lines.length} · 자동 구역: ${regions.length}${selectedLine}${selectedRegion}`;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    drawGrid();
+    drawRegions();
+    drawLines();
+    drawVertices();
+    drawPreview();
+
+    if (activePoint) drawPoint(activePoint, 5, '#111');
+    if (hoverPoint) drawPoint(hoverPoint, 4, '#666');
+
+    updateStatus();
+  }
+
+  canvas.addEventListener('wheel', (ev) => {
+    ev.preventDefault();
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = ev.clientX - rect.left;
+    const mouseY = ev.clientY - rect.top;
+
+    // 마우스가 가리키는 지도 좌표를 확대 전후 동일한 화면 위치에 유지.
+    const before = screenToGrid(mouseX, mouseY);
+
+    const factor = ev.deltaY < 0 ? 1.12 : 1 / 1.12;
+    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom * factor));
+
+    if (Math.abs(newZoom - zoom) < 1e-12) return;
+
+    zoom = newZoom;
+    offsetX = mouseX - before.x * GRID * zoom;
+    offsetY = mouseY - before.y * GRID * zoom;
+
+    draw();
+  }, { passive: false });
+
+  canvas.addEventListener('mousedown', (ev) => {
+    const shouldPan = ev.button === 1 || (ev.button === 0 && spaceDown);
+    if (!shouldPan) return;
+
+    ev.preventDefault();
+    isPanning = true;
+    panStart = {
+      mouseX: ev.clientX,
+      mouseY: ev.clientY,
+      offsetX,
+      offsetY
+    };
+    canvas.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', (ev) => {
+    if (!isPanning || !panStart) return;
+
+    const dx = ev.clientX - panStart.mouseX;
+    const dy = ev.clientY - panStart.mouseY;
+
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      suppressNextClick = true;
+    }
+
+    offsetX = panStart.offsetX + dx;
+    offsetY = panStart.offsetY + dy;
+    draw();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isPanning) return;
+    isPanning = false;
+    panStart = null;
+    canvas.style.cursor = spaceDown ? 'grab' : 'crosshair';
+  });
+
+  window.addEventListener('keydown', (ev) => {
+    if (ev.code !== 'Space') return;
+
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+
+    spaceDown = true;
+    if (!isPanning) canvas.style.cursor = 'grab';
+    ev.preventDefault();
+  });
+
+  window.addEventListener('keyup', (ev) => {
+    if (ev.code !== 'Space') return;
+    spaceDown = false;
+    if (!isPanning) canvas.style.cursor = 'crosshair';
+  });
+
+  canvas.addEventListener('mousemove', (ev) => {
+    hoverPoint = eventToGridPoint(ev);
+    draw();
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    hoverPoint = null;
+    draw();
+  });
+
+
+  function findRegionAtEvent(ev) {
+    const rect = canvas.getBoundingClientRect();
+    const g = screenToGrid(ev.clientX - rect.left, ev.clientY - rect.top);
+
+    // 작은 면이 큰 면보다 우선되도록 면적 오름차순.
+    const ordered = [...regions].sort((a, b) => a.area - b.area);
+    return ordered.find(region => pointInPolygon(g, region.points)) || null;
+  }
+
+  canvas.addEventListener('click', (ev) => {
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      return;
+    }
+
+    if (spaceDown) return;
+
+    if (ev.shiftKey) {
+      selectedLineIndex = findNearestLineIndex(ev);
+      selectedRegionId = null;
+      activePoint = null;
+      draw();
+      return;
+    }
+
+    if (!activePoint) {
+      const hitRegion = findRegionAtEvent(ev);
+      if (hitRegion) {
+        selectedRegionId = hitRegion.id;
+        selectedLineIndex = -1;
+        draw();
+        return;
+      }
+    }
+
+    selectedRegionId = null;
+    selectedLineIndex = -1;
+    const p = eventToGridPoint(ev);
+
+    if (!activePoint) {
+      activePoint = p;
+      draw();
+      return;
+    }
+
+    if (samePoint(activePoint, p)) return;
+
+    addLineWithIntersections(activePoint, p);
+    activePoint = p;
+    draw();
+  });
+
+  canvas.addEventListener('contextmenu', (ev) => {
+    ev.preventDefault();
+    activePoint = null;
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+    draw();
+  });
+
+  function undo() {
+    if (history.length === 0) return;
+    redoStack.push(snapshotState());
+    const state = history.pop();
+    restoreState(state);
+    draw();
+  }
+
+  function redo() {
+    if (redoStack.length === 0) return;
+    history.push(snapshotState());
+    const state = redoStack.pop();
+    restoreState(state);
+    draw();
+  }
+
+  undoBtn.addEventListener('click', undo);
+
+  clearBtn.addEventListener('click', () => {
+    if (lines.length > 0) saveHistory();
+
+    lines = [];
+    regions = [];
+    previousRegionsForId = [];
+    activePoint = null;
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+    draw();
+  });
+
+  deleteSelectedBtn.addEventListener('click', deleteSelectedLine);
+  validateBtn.addEventListener('click', () => validateDrawing(true));
+
+  window.addEventListener('keydown', (ev) => {
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+    const mod = ev.ctrlKey || ev.metaKey;
+
+    if (mod && ev.key.toLowerCase() === 'z') {
+      ev.preventDefault();
+      if (ev.shiftKey) redo();
+      else undo();
+      return;
+    }
+
+    if (mod && ev.key.toLowerCase() === 'y') {
+      ev.preventDefault();
+      redo();
+      return;
+    }
+
+    if (ev.key === 'Escape') {
+      activePoint = null;
+      selectedLineIndex = -1;
+      selectedRegionId = null;
+      draw();
+      return;
+    }
+
+    if ((ev.key === 'Delete' || ev.key === 'Backspace') && selectedLineIndex >= 0) {
+      ev.preventDefault();
+      deleteSelectedLine();
+    }
+  });
+
+  exportBtn.addEventListener('click', exportCsv);
+
+  exportRegionsBtn.addEventListener('click', exportRegionsCsv);
+
+  importBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      importCsvText(text);
+    } catch (err) {
+      alert(`CSV 불러오기 실패\n\n${err.message || err}`);
+    }
+  });
+
+  window.addEventListener('resize', resize);
+  recomputeRegions();
+  resize();
+})();
+</script>
+</body>
+</html>
