@@ -5776,11 +5776,22 @@ function renderWkApplications() {
     detail.className =
       "application-items";
 
+    const applicationStatus =
+      application.status ??
+      "new";
+
+    const statusLabel =
+      applicationStatus === "updated"
+        ? "수정함"
+        : applicationStatus === "new"
+          ? "신규"
+          : applicationStatus;
+
     detail.textContent =
       `${formatWkValue(application.realtime_response)} · ` +
       `${formatWkValue(application.captain_role)} · ` +
       `${formatWkValue(application.participation_time)} · ` +
-      `상태 ${application.status ?? "new"}`;
+      `상태 ${statusLabel}`;
 
     const time =
       document.createElement(
@@ -5793,9 +5804,17 @@ function renderWkApplications() {
     time.style.marginTop =
       "6px";
 
+    const wasUpdated =
+      applicationStatus === "updated" &&
+      Boolean(application.updated_at);
+
     time.textContent =
-      `신청 ${formatKstDateTime(application.created_at)} · ` +
-      `언어 ${application.language ?? "-"}`;
+      wasUpdated
+        ? `최초 신청 ${formatKstDateTime(application.created_at)} · ` +
+          `수정 ${formatKstDateTime(application.updated_at)} · ` +
+          `언어 ${application.language ?? "-"}`
+        : `신청 ${formatKstDateTime(application.created_at)} · ` +
+          `언어 ${application.language ?? "-"}`;
 
     card.appendChild(
       title
