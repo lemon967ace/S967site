@@ -1488,9 +1488,7 @@ export function restoreBuildings(states) {
 export function editBuilding(buildingId, changes = {}) {
   ensureWritable();
   const current = requireUserBuilding(buildingId);
-  if (current.locked && Object.keys(changes).some(key => key !== "locked")) {
-    throw new RangeError("Locked buildings cannot be edited.");
-  }
+
   const candidate = new Building({
     id: current.id,
     name: changes.name ?? current.name,
@@ -1502,6 +1500,23 @@ export function editBuilding(buildingId, changes = {}) {
     affiliation: changes.affiliation ?? current.affiliation,
     locked: changes.locked ?? current.locked,
   });
+
+  /*
+    A locked user building may be unlocked, and submitting an unchanged
+    form is allowed. Block only real changes to protected fields.
+  */
+  if (
+    current.locked &&
+    (
+      candidate.name !== current.name ||
+      candidate.typeId !== current.typeId ||
+      candidate.width !== current.width ||
+      candidate.height !== current.height ||
+      candidate.affiliation !== current.affiliation
+    )
+  ) {
+    throw new RangeError("Locked buildings cannot be edited.");
+  }
   if (!document.buildingTypes.some(type => type.id === candidate.typeId)) {
     throw new RangeError(`Unknown building type ID: ${candidate.typeId}`);
   }
