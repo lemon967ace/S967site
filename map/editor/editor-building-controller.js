@@ -250,13 +250,11 @@ export function createBuildingController({ engine, history = null, onChange = ()
     if (fixed && engine.getDocumentMode?.() !== "template") {
       throw new RangeError("Template buildings cannot be edited in a map.");
     }
-    if (
-      !fixed &&
-      current.locked &&
-      Object.keys(changes).some(key => key !== "locked")
-    ) {
-      throw new RangeError("Locked buildings cannot be edited.");
-    }
+    /*
+      Do not reject a locked user building merely because the UI submitted
+      unchanged form fields. The engine compares actual values and blocks
+      only real protected-field changes while still allowing unlock/no-op.
+    */
     const before = fixed ? snapshotFixedBuilding(current) : snapshotBuilding(current);
     const beforeRanges = engine.getDocument().ranges.map(snapshotRange);
 
