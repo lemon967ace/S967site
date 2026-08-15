@@ -5776,22 +5776,16 @@ function renderWkApplications() {
     detail.className =
       "application-items";
 
-    const applicationStatus =
-      application.status ??
-      "new";
-
-    const statusLabel =
-      applicationStatus === "updated"
-        ? "수정함"
-        : applicationStatus === "new"
-          ? "신규"
-          : applicationStatus;
+    const wasUpdated =
+      Boolean(
+        application.updated_at
+      );
 
     detail.textContent =
       `${formatWkValue(application.realtime_response)} · ` +
       `${formatWkValue(application.captain_role)} · ` +
       `${formatWkValue(application.participation_time)} · ` +
-      `상태 ${statusLabel}`;
+      `상태 ${wasUpdated ? "수정함" : "신규"}`;
 
     const time =
       document.createElement(
@@ -5803,10 +5797,6 @@ function renderWkApplications() {
 
     time.style.marginTop =
       "6px";
-
-    const wasUpdated =
-      applicationStatus === "updated" &&
-      Boolean(application.updated_at);
 
     time.textContent =
       wasUpdated
