@@ -1,0 +1,2595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <title>색칠놀이</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --soft: #eef0f4;
+      --accent: #6750a4;
+      --danger: #b42318;
+      --shadow: 0 8px 26px rgba(0,0,0,.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #15171b;
+        --panel: #202328;
+        --text: #f2f4f7;
+        --muted: #a5abb5;
+        --line: #3b414a;
+        --soft: #2a2f36;
+        --accent: #b9a2ff;
+        --danger: #ff8a80;
+        --shadow: 0 8px 26px rgba(0,0,0,.28);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        Inter,
+        "Noto Sans KR",
+        "Noto Sans JP",
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: .55;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .page {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding:
+        max(10px, env(safe-area-inset-top))
+        14px
+        10px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      white-space: nowrap;
+    }
+
+    .header-spacer {
+      flex: 1;
+    }
+
+    .header-user {
+      color: var(--muted);
+      font-size: .92rem;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .compact-button,
+    .primary-button,
+    .secondary-button,
+    .danger-button {
+      min-height: 38px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 7px 12px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .primary-button {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .danger-button {
+      color: var(--danger);
+    }
+
+    .login-wrap {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 24px 14px;
+    }
+
+    .login-card {
+      width: min(420px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .login-card h2 {
+      margin: 0 0 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .status {
+      min-height: 1.4em;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .workspace {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+    }
+
+    .board-pane {
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(45deg, rgba(128,128,128,.06) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(128,128,128,.06) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(128,128,128,.06) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(128,128,128,.06) 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+      touch-action: none;
+    }
+
+    .board-toolbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 8;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .board-toolbar > * {
+      pointer-events: auto;
+    }
+
+    .active-color-pill {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+
+    .active-color-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.28);
+      flex: 0 0 auto;
+    }
+
+    .board-scroll {
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      overscroll-behavior: contain;
+      touch-action: pan-x pan-y pinch-zoom;
+      display: grid;
+      place-items: center;
+      padding: 70px 24px 32px;
+    }
+
+    .board-stage {
+      position: relative;
+      width: min(1100px, 100%);
+      aspect-ratio: 16 / 10;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .board-stage svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .region {
+      cursor: pointer;
+      transition: filter .1s ease;
+      vector-effect: non-scaling-stroke;
+      stroke: rgba(50,50,50,.72);
+      stroke-width: 1.2;
+    }
+
+    .region:hover {
+      filter: brightness(1.05);
+    }
+
+    .region-label {
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: rgba(255,255,255,.88);
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      fill: #202020;
+    }
+
+    .empty-board {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .side-pane {
+      min-height: 0;
+      overflow: auto;
+      border-left: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+    }
+
+    .panel-section + .panel-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .palette-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .palette-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 34px;
+      gap: 6px;
+      align-items: stretch;
+    }
+
+    .palette-row.is-active .palette-name {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      font-weight: 800;
+    }
+
+    .palette-color {
+      width: 34px;
+      height: 38px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .palette-color::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .palette-color::-webkit-color-swatch {
+      border: 0;
+    }
+
+    .palette-name {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--text);
+      text-align: left;
+      padding: 7px 9px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .palette-delete {
+      width: 34px;
+      min-width: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--danger);
+    }
+
+    .palette-editor {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 46px minmax(0,1fr);
+      gap: 8px;
+      align-items: end;
+    }
+
+    .palette-editor input[type="color"] {
+      width: 46px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0;
+      background: transparent;
+    }
+
+    .palette-editor input[type="text"] {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .palette-editor-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 7px;
+    }
+
+    .palette-editor-actions button {
+      flex: 1;
+    }
+
+    .mode-grid {
+      display: grid;
+      gap: 7px;
+    }
+
+    .mode-grid button.is-active {
+      border-color: var(--accent);
+      outline: 2px solid color-mix(in srgb, var(--accent) 34%, transparent);
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: .86rem;
+      line-height: 1.45;
+      margin: 7px 0 0;
+    }
+
+    .save-state {
+      color: var(--muted);
+      font-size: .84rem;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        flex-wrap: wrap;
+      }
+
+      .header-user {
+        max-width: 110px;
+      }
+
+      .workspace {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .board-pane {
+        height: 56dvh;
+        min-height: 360px;
+      }
+
+      .side-pane {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+        max-height: none;
+      }
+
+      .board-scroll {
+        padding:
+          64px
+          10px
+          18px;
+      }
+
+      .board-stage {
+        width: max(720px, 100%);
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1 id="pageTitle">색칠놀이</h1>
+    <div class="header-spacer"></div>
+
+    <select
+      id="languageSelect"
+      class="compact-button"
+      aria-label="Language"
+    >
+      <option value="ko">한국어</option>
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="ru">Русский</option>
+    </select>
+
+    <span
+      id="headerUser"
+      class="header-user hidden"
+    ></span>
+
+    <button
+      id="logoutButton"
+      class="compact-button hidden"
+      type="button"
+    >
+      로그아웃
+    </button>
+
+    <a
+      id="backLink"
+      class="compact-button"
+      href="/map/"
+      style="text-decoration:none"
+    >
+      맵으로
+    </a>
+  </header>
+
+  <main
+    id="loginArea"
+    class="login-wrap"
+  >
+    <section class="login-card">
+      <h2 id="loginTitle">로그인</h2>
+
+      <form id="loginForm">
+        <label class="field">
+          <span id="idLabel">아이디</span>
+          <input
+            id="loginId"
+            autocomplete="username"
+            required
+          >
+        </label>
+
+        <label class="field">
+          <span id="passwordLabel">비밀번호</span>
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </label>
+
+        <button
+          id="loginButton"
+          class="primary-button"
+          type="submit"
+          style="width:100%"
+        >
+          로그인
+        </button>
+
+        <div
+          id="loginStatus"
+          class="status"
+          role="status"
+        ></div>
+      </form>
+    </section>
+  </main>
+
+  <main
+    id="workspace"
+    class="workspace hidden"
+  >
+    <section class="board-pane">
+      <div class="board-toolbar">
+        <div
+          id="activeColorPill"
+          class="active-color-pill hidden"
+        >
+          <span
+            id="activeColorDot"
+            class="active-color-dot"
+          ></span>
+          <strong id="activeColorName"></strong>
+        </div>
+
+        <button
+          id="cancelPaintButton"
+          class="compact-button hidden"
+          type="button"
+        >
+          색칠 취소
+        </button>
+      </div>
+
+      <div
+        id="boardScroll"
+        class="board-scroll"
+      >
+        <div
+          id="boardStage"
+          class="board-stage"
+        >
+          <div
+            id="emptyBoard"
+            class="empty-board"
+          >
+            관리자가 설정한 구역도가 없습니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side-pane">
+      <section class="panel-section">
+        <div class="panel-title">
+          <h2 id="paletteTitle">색상</h2>
+          <span
+            id="paletteCount"
+            class="count"
+          >0 / 50</span>
+        </div>
+
+        <div
+          id="paletteList"
+          class="palette-list"
+        ></div>
+
+        <div class="palette-editor">
+          <input
+            id="newColor"
+            type="color"
+            value="#7A688F"
+            aria-label="Color"
+          >
+          <input
+            id="newColorName"
+            type="text"
+            maxlength="40"
+            placeholder="색 이름"
+          >
+
+          <div class="palette-editor-actions">
+            <button
+              id="addColorButton"
+              class="secondary-button"
+              type="button"
+            >
+              색 추가
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <div class="panel-title">
+          <h2 id="baseTitle">기준구역</h2>
+        </div>
+
+        <div class="mode-grid">
+          <button
+            id="setBaseButton"
+            class="secondary-button"
+            type="button"
+            disabled
+          >
+            선택한 색의 기준구역 지정
+          </button>
+
+          <button
+            id="clearBaseButton"
+            class="secondary-button"
+            type="button"
+            disabled
+          >
+            기준구역 해제
+          </button>
+        </div>
+
+        <p
+          id="baseHelp"
+          class="helper"
+        >
+          기준구역과 같은 색으로 이어지지 않은 구역은 반투명 그라데이션으로 표시됩니다.
+        </p>
+      </section>
+
+      <section class="panel-section">
+        <div class="panel-title">
+          <h2 id="labelTitle">색 이름 표시</h2>
+        </div>
+
+        <div class="mode-grid">
+          <button
+            class="secondary-button"
+            type="button"
+            data-label-mode="all"
+          >
+            모든 구역
+          </button>
+          <button
+            class="secondary-button"
+            type="button"
+            data-label-mode="base"
+          >
+            기준구역만
+          </button>
+          <button
+            class="secondary-button"
+            type="button"
+            data-label-mode="off"
+          >
+            표시 안 함
+          </button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <button
+          id="saveButton"
+          class="primary-button"
+          type="button"
+          style="width:100%"
+          disabled
+        >
+          저장
+        </button>
+        <div
+          id="saveState"
+          class="save-state"
+        ></div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const FUNCTIONS_BASE_URL =
+    "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1";
+
+  const MAP_LOGIN_URL =
+    `${FUNCTIONS_BASE_URL}/map-login`;
+
+  /*
+    Backend endpoints for Coloring will be added next.
+    The page is already wired to these names so the UI does not need
+    to be rebuilt when the server/storage step is implemented.
+  */
+  const COLORING_LOAD_URL =
+    `${FUNCTIONS_BASE_URL}/coloring-load`;
+
+  const COLORING_SAVE_URL =
+    `${FUNCTIONS_BASE_URL}/coloring-save`;
+
+  const SESSION_TOKEN_KEY =
+    "s967-map-session-token";
+
+  const SESSION_EXPIRES_KEY =
+    "s967-map-session-expires";
+
+  const ACCOUNT_ID_KEY =
+    "s967-map-account-id";
+
+  const LANGUAGE_KEY =
+    "s967-coloring-language";
+
+  const MAX_COLORS = 50;
+
+  const TEXT = {
+    ko: {
+      title: "색칠놀이",
+      login: "로그인",
+      id: "아이디",
+      password: "비밀번호",
+      loginButton: "로그인",
+      loginFailed: "로그인에 실패했습니다.",
+      sessionExpired: "로그인 세션이 만료되었습니다.",
+      logout: "로그아웃",
+      back: "맵으로",
+      palette: "색상",
+      colorNamePlaceholder: "색 이름",
+      addColor: "색 추가",
+      noColorName: "색 이름을 입력하세요.",
+      duplicateColorName: "같은 이름의 색이 이미 있습니다.",
+      maxColors: "색은 최대 50개까지 만들 수 있습니다.",
+      deleteConfirm: "이 색을 삭제하면 이 색으로 칠한 구역도 모두 미지정 상태로 돌아갑니다. 삭제할까요?",
+      cancelPaint: "색칠 취소",
+      baseTitle: "기준구역",
+      setBase: "선택한 색의 기준구역 지정",
+      clearBase: "기준구역 해제",
+      baseHelp: "기준구역과 같은 색으로 이어지지 않은 구역은 테두리의 원래 색부터 중앙으로 갈수록 반투명해지는 그라데이션으로 표시됩니다.",
+      chooseColorFirst: "먼저 색 이름을 눌러 색을 선택하세요.",
+      baseMode: "기준구역으로 지정할 구역을 누르세요.",
+      baseWrongColor: "현재 선택한 색으로 칠해진 구역만 기준구역으로 지정할 수 있습니다.",
+      labelTitle: "색 이름 표시",
+      labelAll: "모든 구역",
+      labelBase: "기준구역만",
+      labelOff: "표시 안 함",
+      save: "저장",
+      saving: "저장 중…",
+      saved: "저장됨",
+      saveFailed: "저장하지 못했습니다.",
+      loading: "불러오는 중…",
+      emptyBoard: "관리자가 설정한 구역도가 없습니다.",
+      boardLoadFailed: "구역도를 불러오지 못했습니다.",
+      activePrefix: "색칠 중",
+    },
+    en: {
+      title: "Coloring",
+      login: "Sign in",
+      id: "ID",
+      password: "Password",
+      loginButton: "Sign in",
+      loginFailed: "Sign-in failed.",
+      sessionExpired: "Your login session has expired.",
+      logout: "Log out",
+      back: "Maps",
+      palette: "Colors",
+      colorNamePlaceholder: "Color name",
+      addColor: "Add color",
+      noColorName: "Enter a color name.",
+      duplicateColorName: "A color with that name already exists.",
+      maxColors: "You can create up to 50 colors.",
+      deleteConfirm: "Deleting this color will also clear every region painted with it. Delete it?",
+      cancelPaint: "Cancel painting",
+      baseTitle: "Base region",
+      setBase: "Set base for selected color",
+      clearBase: "Clear base region",
+      baseHelp: "Regions of the same color that are not connected to its base region are shown with a gradient that fades from the original color at the border toward transparency in the center.",
+      chooseColorFirst: "Select a color by pressing its name first.",
+      baseMode: "Tap the region to use as the base.",
+      baseWrongColor: "Only a region painted with the selected color can be its base region.",
+      labelTitle: "Color names",
+      labelAll: "All regions",
+      labelBase: "Base regions only",
+      labelOff: "Hide names",
+      save: "Save",
+      saving: "Saving…",
+      saved: "Saved",
+      saveFailed: "Save failed.",
+      loading: "Loading…",
+      emptyBoard: "No region map has been configured by an administrator.",
+      boardLoadFailed: "Could not load the region map.",
+      activePrefix: "Painting",
+    },
+    ja: {
+      title: "塗り絵",
+      login: "ログイン",
+      id: "ID",
+      password: "パスワード",
+      loginButton: "ログイン",
+      loginFailed: "ログインに失敗しました。",
+      sessionExpired: "ログインセッションの有効期限が切れました。",
+      logout: "ログアウト",
+      back: "マップへ",
+      palette: "色",
+      colorNamePlaceholder: "色の名前",
+      addColor: "色を追加",
+      noColorName: "色の名前を入力してください。",
+      duplicateColorName: "同じ名前の色がすでにあります。",
+      maxColors: "色は最大50個まで作成できます。",
+      deleteConfirm: "この色を削除すると、この色で塗った区域もすべて未指定に戻ります。削除しますか？",
+      cancelPaint: "塗りを解除",
+      baseTitle: "基準区域",
+      setBase: "選択した色の基準区域を指定",
+      clearBase: "基準区域を解除",
+      baseHelp: "基準区域から同じ色でつながっていない区域は、輪郭の元の色から中央へ向かって透明になるグラデーションで表示されます。",
+      chooseColorFirst: "先に色の名前を押して選択してください。",
+      baseMode: "基準区域にする区域をタップしてください。",
+      baseWrongColor: "現在選択している色で塗られた区域だけを基準区域にできます。",
+      labelTitle: "色名表示",
+      labelAll: "すべての区域",
+      labelBase: "基準区域のみ",
+      labelOff: "表示しない",
+      save: "保存",
+      saving: "保存中…",
+      saved: "保存済み",
+      saveFailed: "保存できませんでした。",
+      loading: "読み込み中…",
+      emptyBoard: "管理者が設定した区域図がありません。",
+      boardLoadFailed: "区域図を読み込めませんでした。",
+      activePrefix: "塗り中",
+    },
+    ru: {
+      title: "Раскраска",
+      login: "Войти",
+      id: "ID",
+      password: "Пароль",
+      loginButton: "Войти",
+      loginFailed: "Не удалось войти.",
+      sessionExpired: "Сеанс входа истёк.",
+      logout: "Выйти",
+      back: "Карты",
+      palette: "Цвета",
+      colorNamePlaceholder: "Название цвета",
+      addColor: "Добавить цвет",
+      noColorName: "Введите название цвета.",
+      duplicateColorName: "Цвет с таким названием уже существует.",
+      maxColors: "Можно создать не более 50 цветов.",
+      deleteConfirm: "При удалении этого цвета все области, окрашенные им, станут не назначенными. Удалить?",
+      cancelPaint: "Отменить окрашивание",
+      baseTitle: "Базовая область",
+      setBase: "Задать базу выбранного цвета",
+      clearBase: "Снять базовую область",
+      baseHelp: "Области того же цвета, не связанные с базовой областью, показываются градиентом: исходный цвет по краям постепенно становится прозрачным к центру.",
+      chooseColorFirst: "Сначала выберите цвет, нажав его название.",
+      baseMode: "Нажмите область, которую нужно сделать базовой.",
+      baseWrongColor: "Базой может быть только область, окрашенная выбранным цветом.",
+      labelTitle: "Названия цветов",
+      labelAll: "Все области",
+      labelBase: "Только базовые",
+      labelOff: "Скрыть",
+      save: "Сохранить",
+      saving: "Сохранение…",
+      saved: "Сохранено",
+      saveFailed: "Не удалось сохранить.",
+      loading: "Загрузка…",
+      emptyBoard: "Администратор ещё не настроил карту областей.",
+      boardLoadFailed: "Не удалось загрузить карту областей.",
+      activePrefix: "Окрашивание",
+    },
+  };
+
+  const elements = {
+    pageTitle: document.getElementById("pageTitle"),
+    languageSelect: document.getElementById("languageSelect"),
+    headerUser: document.getElementById("headerUser"),
+    logoutButton: document.getElementById("logoutButton"),
+    backLink: document.getElementById("backLink"),
+    loginArea: document.getElementById("loginArea"),
+    loginForm: document.getElementById("loginForm"),
+    loginTitle: document.getElementById("loginTitle"),
+    idLabel: document.getElementById("idLabel"),
+    passwordLabel: document.getElementById("passwordLabel"),
+    loginId: document.getElementById("loginId"),
+    loginPassword: document.getElementById("loginPassword"),
+    loginButton: document.getElementById("loginButton"),
+    loginStatus: document.getElementById("loginStatus"),
+    workspace: document.getElementById("workspace"),
+    activeColorPill: document.getElementById("activeColorPill"),
+    activeColorDot: document.getElementById("activeColorDot"),
+    activeColorName: document.getElementById("activeColorName"),
+    cancelPaintButton: document.getElementById("cancelPaintButton"),
+    boardStage: document.getElementById("boardStage"),
+    emptyBoard: document.getElementById("emptyBoard"),
+    paletteTitle: document.getElementById("paletteTitle"),
+    paletteCount: document.getElementById("paletteCount"),
+    paletteList: document.getElementById("paletteList"),
+    newColor: document.getElementById("newColor"),
+    newColorName: document.getElementById("newColorName"),
+    addColorButton: document.getElementById("addColorButton"),
+    baseTitle: document.getElementById("baseTitle"),
+    setBaseButton: document.getElementById("setBaseButton"),
+    clearBaseButton: document.getElementById("clearBaseButton"),
+    baseHelp: document.getElementById("baseHelp"),
+    labelTitle: document.getElementById("labelTitle"),
+    saveButton: document.getElementById("saveButton"),
+    saveState: document.getElementById("saveState"),
+  };
+
+  let language =
+    localStorage.getItem(
+      LANGUAGE_KEY
+    ) ||
+    document.documentElement.lang ||
+    "ko";
+
+  if (!TEXT[language]) {
+    language = "ko";
+  }
+
+  let currentUserId =
+    localStorage.getItem(
+      ACCOUNT_ID_KEY
+    ) || "";
+
+  let board = null;
+
+  let state = {
+    palette: [],
+    regionColors: {},
+    baseRegions: {},
+    labelMode: "all",
+  };
+
+  let activeColorId = null;
+  let interactionMode = "paint";
+  let dirty = false;
+  let saving = false;
+
+  function t() {
+    return (
+      TEXT[language] ??
+      TEXT.ko
+    );
+  }
+
+  function token() {
+    return (
+      sessionStorage.getItem(
+        SESSION_TOKEN_KEY
+      ) || ""
+    );
+  }
+
+  function authHeaders() {
+    return {
+      Authorization:
+        `Bearer ${token()}`,
+      "Content-Type":
+        "application/json",
+    };
+  }
+
+  function saveSession(
+    session,
+    accountId
+  ) {
+    if (!session?.token) return;
+
+    sessionStorage.setItem(
+      SESSION_TOKEN_KEY,
+      session.token
+    );
+
+    if (session.expiresAt) {
+      sessionStorage.setItem(
+        SESSION_EXPIRES_KEY,
+        session.expiresAt
+      );
+    }
+
+    if (accountId) {
+      localStorage.setItem(
+        ACCOUNT_ID_KEY,
+        String(accountId)
+      );
+      currentUserId =
+        String(accountId);
+    }
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem(
+      SESSION_TOKEN_KEY
+    );
+    sessionStorage.removeItem(
+      SESSION_EXPIRES_KEY
+    );
+    currentUserId = "";
+  }
+
+  function makeId() {
+    return (
+      globalThis.crypto
+        ?.randomUUID?.() ??
+      `c-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}`
+    );
+  }
+
+  function hexToRgba(
+    hex,
+    alpha
+  ) {
+    const value =
+      String(hex)
+        .replace("#", "");
+
+    if (
+      !/^[0-9a-fA-F]{6}$/.test(
+        value
+      )
+    ) {
+      return `rgba(127,127,127,${alpha})`;
+    }
+
+    const r =
+      parseInt(
+        value.slice(0,2),
+        16
+      );
+    const g =
+      parseInt(
+        value.slice(2,4),
+        16
+      );
+    const b =
+      parseInt(
+        value.slice(4,6),
+        16
+      );
+
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function setDirty(
+    next = true
+  ) {
+    dirty = Boolean(next);
+    elements.saveButton.disabled =
+      !board ||
+      saving ||
+      !dirty;
+
+    if (dirty) {
+      elements.saveState.textContent =
+        "";
+    }
+  }
+
+  function setStaticText() {
+    const text = t();
+
+    document.documentElement.lang =
+      language;
+    document.title =
+      text.title;
+
+    elements.pageTitle.textContent =
+      text.title;
+    elements.loginTitle.textContent =
+      text.login;
+    elements.idLabel.textContent =
+      text.id;
+    elements.passwordLabel.textContent =
+      text.password;
+    elements.loginButton.textContent =
+      text.loginButton;
+    elements.logoutButton.textContent =
+      text.logout;
+    elements.backLink.textContent =
+      text.back;
+
+    elements.paletteTitle.textContent =
+      text.palette;
+    elements.newColorName.placeholder =
+      text.colorNamePlaceholder;
+    elements.addColorButton.textContent =
+      text.addColor;
+    elements.cancelPaintButton.textContent =
+      text.cancelPaint;
+
+    elements.baseTitle.textContent =
+      text.baseTitle;
+    elements.setBaseButton.textContent =
+      text.setBase;
+    elements.clearBaseButton.textContent =
+      text.clearBase;
+    elements.baseHelp.textContent =
+      text.baseHelp;
+
+    elements.labelTitle.textContent =
+      text.labelTitle;
+
+    const labelButtons =
+      elements.workspace
+        .querySelectorAll(
+          "[data-label-mode]"
+        );
+
+    for (
+      const button
+      of labelButtons
+    ) {
+      button.textContent =
+        button.dataset.labelMode ===
+          "all"
+          ? text.labelAll
+          : button.dataset.labelMode ===
+              "base"
+            ? text.labelBase
+            : text.labelOff;
+    }
+
+    elements.saveButton.textContent =
+      text.save;
+    elements.emptyBoard.textContent =
+      text.emptyBoard;
+
+    renderPalette();
+    renderActiveColor();
+    renderLabelButtons();
+    renderBoard();
+  }
+
+  function showLogin() {
+    elements.loginArea.classList.remove(
+      "hidden"
+    );
+    elements.workspace.classList.add(
+      "hidden"
+    );
+    elements.headerUser.classList.add(
+      "hidden"
+    );
+    elements.logoutButton.classList.add(
+      "hidden"
+    );
+  }
+
+  function showWorkspace() {
+    elements.loginArea.classList.add(
+      "hidden"
+    );
+    elements.workspace.classList.remove(
+      "hidden"
+    );
+    elements.headerUser.classList.remove(
+      "hidden"
+    );
+    elements.logoutButton.classList.remove(
+      "hidden"
+    );
+    elements.headerUser.textContent =
+      currentUserId;
+  }
+
+  function colorById(id) {
+    return (
+      state.palette.find(
+        item =>
+          item.id === id
+      ) ?? null
+    );
+  }
+
+  function regionsUsingColor(
+    colorId
+  ) {
+    return Object.keys(
+      state.regionColors
+    ).filter(
+      regionId =>
+        state.regionColors[
+          regionId
+        ] === colorId
+    );
+  }
+
+  function connectedRegions(
+    colorId
+  ) {
+    const baseId =
+      state.baseRegions[
+        colorId
+      ];
+
+    if (
+      !baseId ||
+      state.regionColors[
+        baseId
+      ] !== colorId
+    ) {
+      return new Set();
+    }
+
+    const result =
+      new Set([
+        baseId,
+      ]);
+
+    const queue =
+      [baseId];
+
+    while (queue.length) {
+      const current =
+        queue.shift();
+
+      const neighbors =
+        board?.adjacency?.[
+          current
+        ] ??
+        [];
+
+      for (
+        const neighbor
+        of neighbors
+      ) {
+        if (
+          result.has(
+            neighbor
+          ) ||
+          state.regionColors[
+            neighbor
+          ] !== colorId
+        ) {
+          continue;
+        }
+
+        result.add(
+          neighbor
+        );
+        queue.push(
+          neighbor
+        );
+      }
+    }
+
+    return result;
+  }
+
+  function renderPalette() {
+    elements.paletteList
+      .replaceChildren();
+
+    elements.paletteCount.textContent =
+      `${state.palette.length} / ${MAX_COLORS}`;
+
+    for (
+      const color
+      of state.palette
+    ) {
+      const row =
+        document.createElement(
+          "div"
+        );
+      row.className =
+        "palette-row";
+
+      if (
+        color.id ===
+          activeColorId
+      ) {
+        row.classList.add(
+          "is-active"
+        );
+      }
+
+      const input =
+        document.createElement(
+          "input"
+        );
+      input.type = "color";
+      input.className =
+        "palette-color";
+      input.value =
+        color.value;
+      input.title =
+        color.name;
+
+      input.addEventListener(
+        "input",
+        () => {
+          color.value =
+            input.value;
+          setDirty(true);
+          renderBoard();
+          renderActiveColor();
+        }
+      );
+
+      const name =
+        document.createElement(
+          "button"
+        );
+      name.type = "button";
+      name.className =
+        "palette-name";
+      name.textContent =
+        color.name;
+
+      name.addEventListener(
+        "click",
+        () => {
+          activeColorId =
+            color.id;
+          interactionMode =
+            "paint";
+          renderPalette();
+          renderActiveColor();
+          renderBaseControls();
+        }
+      );
+
+      const remove =
+        document.createElement(
+          "button"
+        );
+      remove.type = "button";
+      remove.className =
+        "palette-delete";
+      remove.textContent =
+        "×";
+      remove.setAttribute(
+        "aria-label",
+        "Delete"
+      );
+
+      remove.addEventListener(
+        "click",
+        () => {
+          const used =
+            regionsUsingColor(
+              color.id
+            );
+
+          if (
+            used.length > 0 &&
+            !window.confirm(
+              t().deleteConfirm
+            )
+          ) {
+            return;
+          }
+
+          state.palette =
+            state.palette.filter(
+              item =>
+                item.id !==
+                  color.id
+            );
+
+          for (
+            const regionId
+            of used
+          ) {
+            delete state
+              .regionColors[
+                regionId
+              ];
+          }
+
+          delete state
+            .baseRegions[
+              color.id
+            ];
+
+          if (
+            activeColorId ===
+              color.id
+          ) {
+            activeColorId =
+              null;
+            interactionMode =
+              "paint";
+          }
+
+          setDirty(true);
+          renderPalette();
+          renderActiveColor();
+          renderBaseControls();
+          renderBoard();
+        }
+      );
+
+      row.append(
+        input,
+        name,
+        remove
+      );
+
+      elements.paletteList.append(
+        row
+      );
+    }
+
+    elements.addColorButton.disabled =
+      state.palette.length >=
+        MAX_COLORS;
+  }
+
+  function renderActiveColor() {
+    const color =
+      colorById(
+        activeColorId
+      );
+
+    if (!color) {
+      elements.activeColorPill
+        .classList.add(
+          "hidden"
+        );
+      elements.cancelPaintButton
+        .classList.add(
+          "hidden"
+        );
+      return;
+    }
+
+    elements.activeColorPill
+      .classList.remove(
+        "hidden"
+      );
+    elements.cancelPaintButton
+      .classList.remove(
+        "hidden"
+      );
+
+    elements.activeColorDot
+      .style.background =
+        color.value;
+
+    elements.activeColorName
+      .textContent =
+        `${t().activePrefix}: ${color.name}`;
+  }
+
+  function renderBaseControls() {
+    const color =
+      colorById(
+        activeColorId
+      );
+
+    elements.setBaseButton.disabled =
+      !color;
+
+    elements.clearBaseButton.disabled =
+      !color ||
+      !state.baseRegions[
+        color.id
+      ];
+
+    elements.setBaseButton
+      .classList.toggle(
+        "is-active",
+        interactionMode ===
+          "setBase"
+      );
+  }
+
+  function renderLabelButtons() {
+    for (
+      const button
+      of elements.workspace
+        .querySelectorAll(
+          "[data-label-mode]"
+        )
+    ) {
+      button.classList.toggle(
+        "is-active",
+        button.dataset.labelMode ===
+          state.labelMode
+      );
+    }
+  }
+
+  function ensureDefs(svg) {
+    let defs =
+      svg.querySelector(
+        "defs"
+      );
+
+    if (!defs) {
+      defs =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "defs"
+        );
+      svg.prepend(
+        defs
+      );
+    }
+
+    return defs;
+  }
+
+  function disconnectedFill(
+    defs,
+    color
+  ) {
+    const safeId =
+      `fade-${color.id
+        .replace(
+          /[^a-zA-Z0-9_-]/g,
+          ""
+        )}`;
+
+    let gradient =
+      defs.querySelector(
+        `#${CSS.escape(safeId)}`
+      );
+
+    if (!gradient) {
+      gradient =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "radialGradient"
+        );
+      gradient.id =
+        safeId;
+      gradient.setAttribute(
+        "cx",
+        "50%"
+      );
+      gradient.setAttribute(
+        "cy",
+        "50%"
+      );
+      gradient.setAttribute(
+        "r",
+        "70%"
+      );
+
+      const center =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "stop"
+        );
+      center.setAttribute(
+        "offset",
+        "0%"
+      );
+      center.setAttribute(
+        "stop-color",
+        color.value
+      );
+      center.setAttribute(
+        "stop-opacity",
+        ".15"
+      );
+
+      const edge =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "stop"
+        );
+      edge.setAttribute(
+        "offset",
+        "100%"
+      );
+      edge.setAttribute(
+        "stop-color",
+        color.value
+      );
+      edge.setAttribute(
+        "stop-opacity",
+        "1"
+      );
+
+      gradient.append(
+        center,
+        edge
+      );
+      defs.append(
+        gradient
+      );
+    }
+
+    return `url(#${safeId})`;
+  }
+
+  function shouldShowLabel(
+    regionId,
+    colorId
+  ) {
+    if (
+      state.labelMode ===
+        "off"
+    ) {
+      return false;
+    }
+
+    if (
+      state.labelMode ===
+        "all"
+    ) {
+      return true;
+    }
+
+    return (
+      state.baseRegions[
+        colorId
+      ] === regionId
+    );
+  }
+
+  function renderBoard() {
+    elements.boardStage
+      .querySelectorAll(
+        "svg"
+      )
+      .forEach(
+        item =>
+          item.remove()
+      );
+
+    if (
+      !board ||
+      !Array.isArray(
+        board.regions
+      ) ||
+      board.regions.length ===
+        0
+    ) {
+      elements.emptyBoard
+        .classList.remove(
+          "hidden"
+        );
+      elements.saveButton.disabled =
+        true;
+      return;
+    }
+
+    elements.emptyBoard
+      .classList.add(
+        "hidden"
+      );
+
+    const svg =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+    svg.setAttribute(
+      "viewBox",
+      board.viewBox ??
+        "0 0 1600 1000"
+    );
+    svg.setAttribute(
+      "role",
+      "img"
+    );
+
+    const defs =
+      ensureDefs(
+        svg
+      );
+
+    const connectedCache =
+      new Map();
+
+    for (
+      const color
+      of state.palette
+    ) {
+      connectedCache.set(
+        color.id,
+        connectedRegions(
+          color.id
+        )
+      );
+    }
+
+    for (
+      const region
+      of board.regions
+    ) {
+      const group =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+
+      const shape =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          region.kind ===
+            "polygon"
+            ? "polygon"
+            : "path"
+        );
+
+      shape.classList.add(
+        "region"
+      );
+      shape.dataset.regionId =
+        region.id;
+
+      if (
+        region.kind ===
+          "polygon"
+      ) {
+        shape.setAttribute(
+          "points",
+          region.points
+        );
+      } else {
+        shape.setAttribute(
+          "d",
+          region.path
+        );
+      }
+
+      const colorId =
+        state.regionColors[
+          region.id
+        ];
+
+      const color =
+        colorById(
+          colorId
+        );
+
+      if (color) {
+        const baseId =
+          state.baseRegions[
+            color.id
+          ];
+
+        const connected =
+          connectedCache.get(
+            color.id
+          );
+
+        const disconnected =
+          Boolean(
+            baseId &&
+            !connected.has(
+              region.id
+            )
+          );
+
+        shape.setAttribute(
+          "fill",
+          disconnected
+            ? disconnectedFill(
+                defs,
+                color
+              )
+            : color.value
+        );
+      } else {
+        shape.setAttribute(
+          "fill",
+          board.unpaintedColor ??
+            "#e8e8e8"
+        );
+      }
+
+      shape.addEventListener(
+        "pointerup",
+        event => {
+          event.preventDefault();
+          paintRegion(
+            region.id
+          );
+        }
+      );
+
+      group.append(
+        shape
+      );
+
+      if (
+        color &&
+        shouldShowLabel(
+          region.id,
+          color.id
+        )
+      ) {
+        const center =
+          region.labelPoint ??
+          region.center;
+
+        if (
+          Array.isArray(center) &&
+          center.length >= 2
+        ) {
+          const label =
+            document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "text"
+            );
+          label.classList.add(
+            "region-label"
+          );
+          label.setAttribute(
+            "x",
+            String(center[0])
+          );
+          label.setAttribute(
+            "y",
+            String(center[1])
+          );
+          label.setAttribute(
+            "font-size",
+            String(
+              board.labelSize ??
+                24
+            )
+          );
+          label.textContent =
+            color.name;
+          group.append(
+            label
+          );
+        }
+      }
+
+      svg.append(
+        group
+      );
+    }
+
+    elements.boardStage.append(
+      svg
+    );
+
+    elements.saveButton.disabled =
+      saving ||
+      !dirty;
+  }
+
+  function paintRegion(
+    regionId
+  ) {
+    const color =
+      colorById(
+        activeColorId
+      );
+
+    if (
+      interactionMode ===
+        "setBase"
+    ) {
+      if (!color) {
+        window.alert(
+          t().chooseColorFirst
+        );
+        return;
+      }
+
+      if (
+        state.regionColors[
+          regionId
+        ] !== color.id
+      ) {
+        window.alert(
+          t().baseWrongColor
+        );
+        return;
+      }
+
+      state.baseRegions[
+        color.id
+      ] =
+        regionId;
+
+      interactionMode =
+        "paint";
+
+      setDirty(true);
+      renderBaseControls();
+      renderBoard();
+      return;
+    }
+
+    if (!color) {
+      return;
+    }
+
+    state.regionColors[
+      regionId
+    ] =
+      color.id;
+
+    /*
+      If this region used to be another color's base, that base is no longer
+      valid because the region has been repainted.
+    */
+    for (
+      const [
+        colorId,
+        baseRegionId,
+      ]
+      of Object.entries(
+        state.baseRegions
+      )
+    ) {
+      if (
+        baseRegionId ===
+          regionId &&
+        colorId !==
+          color.id
+      ) {
+        delete state
+          .baseRegions[
+            colorId
+          ];
+      }
+    }
+
+    setDirty(true);
+    renderBaseControls();
+    renderBoard();
+  }
+
+  function normalizeLoadedState(
+    source
+  ) {
+    const palette =
+      Array.isArray(
+        source?.palette
+      )
+        ? source.palette
+            .slice(
+              0,
+              MAX_COLORS
+            )
+            .map(
+              item => ({
+                id:
+                  String(
+                    item.id ||
+                    makeId()
+                  ),
+                name:
+                  String(
+                    item.name ??
+                    ""
+                  ).slice(
+                    0,
+                    40
+                  ),
+                value:
+                  /^#[0-9a-fA-F]{6}$/.test(
+                    String(
+                      item.value
+                    )
+                  )
+                    ? String(
+                        item.value
+                      )
+                    : "#7A688F",
+              })
+            )
+            .filter(
+              item =>
+                item.name
+            )
+        : [];
+
+    const validColorIds =
+      new Set(
+        palette.map(
+          item =>
+            item.id
+        )
+      );
+
+    const validRegionIds =
+      new Set(
+        board?.regions?.map(
+          item =>
+            item.id
+        ) ?? []
+      );
+
+    const regionColors =
+      {};
+
+    for (
+      const [
+        regionId,
+        colorId,
+      ]
+      of Object.entries(
+        source?.regionColors ??
+        {}
+      )
+    ) {
+      if (
+        validRegionIds.has(
+          regionId
+        ) &&
+        validColorIds.has(
+          colorId
+        )
+      ) {
+        regionColors[
+          regionId
+        ] =
+          colorId;
+      }
+    }
+
+    const baseRegions =
+      {};
+
+    for (
+      const [
+        colorId,
+        regionId,
+      ]
+      of Object.entries(
+        source?.baseRegions ??
+        {}
+      )
+    ) {
+      if (
+        validColorIds.has(
+          colorId
+        ) &&
+        regionColors[
+          regionId
+        ] === colorId
+      ) {
+        baseRegions[
+          colorId
+        ] =
+          regionId;
+      }
+    }
+
+    return {
+      palette,
+      regionColors,
+      baseRegions,
+      labelMode:
+        [
+          "all",
+          "base",
+          "off",
+        ].includes(
+          source?.labelMode
+        )
+          ? source.labelMode
+          : "all",
+    };
+  }
+
+  async function loadColoring() {
+    elements.saveState.textContent =
+      t().loading;
+
+    try {
+      const response =
+        await fetch(
+          COLORING_LOAD_URL,
+          {
+            headers:
+              authHeaders(),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (
+        response.status === 401
+      ) {
+        clearSession();
+        showLogin();
+        elements.loginStatus.textContent =
+          t().sessionExpired;
+        elements.loginStatus.classList.add(
+          "error"
+        );
+        return;
+      }
+
+      if (
+        !response.ok ||
+        result.ok !== true
+      ) {
+        /*
+          Coloring backend may not exist yet during this first page step.
+          Treat a missing board as an empty admin-board state rather than
+          making the whole page unusable.
+        */
+        board = null;
+        state =
+          normalizeLoadedState(
+            {}
+          );
+        elements.saveState.textContent =
+          "";
+        renderPalette();
+        renderBaseControls();
+        renderLabelButtons();
+        renderBoard();
+        return;
+      }
+
+      board =
+        result.board ??
+        null;
+
+      state =
+        normalizeLoadedState(
+          result.data ??
+          {}
+        );
+
+      activeColorId =
+        null;
+      interactionMode =
+        "paint";
+      dirty =
+        false;
+
+      renderPalette();
+      renderActiveColor();
+      renderBaseControls();
+      renderLabelButtons();
+      renderBoard();
+
+      elements.saveState.textContent =
+        "";
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      board = null;
+      state =
+        normalizeLoadedState(
+          {}
+        );
+      elements.saveState.textContent =
+        "";
+      renderPalette();
+      renderBaseControls();
+      renderLabelButtons();
+      renderBoard();
+    }
+  }
+
+  async function saveColoring() {
+    if (
+      !board ||
+      saving
+    ) {
+      return;
+    }
+
+    saving = true;
+    elements.saveButton.disabled =
+      true;
+    elements.saveState.textContent =
+      t().saving;
+
+    try {
+      const response =
+        await fetch(
+          COLORING_SAVE_URL,
+          {
+            method: "POST",
+            headers:
+              authHeaders(),
+            body:
+              JSON.stringify({
+                boardId:
+                  board.id,
+                data: state,
+              }),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (
+        response.status === 401
+      ) {
+        clearSession();
+        showLogin();
+        return;
+      }
+
+      if (
+        !response.ok ||
+        result.ok !== true
+      ) {
+        throw new Error(
+          "SAVE_FAILED"
+        );
+      }
+
+      dirty =
+        false;
+      elements.saveState.textContent =
+        t().saved;
+    } catch (error) {
+      console.error(
+        error
+      );
+      elements.saveState.textContent =
+        t().saveFailed;
+    } finally {
+      saving =
+        false;
+      elements.saveButton.disabled =
+        !board ||
+        !dirty;
+    }
+  }
+
+  async function login(
+    id,
+    password
+  ) {
+    elements.loginButton.disabled =
+      true;
+    elements.loginStatus.textContent =
+      "";
+
+    try {
+      const response =
+        await fetch(
+          MAP_LOGIN_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body:
+              JSON.stringify({
+                id,
+                password,
+              }),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (
+        !response.ok ||
+        result.ok !== true ||
+        !result.session?.token
+      ) {
+        throw new Error(
+          result.error ||
+          "LOGIN_FAILED"
+        );
+      }
+
+      saveSession(
+        result.session,
+        id
+      );
+
+      showWorkspace();
+      await loadColoring();
+    } catch (error) {
+      console.error(
+        error
+      );
+      elements.loginStatus.textContent =
+        t().loginFailed;
+      elements.loginStatus.classList.add(
+        "error"
+      );
+    } finally {
+      elements.loginButton.disabled =
+        false;
+    }
+  }
+
+  elements.loginForm
+    .addEventListener(
+      "submit",
+      event => {
+        event.preventDefault();
+
+        login(
+          elements.loginId
+            .value.trim(),
+          elements.loginPassword
+            .value
+        );
+      }
+    );
+
+  elements.languageSelect
+    .addEventListener(
+      "change",
+      () => {
+        language =
+          elements.languageSelect.value;
+        localStorage.setItem(
+          LANGUAGE_KEY,
+          language
+        );
+        setStaticText();
+      }
+    );
+
+  elements.logoutButton
+    .addEventListener(
+      "click",
+      () => {
+        clearSession();
+        activeColorId =
+          null;
+        interactionMode =
+          "paint";
+        board =
+          null;
+        showLogin();
+      }
+    );
+
+  elements.addColorButton
+    .addEventListener(
+      "click",
+      () => {
+        if (
+          state.palette.length >=
+            MAX_COLORS
+        ) {
+          window.alert(
+            t().maxColors
+          );
+          return;
+        }
+
+        const name =
+          elements.newColorName
+            .value.trim();
+
+        if (!name) {
+          window.alert(
+            t().noColorName
+          );
+          elements.newColorName
+            .focus();
+          return;
+        }
+
+        if (
+          state.palette.some(
+            item =>
+              item.name ===
+                name
+          )
+        ) {
+          window.alert(
+            t().duplicateColorName
+          );
+          return;
+        }
+
+        const color = {
+          id: makeId(),
+          name,
+          value:
+            elements.newColor.value,
+        };
+
+        state.palette.push(
+          color
+        );
+
+        elements.newColorName
+          .value =
+            "";
+
+        activeColorId =
+          color.id;
+        interactionMode =
+          "paint";
+
+        setDirty(true);
+        renderPalette();
+        renderActiveColor();
+        renderBaseControls();
+      }
+    );
+
+  elements.cancelPaintButton
+    .addEventListener(
+      "click",
+      () => {
+        activeColorId =
+          null;
+        interactionMode =
+          "paint";
+        renderPalette();
+        renderActiveColor();
+        renderBaseControls();
+      }
+    );
+
+  elements.setBaseButton
+    .addEventListener(
+      "click",
+      () => {
+        if (
+          !colorById(
+            activeColorId
+          )
+        ) {
+          window.alert(
+            t().chooseColorFirst
+          );
+          return;
+        }
+
+        interactionMode =
+          "setBase";
+        elements.saveState.textContent =
+          t().baseMode;
+        renderBaseControls();
+      }
+    );
+
+  elements.clearBaseButton
+    .addEventListener(
+      "click",
+      () => {
+        const color =
+          colorById(
+            activeColorId
+          );
+
+        if (!color) return;
+
+        delete state
+          .baseRegions[
+            color.id
+          ];
+
+        interactionMode =
+          "paint";
+        setDirty(true);
+        renderBaseControls();
+        renderBoard();
+      }
+    );
+
+  for (
+    const button
+    of elements.workspace
+      .querySelectorAll(
+        "[data-label-mode]"
+      )
+  ) {
+    button.addEventListener(
+      "click",
+      () => {
+        state.labelMode =
+          button.dataset
+            .labelMode;
+        setDirty(true);
+        renderLabelButtons();
+        renderBoard();
+      }
+    );
+  }
+
+  elements.saveButton
+    .addEventListener(
+      "click",
+      saveColoring
+    );
+
+  window.addEventListener(
+    "beforeunload",
+    event => {
+      if (!dirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  );
+
+  elements.languageSelect.value =
+    language;
+  setStaticText();
+  renderBaseControls();
+
+  if (token()) {
+    showWorkspace();
+    loadColoring();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
