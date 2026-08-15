@@ -92,9 +92,17 @@ export function applyRangeOverlapRules(
         )
       : existingRanges;
 
+  /*
+    Fixed/base-map ranges are a separate terrain layer and do not block
+    creation of user ranges. Only user-range ownership participates in
+    user-range overlap validation.
+
+    Actual buildability is resolved later by placement rules, where any
+    blocked layer (fixed or user) takes precedence.
+  */
   const owners =
     buildRangeCellOwnerIndex({
-      fixedRanges,
+      fixedRanges: [],
       ranges:
         rangesForOverlap,
     });
