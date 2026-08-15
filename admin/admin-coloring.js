@@ -156,8 +156,22 @@
             ?.clearToken?.();
         }
 
+        const parts = [
+          result.error,
+          result.detail,
+          result.code
+            ? `code=${result.code}`
+            : "",
+          result.hint
+            ? `hint=${result.hint}`
+            : "",
+          result.details
+            ? `details=${result.details}`
+            : "",
+        ].filter(Boolean);
+
         throw new Error(
-          result.error ||
+          parts.join(" | ") ||
           result.message ||
           "색칠놀이 관리자 요청에 실패했습니다."
         );
