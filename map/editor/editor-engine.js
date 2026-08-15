@@ -1341,14 +1341,17 @@ export function moveBuilding(
   newY
 ) {
   ensureWritable();
-  requireUserBuilding(
-    buildingId
-  );
 
   const current =
-    occupancy.requireBuilding(
+    requireUserBuilding(
       buildingId
     );
+
+  if (current.locked) {
+    throw new RangeError(
+      "Locked buildings cannot be moved."
+    );
+  }
 
   const rules =
     canPlaceBuilding({
@@ -1841,7 +1844,7 @@ export function deleteFixedBuildingType(typeId) {
 }
 
 export function canPlaceFixedBuilding({ x, y, width, height, ignoreBuildingId = null }) {
-  ensureWritable();
+  ensureTemplateWritable();
   return occupancy.checkPosition({ x, y, width, height, ignoreBuildingId });
 }
 
@@ -1864,30 +1867,18 @@ export function addFixedBuilding(data) {
 }
 
 export function moveFixedBuilding(buildingId, newX, newY) {
-  ensureWritable();
+  ensureTemplateWritable();
   return editFixedBuilding(buildingId, { x: newX, y: newY });
 }
 
 export function editFixedBuilding(buildingId, changes = {}) {
-  ensureWritable();
+  ensureTemplateWritable();
 
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
 
   const current = document.fixedBuildings[index];
 
-  /*
-    In a normal map, a locked fixed building may only have its lock removed.
-    Once unlocked, it can be renamed, moved, switched to another fixed type,
-    relocked, or deleted. Template mode keeps its administrator editability.
-  */
-  if (
-    documentMode === "map" &&
-    current.locked &&
-    Object.keys(changes).some(key => !["locked"].includes(key))
-  ) {
-    throw new RangeError("Unlock the fixed building before editing it.");
-  }
 
   const typeId = changes.typeId ?? changes.type_id ?? current.typeId;
   const type = requireFixedBuildingType(typeId);
@@ -1902,7 +1893,6 @@ export function editFixedBuilding(buildingId, changes = {}) {
     height: type.height,
     color: changes.color ?? current.color ?? type.color,
     priority: changes.priority ?? current.priority ?? 0,
-    locked: changes.locked ?? current.locked,
   });
 
   const check = occupancy.checkPosition({
@@ -1924,14 +1914,9 @@ export function editFixedBuilding(buildingId, changes = {}) {
 }
 
 export function deleteFixedBuilding(buildingId) {
-  ensureWritable();
+  ensureTemplateWritable();
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
-
-  const current = document.fixedBuildings[index];
-  if (documentMode === "map" && current.locked) {
-    throw new RangeError("Unlock the fixed building before deleting it.");
-  }
 
   const [removed] = document.fixedBuildings.splice(index, 1);
   rebuildOccupancy();
@@ -1949,7 +1934,7 @@ export function deleteFixedBuildings(buildingIds) {
 }
 
 export function restoreFixedBuildings(states) {
-  ensureWritable();
+  ensureTemplateWritable();
   const additions = states.map(item => {
     const type = requireFixedBuildingType(item.typeId ?? item.type_id);
     return new FixedBuilding({
@@ -1970,7 +1955,7 @@ export function restoreFixedBuildings(states) {
 }
 
 export function restoreFixedBuildingState(state) {
-  ensureWritable();
+  ensureTemplateWritable();
   const index = document.fixedBuildings.findIndex(item => item.id === state.id);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${state.id}`);
 
