@@ -809,6 +809,14 @@
 >
   고정맵
 </button>
+
+<button
+  type="button"
+  class="admin-tab"
+  data-admin-tab="coloring"
+>
+  색칠놀이
+</button>
   </div>
 
   <div
@@ -943,39 +951,12 @@
     </h3>
 
     <p class="small">
-      채팅 전용 계정입니다. 권한 버튼에서 Staff로 전환할 수 있습니다.
+      채팅 전용 권한으로 전환된 계정입니다. 권한 버튼에서 Staff로 다시 전환할 수 있습니다.
     </p>
 
     <div
       id="chatOnlyAccounts"
       class="manage-list"
-    ></div>
-
-    <hr
-      style="
-        margin: 20px 0;
-        border: 0;
-        border-top: 1px solid var(--border);
-      "
-    >
-
-    <h3 style="margin-bottom: 6px;">
-      Staff Email Recipients
-    </h3>
-
-    <p class="small">
-      Staff가 직접 등록한 업무 알림 이메일입니다.
-      Admin은 조회·수정·활성화/비활성화·삭제할 수 있습니다.
-    </p>
-
-    <div
-      id="staffEmailRecipients"
-      class="manage-list"
-    ></div>
-
-    <div
-      id="staffEmailRecipientsStatus"
-      class="status"
     ></div>
 
     <hr
@@ -1820,16 +1801,6 @@
 
       <input id="embeddedAnnAnnouncementId" type="hidden">
 
-      <div class="row" style="margin-top:9px;margin-bottom:9px">
-        <button
-          id="embeddedAnnGroupBuyPreset"
-          type="button"
-          class="preset"
-        >
-          공동구매 프리셋
-        </button>
-      </div>
-
       <div class="lang-grid">
         <label>한국어<textarea id="embeddedAnnAKo"></textarea></label>
         <label>English<textarea id="embeddedAnnAEn"></textarea></label>
@@ -1932,6 +1903,93 @@
     <div id="createMapTemplateStatus" class="status"></div>
   </section>
 </div>
+
+
+<div
+  id="coloringAdminSection"
+  class="admin-section"
+  data-admin-section="coloring"
+>
+  <section class="panel">
+    <div class="row">
+      <h2 style="margin: 0;">
+        색칠놀이 구역도 관리
+      </h2>
+
+      <a
+        class="admin-button"
+        href="/admin/editcoloring/"
+      >
+        구역도 제작기 열기
+      </a>
+
+      <button
+        id="refreshColoringBoardButton"
+        type="button"
+      >
+        새로고침
+      </button>
+    </div>
+
+    <p class="small">
+      현재 색칠놀이에 사용되는 구역도를 교체합니다.
+      새 구역도를 적용하면 모든 사용자의 기존 색칠 데이터가 즉시 삭제되며 복구할 수 없습니다.
+    </p>
+
+    <div
+      id="coloringBoardCurrent"
+      class="group-buy-card"
+      style="margin-top: 14px;"
+    >
+      <div class="small">
+        현재 구역도를 불러오는 중…
+      </div>
+    </div>
+
+    <div
+      id="coloringBoardStatus"
+      class="status"
+    ></div>
+  </section>
+
+  <section class="panel">
+    <h2>새 구역도로 교체</h2>
+
+    <p class="small">
+      색칠놀이용 구역 데이터 JSON 파일을 선택합니다.
+      <code>id</code>, <code>regions</code>, <code>adjacency</code>가 포함된 파일이어야 합니다.
+      새 구역도의 <code>id</code>는 현재 구역도와 다른 값을 사용해야 합니다.
+    </p>
+
+    <div class="row add-row">
+      <input
+        id="newColoringBoardFile"
+        type="file"
+        accept=".json,application/json"
+      >
+
+      <button
+        id="replaceColoringBoardButton"
+        type="button"
+        class="danger"
+      >
+        구역도 교체
+      </button>
+    </div>
+
+    <div
+      id="newColoringBoardPreview"
+      class="small"
+      style="margin-top: 12px;"
+    ></div>
+
+    <div
+      id="replaceColoringBoardStatus"
+      class="status"
+    ></div>
+  </section>
+</div>
+
 </div>
 
 
@@ -2009,9 +2067,6 @@
 
     const STAFF_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-admin";
-
-    const STAFF_EMAIL_RECIPIENTS_ADMIN_API_URL =
-  "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-email-recipients-admin";
 
     const CHAT_ROOM_ADMIN_API_URL =
   "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
@@ -2107,16 +2162,6 @@ const staffStatus =
 const refreshStaffButton =
   document.getElementById(
     "refreshStaffButton"
-  );
-
-const staffEmailRecipients =
-  document.getElementById(
-    "staffEmailRecipients"
-  );
-
-const staffEmailRecipientsStatus =
-  document.getElementById(
-    "staffEmailRecipientsStatus"
   );
 
 const staffIdInput =
@@ -3253,79 +3298,6 @@ async function chatRoomAdminApiRequest(
   return result;
 }
 
-function getManagedAccountLoginId(account) {
-  const accountId =
-    String(
-      account?.account_id ??
-      account?.login_id ??
-      account?.chat_id ??
-      ""
-    ).trim();
-
-  if (accountId) {
-    return accountId;
-  }
-
-  const legacyStaffId =
-    String(
-      account?.staff_id ??
-      ""
-    ).trim();
-
-  const nickname =
-    String(
-      account?.display_name ??
-      ""
-    ).trim();
-
-  /*
-    예전 staff-admin은 staff_id에 실제 로그인 ID가 아니라
-    display_name을 그대로 복제해 보냈다.
-    두 값이 같으면 그 값은 ID로 신뢰하지 않는다.
-  */
-  if (
-    legacyStaffId &&
-    legacyStaffId.toLowerCase() !==
-      nickname.toLowerCase()
-  ) {
-    return legacyStaffId;
-  }
-
-  return "";
-}
-
-function getManagedAccountLabel(account) {
-  const loginId =
-    getManagedAccountLoginId(account);
-
-  const nickname =
-    String(
-      account?.display_name ??
-      ""
-    ).trim();
-
-  if (
-    loginId &&
-    nickname
-  ) {
-    if (
-      loginId.toLowerCase() ===
-      nickname.toLowerCase()
-    ) {
-      return loginId;
-    }
-
-    return `${loginId} (${nickname})`;
-  }
-
-  return (
-    loginId ||
-    nickname ||
-    "알 수 없는 계정"
-  );
-}
-
-
 function openPermissionDialog(
   account,
   currentPermission
@@ -3335,21 +3307,11 @@ function openPermissionDialog(
       account.user_id,
     display_name:
       account.display_name,
-    login_id:
-      account.login_id,
-    staff_id:
-      account.staff_id,
-    chat_id:
-      account.chat_id,
-    account_id:
-      account.account_id,
-    email:
-      account.email,
     currentPermission,
   };
 
   accountPermissionName.textContent =
-    getManagedAccountLabel(account);
+    account.display_name;
 
   chooseStaffPermission.classList.toggle(
     "is-current",
@@ -3397,7 +3359,7 @@ async function applyAccountPermission(
 
   if (
     !confirm(
-      `"${getManagedAccountLabel(permissionAccount)}" 계정의 권한을 ${label}(으)로 변경할까요?`
+      `"${permissionAccount.display_name}" 계정의 권한을 ${label}(으)로 변경할까요?`
     )
   ) {
     return;
@@ -3524,7 +3486,7 @@ accountPermissionDialog
       "manage-name";
 
     name.textContent =
-      getManagedAccountLabel(account);
+      account.display_name;
 
     const email =
       document.createElement("div");
@@ -3575,7 +3537,7 @@ accountPermissionDialog
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${getManagedAccountLabel(account)}:`
+            `Enter a new temporary password for ${account.display_name}:`
           );
 
         if (password === null) {
@@ -3659,7 +3621,7 @@ accountPermissionDialog
 
         const confirmed =
           confirm(
-            `${verb} Staff "${getManagedAccountLabel(account)}"?`
+            `${verb} Staff "${account.display_name}"?`
           );
 
         if (!confirmed) {
@@ -3740,7 +3702,7 @@ accountPermissionDialog
       async () => {
         const confirmed =
           confirm(
-            `Delete Staff "${getManagedAccountLabel(account)}"?\n\nThis cannot be undone.`
+            `Delete Staff "${account.display_name}"?\n\nThis cannot be undone.`
           );
 
         if (!confirmed) {
@@ -3848,7 +3810,7 @@ function renderChatOnlyAccounts(accounts) {
 
     name.className = "manage-name";
     name.textContent =
-      getManagedAccountLabel(account);
+      account.display_name;
 
     const state =
       document.createElement("div");
@@ -3884,7 +3846,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${getManagedAccountLabel(account)}:`
+            `Enter a new temporary password for ${account.display_name}:`
           );
 
         if (password === null) {
@@ -3957,7 +3919,7 @@ function renderChatOnlyAccounts(accounts) {
 
         if (
           !confirm(
-            `${verb} chat-only account "${getManagedAccountLabel(account)}"?`
+            `${verb} chat-only account "${account.display_name}"?`
           )
         ) {
           return;
@@ -4024,7 +3986,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const confirmed =
           confirm(
-            `Delete chat-only account "${getManagedAccountLabel(account)}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
+            `Delete chat-only account "${account.display_name}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
           );
 
         if (!confirmed) {
@@ -4075,313 +4037,6 @@ function renderChatOnlyAccounts(accounts) {
   }
 }
 
-async function staffEmailRecipientsAdminRequest(
-  method,
-  body = null
-) {
-  const options = {
-    method,
-    headers: {},
-  };
-
-  if (body !== null) {
-    options.headers[
-      "Content-Type"
-    ] = "application/json";
-
-    options.body =
-      JSON.stringify(body);
-  }
-
-  const response =
-    await authenticatedAdminFetch(
-      STAFF_EMAIL_RECIPIENTS_ADMIN_API_URL,
-      options
-    );
-
-  const result =
-    await response
-      .json()
-      .catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(
-      result.error ||
-      "Staff email request failed."
-    );
-  }
-
-  return result;
-}
-
-function staffEmailTypeLabel(type) {
-  if (type === "wk") return "WK";
-  if (type === "inquiry") return "문의";
-  if (type === "group_buy") return "공동구매";
-  return String(type ?? "");
-}
-
-function renderStaffEmailRecipients(
-  recipients
-) {
-  staffEmailRecipients.innerHTML = "";
-
-  const items =
-    Array.isArray(recipients)
-      ? recipients
-      : [];
-
-  if (!items.length) {
-    staffEmailRecipients.innerHTML =
-      '<div class="small">Staff가 등록한 이메일이 없습니다.</div>';
-    return;
-  }
-
-  for (const recipient of items) {
-    const row =
-      document.createElement("div");
-
-    row.className = "manage-item";
-
-    if (!recipient.active) {
-      row.classList.add(
-        "item-inactive"
-      );
-    }
-
-    const content =
-      document.createElement("div");
-
-    content.style.flex = "1";
-    content.style.minWidth = "0";
-
-    const name =
-      document.createElement("div");
-
-    name.className = "manage-name";
-    name.textContent =
-      `${recipient.staff_id || "알 수 없는 Staff"} · ${staffEmailTypeLabel(recipient.type)} · ${recipient.nickname || "이름 없음"}`;
-
-    const email =
-      document.createElement("div");
-
-    email.className = "manage-note";
-    email.textContent =
-      `${recipient.email} · ${recipient.active ? "Active" : "Inactive"}`;
-
-    content.append(
-      name,
-      email
-    );
-
-    const actions =
-      document.createElement("div");
-
-    actions.className =
-      "manage-actions";
-
-    const toggleButton =
-      document.createElement("button");
-
-    toggleButton.type = "button";
-    toggleButton.textContent =
-      recipient.active
-        ? "Deactivate"
-        : "Activate";
-
-    toggleButton.addEventListener(
-      "click",
-      async () => {
-        toggleButton.disabled = true;
-
-        try {
-          await staffEmailRecipientsAdminRequest(
-            "PATCH",
-            {
-              type: recipient.type,
-              id: recipient.id,
-              active: !recipient.active,
-            }
-          );
-
-          await loadStaffEmailRecipients();
-        } catch (error) {
-          setStatus(
-            staffEmailRecipientsStatus,
-            error.message ||
-              "이메일 상태 변경에 실패했습니다.",
-            true
-          );
-        } finally {
-          toggleButton.disabled = false;
-        }
-      }
-    );
-
-    const editButton =
-      document.createElement("button");
-
-    editButton.type = "button";
-    editButton.textContent = "Edit";
-
-    editButton.addEventListener(
-      "click",
-      async () => {
-        const nickname =
-          prompt(
-            "별명:",
-            recipient.nickname ?? ""
-          );
-
-        if (nickname === null) {
-          return;
-        }
-
-        const email =
-          prompt(
-            "이메일 주소:",
-            recipient.email ?? ""
-          );
-
-        if (email === null) {
-          return;
-        }
-
-        if (
-          !nickname.trim() ||
-          !email.trim()
-        ) {
-          setStatus(
-            staffEmailRecipientsStatus,
-            "별명과 이메일을 모두 입력하세요.",
-            true
-          );
-          return;
-        }
-
-        editButton.disabled = true;
-
-        try {
-          await staffEmailRecipientsAdminRequest(
-            "PATCH",
-            {
-              type: recipient.type,
-              id: recipient.id,
-              nickname:
-                nickname.trim(),
-              email:
-                email.trim(),
-            }
-          );
-
-          await loadStaffEmailRecipients();
-        } catch (error) {
-          setStatus(
-            staffEmailRecipientsStatus,
-            error.message ||
-              "이메일 수정에 실패했습니다.",
-            true
-          );
-        } finally {
-          editButton.disabled = false;
-        }
-      }
-    );
-
-    const deleteButton =
-      document.createElement("button");
-
-    deleteButton.type = "button";
-    deleteButton.classList.add(
-      "danger"
-    );
-    deleteButton.textContent =
-      "Delete";
-
-    deleteButton.addEventListener(
-      "click",
-      async () => {
-        const confirmed =
-          confirm(
-            `Delete Staff email?\n\n${recipient.staff_id || ""} · ${recipient.email}\n\nThis removes the address from the Staff account's notification recipients.`
-          );
-
-        if (!confirmed) {
-          return;
-        }
-
-        deleteButton.disabled = true;
-
-        try {
-          await staffEmailRecipientsAdminRequest(
-            "DELETE",
-            {
-              type: recipient.type,
-              id: recipient.id,
-            }
-          );
-
-          await loadStaffEmailRecipients();
-        } catch (error) {
-          setStatus(
-            staffEmailRecipientsStatus,
-            error.message ||
-              "이메일 삭제에 실패했습니다.",
-            true
-          );
-          deleteButton.disabled = false;
-        }
-      }
-    );
-
-    actions.append(
-      toggleButton,
-      editButton,
-      deleteButton
-    );
-
-    row.append(
-      content,
-      actions
-    );
-
-    staffEmailRecipients.appendChild(
-      row
-    );
-  }
-}
-
-async function loadStaffEmailRecipients() {
-  setStatus(
-    staffEmailRecipientsStatus,
-    "Loading…"
-  );
-
-  try {
-    const result =
-      await staffEmailRecipientsAdminRequest(
-        "GET"
-      );
-
-    renderStaffEmailRecipients(
-      result.recipients ?? []
-    );
-
-    setStatus(
-      staffEmailRecipientsStatus,
-      ""
-    );
-  } catch (error) {
-    setStatus(
-      staffEmailRecipientsStatus,
-      error.message ||
-        "Staff 이메일을 불러오지 못했습니다.",
-      true
-    );
-    throw error;
-  }
-}
-
     async function loadStaffAccounts() {
   setStatus(
     staffStatus,
@@ -4392,7 +4047,6 @@ async function loadStaffEmailRecipients() {
     const [
       staffResult,
       chatResult,
-      staffEmailResult,
     ] =
       await Promise.all([
         staffApiRequest(
@@ -4401,22 +4055,20 @@ async function loadStaffEmailRecipients() {
         chatRoomAdminApiRequest(
           "GET"
         ),
-        staffEmailRecipientsAdminRequest(
-          "GET"
-        ),
       ]);
 
-    renderStaffEmailRecipients(
-      staffEmailResult.recipients ?? []
-    );
-
-    const chatAccountIds =
+    const activeChatIds =
       new Set(
         (
           chatResult
             .chat_users ??
           []
         )
+          .filter(
+            (account) =>
+              account.is_active ===
+              true
+          )
           .map(
             (account) =>
               account.user_id
@@ -4425,13 +4077,9 @@ async function loadStaffEmailRecipients() {
 
     /*
       A user converted from Staff to chat-only keeps an inactive
-      staff_accounts shadow row so the conversion can be reversed without
-      destroying historical account data.
-
-      That shadow row must stay hidden from the Staff list even when the
-      chat-only account itself is disabled. A real active Staff account,
-      however, must always remain visible even if an inactive chat shadow
-      row also exists.
+      staff_accounts row so the conversion can be reversed without
+      destroying historical account data. Hide that inactive Staff
+      shadow row from the Staff list while its chat permission is active.
     */
     const visibleStaff =
       (
@@ -4440,8 +4088,7 @@ async function loadStaffEmailRecipients() {
       )
         .filter(
           (account) =>
-            account.is_active === true ||
-            !chatAccountIds.has(
+            !activeChatIds.has(
               account.user_id
             )
         );
@@ -4491,11 +4138,6 @@ async function loadStaffEmailRecipients() {
 
     setStatus(
       staffStatus,
-      ""
-    );
-
-    setStatus(
-      staffEmailRecipientsStatus,
       ""
     );
   } catch (error) {
@@ -11487,7 +11129,7 @@ window.addEventListener(
     function renderUsers(){
       usersHost.replaceChildren(...data.chat_users.map(u=>{
         const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${getManagedAccountLabel(u)} ${u.is_active?"":"[비활성]"}`;
+        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
         const row=document.createElement("div");row.className="row";
         const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
         const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
@@ -11543,7 +11185,7 @@ window.addEventListener(
     const $=id=>document.getElementById(id);
 
     const gate=$("embeddedAnnGate"),gateMessage=$("embeddedAnnGateMessage"),staffLogin=$("embeddedAnnStaffLogin"),staffId=$("embeddedAnnStaffId"),staffPassword=$("embeddedAnnStaffPassword"),staffLoginButton=$("embeddedAnnStaffLoginButton"),app=$("embeddedAnnApp"),actorHost=$("embeddedAnnActor");
-    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList"),announcementListEmpty=$("embeddedAnnAnnouncementListEmpty"),refreshAnnouncements=$("embeddedAnnRefreshAnnouncements"),groupBuyPreset=$("embeddedAnnGroupBuyPreset");
+    const aId=$("embeddedAnnAnnouncementId"),aKo=$("embeddedAnnAKo"),aEn=$("embeddedAnnAEn"),aJa=$("embeddedAnnAJa"),aRu=$("embeddedAnnARu"),aStart=$("embeddedAnnAStart"),aEnd=$("embeddedAnnAEnd"),saveAnnouncement=$("embeddedAnnSaveAnnouncement"),cancelAnnouncementEdit=$("embeddedAnnCancelAnnouncementEdit"),announcementStatus=$("embeddedAnnAnnouncementStatus"),announcementList=$("embeddedAnnAnnouncementList"),announcementListEmpty=$("embeddedAnnAnnouncementListEmpty"),refreshAnnouncements=$("embeddedAnnRefreshAnnouncements");
     const rId=$("embeddedAnnRoutineId"),rName=$("embeddedAnnRName"),rAnchor=$("embeddedAnnRAnchor"),rRepeat=$("embeddedAnnRRepeat"),rHours=$("embeddedAnnRHours"),rOffset=$("embeddedAnnROffset"),rEnabled=$("embeddedAnnREnabled"),rKo=$("embeddedAnnRKo"),rEn=$("embeddedAnnREn"),rJa=$("embeddedAnnRJa"),rRu=$("embeddedAnnRRu"),saveRoutine=$("embeddedAnnSaveRoutine"),cancelRoutineEdit=$("embeddedAnnCancelRoutineEdit"),routineStatus=$("embeddedAnnRoutineStatus"),routineList=$("embeddedAnnRoutineList"),wkPreset=$("embeddedAnnWkPreset"),periodPreset=$("embeddedAnnPeriodPreset");
 
     let data={announcements:[],routines:[]};
@@ -11697,14 +11339,6 @@ window.addEventListener(
 
     async function deleteAnnouncement(item){if(!confirm("이 공지사항을 삭제할까요?"))return;await request("POST",{action:"delete_announcement",id:item.id});await load();}
 
-    groupBuyPreset.onclick=()=>{
-      aKo.value="공동구매가 진행중입니다.";
-      aEn.value="A group purchase is currently in progress.";
-      aJa.value="共同購入を実施中です。";
-      aRu.value="Сейчас проходит совместная закупка.";
-      status(announcementStatus,"공동구매 프리셋을 입력했습니다.");
-    };
-
     saveAnnouncement.onclick=async()=>{saveAnnouncement.disabled=true;try{status(announcementStatus,"저장 중…");const payload={action:aId.value?"update_announcement":"create_announcement",id:aId.value||undefined,text_ko:aKo.value,text_en:aEn.value,text_ja:aJa.value,text_ru:aRu.value,starts_at:isoFromLocal(aStart.value),ends_at:isoFromLocal(aEnd.value),enabled:editingAnnouncementEnabled};await request("POST",payload);clearAnnouncement();await load();status(announcementStatus,"저장했습니다.");}catch(e){status(announcementStatus,e.message,true);}finally{saveAnnouncement.disabled=false;}};
     cancelAnnouncementEdit.onclick=clearAnnouncement;
     if(refreshAnnouncements)refreshAnnouncements.onclick=()=>load().catch(e=>status(announcementStatus,e.message,true));
@@ -11749,5 +11383,6 @@ window.addEventListener(
     })();
   
 </script>
+  <script src="/admin/admin-coloring.js"></script>
 </body>
 </html>
