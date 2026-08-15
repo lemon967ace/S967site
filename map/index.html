@@ -307,6 +307,28 @@
       line-height: 1.55;
     }
 
+    .age-confirmation {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-top: 16px;
+      color: var(--text);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .age-confirmation input {
+      width: 16px;
+      height: 16px;
+      margin: 2px 0 0;
+      flex: 0 0 auto;
+    }
+
+    .age-confirmation span {
+      min-width: 0;
+    }
+
     .login-action-row {
       position: relative;
       display: flex;
@@ -1038,6 +1060,20 @@
           class="password-notice"
         ></p>
 
+        <label
+          class="age-confirmation"
+          for="ageConfirmation"
+        >
+          <input
+            id="ageConfirmation"
+            type="checkbox"
+            required
+          >
+          <span id="ageConfirmationText">
+            I confirm that I am at least 14 years old.
+          </span>
+        </label>
+
         <div class="dialog-buttons">
 
           <button
@@ -1387,6 +1423,12 @@
         passwordSecurityNotice:
           "Simple or commonly used passwords may be detected by your browser or password manager as compromised or weak, which may trigger a security warning.",
 
+        ageConfirmation:
+          "I confirm that I am at least 14 years old.",
+
+        ageConfirmationRequired:
+          "You must confirm that you are at least 14 years old to create an account.",
+
         passwordMismatch:
           "Passwords do not match.",
 
@@ -1611,6 +1653,12 @@
 
         passwordSecurityNotice:
           "단순하거나 흔히 사용되는 비밀번호는 브라우저 또는 비밀번호 관리자에서 유출·취약 비밀번호로 감지되어 보안 경고가 표시될 수 있습니다.",
+
+        ageConfirmation:
+          "만 14세 이상임을 확인합니다.",
+
+        ageConfirmationRequired:
+          "계정을 생성하려면 만 14세 이상임을 확인해 주세요.",
 
         passwordMismatch:
           "비밀번호가 일치하지 않습니다.",
@@ -1837,6 +1885,12 @@
         passwordSecurityNotice:
           "単純なパスワードや一般的によく使われるパスワードは、ブラウザやパスワードマネージャーによって漏洩済みまたは脆弱なパスワードとして検出され、セキュリティ警告が表示される場合があります。",
 
+        ageConfirmation:
+          "14歳以上であることを確認します。",
+
+        ageConfirmationRequired:
+          "アカウントを作成するには、14歳以上であることを確認してください。",
+
         passwordMismatch:
           "パスワードが一致しません。",
 
@@ -2061,6 +2115,12 @@
 
         passwordSecurityNotice:
           "Простые или широко используемые пароли могут быть определены браузером или менеджером паролей как скомпрометированные или слабые, из-за чего может появиться предупреждение безопасности.",
+
+        ageConfirmation:
+          "Я подтверждаю, что мне исполнилось 14 лет.",
+
+        ageConfirmationRequired:
+          "Для создания учётной записи подтвердите, что вам исполнилось 14 лет.",
 
         passwordMismatch:
           "Пароли не совпадают.",
@@ -2335,6 +2395,11 @@
     const confirmPassword =
       document.getElementById(
         "confirmPassword"
+      );
+
+    const ageConfirmation =
+      document.getElementById(
+        "ageConfirmation"
       );
 
     const createAccountButton =
@@ -2665,6 +2730,11 @@
       ).textContent =
         text.passwordSecurityNotice;
 
+      document.getElementById(
+        "ageConfirmationText"
+      ).textContent =
+        text.ageConfirmation;
+
       createCancelButton.textContent =
         text.cancel;
 
@@ -2869,6 +2939,9 @@
 
       confirmPassword.value =
         "";
+
+      ageConfirmation.checked =
+        false;
 
       renderCreateAccountId();
 
@@ -4078,6 +4151,9 @@
         confirmPassword.value =
           "";
 
+        ageConfirmation.checked =
+          false;
+
         showUnknownAccount();
       }
     );
@@ -4126,6 +4202,22 @@
         }
 
 
+        if (
+          ageConfirmation.checked !==
+            true
+        ) {
+          setStatus(
+            createStatus,
+            text.ageConfirmationRequired,
+            "error"
+          );
+
+          ageConfirmation.focus();
+
+          return;
+        }
+
+
         createAccountButton.disabled =
           true;
 
@@ -4152,6 +4244,9 @@
 
                     password:
                       createPassword.value,
+
+                    ageConfirmed:
+                      ageConfirmation.checked,
                   }),
               }
             );
@@ -4190,6 +4285,16 @@
           ) {
             throw new Error(
               text.invalidNewPassword
+            );
+          }
+
+
+          if (
+            result.error ===
+              "AGE_CONFIRMATION_REQUIRED"
+          ) {
+            throw new Error(
+              text.ageConfirmationRequired
             );
           }
 
@@ -4234,6 +4339,9 @@
 
           confirmPassword.value =
             "";
+
+          ageConfirmation.checked =
+            false;
 
           showAccount();
 
