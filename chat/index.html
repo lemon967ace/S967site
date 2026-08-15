@@ -1023,308 +1023,6 @@
       }
     }
 
-
-    /* =========================================================
-       LOGIN SETTINGS — SHARED S967 PICKER DESIGN
-       로그인 화면에서 다른 S967 페이지와 동일한 원형 버튼/메뉴 사용.
-       로그인 후 toolbar/desktop-position 스타일에는 영향 없음.
-       ========================================================= */
-
-    .chat-settings-pickers.login-position {
-      position: fixed !important;
-      right: 22px !important;
-      bottom: 22px !important;
-      z-index: 1200 !important;
-
-      display: flex !important;
-      align-items: flex-end !important;
-      gap: 8px !important;
-    }
-
-    .chat-settings-pickers.login-position .language-picker,
-    .chat-settings-pickers.login-position .theme-picker {
-      position: relative !important;
-      inset: auto !important;
-    }
-
-    .chat-settings-pickers.login-position .language-button,
-    .chat-settings-pickers.login-position .theme-button,
-    .chat-settings-pickers.login-position .chat-setting-button {
-      box-sizing: border-box !important;
-
-      width: 44px !important;
-      min-width: 44px !important;
-      height: 44px !important;
-      min-height: 44px !important;
-
-      display: grid !important;
-      place-items: center !important;
-
-      padding: 0 !important;
-
-      border:
-        1px solid
-        var(--border) !important;
-
-      border-radius:
-        999px !important;
-
-      background:
-        var(--surface) !important;
-
-      color:
-        var(--text) !important;
-
-      box-shadow:
-        var(--shadow) !important;
-
-      backdrop-filter:
-        blur(14px);
-
-      -webkit-backdrop-filter:
-        blur(14px);
-
-      font: inherit;
-      font-size: 19px !important;
-      line-height: 1 !important;
-
-      cursor: pointer;
-
-      transition:
-        transform 160ms ease,
-        background 160ms ease,
-        border-color 160ms ease;
-    }
-
-    .chat-settings-pickers.login-position .language-button:hover,
-    .chat-settings-pickers.login-position .theme-button:hover {
-      transform:
-        translateY(-1px);
-
-      background:
-        var(--surface-hover) !important;
-
-      border-color:
-        var(--border-hover) !important;
-    }
-
-    .chat-settings-pickers.login-position .language-button:active,
-    .chat-settings-pickers.login-position .theme-button:active {
-      transform:
-        translateY(0)
-        scale(.97);
-    }
-
-    .chat-settings-pickers.login-position .language-menu,
-    .chat-settings-pickers.login-position .theme-menu {
-      position: absolute !important;
-
-      top: auto !important;
-      right: 0 !important;
-      bottom: 54px !important;
-      left: auto !important;
-
-      min-width: 148px !important;
-
-      display: block !important;
-
-      padding: 7px !important;
-
-      border:
-        1px solid
-        var(--border) !important;
-
-      border-radius:
-        14px !important;
-
-      background:
-        var(--surface-hover) !important;
-
-      box-shadow:
-        var(--menu-shadow) !important;
-
-      backdrop-filter:
-        blur(18px);
-
-      -webkit-backdrop-filter:
-        blur(18px);
-
-      opacity: 0;
-      visibility: hidden;
-
-      transform:
-        translateY(8px)
-        scale(.98);
-
-      transform-origin:
-        bottom right;
-
-      pointer-events: none;
-
-      transition:
-        opacity 140ms ease,
-        visibility 140ms ease,
-        transform 140ms ease;
-    }
-
-    .chat-settings-pickers.login-position
-      .language-picker.is-open
-      .language-menu,
-    .chat-settings-pickers.login-position
-      .theme-picker.is-open
-      .theme-menu {
-      opacity: 1;
-      visibility: visible;
-
-      transform:
-        translateY(0)
-        scale(1);
-
-      pointer-events: auto;
-    }
-
-    .chat-settings-pickers.login-position
-      .language-menu button,
-    .chat-settings-pickers.login-position
-      .theme-menu button {
-      width: 100% !important;
-
-      display: flex !important;
-      align-items: center !important;
-
-      gap: 9px;
-
-      padding:
-        9px
-        10px !important;
-
-      border: 0 !important;
-      border-radius: 9px !important;
-
-      background:
-        transparent !important;
-
-      color:
-        var(--text) !important;
-
-      text-align: left !important;
-      white-space: nowrap;
-
-      font: inherit;
-      font-size: .86rem;
-
-      cursor: pointer;
-    }
-
-    .chat-settings-pickers.login-position
-      .language-menu button:hover,
-    .chat-settings-pickers.login-position
-      .theme-menu button:hover,
-    .chat-settings-pickers.login-position
-      .language-menu button[aria-checked="true"],
-    .chat-settings-pickers.login-position
-      .theme-menu button[aria-checked="true"] {
-      background:
-        var(--surface) !important;
-    }
-
-    .chat-settings-pickers.login-position
-      .theme-choice-icon {
-      width: 18px;
-      text-align: center;
-      opacity: .82;
-    }
-
-    .chat-settings-pickers.login-position
-      .language-button:focus-visible,
-    .chat-settings-pickers.login-position
-      .theme-button:focus-visible,
-    .chat-settings-pickers.login-position
-      .language-menu button:focus-visible,
-    .chat-settings-pickers.login-position
-      .theme-menu button:focus-visible {
-      outline:
-        2px solid
-        currentColor;
-
-      outline-offset: 2px;
-    }
-
-
-    .translation-disclosure-dialog {
-      width: min(440px, calc(100vw - 28px));
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      padding: 0;
-      background: var(--surface-hover);
-      color: var(--text);
-      box-shadow: var(--menu-shadow);
-    }
-
-    .translation-disclosure-dialog::backdrop {
-      background: rgba(0,0,0,.5);
-      backdrop-filter: blur(2px);
-    }
-
-    .translation-disclosure-inner {
-      padding: 18px;
-    }
-
-    .translation-disclosure-dialog h2 {
-      margin: 0 0 9px;
-      font-size: 1.02rem;
-    }
-
-    .translation-disclosure-dialog p {
-      margin: 0;
-      color: var(--muted);
-      font-size: .86rem;
-      line-height: 1.6;
-    }
-
-    .translation-disclosure-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 14px;
-    }
-
-    .translation-disclosure-actions button {
-      min-width: 86px;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: var(--surface);
-      color: var(--text);
-      font: inherit;
-      font-weight: 700;
-    }
-
-    @media (max-width: 480px) {
-      .chat-settings-pickers.login-position {
-        right: 14px !important;
-        bottom: 14px !important;
-      }
-
-      .chat-settings-pickers.login-position
-        .language-button,
-      .chat-settings-pickers.login-position
-        .theme-button,
-      .chat-settings-pickers.login-position
-        .chat-setting-button {
-        width: 42px !important;
-        min-width: 42px !important;
-        height: 42px !important;
-        min-height: 42px !important;
-      }
-
-      .chat-settings-pickers.login-position
-        .language-menu,
-      .chat-settings-pickers.login-position
-        .theme-menu {
-        bottom: 52px !important;
-      }
-    }
-
   </style>
 </head>
 <body>
@@ -1361,13 +1059,13 @@
 
       <div class="theme-menu" data-theme-menu role="menu">
         <button type="button" data-theme-choice="system" role="menuitemradio">
-          <span class="theme-choice-icon">◐</span><span data-i18n="themeSystem">System</span>
+          <span class="theme-choice-icon">◐</span><span>System</span>
         </button>
         <button type="button" data-theme-choice="light" role="menuitemradio">
-          <span class="theme-choice-icon">☀</span><span data-i18n="themeLight">Light</span>
+          <span class="theme-choice-icon">☀</span><span>Light</span>
         </button>
         <button type="button" data-theme-choice="dark" role="menuitemradio">
-          <span class="theme-choice-icon">☾</span><span data-i18n="themeDark">Dark</span>
+          <span class="theme-choice-icon">☾</span><span>Dark</span>
         </button>
       </div>
     </div>
@@ -1514,24 +1212,6 @@
   </main>
 
 
-  <dialog
-    id="translationDisclosureDialog"
-    class="translation-disclosure-dialog"
-  >
-    <div class="translation-disclosure-inner">
-      <h2 id="translationDisclosureTitle">Translation notice</h2>
-      <p id="translationDisclosureText">
-        Chat messages may be sent to the OpenAI API if another participant uses the translation feature.
-      </p>
-      <div class="translation-disclosure-actions">
-        <button
-          id="translationDisclosureCloseButton"
-          type="button"
-        >OK</button>
-      </div>
-    </div>
-  </dialog>
-
   <dialog id="createRoomDialog" class="room-dialog">
     <div class="room-dialog-inner">
       <h2 id="createRoomTitle">Create room</h2>
@@ -1627,10 +1307,10 @@
     const REACTIONS = ["😂","🤗","🧐","😞","😭","😅","😍","😨","😡","👍","👎","✋","👀"];
 
     const TEXT = {
-      ko:{translationNoticeTitle:"번역 기능 안내",translationNoticeText:"채팅 메시지는 다른 참여자가 번역 기능을 사용할 경우 OpenAI API로 전송될 수 있습니다.",translationNoticeOk:"확인",title:"채팅",back:"뒤로가기",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고가 완료되었습니다. 감사합니다!",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",chooseRoom:"채팅방을 골라주세요.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",memberInvited:"{target}님이 채팅방에 초대되었습니다. 초대자: {inviter}",memberLeft:"{target}님이 채팅방에서 퇴장하셨습니다.",memberRemoved:"{target}님이 채팅방에서 퇴장당하셨습니다.",removeMember:"내보내기",removeMemberConfirm:"{name}님을 채팅방에서 내보낼까요?",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",leaveRoom:"채팅방 나가기",leaveRoomConfirm:"이 채팅방에서 나갈까요?",ownerCannotLeave:"방장은 채팅방을 나갈 수 없습니다.",transferOwner:"방장 위임",transferOwnerConfirm:"{name}님에게 방장을 위임할까요?",ownerTransferred:"방장을 위임했습니다.",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
-      en:{translationNoticeTitle:"Translation notice",translationNoticeText:"Chat messages may be sent to the OpenAI API if another participant uses the translation feature.",translationNoticeOk:"OK",title:"Chat",back:"Back",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Your report has been submitted. Thank you!",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",chooseRoom:"Please choose a chat room.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",memberInvited:"{target} was invited to the chat room. Invited by: {inviter}",memberLeft:"{target} left the chat room.",memberRemoved:"{target} was removed from the chat room.",removeMember:"Remove",removeMemberConfirm:"Remove {name} from the chat room?",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",leaveRoom:"Leave room",leaveRoomConfirm:"Leave this room?",ownerCannotLeave:"The room owner cannot leave the room.",transferOwner:"Transfer ownership",transferOwnerConfirm:"Transfer room ownership to {name}?",ownerTransferred:"Room ownership transferred.",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
-      ja:{translationNoticeTitle:"翻訳機能について",translationNoticeText:"チャットメッセージは、他の参加者が翻訳機能を使用した場合、OpenAI APIに送信されることがあります。",translationNoticeOk:"確認",title:"チャット",back:"戻る",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報が完了しました。ありがとうございます！",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",chooseRoom:"チャットルームを選んでください。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",memberInvited:"{target}さんがチャットルームに招待されました。招待者: {inviter}",memberLeft:"{target}さんがチャットルームから退出しました。",memberRemoved:"{target}さんがチャットルームから退出させられました。",removeMember:"退出させる",removeMemberConfirm:"{name}さんをチャットルームから退出させますか？",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",leaveRoom:"チャットルームを退出",leaveRoomConfirm:"このチャットルームから退出しますか？",ownerCannotLeave:"ルーム所有者は退出できません。",transferOwner:"所有権を移譲",transferOwnerConfirm:"{name} にルーム所有権を移譲しますか？",ownerTransferred:"ルーム所有権を移譲しました。",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
-      ru:{translationNoticeTitle:"О переводе сообщений",translationNoticeText:"Сообщения чата могут передаваться в OpenAI API, если другой участник использует функцию перевода.",translationNoticeOk:"Понятно",title:"Чат",back:"Назад",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба успешно отправлена. Спасибо!",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",chooseRoom:"Выберите чат.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",memberInvited:"{target} приглашён(а) в чат. Пригласил(а): {inviter}",memberLeft:"{target} вышел(а) из чата.",memberRemoved:"{target} был(а) удалён(а) из чата.",removeMember:"Удалить из чата",removeMemberConfirm:"Удалить {name} из чата?",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",leaveRoom:"Выйти из комнаты",leaveRoomConfirm:"Выйти из этой комнаты?",ownerCannotLeave:"Владелец комнаты не может выйти.",transferOwner:"Передать владельца",transferOwnerConfirm:"Передать владение комнатой пользователю {name}?",ownerTransferred:"Владелец комнаты изменён.",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
+      ko:{title:"채팅",back:"뒤로가기",rooms:"채팅방",checking:"접근 권한을 확인하고 있습니다…",denied:"Staff 또는 Member 계정으로 로그인하세요.",chatLogin:"채팅 로그인",password:"비밀번호 변경",message:"메시지",send:"전송",reply:"답장",replying:"답장 중",deletedReply:"삭제된 메시지",deletedMessage:"삭제된 메시지입니다.",report:"신고",reportReason:"신고 사유를 입력하세요. (선택)",reportDone:"신고가 완료되었습니다. 감사합니다!",translate:"번역",translation:"번역",translating:"번역 중…",translationFailed:"번역에 실패했습니다.",search:"검색",text:"문자열",date:"날짜",clear:"초기화",older:"이전 메시지",empty:"아직 메시지가 없습니다.",chooseRoom:"채팅방을 골라주세요.",delete:"삭제",deleteConfirm:"이 메시지를 삭제할까요?",loadFailed:"채팅을 불러오지 못했습니다.",sendFailed:"메시지를 전송하지 못했습니다.",fileTooLarge:"파일은 각각 10MB 이하여야 합니다.",tooManyFiles:"파일은 한 메시지에 최대 5개까지 첨부할 수 있습니다.",notification:"브라우저 알림",notificationDenied:"브라우저 알림 권한이 허용되지 않았습니다.",createRoom:"채팅방 만들기",roomName:"채팅방 이름",members:"참여자",addPeople:"인원 추가",memberInvited:"{target}님이 채팅방에 초대되었습니다. 초대자: {inviter}",memberLeft:"{target}님이 채팅방에서 퇴장하셨습니다.",memberRemoved:"{target}님이 채팅방에서 퇴장당하셨습니다.",removeMember:"내보내기",removeMemberConfirm:"{name}님을 채팅방에서 내보낼까요?",officialRoom:"Staff 공식방 · 현재 활성 Staff 목록과 자동 동기화됩니다. 새 Staff도 이전 대화를 볼 수 있습니다.",deleteRoom:"채팅방 삭제",deleteRoomConfirm:"이 채팅방과 대화를 모두 삭제할까요?",leaveRoom:"채팅방 나가기",leaveRoomConfirm:"이 채팅방에서 나갈까요?",ownerCannotLeave:"방장은 채팅방을 나갈 수 없습니다.",transferOwner:"방장 위임",transferOwnerConfirm:"{name}님에게 방장을 위임할까요?",ownerTransferred:"방장을 위임했습니다.",close:"닫기",cancel:"취소",create:"만들기",nickname:"닉네임 변경",nicknamePlaceholder:"새 닉네임",save:"저장",nicknameTaken:"이미 사용 중인 닉네임입니다.",nicknameReserved:"사용할 수 없는 닉네임입니다.",nicknameInvalid:"닉네임은 공백 제외 1~32자로 입력하세요.",nicknameSaved:"닉네임을 변경했습니다."},
+      en:{title:"Chat",back:"Back",rooms:"Rooms",checking:"Checking access…",denied:"Sign in as Staff or Member.",chatLogin:"Chat login",password:"Change password",message:"Message",send:"Send",reply:"Reply",replying:"Replying",deletedReply:"Deleted message",deletedMessage:"This message was deleted.",report:"Report",reportReason:"Reason for report (optional)",reportDone:"Your report has been submitted. Thank you!",translate:"Translate",translation:"Translation",translating:"Translating…",translationFailed:"Translation failed.",search:"Search",text:"Text",date:"Date",clear:"Clear",older:"Load older",empty:"No messages yet.",chooseRoom:"Please choose a chat room.",delete:"Delete",deleteConfirm:"Delete this message?",loadFailed:"Failed to load chat.",sendFailed:"Failed to send message.",fileTooLarge:"Each file must be 10 MB or smaller.",tooManyFiles:"Up to 5 files per message.",notification:"Browser notifications",notificationDenied:"Browser notifications were not allowed.",createRoom:"Create room",roomName:"Room name",members:"Members",addPeople:"Add people",memberInvited:"{target} was invited to the chat room. Invited by: {inviter}",memberLeft:"{target} left the chat room.",memberRemoved:"{target} was removed from the chat room.",removeMember:"Remove",removeMemberConfirm:"Remove {name} from the chat room?",officialRoom:"Official Staff room · membership automatically follows the current active Staff list. New Staff can read previous messages.",deleteRoom:"Delete room",deleteRoomConfirm:"Delete this room and all of its messages?",leaveRoom:"Leave room",leaveRoomConfirm:"Leave this room?",ownerCannotLeave:"The room owner cannot leave the room.",transferOwner:"Transfer ownership",transferOwnerConfirm:"Transfer room ownership to {name}?",ownerTransferred:"Room ownership transferred.",close:"Close",cancel:"Cancel",create:"Create",nickname:"Change nickname",nicknamePlaceholder:"New nickname",save:"Save",nicknameTaken:"That nickname is already in use.",nicknameReserved:"That nickname cannot be used.",nicknameInvalid:"Enter a nickname from 1 to 32 characters.",nicknameSaved:"Nickname changed."},
+      ja:{title:"チャット",back:"戻る",rooms:"チャットルーム",checking:"アクセス権限を確認しています…",denied:"StaffまたはMemberアカウントでログインしてください。",chatLogin:"チャットログイン",password:"パスワード変更",message:"メッセージ",send:"送信",reply:"返信",replying:"返信中",deletedReply:"削除されたメッセージ",deletedMessage:"削除されたメッセージです。",report:"通報",reportReason:"通報理由を入力してください。（任意）",reportDone:"通報が完了しました。ありがとうございます！",translate:"翻訳",translation:"翻訳",translating:"翻訳中…",translationFailed:"翻訳に失敗しました。",search:"検索",text:"文字列",date:"日付",clear:"クリア",older:"以前のメッセージ",empty:"まだメッセージはありません。",chooseRoom:"チャットルームを選んでください。",delete:"削除",deleteConfirm:"このメッセージを削除しますか？",loadFailed:"チャットを読み込めませんでした。",sendFailed:"メッセージを送信できませんでした。",fileTooLarge:"各ファイルは10MB以下にしてください。",tooManyFiles:"1メッセージにつき最大5ファイルです。",notification:"ブラウザ通知",notificationDenied:"ブラウザ通知が許可されていません。",createRoom:"チャットルームを作成",roomName:"ルーム名",members:"参加者",addPeople:"メンバー追加",memberInvited:"{target}さんがチャットルームに招待されました。招待者: {inviter}",memberLeft:"{target}さんがチャットルームから退出しました。",memberRemoved:"{target}さんがチャットルームから退出させられました。",removeMember:"退出させる",removeMemberConfirm:"{name}さんをチャットルームから退出させますか？",officialRoom:"Staff公式ルーム · 現在有効なStaff一覧と自動同期されます。新しいStaffも過去の会話を閲覧できます。",deleteRoom:"ルーム削除",deleteRoomConfirm:"このルームとすべての会話を削除しますか？",leaveRoom:"チャットルームを退出",leaveRoomConfirm:"このチャットルームから退出しますか？",ownerCannotLeave:"ルーム所有者は退出できません。",transferOwner:"所有権を移譲",transferOwnerConfirm:"{name} にルーム所有権を移譲しますか？",ownerTransferred:"ルーム所有権を移譲しました。",close:"閉じる",cancel:"キャンセル",create:"作成",nickname:"ニックネーム変更",nicknamePlaceholder:"新しいニックネーム",save:"保存",nicknameTaken:"そのニックネームは既に使用されています。",nicknameReserved:"そのニックネームは使用できません。",nicknameInvalid:"ニックネームは1～32文字で入力してください。",nicknameSaved:"ニックネームを変更しました。"},
+      ru:{title:"Чат",back:"Назад",rooms:"Комнаты",checking:"Проверка доступа…",denied:"Войдите как Staff или Member.",chatLogin:"Войти в чат",password:"Изменить пароль",message:"Сообщение",send:"Отправить",reply:"Ответить",replying:"Ответ",deletedReply:"Удалённое сообщение",deletedMessage:"Сообщение удалено.",report:"Пожаловаться",reportReason:"Причина жалобы (необязательно)",reportDone:"Жалоба успешно отправлена. Спасибо!",translate:"Перевести",translation:"Перевод",translating:"Перевод…",translationFailed:"Не удалось перевести.",search:"Поиск",text:"Текст",date:"Дата",clear:"Сбросить",older:"Загрузить предыдущие",empty:"Сообщений пока нет.",chooseRoom:"Выберите чат.",delete:"Удалить",deleteConfirm:"Удалить это сообщение?",loadFailed:"Не удалось загрузить чат.",sendFailed:"Не удалось отправить сообщение.",fileTooLarge:"Каждый файл должен быть не более 10 МБ.",tooManyFiles:"До 5 файлов на сообщение.",notification:"Уведомления браузера",notificationDenied:"Уведомления браузера не разрешены.",createRoom:"Создать комнату",roomName:"Название комнаты",members:"Участники",addPeople:"Добавить людей",memberInvited:"{target} приглашён(а) в чат. Пригласил(а): {inviter}",memberLeft:"{target} вышел(а) из чата.",memberRemoved:"{target} был(а) удалён(а) из чата.",removeMember:"Удалить из чата",removeMemberConfirm:"Удалить {name} из чата?",officialRoom:"Официальная Staff-комната · состав автоматически синхронизируется с активными Staff. Новые Staff видят предыдущую переписку.",deleteRoom:"Удалить комнату",deleteRoomConfirm:"Удалить эту комнату и всю переписку?",leaveRoom:"Выйти из комнаты",leaveRoomConfirm:"Выйти из этой комнаты?",ownerCannotLeave:"Владелец комнаты не может выйти.",transferOwner:"Передать владельца",transferOwnerConfirm:"Передать владение комнатой пользователю {name}?",ownerTransferred:"Владелец комнаты изменён.",close:"Закрыть",cancel:"Отмена",create:"Создать",nickname:"Изменить имя",nicknamePlaceholder:"Новое имя",save:"Сохранить",nicknameTaken:"Это имя уже используется.",nicknameReserved:"Это имя нельзя использовать.",nicknameInvalid:"Введите имя длиной от 1 до 32 символов.",nicknameSaved:"Имя изменено."},
     };
 
     let language = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "en";
@@ -1651,13 +1331,10 @@
     let initialUnreadAnchor = null;
     const messageMap = new Map();
     let currentSearch = {q:"",date:""};
+    let searchNavigationKey = "";
+    let searchBefore = "";
 
     const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
-    const translationDisclosureDialog=$("translationDisclosureDialog");
-    const translationDisclosureTitle=$("translationDisclosureTitle");
-    const translationDisclosureText=$("translationDisclosureText");
-    const translationDisclosureCloseButton=$("translationDisclosureCloseButton");
-    const TRANSLATION_DISCLOSURE_INTERVAL_MS=7*24*60*60*1000;
 
     const chatSettingsPickers = $("chatSettingsPickers");
     const chatSettingsToolbarSlot = $("chatSettingsToolbarSlot");
@@ -1880,9 +1557,6 @@
       $("gateTitle").textContent=text.title;
       gateMessage.textContent=text.checking;
       chatLoginButton.textContent=text.chatLogin;
-      translationDisclosureTitle.textContent=text.translationNoticeTitle;
-      translationDisclosureText.textContent=text.translationNoticeText;
-      translationDisclosureCloseButton.textContent=text.translationNoticeOk;
       roomsTitle.textContent=text.rooms;
       createRoomButton.title=text.createRoom;
       roomMembersButton.title=text.members;
@@ -2057,6 +1731,16 @@
       const p=new URLSearchParams({room_id:currentRoomId??"",limit:"1"});
       if(currentSearch.q)p.set("q",currentSearch.q);
       if(currentSearch.date)p.set("target_date",currentSearch.date);
+
+      /*
+        Repeated text searches walk backward through matches.
+        The server search function sorts newest -> oldest, and `before`
+        asks for the next match older than the current hit.
+      */
+      if(currentSearch.q&&searchBefore){
+        p.set("before",searchBefore);
+      }
+
       p.set("search_navigation","1");
       return`${API.list}?${p.toString()}`;
     }
@@ -2681,6 +2365,8 @@
       replyTarget=null;
       renderReplyTarget();
       currentSearch={q:"",date:""};
+      searchNavigationKey="";
+      searchBefore="";
       searchText.value="";
       searchDate.value="";
       renderRooms();
@@ -2691,21 +2377,64 @@
     async function navigateSearch(){
       const requestRoomId=currentRoomId;
       const requestGeneration=roomLoadGeneration;
-      currentSearch={q:searchText.value.trim(),date:searchDate.value};
-      if(!requestRoomId||(!currentSearch.q&&!currentSearch.date))return;
+
+      const nextSearch={
+        q:searchText.value.trim(),
+        date:searchDate.value
+      };
+
+      if(!requestRoomId||(!nextSearch.q&&!nextSearch.date))return;
+
+      /*
+        A new search term/date starts from the newest result again.
+        Pressing Search repeatedly with the same text keeps the cursor and
+        moves to the next older matching message.
+      */
+      const nextKey=
+        `${requestRoomId}\n${nextSearch.q}\n${nextSearch.date}`;
+
+      if(nextKey!==searchNavigationKey){
+        searchNavigationKey=nextKey;
+        searchBefore="";
+      }
+
+      currentSearch=nextSearch;
+
       try{
         const result=await request(buildSearchUrl());
         if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
+
         const hit=result.search_match??result.messages?.[0]??null;
+
+        /*
+          No older match: stay where we are.
+          A changed query automatically resets the cursor above.
+        */
         if(!hit)return;
-        const around=await request(buildListUrl({around:hit.id,limit:MESSAGE_BATCH_SIZE,roomId:requestRoomId}));
+
+        if(currentSearch.q&&hit.created_at){
+          searchBefore=hit.created_at;
+        }
+
+        const around=await request(
+          buildListUrl({
+            around:hit.id,
+            limit:MESSAGE_BATCH_SIZE,
+            roomId:requestRoomId
+          })
+        );
+
         if(requestGeneration!==roomLoadGeneration||requestRoomId!==currentRoomId)return;
+
         messageMap.clear();
         for(const m of around.messages??[])messageMap.set(m.id,m);
         hasMore=Boolean(around.has_more);
         renderMessages();
+
         requestAnimationFrame(()=>{
-          const el=messagesHost.querySelector(`[data-message-id="${CSS.escape(String(hit.id))}"]`);
+          const el=messagesHost.querySelector(
+            `[data-message-id="${CSS.escape(String(hit.id))}"]`
+          );
           el?.scrollIntoView({block:"center"});
           el?.classList.add("search-hit");
           setTimeout(()=>el?.classList.remove("search-hit"),1800);
@@ -2798,79 +2527,6 @@
       showGate(text.denied);
     }
 
-    function translationDisclosureStorageKey(){
-      const actorKey =
-        String(
-          actor?.actorKey ??
-          actor?.actor_key ??
-          actor?.userId ??
-          actor?.user_id ??
-          actor?.name ??
-          "unknown"
-        );
-
-      return (
-        "s967_chat_openai_notice_seen_at:" +
-        actorKey
-      );
-    }
-
-    function shouldShowTranslationDisclosure(){
-      const raw =
-        localStorage.getItem(
-          translationDisclosureStorageKey()
-        );
-
-      const seenAt =
-        Number(raw);
-
-      return (
-        !Number.isFinite(seenAt) ||
-        seenAt <= 0 ||
-        Date.now() - seenAt >=
-          TRANSLATION_DISCLOSURE_INTERVAL_MS
-      );
-    }
-
-    function showTranslationDisclosureIfDue(){
-      if(
-        !actor ||
-        !shouldShowTranslationDisclosure()
-      ){
-        return;
-      }
-
-      translationDisclosureTitle.textContent =
-        text.translationNoticeTitle;
-
-      translationDisclosureText.textContent =
-        text.translationNoticeText;
-
-      translationDisclosureCloseButton.textContent =
-        text.translationNoticeOk;
-
-      /*
-        7일 주기는 "확인 버튼을 눌렀는지"가 아니라
-        실제로 안내창을 보여준 시점을 기준으로 기록합니다.
-        따라서 ESC, 새로고침, 페이지 이동 등으로 닫혀도
-        같은 7일 안에는 다시 표시되지 않습니다.
-      */
-      localStorage.setItem(
-        translationDisclosureStorageKey(),
-        String(Date.now())
-      );
-
-      if(
-        !translationDisclosureDialog.open
-      ){
-        translationDisclosureDialog.showModal();
-      }
-    }
-
-    function acknowledgeTranslationDisclosure(){
-      translationDisclosureDialog.close();
-    }
-
     async function bootstrap(){
       setText();
       try{
@@ -2891,13 +2547,11 @@
           app.classList.remove("hidden");
       placeChatSettingsInToolbar();
       loadChatAnnouncements();
-          showTranslationDisclosureIfDue();
           return;
         }
 
         await loadLatest(false,false,{initial:true});
         startRealtime();
-        showTranslationDisclosureIfDue();
       }catch(e){
         if(e?.status===401||e?.status===403){
           await showAccessFailure(e);
@@ -3071,9 +2725,6 @@
       }
     }
 
-    translationDisclosureCloseButton.onclick=
-      acknowledgeTranslationDisclosure;
-
     chatLoginButton.onclick=doChatLogin;
     chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
     createRoomButton.onclick=()=>{createRoomStatus.textContent="";createRoomStatus.classList.remove("error");newRoomName.value="";createRoomDialog.showModal();newRoomName.focus();};
@@ -3130,7 +2781,7 @@
         syncMobileSearchState();
       }
     };
-    clearSearchButton.onclick=async()=>{searchText.value="";searchDate.value="";currentSearch={q:"",date:""};messageMap.clear();await loadLatest(false,false,{initial:true}).catch(()=>{});};
+    clearSearchButton.onclick=async()=>{searchText.value="";searchDate.value="";currentSearch={q:"",date:""};searchNavigationKey="";searchBefore="";messageMap.clear();await loadLatest(false,false,{initial:true}).catch(()=>{});};
     searchText.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();searchButton.click();}});
     searchDate.onchange=()=>{
       if(searchDate.value)searchText.value="";
