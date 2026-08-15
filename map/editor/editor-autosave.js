@@ -30,7 +30,7 @@ export function validateRecoverySnapshot(value) {
 export function createRecoveryStorage({ indexedDB = globalThis.indexedDB } = {}) {
   if (!indexedDB) return unavailableStorage();
   const open = () => new Promise((resolve, reject) => {
-    const request = indexedDB.open(RECOVERY_DB_NAME, 1);
+    const request = indexedDB.open(RECOVERY_DB_NAME, RECOVERY_VERSION);
     request.onupgradeneeded = () => { if (!request.result.objectStoreNames.contains(RECOVERY_STORE_NAME)) request.result.createObjectStore(RECOVERY_STORE_NAME, { keyPath: "key" }); };
     request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error ?? new Error("Recovery database failed."));
   });
