@@ -819,6 +819,20 @@
         Duplicate
       </button>
 
+      <label
+        id="fixedMapPicker"
+        style="display:inline-flex;align-items:center;gap:6px"
+      >
+        <span id="fixedMapPickerLabel">Fixed map</span>
+        <select
+          id="fixedMapSelect"
+          disabled
+          style="max-width:190px"
+        >
+          <option value="">Loading…</option>
+        </select>
+      </label>
+
       <span class="tool-separator" aria-hidden="true"></span>
       <button id="openMapFileButton" type="button" disabled>Open file</button>
       <button id="exportMapFileButton" type="button" disabled>Export to file</button>
@@ -1305,6 +1319,12 @@
     const MAP_SAVE_URL =
       `${FUNCTIONS_BASE_URL}/map-save`;
 
+    const MAP_TEMPLATE_LIST_URL =
+      `${FUNCTIONS_BASE_URL}/map-template-list`;
+
+    const MAP_TEMPLATE_LOAD_URL =
+      `${FUNCTIONS_BASE_URL}/map-template-load`;
+
     const SESSION_TOKEN_KEY =
       "s967-map-session-token";
 
@@ -1322,6 +1342,49 @@
       TRANSLATIONS
       ==========================================================
     */
+
+    const FIXED_MAP_TEXT = {
+      en: {
+        label: "Fixed map",
+        loading: "Loading…",
+        choose: "Change fixed map…",
+        current: "Current fixed map",
+        empty: "Empty map",
+        listFailed: "Failed to load fixed maps.",
+        loadFailed: "Failed to load the selected fixed map.",
+        conflict: "This fixed map conflicts with an existing building, so it was not applied.",
+      },
+      ko: {
+        label: "고정맵",
+        loading: "불러오는 중…",
+        choose: "고정맵 변경…",
+        current: "현재 고정맵",
+        empty: "빈 맵",
+        listFailed: "고정맵 목록을 불러오지 못했습니다.",
+        loadFailed: "선택한 고정맵을 불러오지 못했습니다.",
+        conflict: "기존 건물과 충돌하여 이 고정맵으로 변경할 수 없습니다.",
+      },
+      ja: {
+        label: "固定マップ",
+        loading: "読み込み中…",
+        choose: "固定マップを変更…",
+        current: "現在の固定マップ",
+        empty: "空のマップ",
+        listFailed: "固定マップ一覧を読み込めませんでした。",
+        loadFailed: "選択した固定マップを読み込めませんでした。",
+        conflict: "既存の建物と競合するため、この固定マップは適用できません。",
+      },
+      ru: {
+        label: "Фиксированная карта",
+        loading: "Загрузка…",
+        choose: "Сменить фиксированную карту…",
+        current: "Текущая фиксированная карта",
+        empty: "Пустая карта",
+        listFailed: "Не удалось загрузить список фиксированных карт.",
+        loadFailed: "Не удалось загрузить выбранную фиксированную карту.",
+        conflict: "Эта фиксированная карта конфликтует с существующим зданием и не была применена.",
+      },
+    };
 
     const TEXT = {
       en: {
@@ -2104,6 +2167,15 @@
     let minimap = null;
     let buildingController = null;
 
+    let mapTemplates =
+      [];
+    let fixedMapSelection =
+      "";
+    let fixedMapOptionsState =
+      "idle";
+    let fixedMapChangeBusy =
+      false;
+
     let paletteAffiliation =
       "";
 
@@ -2155,6 +2227,21 @@
     const duplicateMapButton =
       document.getElementById(
         "duplicateMapButton"
+      );
+
+    const fixedMapPicker =
+      document.getElementById(
+        "fixedMapPicker"
+      );
+
+    const fixedMapPickerLabel =
+      document.getElementById(
+        "fixedMapPickerLabel"
+      );
+
+    const fixedMapSelect =
+      document.getElementById(
+        "fixedMapSelect"
       );
 
     const openMapFileButton = document.getElementById("openMapFileButton");
@@ -3212,6 +3299,428 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
     }
 
 
+    function fixedMapText() {
+      return (
+        FIXED_MAP_TEXT[
+          language
+        ] ??
+        FIXED_MAP_TEXT.en
+      );
+    }
+
+    function fixedMapTemplateName(
+      template
+    ) {
+      const field = {
+        ko: "name_ko",
+        en: "name_en",
+        ja: "name_ja",
+        ru: "name_ru",
+      }[language] ?? "name_en";
+
+      return (
+        template?.[field] ??
+        template?.name_en ??
+        template?.name_ko ??
+        template?.id ??
+        ""
+      );
+    }
+
+    function documentHasFixedMap() {
+      try {
+        const doc =
+          PNSMapEngine.getDocument();
+
+        return Boolean(
+          doc.fixedBuildingTypes
+            ?.length ||
+          doc.fixedBuildings
+            ?.length ||
+          doc.fixedRanges
+            ?.length
+        );
+      } catch {
+        return false;
+      }
+    }
+
+    function renderFixedMapSelector() {
+      if (
+        !fixedMapSelect ||
+        !fixedMapPickerLabel
+      ) {
+        return;
+      }
+
+      const labels =
+        fixedMapText();
+
+      fixedMapPickerLabel.textContent =
+        labels.label;
+
+      fixedMapSelect
+        .replaceChildren();
+
+      if (
+        fixedMapOptionsState ===
+          "loading"
+      ) {
+        const option =
+          document.createElement(
+            "option"
+          );
+        option.value = "";
+        option.textContent =
+          labels.loading;
+        fixedMapSelect.append(
+          option
+        );
+      } else if (
+        fixedMapOptionsState ===
+          "error"
+      ) {
+        const option =
+          document.createElement(
+            "option"
+          );
+        option.value = "";
+        option.textContent =
+          labels.listFailed;
+        fixedMapSelect.append(
+          option
+        );
+      } else {
+        if (
+          fixedMapSelection ===
+            "current"
+        ) {
+          const current =
+            document.createElement(
+              "option"
+            );
+          current.value =
+            "current";
+          current.textContent =
+            labels.current;
+          fixedMapSelect.append(
+            current
+          );
+        } else {
+          const choose =
+            document.createElement(
+              "option"
+            );
+          choose.value = "";
+          choose.textContent =
+            labels.choose;
+          fixedMapSelect.append(
+            choose
+          );
+        }
+
+        const empty =
+          document.createElement(
+            "option"
+          );
+        empty.value = "empty";
+        empty.textContent =
+          labels.empty;
+        fixedMapSelect.append(
+          empty
+        );
+
+        for (
+          const template
+          of mapTemplates
+        ) {
+          if (
+            !template?.id
+          ) {
+            continue;
+          }
+
+          const option =
+            document.createElement(
+              "option"
+            );
+          option.value =
+            template.id;
+          option.textContent =
+            fixedMapTemplateName(
+              template
+            );
+
+          if (
+            template.is_default ===
+              true
+          ) {
+            option.textContent +=
+              language === "ko"
+                ? " · 기본"
+                : language === "ja"
+                  ? " · デフォルト"
+                  : language === "ru"
+                    ? " · По умолчанию"
+                    : " · Default";
+          }
+
+          fixedMapSelect.append(
+            option
+          );
+        }
+
+        if (
+          fixedMapSelection &&
+          [
+            "current",
+            "empty",
+          ].includes(
+            fixedMapSelection
+          ) === false &&
+          !mapTemplates.some(
+            item =>
+              item.id ===
+                fixedMapSelection
+          )
+        ) {
+          fixedMapSelection =
+            documentHasFixedMap()
+              ? "current"
+              : "empty";
+        }
+
+        fixedMapSelect.value =
+          fixedMapSelection ===
+            "current"
+            ? "current"
+            : fixedMapSelection ||
+              (
+                documentHasFixedMap()
+                  ? ""
+                  : "empty"
+              );
+      }
+
+      fixedMapSelect.disabled =
+        readOnly ||
+        fixedMapChangeBusy ||
+        fixedMapOptionsState !==
+          "ready";
+    }
+
+    async function loadFixedMapOptions({
+      preferredSelection =
+        null,
+    } = {}) {
+      if (
+        readOnly
+      ) {
+        renderFixedMapSelector();
+        return;
+      }
+
+      fixedMapOptionsState =
+        "loading";
+      renderFixedMapSelector();
+
+      try {
+        const response =
+          await fetch(
+            MAP_TEMPLATE_LIST_URL,
+            {
+              method: "GET",
+            }
+          );
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (
+          !response.ok ||
+          result.ok !== true ||
+          !Array.isArray(
+            result.templates
+          )
+        ) {
+          throw new Error(
+            "TEMPLATE_LIST_FAILED"
+          );
+        }
+
+        mapTemplates =
+          result.templates;
+
+        if (
+          preferredSelection &&
+          (
+            preferredSelection ===
+              "empty" ||
+            mapTemplates.some(
+              item =>
+                item.id ===
+                  preferredSelection
+            )
+          )
+        ) {
+          fixedMapSelection =
+            preferredSelection;
+        } else if (
+          !documentHasFixedMap()
+        ) {
+          fixedMapSelection =
+            "empty";
+        } else if (
+          !fixedMapSelection
+        ) {
+          /*
+            Old/saved map documents do not store the source template ID.
+            Keep a neutral "current fixed map" entry until the user
+            explicitly chooses another fixed map.
+          */
+          fixedMapSelection =
+            "current";
+        }
+
+        fixedMapOptionsState =
+          "ready";
+        renderFixedMapSelector();
+      } catch (error) {
+        console.error(
+          "Fixed map list failed:",
+          error
+        );
+        mapTemplates = [];
+        fixedMapOptionsState =
+          "error";
+        renderFixedMapSelector();
+      }
+    }
+
+    async function applyFixedMapSelection(
+      selection
+    ) {
+      if (
+        readOnly ||
+        fixedMapChangeBusy ||
+        !selection ||
+        selection ===
+          "current"
+      ) {
+        renderFixedMapSelector();
+        return;
+      }
+
+      const previous =
+        fixedMapSelection;
+
+      fixedMapChangeBusy =
+        true;
+      renderFixedMapSelector();
+
+      try {
+        let template =
+          null;
+
+        if (
+          selection !==
+            "empty"
+        ) {
+          const response =
+            await fetch(
+              `${MAP_TEMPLATE_LOAD_URL}?templateId=${encodeURIComponent(selection)}`,
+              {
+                method: "GET",
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => ({})
+              );
+
+          if (
+            !response.ok ||
+            result.ok !== true ||
+            !result.template
+              ?.templateData
+          ) {
+            throw new Error(
+              "TEMPLATE_LOAD_FAILED"
+            );
+          }
+
+          template =
+            result.template
+              .templateData;
+        }
+
+        PNSMapEngine
+          .replaceFixedMapTemplate(
+            template
+          );
+
+        fixedMapSelection =
+          selection;
+
+        /*
+          A fixed-map change is a document mutation.
+          User content remains in place; only fixed layers change.
+        */
+        setDirty(true);
+
+        buildingController
+          ?.cancelMode?.();
+        rangeController
+          ?.cancel?.();
+
+        mountMapRenderer();
+
+        minimap?.setDocument?.(
+          PNSMapEngine.getDocument()
+        );
+
+        renderSelectionPanel(
+          null
+        );
+        renderRangePanel();
+        renderBuildingPalette();
+
+        mapRenderer?.refresh?.();
+      } catch (error) {
+        console.error(
+          "Fixed map change failed:",
+          error
+        );
+
+        fixedMapSelection =
+          previous;
+
+        const labels =
+          fixedMapText();
+
+        window.alert(
+          error instanceof
+              RangeError
+            ? labels.conflict
+            : labels.loadFailed
+        );
+      } finally {
+        fixedMapChangeBusy =
+          false;
+        renderFixedMapSelector();
+        setEditorControlsEnabled(
+          true
+        );
+      }
+    }
+
     function renderDocumentStatus() {
       if (readOnly) {
         documentStatus.textContent =
@@ -3295,12 +3804,43 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           (saveManager?.getState().saving ?? false);
       }
 
+      if (fixedMapSelect) {
+        fixedMapSelect.disabled =
+          !editable ||
+          !engineReady ||
+          fixedMapChangeBusy ||
+          fixedMapOptionsState !==
+            "ready";
+      }
+
       openMapFileButton.disabled = !editable || (saveManager?.getState().saving ?? false);
       exportMapFileButton.disabled = !enabled || !engineReady;
 
       mapTitleInput.disabled =
         readOnly;
     }
+
+
+    fixedMapSelect?.addEventListener(
+      "change",
+      () => {
+        const selection =
+          fixedMapSelect.value;
+
+        if (
+          !selection ||
+          selection ===
+            "current"
+        ) {
+          renderFixedMapSelector();
+          return;
+        }
+
+        applyFixedMapSelection(
+          selection
+        );
+      }
+    );
 
 
     /*
@@ -3321,6 +3861,8 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           text.duplicateMap ??
           "Duplicate";
       }
+
+      renderFixedMapSelector();
 
       const fileText = FILE_TEXT[language] ?? FILE_TEXT.en;
       openMapFileButton.textContent = fileText.open;
@@ -3966,6 +4508,12 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
           true
         );
 
+        fixedMapSelection =
+          documentHasFixedMap()
+            ? "current"
+            : "empty";
+        await loadFixedMapOptions();
+
         /*
           다음 단계:
           currentDocument를 실제 아이소메트릭
@@ -4098,6 +4646,13 @@ const typeOptions = PNSMapEngine.getDocument().buildingTypes.map(type => `<optio
       setEditorControlsEnabled(
         true
       );
+
+      fixedMapSelection =
+        entry.templateId;
+      await loadFixedMapOptions({
+        preferredSelection:
+          entry.templateId,
+      });
 
       return true;
     }
