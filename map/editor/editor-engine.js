@@ -1841,7 +1841,7 @@ export function deleteFixedBuildingType(typeId) {
 }
 
 export function canPlaceFixedBuilding({ x, y, width, height, ignoreBuildingId = null }) {
-  ensureTemplateWritable();
+  ensureWritable();
   return occupancy.checkPosition({ x, y, width, height, ignoreBuildingId });
 }
 
@@ -1864,17 +1864,34 @@ export function addFixedBuilding(data) {
 }
 
 export function moveFixedBuilding(buildingId, newX, newY) {
-  ensureTemplateWritable();
+  ensureWritable();
   return editFixedBuilding(buildingId, { x: newX, y: newY });
 }
 
 export function editFixedBuilding(buildingId, changes = {}) {
-  ensureTemplateWritable();
+  ensureWritable();
+
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
+
   const current = document.fixedBuildings[index];
+
+  /*
+    In a normal map, a locked fixed building may only have its lock removed.
+    Once unlocked, it can be renamed, moved, switched to another fixed type,
+    relocked, or deleted. Template mode keeps its administrator editability.
+  */
+  if (
+    documentMode === "map" &&
+    current.locked &&
+    Object.keys(changes).some(key => !["locked"].includes(key))
+  ) {
+    throw new RangeError("Unlock the fixed building before editing it.");
+  }
+
   const typeId = changes.typeId ?? changes.type_id ?? current.typeId;
   const type = requireFixedBuildingType(typeId);
+
   const candidate = new FixedBuilding({
     id: current.id,
     name: changes.name ?? current.name,
@@ -1885,7 +1902,9 @@ export function editFixedBuilding(buildingId, changes = {}) {
     height: type.height,
     color: changes.color ?? current.color ?? type.color,
     priority: changes.priority ?? current.priority ?? 0,
+    locked: changes.locked ?? current.locked,
   });
+
   const check = occupancy.checkPosition({
     x: candidate.x,
     y: candidate.y,
@@ -1893,7 +1912,9 @@ export function editFixedBuilding(buildingId, changes = {}) {
     height: candidate.height,
     ignoreBuildingId: current.id,
   });
+
   if (!check.canPlace) throw new RangeError("Fixed building cannot be placed.");
+
   const next = [...document.fixedBuildings];
   next[index] = candidate;
   occupancy = new OccupancyManager([...next, ...document.buildings]);
@@ -1903,9 +1924,15 @@ export function editFixedBuilding(buildingId, changes = {}) {
 }
 
 export function deleteFixedBuilding(buildingId) {
-  ensureTemplateWritable();
+  ensureWritable();
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
+
+  const current = document.fixedBuildings[index];
+  if (documentMode === "map" && current.locked) {
+    throw new RangeError("Unlock the fixed building before deleting it.");
+  }
+
   const [removed] = document.fixedBuildings.splice(index, 1);
   rebuildOccupancy();
   return cloneFixedBuilding(removed);
@@ -1922,7 +1949,7 @@ export function deleteFixedBuildings(buildingIds) {
 }
 
 export function restoreFixedBuildings(states) {
-  ensureTemplateWritable();
+  ensureWritable();
   const additions = states.map(item => {
     const type = requireFixedBuildingType(item.typeId ?? item.type_id);
     return new FixedBuilding({
@@ -1932,6 +1959,7 @@ export function restoreFixedBuildings(states) {
       height: type.height,
       color: item.color ?? type.color,
       priority: item.priority ?? 0,
+      locked: item.locked ?? true,
     });
   });
   const next = [...document.fixedBuildings, ...additions];
@@ -1942,7 +1970,28 @@ export function restoreFixedBuildings(states) {
 }
 
 export function restoreFixedBuildingState(state) {
-  return editFixedBuilding(state.id, state);
+  ensureWritable();
+  const index = document.fixedBuildings.findIndex(item => item.id === state.id);
+  if (index < 0) throw new RangeError(`Unknown fixed building ID: ${state.id}`);
+
+  const typeId = state.typeId ?? state.type_id;
+  const type = requireFixedBuildingType(typeId);
+  const restored = new FixedBuilding({
+    ...state,
+    type_id: typeId,
+    width: type.width,
+    height: type.height,
+    color: state.color ?? type.color,
+    priority: state.priority ?? 0,
+    locked: state.locked ?? true,
+  });
+
+  const next = [...document.fixedBuildings];
+  next[index] = restored;
+  occupancy = new OccupancyManager([...next, ...document.buildings]);
+  document.fixedBuildings = next;
+  validateTemplateState();
+  return cloneFixedBuilding(restored);
 }
 
 export function commitFixedRange(data) {
@@ -2023,6 +2072,7 @@ function cloneFixedBuilding(item) {
     height: item.height,
     color: item.color,
     priority: item.priority ?? 0,
+    locked: item.locked ?? true,
   });
 }
 
