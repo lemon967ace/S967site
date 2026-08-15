@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Grid Region Editor - Step 9</title>
+<title>Grid Region Editor - Step 10</title>
 <style>
   :root {
     --bg: #f7f7f7;
@@ -62,6 +62,33 @@
     height: 100%;
     background: white;
     cursor: crosshair;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  @media (pointer: coarse) {
+    button, select {
+      min-height: 44px;
+      font-size: 15px;
+    }
+
+    .toolbar {
+      gap: 7px;
+    }
+
+    .hint {
+      flex-basis: 100%;
+      margin-left: 0;
+      line-height: 1.45;
+    }
+
+    .status {
+      font-size: 14px;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
   }
   .status {
     padding: 7px 12px;
@@ -89,7 +116,7 @@
     <button id="importBtn">CSV 불러오기</button>
     <input id="fileInput" type="file" accept=".csv,text/csv" />
     <span class="hint">
-      같은 직선 위에서 겹치거나 맞닿은 선은 최대 선분으로 자동 병합됩니다. 작업 CSV는 선 좌표와 원본선 ID 목록을 보존하고, 구역 CSV에는 자동 구역의 꼭짓점 좌표만 저장됩니다.
+      같은 직선 위에서 겹치거나 맞닿은 선은 최대 선분으로 자동 병합됩니다. 태블릿에서는 두 손가락 드래그로 이동하고 핀치로 확대/축소할 수 있습니다.
       Shift+클릭: 선 선택 · 일반 클릭(선 밖): 그리기 · 구역 내부 클릭: 구역 선택 · Delete: 선택 선 삭제 · Ctrl+Z/Y: 실행취소/다시실행 · 휠: 확대/축소 · 가운데 버튼 또는 Space+드래그: 화면 이동
     </span>
   </div>
@@ -135,6 +162,11 @@
   let panStart = null;
   let spaceDown = false;
   let suppressNextClick = false;
+
+  // 태블릿/모바일 두 손가락 팬 + 핀치 줌 상태
+  let touchGesture = null;
+  let touchGestureActive = false;
+  let suppressTouchClickUntil = 0;
 
   let lines = [];
   let regions = [];
@@ -1223,8 +1255,11 @@
       ? ` · 선택 선: L${selectedLineIndex + 1} / 원본 ${((lines[selectedLineIndex]?.sourceIds || []).map(id => `S${id}`).join(', ') || '-')}`
       : '';
     const selectedRegion = selectedRegionId ? ` · 선택 구역: ${selectedRegionId}` : '';
+    const touchHint = window.matchMedia && window.matchMedia('(pointer: coarse)').matches
+      ? ' · 두 손가락: 이동/확대'
+      : '';
     status.textContent =
-      `좌표: ${coord} · 확대: ${Math.round(zoom * 100)}% · 분할 선분: ${lines.length} · 자동 구역: ${regions.length}${selectedLine}${selectedRegion}`;
+      `좌표: ${coord} · 확대: ${Math.round(zoom * 100)}% · 분할 선분: ${lines.length} · 자동 구역: ${regions.length}${selectedLine}${selectedRegion}${touchHint}`;
   }
 
   function draw() {
@@ -1240,6 +1275,107 @@
 
     updateStatus();
   }
+
+
+  function touchPoint(touch) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
+  }
+
+  function midpoint(a, b) {
+    return {
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2
+    };
+  }
+
+  function distance(a, b) {
+    return Math.hypot(b.x - a.x, b.y - a.y);
+  }
+
+  function beginTwoFingerGesture(ev) {
+    if (ev.touches.length !== 2) return;
+
+    const p1 = touchPoint(ev.touches[0]);
+    const p2 = touchPoint(ev.touches[1]);
+    const mid = midpoint(p1, p2);
+    const dist = Math.max(1, distance(p1, p2));
+
+    touchGesture = {
+      startDistance: dist,
+      startZoom: zoom,
+      worldX: (mid.x - offsetX) / (GRID * zoom),
+      worldY: (mid.y - offsetY) / (GRID * zoom)
+    };
+
+    touchGestureActive = true;
+    activePoint = null;
+    selectedLineIndex = -1;
+    selectedRegionId = null;
+    canvas.style.cursor = 'grabbing';
+  }
+
+  canvas.addEventListener('touchstart', (ev) => {
+    if (ev.touches.length >= 2) {
+      ev.preventDefault();
+      beginTwoFingerGesture(ev);
+      draw();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (ev) => {
+    if (!touchGestureActive || !touchGesture || ev.touches.length < 2) return;
+
+    ev.preventDefault();
+
+    const p1 = touchPoint(ev.touches[0]);
+    const p2 = touchPoint(ev.touches[1]);
+    const mid = midpoint(p1, p2);
+    const dist = Math.max(1, distance(p1, p2));
+
+    const scale = dist / touchGesture.startDistance;
+    zoom = Math.max(
+      MIN_ZOOM,
+      Math.min(MAX_ZOOM, touchGesture.startZoom * scale)
+    );
+
+    // 핀치 중심을 기준으로 줌하면서, 중심 이동분은 팬으로 반영한다.
+    offsetX = mid.x - touchGesture.worldX * GRID * zoom;
+    offsetY = mid.y - touchGesture.worldY * GRID * zoom;
+
+    draw();
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (ev) => {
+    if (!touchGestureActive) return;
+
+    if (ev.touches.length < 2) {
+      ev.preventDefault();
+      touchGestureActive = false;
+      touchGesture = null;
+
+      // 제스처 직후 브라우저가 합성 click을 발생시켜 선이 찍히는 것을 방지.
+      suppressTouchClickUntil = Date.now() + 450;
+      suppressNextClick = true;
+      canvas.style.cursor = 'crosshair';
+      draw();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchcancel', (ev) => {
+    if (!touchGestureActive) return;
+
+    ev.preventDefault();
+    touchGestureActive = false;
+    touchGesture = null;
+    suppressTouchClickUntil = Date.now() + 450;
+    suppressNextClick = true;
+    canvas.style.cursor = 'crosshair';
+    draw();
+  }, { passive: false });
 
   canvas.addEventListener('wheel', (ev) => {
     ev.preventDefault();
@@ -1338,6 +1474,11 @@
   }
 
   canvas.addEventListener('click', (ev) => {
+    if (Date.now() < suppressTouchClickUntil) {
+      suppressNextClick = false;
+      return;
+    }
+
     if (suppressNextClick) {
       suppressNextClick = false;
       return;
