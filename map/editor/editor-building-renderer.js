@@ -73,7 +73,7 @@ export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText 
   const preferred = preferredFontSizeForZoom(zoom);
   for (let fontSize = preferred; fontSize >= MINIMUM_FONT_PIXEL_SIZE; fontSize--) {
     const coordinate =
-  zoom >= 0.8
+  zoom >= 0.7
     ? `(${building.x}, ${building.y})`
     : "";
     const coordinateSize = measureText(coordinate, fontSize);
