@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Upload Admin · S967</title>
+  <title>Admin · S967</title>
 
   <link rel="stylesheet" href="/theme.css">
   <script src="/theme.js" defer></script>
@@ -3497,11 +3497,14 @@ function getStaffAccountDisplayName(account) {
       account?.display_name ?? ""
     ).trim();
 
-  const fallbackId =
-    accountId ||
-    String(
-      account?.user_id ?? ""
-    ).trim();
+const fallbackId =
+  accountId ||
+  String(
+    account?.staff_id ??
+    account?.account_id ??
+    account?.display_name ??
+    ""
+  ).trim();
 
   if (
     !nickname ||
@@ -3541,12 +3544,14 @@ function getChatOnlyAccountDisplayName(account) {
     ).trim();
 
   const fallbackId =
-    accountId ||
-    String(
-      account?.chat_id ??
-      account?.user_id ??
-      ""
-    ).trim();
+  accountId ||
+  String(
+    account?.chat_id ??
+    account?.account_id ??
+    account?.staff_id ??
+    account?.display_name ??
+    ""
+  ).trim();
 
   if (
     !nickname ||
