@@ -1078,6 +1078,7 @@
       <input id="chatId" type="text" autocomplete="username" placeholder="Chat ID">
       <input id="chatPassword" type="password" autocomplete="current-password" placeholder="Password">
       <button id="chatLoginButton" type="button">Chat login</button>
+      <button id="chatPasskeyLoginButton" type="button">Login with passkey</button>
     </div>
     <div class="gate-links">
       <a href="/">Home</a>
@@ -1148,6 +1149,13 @@
             type="button"
             title="Change nickname"
           >✎</button>
+
+          <button
+            id="passkeyButton"
+            class="hidden"
+            type="button"
+            title="Passkeys"
+          >🔐</button>
 
           <button
             id="roomMembersButton"
@@ -1245,6 +1253,59 @@
     </div>
   </dialog>
 
+  <dialog id="passkeyDialog" class="room-dialog">
+    <div class="room-dialog-inner">
+      <h2 id="passkeyDialogTitle">Passkeys</h2>
+      <p id="passkeyDialogLead" class="room-note">
+        Register and manage passkeys for this account.
+      </p>
+
+      <div
+        id="passkeyDialogList"
+        class="member-list"
+      ></div>
+
+      <div style="margin-top:12px">
+        <input
+          id="passkeyDialogPassword"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Current password"
+        >
+      </div>
+
+      <div
+        id="passkeyDialogStatus"
+        class="status"
+      ></div>
+
+      <div class="room-dialog-actions">
+        <button
+          id="passkeyDialogVerify"
+          type="button"
+        >
+          Verify password
+        </button>
+
+        <button
+          id="passkeyDialogRegister"
+          class="hidden"
+          type="button"
+        >
+          Register passkey
+        </button>
+
+        <button
+          id="passkeyDialogClose"
+          type="button"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+
   <dialog id="nicknameDialog" class="room-dialog">
     <div class="room-dialog-inner">
       <h2 id="nicknameTitle">Change nickname</h2>
@@ -1299,7 +1360,17 @@
     const CHAT_ANNOUNCEMENT_API =
       "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/site-announcements";
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth: {
+          experimental: {
+            passkey: true
+          }
+        }
+      }
+    );
     const $ = id => document.getElementById(id);
     const MESSAGE_BATCH_SIZE = 20;
     const MAX_FILES = 5;
@@ -1335,6 +1406,29 @@
     let searchBefore = "";
 
     const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+
+    const chatPasskeyLoginButton =
+      $("chatPasskeyLoginButton");
+    const passkeyButton =
+      $("passkeyButton");
+    const passkeyDialog =
+      $("passkeyDialog");
+    const passkeyDialogTitle =
+      $("passkeyDialogTitle");
+    const passkeyDialogLead =
+      $("passkeyDialogLead");
+    const passkeyDialogList =
+      $("passkeyDialogList");
+    const passkeyDialogPassword =
+      $("passkeyDialogPassword");
+    const passkeyDialogStatus =
+      $("passkeyDialogStatus");
+    const passkeyDialogVerify =
+      $("passkeyDialogVerify");
+    const passkeyDialogRegister =
+      $("passkeyDialogRegister");
+    const passkeyDialogClose =
+      $("passkeyDialogClose");
 
     const chatSettingsPickers = $("chatSettingsPickers");
     const chatSettingsToolbarSlot = $("chatSettingsToolbarSlot");
@@ -1551,6 +1645,114 @@
     }
 
 
+    function chatPasskeyText(){
+      const all={
+        ko:{
+          login:"패스키로 로그인",
+          title:"패스키",
+          lead:"이 Staff/Member 계정의 패스키를 등록하고 관리합니다.",
+          current:"현재 비밀번호",
+          verify:"비밀번호 확인",
+          verified:"확인 완료",
+          register:"패스키 등록",
+          close:"닫기",
+          none:"등록된 패스키가 없습니다.",
+          delete:"삭제",
+          deleteConfirm:"이 패스키를 삭제할까요?",
+          ready:"확인이 완료되었습니다. ‘패스키 등록’을 직접 눌러 계속하세요.",
+          registering:"기기에서 패스키 등록을 승인해 주세요.",
+          registered:"패스키를 등록했습니다.",
+          deleted:"패스키를 삭제했습니다.",
+          failed:"패스키 작업에 실패했습니다.",
+          wrong:"현재 비밀번호가 올바르지 않습니다.",
+          working:"패스키 인증을 기다리는 중…",
+          denied:"이 패스키는 Staff 또는 Member 계정에 연결되어 있지 않습니다.",
+          cancelled:"패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다."
+        },
+        en:{
+          login:"Login with passkey",
+          title:"Passkeys",
+          lead:"Register and manage passkeys for this Staff/Member account.",
+          current:"Current password",
+          verify:"Verify password",
+          verified:"Verified",
+          register:"Register passkey",
+          close:"Close",
+          none:"No passkeys are registered.",
+          delete:"Delete",
+          deleteConfirm:"Delete this passkey?",
+          ready:"Verification complete. Press “Register passkey” to continue.",
+          registering:"Approve passkey registration on your device.",
+          registered:"Passkey registered.",
+          deleted:"Passkey deleted.",
+          failed:"Passkey operation failed.",
+          wrong:"The current password is incorrect.",
+          working:"Waiting for passkey authentication…",
+          denied:"This passkey is not linked to a Staff or Member account.",
+          cancelled:"Passkey authentication was cancelled or not allowed by the device."
+        },
+        ja:{
+          login:"パスキーでログイン",
+          title:"パスキー",
+          lead:"このStaff/Memberアカウントのパスキーを登録・管理します。",
+          current:"現在のパスワード",
+          verify:"パスワード確認",
+          verified:"確認済み",
+          register:"パスキーを登録",
+          close:"閉じる",
+          none:"登録されたパスキーはありません。",
+          delete:"削除",
+          deleteConfirm:"このパスキーを削除しますか？",
+          ready:"確認が完了しました。「パスキーを登録」を直接押してください。",
+          registering:"端末でパスキー登録を承認してください。",
+          registered:"パスキーを登録しました。",
+          deleted:"パスキーを削除しました。",
+          failed:"パスキー操作に失敗しました。",
+          wrong:"現在のパスワードが正しくありません。",
+          working:"パスキー認証を待っています…",
+          denied:"このパスキーはStaffまたはMemberアカウントに連携されていません。",
+          cancelled:"パスキー認証がキャンセルされたか、端末で許可されませんでした。"
+        },
+        ru:{
+          login:"Войти с ключом доступа",
+          title:"Ключи доступа",
+          lead:"Регистрация и управление ключами доступа этой учётной записи Staff/Member.",
+          current:"Текущий пароль",
+          verify:"Проверить пароль",
+          verified:"Подтверждено",
+          register:"Зарегистрировать ключ",
+          close:"Закрыть",
+          none:"Ключи доступа не зарегистрированы.",
+          delete:"Удалить",
+          deleteConfirm:"Удалить этот ключ доступа?",
+          ready:"Проверка завершена. Нажмите «Зарегистрировать ключ».",
+          registering:"Подтвердите регистрацию ключа на устройстве.",
+          registered:"Ключ доступа зарегистрирован.",
+          deleted:"Ключ доступа удалён.",
+          failed:"Операция с ключом доступа не выполнена.",
+          wrong:"Текущий пароль неверен.",
+          working:"Ожидание подтверждения ключа доступа…",
+          denied:"Этот ключ доступа не связан с учётной записью Staff или Member.",
+          cancelled:"Аутентификация ключом доступа отменена или не разрешена устройством."
+        }
+      };
+      return all[language]??all.en;
+    }
+
+    function applyChatPasskeyText(){
+      const t=chatPasskeyText();
+      chatPasskeyLoginButton.textContent=t.login;
+      passkeyButton.title=t.title;
+      passkeyDialogTitle.textContent=t.title;
+      passkeyDialogLead.textContent=t.lead;
+      passkeyDialogPassword.placeholder=t.current;
+      if(passkeyDialogRegister.classList.contains("hidden")){
+        passkeyDialogVerify.textContent=t.verify;
+      }
+      passkeyDialogRegister.textContent=t.register;
+      passkeyDialogClose.textContent=t.close;
+    }
+
     function setText(){
       document.documentElement.lang=language;
       document.title=`${text.title} | S967`;
@@ -1583,6 +1785,7 @@
       backButton.setAttribute("aria-label",text.back);
       memberPasswordButton.title=text.password;
       nicknameButton.title=text.nickname;
+      applyChatPasskeyText();
       nicknameTitle.textContent=text.nickname;
       nicknameInput.placeholder=text.nicknamePlaceholder;
       cancelNicknameButton.textContent=text.cancel;
@@ -1706,7 +1909,7 @@
     async function loadRooms(){
       const result=await request(`${API.list}?view=rooms`);
       actor=result.actor;
-      actorLabel.textContent=actor?.name?`${actor.name} · ${displayRole(actor.kind)}`:"";memberPasswordButton.classList.toggle("hidden",actor?.kind!=="chat");nicknameButton.classList.toggle("hidden",!actor||actor.kind==="admin");
+      actorLabel.textContent=actor?.name?`${actor.name} · ${displayRole(actor.kind)}`:"";memberPasswordButton.classList.toggle("hidden",actor?.kind!=="chat");nicknameButton.classList.toggle("hidden",!actor||actor.kind==="admin");passkeyButton.classList.toggle("hidden",!actor||actor.kind==="admin");
       rooms=result.rooms??[];
       if(initialRequestedRoomId&&rooms.some(r=>r.id===initialRequestedRoomId)){
         currentRoomId=initialRequestedRoomId;
@@ -2634,6 +2837,179 @@
       );
     }
 
+    function resetChatPasskeyRegistration(){
+      passkeyDialogPassword.value="";
+      passkeyDialogPassword.disabled=false;
+      passkeyDialogVerify.disabled=false;
+      passkeyDialogVerify.textContent=chatPasskeyText().verify;
+      passkeyDialogRegister.disabled=false;
+      passkeyDialogRegister.classList.add("hidden");
+    }
+
+    async function loadChatPasskeys(){
+      const t=chatPasskeyText();
+      const {data,error}=await supabase.auth.passkey.list();
+      if(error)throw error;
+
+      const items=Array.isArray(data)?data:[];
+      passkeyDialogList.replaceChildren();
+
+      if(!items.length){
+        const empty=document.createElement("div");
+        empty.className="room-note";
+        empty.textContent=t.none;
+        passkeyDialogList.append(empty);
+      }
+
+      for(const item of items){
+        const row=document.createElement("div");
+        row.className="member-row";
+
+        const name=document.createElement("span");
+        name.className="member-name";
+        name.textContent=item.friendly_name||"Passkey";
+
+        const remove=document.createElement("button");
+        remove.type="button";
+        remove.textContent=t.delete;
+        remove.onclick=async()=>{
+          if(!confirm(chatPasskeyText().deleteConfirm))return;
+          remove.disabled=true;
+          try{
+            const {error:deleteError}=await supabase.auth.passkey.delete({
+              passkeyId:item.id
+            });
+            if(deleteError)throw deleteError;
+            await loadChatPasskeys();
+            passkeyDialogStatus.textContent=chatPasskeyText().deleted;
+            passkeyDialogStatus.classList.remove("error");
+          }catch(error){
+            passkeyDialogStatus.textContent=error?.message||chatPasskeyText().failed;
+            passkeyDialogStatus.classList.add("error");
+          }finally{
+            remove.disabled=false;
+          }
+        };
+
+        row.append(name,remove);
+        passkeyDialogList.append(row);
+      }
+    }
+
+    async function openPasskeyDialog(){
+      resetChatPasskeyRegistration();
+      applyChatPasskeyText();
+      passkeyDialogStatus.textContent="";
+      passkeyDialogStatus.classList.remove("error");
+
+      try{
+        await loadChatPasskeys();
+      }catch(error){
+        passkeyDialogStatus.textContent=error?.message||chatPasskeyText().failed;
+        passkeyDialogStatus.classList.add("error");
+      }
+
+      passkeyDialog.showModal();
+      passkeyDialogPassword.focus();
+    }
+
+    async function verifyChatPasswordForPasskey(){
+      const t=chatPasskeyText();
+      const password=passkeyDialogPassword.value;
+      if(!password){
+        passkeyDialogStatus.textContent=t.wrong;
+        passkeyDialogStatus.classList.add("error");
+        return;
+      }
+
+      passkeyDialogVerify.disabled=true;
+      passkeyDialogPassword.disabled=true;
+
+      try{
+        const {data:{session}}=await supabase.auth.getSession();
+        const email=session?.user?.email;
+        if(!email)throw new Error("NO_AUTH_SESSION");
+
+        const {error}=await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        if(error)throw error;
+
+        passkeyDialogPassword.value="";
+        passkeyDialogVerify.textContent=t.verified;
+        passkeyDialogRegister.classList.remove("hidden");
+        passkeyDialogStatus.textContent=t.ready;
+        passkeyDialogStatus.classList.remove("error");
+      }catch(error){
+        console.error(error);
+        resetChatPasskeyRegistration();
+        passkeyDialogStatus.textContent=t.wrong;
+        passkeyDialogStatus.classList.add("error");
+      }
+    }
+
+    async function registerChatPasskey(){
+      const t=chatPasskeyText();
+      passkeyDialogRegister.disabled=true;
+      passkeyDialogStatus.textContent=t.registering;
+      passkeyDialogStatus.classList.remove("error");
+
+      try{
+        const {error}=await supabase.auth.registerPasskey();
+        if(error)throw error;
+
+        resetChatPasskeyRegistration();
+        await loadChatPasskeys();
+        passkeyDialogStatus.textContent=t.registered;
+      }catch(error){
+        console.error(error);
+        resetChatPasskeyRegistration();
+        passkeyDialogStatus.textContent=
+          error?.name==="NotAllowedError"
+            ? t.cancelled
+            : (error?.message||t.failed);
+        passkeyDialogStatus.classList.add("error");
+      }
+    }
+
+    async function doChatPasskeyLogin(){
+      const t=chatPasskeyText();
+      chatPasskeyLoginButton.disabled=true;
+      chatLoginButton.disabled=true;
+      gateMessage.textContent=t.working;
+
+      try{
+        const {error}=await supabase.auth.signInWithPasskey();
+        if(error)throw error;
+
+        /*
+          bootstrap() calls staff-chat-list, whose server-side verifyActor()
+          validates the Supabase JWT and requires an active Staff or Member
+          database row. A different S967 passkey therefore does not gain
+          Chat access merely by being a valid project passkey.
+        */
+        await bootstrap();
+
+        if(app.classList.contains("hidden")){
+          await supabase.auth.signOut({scope:"local"});
+          throw new Error(t.denied);
+        }
+      }catch(error){
+        console.error("Chat passkey login failed:",error);
+
+        const message=
+          error?.name==="NotAllowedError"
+            ? t.cancelled
+            : (error?.message||t.failed);
+
+        gateMessage.textContent=message;
+      }finally{
+        chatPasskeyLoginButton.disabled=false;
+        chatLoginButton.disabled=false;
+      }
+    }
+
     async function doChatLogin(){
       const id=chatId.value.trim();
       const password=chatPassword.value;
@@ -2726,7 +3102,22 @@
     }
 
     chatLoginButton.onclick=doChatLogin;
+    chatPasskeyLoginButton.onclick=doChatPasskeyLogin;
     chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
+
+    passkeyButton.onclick=openPasskeyDialog;
+    passkeyDialogVerify.onclick=verifyChatPasswordForPasskey;
+    passkeyDialogRegister.onclick=registerChatPasskey;
+    passkeyDialogClose.onclick=()=>{
+      resetChatPasskeyRegistration();
+      passkeyDialog.close();
+    };
+    passkeyDialogPassword.addEventListener("keydown",e=>{
+      if(e.key==="Enter"&&!e.isComposing&&!passkeyDialogVerify.disabled){
+        e.preventDefault();
+        verifyChatPasswordForPasskey();
+      }
+    });
     createRoomButton.onclick=()=>{createRoomStatus.textContent="";createRoomStatus.classList.remove("error");newRoomName.value="";createRoomDialog.showModal();newRoomName.focus();};
     cancelCreateRoomButton.onclick=()=>createRoomDialog.close();
     confirmCreateRoomButton.onclick=createRoom;
