@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self';">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -623,6 +625,13 @@
   #chatAdminSection .context-line{padding:6px 8px;border-left:3px solid var(--border);font-size:.78rem;white-space:pre-wrap}
   #chatAdminSection .context-line.reported{border-left-color:var(--text);font-weight:650}
   #chatAdminSection .evidence-links{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  #chatAdminSection .chat-glossary-table-wrap{margin-top:12px;overflow:auto;max-height:60vh;border:1px solid var(--border);border-radius:10px}
+  #chatAdminSection .chat-glossary-table{width:100%;border-collapse:collapse;min-width:900px}
+  #chatAdminSection .chat-glossary-table th,#chatAdminSection .chat-glossary-table td{padding:8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;font-size:.84rem}
+  #chatAdminSection .chat-glossary-table th{position:sticky;top:0;background:var(--surface-hover);z-index:1}
+  #chatAdminSection .chat-glossary-table td input{width:100%;min-width:120px;padding:7px;border:1px solid var(--border);border-radius:7px;background:var(--surface-hover);color:var(--text)}
+  #chatAdminSection .chat-glossary-key{min-width:150px}
+  #chatAdminSection .chat-glossary-notes{min-width:230px}
   #announcementAdminSection .grid,#announcementAdminSection .lang-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
   #announcementAdminSection label{display:grid;gap:5px;font-size:.78rem}
   #announcementAdminSection textarea{min-height:78px;resize:vertical;line-height:1.45}
@@ -1838,13 +1847,15 @@
 
 <div id="chatAdminSection" class="admin-section" data-admin-section="chat">
   <section class="panel">
-    <div class="row"><h2 style="margin:0">채팅 관리</h2><a class="admin-button" href="/chat/">채팅방 열기</a></div>
-    <p class="small">채팅 전용 계정, 채팅방, 초대·퇴장, 신고를 이 탭에서 직접 관리합니다.</p>
+    <h2 style="margin:0">채팅 관리</h2>
+    <p class="small">신고 내역과 AI 번역 용어집을 관리합니다.</p>
   </section>
-  <div id="embeddedChatGate" class="hidden"><span id="embeddedChatGateMessage"></span></div>
+
+  <div id="embeddedChatGate" class="hidden">
+    <span id="embeddedChatGateMessage"></span>
+  </div>
+
   <div id="embeddedChatApp">
-
-
     <section class="panel">
       <h2>신고함</h2>
       <p class="small">
@@ -1859,27 +1870,39 @@
     </section>
 
     <section class="panel">
-      <h2>채팅 전용 계정</h2>
-      <div class="row">
-        <input id="embeddedChatNewChatId" placeholder="Chat ID">
-        <input id="embeddedChatNewChatPassword" type="password" minlength="10" autocomplete="new-password" placeholder="초기 비밀번호 (10자 이상)">
-        <button id="embeddedChatGeneratePassword" type="button">강한 비밀번호 생성</button>
-        <button id="embeddedChatCreateChatUser" type="button">계정 생성</button>
-      </div>
-      <div id="embeddedChatUserStatus" class="status"></div>
-      <div id="embeddedChatUsers" class="cards"></div>
-    </section>
+      <h2>번역표 수정</h2>
+      <p class="small">
+        KO / EN / JA / RU 대응어를 관리합니다.
+        서버에 저장하면 glossary revision이 올라가고 기존 AI 번역 캐시는 자동으로 무효화됩니다.
+      </p>
 
-    <section class="panel">
-      <h2>채팅방</h2>
       <div class="row">
-        <input id="embeddedChatNewRoomName" placeholder="채팅방 이름">
-        <input id="embeddedChatNewRoomId" placeholder="room-id (선택)">
-        <label><input id="embeddedChatStaffAutoJoin" type="checkbox" checked> 모든 활성 스태프 자동 참여</label>
-        <button id="embeddedChatCreateRoom" type="button">방 생성</button>
+        <input id="embeddedGlossaryCsvFile" type="file" accept=".csv,text/csv">
+        <button id="embeddedGlossaryImportButton" type="button">CSV 불러오기</button>
+        <button id="embeddedGlossaryAddRowButton" type="button">행 추가</button>
+        <button id="embeddedGlossaryExportButton" type="button">현재 용어집 CSV 저장</button>
+        <button id="embeddedGlossarySaveButton" type="button">서버에 저장</button>
       </div>
-      <div id="embeddedChatRoomStatus" class="status"></div>
-      <div id="embeddedChatRooms" class="cards"></div>
+
+      <div id="embeddedGlossaryRevision" class="small" style="margin-top:10px"></div>
+      <div id="embeddedGlossaryStatus" class="status"></div>
+
+      <div class="chat-glossary-table-wrap">
+        <table class="chat-glossary-table">
+          <thead>
+            <tr>
+              <th>canonical_key</th>
+              <th>한국어</th>
+              <th>English</th>
+              <th>日本語</th>
+              <th>Русский</th>
+              <th>notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="embeddedGlossaryRows"></tbody>
+        </table>
+      </div>
     </section>
   </div>
 </div>
@@ -11210,326 +11233,1029 @@ window.addEventListener(
   </script>
 <script>
 
-    const API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-room-admin";
-    const REPORT_API="https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-report-admin";
-    const $=id=>document.getElementById(id);
-    const gate=$("embeddedChatGate"),gateMessage=$("embeddedChatGateMessage"),app=$("embeddedChatApp"),newChatId=$("embeddedChatNewChatId"),newChatPassword=$("embeddedChatNewChatPassword"),generatePassword=$("embeddedChatGeneratePassword"),createChatUser=$("embeddedChatCreateChatUser"),userStatus=$("embeddedChatUserStatus"),usersHost=$("embeddedChatUsers"),newRoomName=$("embeddedChatNewRoomName"),newRoomId=$("embeddedChatNewRoomId"),staffAutoJoin=$("embeddedChatStaffAutoJoin"),createRoom=$("embeddedChatCreateRoom"),roomStatus=$("embeddedChatRoomStatus"),roomsHost=$("embeddedChatRooms"),refreshReports=$("embeddedChatRefreshReports"),reportStatus=$("embeddedChatReportStatus"),reportsHost=$("embeddedChatReports"),reportsPagination=$("embeddedChatReportsPagination");
-    let data={rooms:[],staff:[],chat_users:[],memberships:[]};
-    let reportPage=1;
-    const REPORT_PAGE_SIZE=5;
+    const REPORT_API =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-report-admin";
+
+    const GLOSSARY_API =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/staff-chat-glossary-admin";
+
+    const $ = (id) =>
+      document.getElementById(id);
+
+    const gate = $("embeddedChatGate");
+    const gateMessage = $("embeddedChatGateMessage");
+    const app = $("embeddedChatApp");
+
+    const refreshReports = $("embeddedChatRefreshReports");
+    const reportStatus = $("embeddedChatReportStatus");
+    const reportsHost = $("embeddedChatReports");
+    const reportsPagination = $("embeddedChatReportsPagination");
+
+    const glossaryCsvFile = $("embeddedGlossaryCsvFile");
+    const glossaryImportButton = $("embeddedGlossaryImportButton");
+    const glossaryAddRowButton = $("embeddedGlossaryAddRowButton");
+    const glossaryExportButton = $("embeddedGlossaryExportButton");
+    const glossarySaveButton = $("embeddedGlossarySaveButton");
+    const glossaryRowsHost = $("embeddedGlossaryRows");
+    const glossaryStatus = $("embeddedGlossaryStatus");
+    const glossaryRevision = $("embeddedGlossaryRevision");
+
+    let reportPage = 1;
+    const REPORT_PAGE_SIZE = 5;
+    let glossaryRows = [];
 
     const HIDDEN_NO_ACTION_REPORTS_KEY =
       "s967_admin_hidden_no_action_reports";
 
-    function hiddenNoActionReportIds(){
-      try{
-        const parsed=JSON.parse(
+    function hiddenNoActionReportIds() {
+      try {
+        const parsed = JSON.parse(
           localStorage.getItem(
             HIDDEN_NO_ACTION_REPORTS_KEY
           ) || "[]"
         );
+
         return new Set(
           Array.isArray(parsed)
             ? parsed.map(String)
             : []
         );
-      }catch{
+      } catch {
         return new Set();
       }
     }
 
-    function hideNoActionReportId(reportId){
-      const ids=hiddenNoActionReportIds();
+    function hideNoActionReportId(reportId) {
+      const ids = hiddenNoActionReportIds();
       ids.add(String(reportId));
+
       localStorage.setItem(
         HIDDEN_NO_ACTION_REPORTS_KEY,
         JSON.stringify([...ids])
       );
     }
 
-    function visibleReports(reports){
-      const hidden=hiddenNoActionReportIds();
-      return (reports??[]).filter(
-        report=>!hidden.has(String(report.id))
+    function visibleReports(reports) {
+      const hidden = hiddenNoActionReportIds();
+
+      return (reports ?? []).filter(
+        (report) =>
+          !hidden.has(String(report.id))
       );
     }
 
-    function status(host,msg="",err=false){host.textContent=msg;host.classList.toggle("error",err);}
-    async function request(method,body=null){const token=S967AdminAuth.getToken();if(!token)throw new Error("관리자 로그인이 필요합니다.");const opt={method,headers:{Authorization:`Bearer ${token}`}};if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}const r=await fetch(API,opt);const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);return j;}
-    async function reportRequest(method="GET",body=null,url=REPORT_API){
-      const token=S967AdminAuth.getToken();
-      if(!token)throw new Error("관리자 로그인이 필요합니다.");
-      const opt={method,headers:{Authorization:`Bearer ${token}`}};
-      if(body!==null){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}
-      const r=await fetch(url,opt);
-      const j=await r.json().catch(()=>({}));
-      if(!r.ok)throw new Error(j.error||`HTTP_${r.status}`);
-      return j;
+    function chatStatus(
+      host,
+      message = "",
+      isError = false
+    ) {
+      if (!host) return;
+      host.textContent = message;
+      host.classList.toggle("error", isError);
     }
 
-    function fmtReportTime(value){
-      try{return new Intl.DateTimeFormat("ko-KR",{dateStyle:"short",timeStyle:"short"}).format(new Date(value));}
-      catch{return value??"";}
+    async function adminJsonRequest(
+      url,
+      method = "GET",
+      body = null
+    ) {
+      const token = S967AdminAuth.getToken();
+
+      if (!token) {
+        throw new Error("관리자 로그인이 필요합니다.");
+      }
+
+      const options = {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      if (body !== null) {
+        options.headers["Content-Type"] =
+          "application/json";
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(url, options);
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+          `HTTP_${response.status}`
+        );
+      }
+
+      return result;
     }
 
-    async function handleReport(report,action){
-      const label=action==="no_action"?"문제없음":action==="delete_message"?"메시지 삭제":"메시지 삭제 + 계정 정지";
-      if(!confirm(`${label} 처리할까요?`))return;
-      const note=prompt("처리 메모 (선택)")??"";
-      try{
-        status(reportStatus,"처리 중…");
-        await reportRequest("POST",{report_id:report.id,action,note});
+    function fmtReportTime(value) {
+      try {
+        return new Intl.DateTimeFormat(
+          "ko-KR",
+          {
+            dateStyle: "short",
+            timeStyle: "short",
+          }
+        ).format(new Date(value));
+      } catch {
+        return value ?? "";
+      }
+    }
 
-        if(action==="no_action"){
+    async function handleReport(
+      report,
+      action
+    ) {
+      const label =
+        action === "no_action"
+          ? "문제없음"
+          : action === "delete_message"
+            ? "메시지 삭제"
+            : "메시지 삭제 + 계정 정지";
+
+      if (!confirm(`${label} 처리할까요?`)) {
+        return;
+      }
+
+      const note =
+        prompt("처리 메모 (선택)") ?? "";
+
+      try {
+        chatStatus(reportStatus, "처리 중…");
+
+        await adminJsonRequest(
+          REPORT_API,
+          "POST",
+          {
+            report_id: report.id,
+            action,
+            note,
+          }
+        );
+
+        if (action === "no_action") {
           hideNoActionReportId(report.id);
         }
 
         await loadReports();
-        status(
+
+        chatStatus(
           reportStatus,
-          action==="no_action"
+          action === "no_action"
             ? "문제없음으로 처리했습니다. 이 목록에서는 숨겼습니다."
             : "처리했습니다."
         );
-      }catch(e){status(reportStatus,e.message,true);}
+      } catch (error) {
+        chatStatus(
+          reportStatus,
+          error.message,
+          true
+        );
+      }
     }
 
-    function renderReports(reports){
-      reportsHost.replaceChildren(...reports.map(report=>{
-        const card=document.createElement("div");
-        card.className=`report-card ${report.status==="pending"?"pending":""}`;
+    function renderReports(reports) {
+      reportsHost.replaceChildren(
+        ...reports.map((report) => {
+          const card =
+            document.createElement("div");
 
-        const h=document.createElement("h3");
-        h.textContent=`${report.status==="pending"?"● ":""}${report.reported_author_name} · ${report.status}`;
+          card.className =
+            `report-card ${
+              report.status === "pending"
+                ? "pending"
+                : ""
+            }`;
 
-        const meta=document.createElement("div");
-        meta.className="report-meta";
-        meta.textContent=`신고자 ${report.reporter_name} · 신고 ${fmtReportTime(report.created_at)} · 메시지 ${fmtReportTime(report.message_created_at)} · 증거 만료 ${fmtReportTime(report.evidence_expires_at)}`;
+          const heading =
+            document.createElement("h3");
 
-        const reason=document.createElement("div");
-        reason.className="report-meta";
-        reason.textContent=`사유: ${report.reason||"(없음)"}`;
+          heading.textContent =
+            `${
+              report.status === "pending"
+                ? "● "
+                : ""
+            }${report.reported_author_name} · ${report.status}`;
 
-        card.append(h,meta,reason);
+          const meta =
+            document.createElement("div");
 
-        if(report.evidence_purged_at){
-          const purged=document.createElement("div");
-          purged.className="report-message";
-          purged.textContent="90일 보존기간이 지나 증거 내용이 삭제되었습니다.";
-          card.append(purged);
-        }else{
-          const message=document.createElement("div");
-          message.className="report-message";
-          message.textContent=report.message_body_snapshot||"(본문 없음)";
-          card.append(message);
+          meta.className = "report-meta";
+          meta.textContent =
+            `신고자 ${report.reporter_name} · ` +
+            `신고 ${fmtReportTime(report.created_at)} · ` +
+            `메시지 ${fmtReportTime(report.message_created_at)} · ` +
+            `증거 만료 ${fmtReportTime(report.evidence_expires_at)}`;
 
-          const context=document.createElement("div");
-          context.className="report-context";
+          const reason =
+            document.createElement("div");
 
-          const allContext=Array.isArray(report.context_snapshot)
-            ? report.context_snapshot
-            : [];
+          reason.className = "report-meta";
+          reason.textContent =
+            `사유: ${report.reason || "(없음)"}`;
 
-          const reportedIndex=allContext.findIndex(item=>item?.reported===true);
+          card.append(
+            heading,
+            meta,
+            reason
+          );
 
-          const beforeContext=reportedIndex>=0
-            ? allContext.slice(0,reportedIndex)
-            : allContext.filter(item=>!item?.reported);
+          if (report.evidence_purged_at) {
+            const purged =
+              document.createElement("div");
 
-          const otherContext=reportedIndex>=0
-            ? [
-                ...allContext.slice(0,Math.max(0,reportedIndex-2)),
-                ...allContext.slice(reportedIndex+1)
-              ]
-            : beforeContext.slice(0,-2);
+            purged.className =
+              "report-message";
+            purged.textContent =
+              "90일 보존기간이 지나 증거 내용이 삭제되었습니다.";
 
-          const defaultContext=reportedIndex>=0
-            ? beforeContext.slice(-2)
-            : beforeContext.slice(-2);
+            card.append(purged);
+          } else {
+            const message =
+              document.createElement("div");
 
-          function appendContextLines(items){
-            context.replaceChildren();
-            for(const item of items){
-              const line=document.createElement("div");
-              line.className="context-line";
-              line.textContent=`${item.author_name} · ${fmtReportTime(item.created_at)}\n${item.is_deleted?"[삭제된 메시지]":item.body}`;
-              context.append(line);
+            message.className =
+              "report-message";
+            message.textContent =
+              report.message_body_snapshot ||
+              "(본문 없음)";
+
+            card.append(message);
+
+            const context =
+              document.createElement("div");
+
+            context.className =
+              "report-context";
+
+            const allContext =
+              Array.isArray(
+                report.context_snapshot
+              )
+                ? report.context_snapshot
+                : [];
+
+            const reportedIndex =
+              allContext.findIndex(
+                (item) =>
+                  item?.reported === true
+              );
+
+            const beforeContext =
+              reportedIndex >= 0
+                ? allContext.slice(
+                    0,
+                    reportedIndex
+                  )
+                : allContext.filter(
+                    (item) =>
+                      !item?.reported
+                  );
+
+            const defaultContext =
+              beforeContext.slice(-2);
+
+            function appendContextLines(
+              items
+            ) {
+              context.replaceChildren();
+
+              for (const item of items) {
+                const line =
+                  document.createElement(
+                    "div"
+                  );
+
+                line.className =
+                  "context-line";
+
+                line.textContent =
+                  `${item.author_name} · ${fmtReportTime(item.created_at)}\n` +
+                  `${
+                    item.is_deleted
+                      ? "[삭제된 메시지]"
+                      : item.body
+                  }`;
+
+                context.append(line);
+              }
+            }
+
+            appendContextLines(
+              defaultContext
+            );
+            card.append(context);
+
+            const expandedContext =
+              allContext.filter(
+                (item) =>
+                  !item?.reported
+              );
+
+            const hiddenCount =
+              Math.max(
+                0,
+                expandedContext.length -
+                  defaultContext.length
+              );
+
+            if (hiddenCount > 0) {
+              const contextToggle =
+                document.createElement(
+                  "button"
+                );
+
+              contextToggle.type = "button";
+              contextToggle.className =
+                "btn";
+              contextToggle.style.marginTop =
+                "7px";
+              contextToggle.textContent =
+                `전체 대화 보기 (${hiddenCount}개 더)`;
+
+              let expanded = false;
+
+              contextToggle.onclick = () => {
+                expanded = !expanded;
+
+                appendContextLines(
+                  expanded
+                    ? expandedContext
+                    : defaultContext
+                );
+
+                contextToggle.textContent =
+                  expanded
+                    ? "대화 접기"
+                    : `전체 대화 보기 (${hiddenCount}개 더)`;
+              };
+
+              card.append(contextToggle);
+            }
+
+            const evidence =
+              document.createElement("div");
+
+            evidence.className =
+              "evidence-links";
+
+            for (
+              const item of
+                report.attachment_evidence ?? []
+            ) {
+              if (!item.signed_url) {
+                continue;
+              }
+
+              const link =
+                document.createElement("a");
+
+              link.className = "btn";
+              link.href = item.signed_url;
+              link.target = "_blank";
+              link.rel =
+                "noopener noreferrer";
+              link.textContent =
+                `첨부 증거 · ${item.original_name}`;
+
+              evidence.append(link);
+            }
+
+            if (evidence.childNodes.length) {
+              card.append(evidence);
             }
           }
 
-          appendContextLines(defaultContext);
-          card.append(context);
+          if (report.status === "pending") {
+            const actions =
+              document.createElement("div");
 
-          const expandedContext=allContext.filter(item=>!item?.reported);
-          const hiddenCount=Math.max(0,expandedContext.length-defaultContext.length);
+            actions.className = "row";
+            actions.style.marginTop = "9px";
 
-          if(hiddenCount>0){
-            const contextToggle=document.createElement("button");
-            contextToggle.type="button";
-            contextToggle.className="btn";
-            contextToggle.style.marginTop="7px";
-            contextToggle.textContent=`전체 대화 보기 (${hiddenCount}개 더)`;
-
-            let expanded=false;
-            contextToggle.onclick=()=>{
-              expanded=!expanded;
-              appendContextLines(
-                expanded
-                  ? expandedContext
-                  : defaultContext
+            const noAction =
+              document.createElement("button");
+            noAction.textContent = "문제없음";
+            noAction.onclick = () =>
+              handleReport(
+                report,
+                "no_action"
               );
-              contextToggle.textContent=expanded
-                ? "대화 접기"
-                : `전체 대화 보기 (${hiddenCount}개 더)`;
-            };
 
-            card.append(contextToggle);
+            const del =
+              document.createElement("button");
+            del.textContent = "메시지 삭제";
+            del.onclick = () =>
+              handleReport(
+                report,
+                "delete_message"
+              );
+
+            const suspend =
+              document.createElement("button");
+            suspend.textContent =
+              "삭제 + 계정 정지";
+            suspend.onclick = () =>
+              handleReport(
+                report,
+                "suspend_account"
+              );
+
+            actions.append(
+              noAction,
+              del,
+              suspend
+            );
+
+            card.append(actions);
+          } else if (
+            report.resolution_note
+          ) {
+            const resolved =
+              document.createElement("div");
+
+            resolved.className =
+              "report-meta";
+            resolved.textContent =
+              `처리 메모: ${report.resolution_note}`;
+
+            card.append(resolved);
           }
 
-          const evidence=document.createElement("div");
-          evidence.className="evidence-links";
-          for(const item of report.attachment_evidence??[]){
-            if(!item.signed_url)continue;
-            const a=document.createElement("a");
-            a.className="btn";
-            a.href=item.signed_url;
-            a.target="_blank";
-            a.rel="noopener noreferrer";
-            a.textContent=`첨부 증거 · ${item.original_name}`;
-            evidence.append(a);
-          }
-          if(evidence.childNodes.length)card.append(evidence);
-        }
-
-        if(report.status==="pending"){
-          const actions=document.createElement("div");
-          actions.className="row";
-          actions.style.marginTop="9px";
-
-          const noAction=document.createElement("button");
-          noAction.textContent="문제없음";
-          noAction.onclick=()=>handleReport(report,"no_action");
-
-          const del=document.createElement("button");
-          del.textContent="메시지 삭제";
-          del.onclick=()=>handleReport(report,"delete_message");
-
-          const suspend=document.createElement("button");
-          suspend.textContent="삭제 + 계정 정지";
-          suspend.onclick=()=>handleReport(report,"suspend_account");
-
-          actions.append(noAction,del,suspend);
-          card.append(actions);
-        }else if(report.resolution_note){
-          const resolved=document.createElement("div");
-          resolved.className="report-meta";
-          resolved.textContent=`처리 메모: ${report.resolution_note}`;
-          card.append(resolved);
-        }
-
-        return card;
-      }));
+          return card;
+        })
+      );
     }
 
-    function renderReportPagination(pagination){
+    function renderReportPagination(
+      pagination
+    ) {
       renderAdminPagination(
         reportsPagination,
         pagination,
         async (page) => {
-          reportPage=page;
+          reportPage = page;
           await loadReports();
         }
       );
     }
 
-    async function loadReports(){
-      try{
-        const url=`${REPORT_API}?page=${encodeURIComponent(reportPage)}`;
-        const result=await reportRequest("GET",null,url);
+    async function loadReports() {
+      try {
+        const url =
+          `${REPORT_API}?page=${encodeURIComponent(reportPage)}`;
 
-        const pagination=result.pagination??{
-          page:reportPage,
-          page_size:REPORT_PAGE_SIZE,
-          total:(result.reports??[]).length,
-          total_pages:1
-        };
+        const result =
+          await adminJsonRequest(url);
 
-        if(
-          reportPage>Number(pagination.total_pages??1)
-        ){
-          reportPage=Math.max(1,Number(pagination.total_pages??1));
+        const pagination =
+          result.pagination ?? {
+            page: reportPage,
+            page_size:
+              REPORT_PAGE_SIZE,
+            total:
+              (result.reports ?? [])
+                .length,
+            total_pages: 1,
+          };
+
+        if (
+          reportPage >
+          Number(
+            pagination.total_pages ?? 1
+          )
+        ) {
+          reportPage = Math.max(
+            1,
+            Number(
+              pagination.total_pages ?? 1
+            )
+          );
+
           return loadReports();
         }
 
-        reportPage=Number(pagination.page??reportPage);
+        reportPage = Number(
+          pagination.page ?? reportPage
+        );
 
-        const reports=
+        const reports =
           visibleReports(
-            result.reports??[]
+            result.reports ?? []
           );
 
         renderReports(reports);
-        renderReportPagination(pagination);
-        status(reportStatus,"");
-      }catch(e){
+        renderReportPagination(
+          pagination
+        );
+        chatStatus(reportStatus, "");
+      } catch (error) {
         reportsPagination.replaceChildren();
-        status(reportStatus,e.message,true);
+        chatStatus(
+          reportStatus,
+          error.message,
+          true
+        );
       }
     }
 
-    async function load(){data=await request("GET");renderUsers();renderRooms();await loadReports();}
-
-    function renderUsers(){
-      usersHost.replaceChildren(...data.chat_users.map(u=>{
-        const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${u.display_name} ${u.is_active?"":"[비활성]"}`;
-        const row=document.createElement("div");row.className="row";
-        const toggle=document.createElement("button");toggle.textContent=u.is_active?"비활성화":"활성화";toggle.onclick=async()=>{await request("POST",{action:"set_chat_user_active",user_id:u.user_id,is_active:!u.is_active});await load();};
-        const reset=document.createElement("button");reset.textContent="비밀번호 변경";reset.onclick=async()=>{const p=prompt("새 비밀번호");if(!p)return;await request("POST",{action:"reset_chat_password",user_id:u.user_id,password:p});alert("변경했습니다.");};
-        row.append(toggle,reset);card.append(h,row);return card;
-      }));
+    function blankGlossaryRow() {
+      return {
+        canonical_key: "",
+        ko: "",
+        en: "",
+        ja: "",
+        ru: "",
+        notes: "",
+      };
     }
 
-    function membershipActive(roomId,userId,kind){return data.memberships.some(m=>m.room_id===roomId&&m.user_id===userId&&m.member_kind===kind&&m.is_active);}
-    function renderRooms(){
-      roomsHost.replaceChildren(...data.rooms.map(room=>{
-        const card=document.createElement("div");card.className="card";
-        const h=document.createElement("h3");h.textContent=`${room.name} · ${room.id}`;
-        const small=document.createElement("div");small.className="small";small.textContent=room.staff_auto_join?"활성 스태프 전체 자동 참여":"초대된 사용자만 참여";
-        const controls=document.createElement("div");controls.className="row";
-        const auto=document.createElement("button");auto.textContent=room.staff_auto_join?"스태프 자동참여 끄기":"스태프 자동참여 켜기";auto.onclick=async()=>{await request("POST",{action:"update_room",room_id:room.id,staff_auto_join:!room.staff_auto_join});await load();};
-        controls.append(auto);
-        if(room.id!=="general"){const del=document.createElement("button");del.textContent="방 삭제";del.onclick=async()=>{if(!confirm("채팅방과 메시지를 모두 삭제할까요?"))return;await request("POST",{action:"delete_room",room_id:room.id});await load();};controls.append(del);}
-        const members=document.createElement("div");members.className="members";
+    function renderGlossary() {
+      glossaryRowsHost.replaceChildren(
+        ...glossaryRows.map(
+          (row, index) => {
+            const tr =
+              document.createElement("tr");
 
-        const candidates=[
-          ...data.staff.map(u=>({id:u.user_id,name:u.display_name,kind:"staff",active:u.is_active})),
-          ...data.chat_users.map(u=>({id:u.user_id,name:u.display_name,kind:"chat",active:u.is_active})),
-        ].filter(x=>x.active);
+            for (
+              const key of [
+                "canonical_key",
+                "ko",
+                "en",
+                "ja",
+                "ru",
+                "notes",
+              ]
+            ) {
+              const td =
+                document.createElement("td");
 
-        for(const c of candidates){
-          if(c.kind==="staff"&&room.staff_auto_join){const s=document.createElement("span");s.className="member";s.textContent=`${c.name} · Staff 자동`;members.append(s);continue;}
-          const active=membershipActive(room.id,c.id,c.kind);
-          const b=document.createElement("button");b.className="member";b.textContent=`${active?"✓ ":"＋ "}${c.name} · ${c.kind==="staff"?"Staff":"Chat"}`;b.onclick=async()=>{await request("POST",{action:"set_membership",room_id:room.id,user_id:c.id,member_kind:c.kind,is_active:!active});await load();};members.append(b);
+              const input =
+                document.createElement(
+                  "input"
+                );
+
+              input.value =
+                row[key] ?? "";
+
+              input.className =
+                key === "canonical_key"
+                  ? "chat-glossary-key"
+                  : key === "notes"
+                    ? "chat-glossary-notes"
+                    : "";
+
+              input.addEventListener(
+                "input",
+                () => {
+                  glossaryRows[index][key] =
+                    input.value;
+                }
+              );
+
+              td.append(input);
+              tr.append(td);
+            }
+
+            const action =
+              document.createElement("td");
+
+            const del =
+              document.createElement(
+                "button"
+              );
+
+            del.type = "button";
+            del.textContent = "삭제";
+            del.className = "danger";
+
+            del.addEventListener(
+              "click",
+              () => {
+                glossaryRows.splice(
+                  index,
+                  1
+                );
+                renderGlossary();
+              }
+            );
+
+            action.append(del);
+            tr.append(action);
+
+            return tr;
+          }
+        )
+      );
+    }
+
+    function parseGlossaryCsv(text) {
+      const records = [];
+      let row = [];
+      let field = "";
+      let quoted = false;
+
+      for (
+        let i = 0;
+        i < text.length;
+        i++
+      ) {
+        const char = text[i];
+
+        if (quoted) {
+          if (char === '"') {
+            if (text[i + 1] === '"') {
+              field += '"';
+              i++;
+            } else {
+              quoted = false;
+            }
+          } else {
+            field += char;
+          }
+
+          continue;
         }
-        card.append(h,small,controls,members);return card;
-      }));
+
+        if (char === '"') {
+          quoted = true;
+        } else if (char === ",") {
+          row.push(field);
+          field = "";
+        } else if (
+          char === "\n" ||
+          char === "\r"
+        ) {
+          if (
+            char === "\r" &&
+            text[i + 1] === "\n"
+          ) {
+            i++;
+          }
+
+          row.push(field);
+          records.push(row);
+          row = [];
+          field = "";
+        } else {
+          field += char;
+        }
+      }
+
+      if (
+        field.length ||
+        row.length
+      ) {
+        row.push(field);
+        records.push(row);
+      }
+
+      return records;
     }
 
-    function strongPassword(){const bytes=new Uint8Array(18);crypto.getRandomValues(bytes);return Array.from(bytes,b=>("0"+b.toString(16)).slice(-2)).join("");}
-    if(generatePassword)generatePassword.onclick=()=>{newChatPassword.value=strongPassword();newChatPassword.type="text";newChatPassword.select();};
+    function glossaryRowsFromCsv(text) {
+      const records =
+        parseGlossaryCsv(
+          text.replace(/^\uFEFF/, "")
+        );
 
-    refreshReports.onclick=loadReports;
+      if (!records.length) {
+        return [];
+      }
 
-    createChatUser.onclick=async()=>{try{status(userStatus,"생성 중…");await request("POST",{action:"create_chat_user",chat_id:newChatId.value.trim(),password:newChatPassword.value});newChatId.value="";newChatPassword.value="";await load();status(userStatus,"생성 완료");}catch(e){status(userStatus,e.message,true);}};
-    createRoom.onclick=async()=>{try{status(roomStatus,"생성 중…");await request("POST",{action:"create_room",name:newRoomName.value.trim(),id:newRoomId.value.trim(),staff_auto_join:staffAutoJoin.checked});newRoomName.value="";newRoomId.value="";await load();status(roomStatus,"생성 완료");}catch(e){status(roomStatus,e.message,true);}};
+      const header =
+        records[0].map(
+          (value) =>
+            value
+              .trim()
+              .toLowerCase()
+        );
 
-    (async()=>{const valid=await S967AdminAuth.validate({url:"https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session"});if(!valid){gateMessage.textContent="관리자 로그인이 필요하거나 세션이 만료되었습니다.";return;}gate.classList.add("hidden");app.classList.remove("hidden");try{await load();}catch(e){status(roomStatus,e.message,true);}})();
-  
+      const required = [
+        "canonical_key",
+        "ko",
+        "en",
+        "ja",
+        "ru",
+        "notes",
+      ];
+
+      for (const key of required) {
+        if (!header.includes(key)) {
+          throw new Error(
+            `CSV 헤더 누락: ${key}`
+          );
+        }
+      }
+
+      return records
+        .slice(1)
+        .filter(
+          (record) =>
+            record.some(
+              (value) =>
+                value.trim() !== ""
+            )
+        )
+        .map(
+          (record) =>
+            Object.fromEntries(
+              required.map(
+                (key) => [
+                  key,
+                  record[
+                    header.indexOf(key)
+                  ] ?? "",
+                ]
+              )
+            )
+        );
+    }
+
+    function glossaryCsvEscape(value) {
+      const text =
+        String(value ?? "");
+
+      return /[",\r\n]/.test(text)
+        ? `"${text.replaceAll(
+            '"',
+            '""'
+          )}"`
+        : text;
+    }
+
+    function exportGlossaryCsv() {
+      const header = [
+        "canonical_key",
+        "ko",
+        "en",
+        "ja",
+        "ru",
+        "notes",
+      ];
+
+      const content = [
+        header.join(","),
+        ...glossaryRows.map(
+          (row) =>
+            header
+              .map(
+                (key) =>
+                  glossaryCsvEscape(
+                    row[key]
+                  )
+              )
+              .join(",")
+        ),
+      ].join("\r\n");
+
+      const blob =
+        new Blob(
+          ["\uFEFF", content],
+          {
+            type:
+              "text/csv;charset=utf-8",
+          }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+      link.download =
+        "s967-translation-glossary.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    async function loadGlossary() {
+      chatStatus(
+        glossaryStatus,
+        "용어집을 불러오는 중…"
+      );
+
+      const result =
+        await adminJsonRequest(
+          GLOSSARY_API
+        );
+
+      glossaryRows =
+        (result.rows ?? []).map(
+          (row) => ({
+            canonical_key:
+              row.canonical_key ?? "",
+            ko: row.ko ?? "",
+            en: row.en ?? "",
+            ja: row.ja ?? "",
+            ru: row.ru ?? "",
+            notes: row.notes ?? "",
+          })
+        );
+
+      glossaryRevision.textContent =
+        `Glossary revision: ${
+          result.glossary_revision ?? 1
+        }`;
+
+      renderGlossary();
+      chatStatus(glossaryStatus, "");
+    }
+
+    refreshReports?.addEventListener(
+      "click",
+      loadReports
+    );
+
+    glossaryImportButton?.addEventListener(
+      "click",
+      async () => {
+        const file =
+          glossaryCsvFile.files?.[0];
+
+        if (!file) {
+          chatStatus(
+            glossaryStatus,
+            "CSV 파일을 선택하세요.",
+            true
+          );
+          return;
+        }
+
+        try {
+          glossaryRows =
+            glossaryRowsFromCsv(
+              await file.text()
+            );
+
+          renderGlossary();
+
+          chatStatus(
+            glossaryStatus,
+            `${glossaryRows.length}개 행을 불러왔습니다. 서버 저장 전까지는 적용되지 않습니다.`
+          );
+        } catch (error) {
+          chatStatus(
+            glossaryStatus,
+            error.message,
+            true
+          );
+        }
+      }
+    );
+
+    glossaryAddRowButton?.addEventListener(
+      "click",
+      () => {
+        glossaryRows.push(
+          blankGlossaryRow()
+        );
+        renderGlossary();
+      }
+    );
+
+    glossaryExportButton?.addEventListener(
+      "click",
+      exportGlossaryCsv
+    );
+
+    glossarySaveButton?.addEventListener(
+      "click",
+      async () => {
+        const cleaned =
+          glossaryRows
+            .map((row) => ({
+              canonical_key:
+                row.canonical_key.trim(),
+              ko: row.ko.trim(),
+              en: row.en.trim(),
+              ja: row.ja.trim(),
+              ru: row.ru.trim(),
+              notes: row.notes.trim(),
+            }))
+            .filter(
+              (row) =>
+                Object.values(row)
+                  .some(Boolean)
+            );
+
+        if (
+          cleaned.some(
+            (row) =>
+              !row.canonical_key
+          )
+        ) {
+          chatStatus(
+            glossaryStatus,
+            "canonical_key가 빈 행이 있습니다.",
+            true
+          );
+          return;
+        }
+
+        if (
+          !confirm(
+            `용어집 ${cleaned.length}개를 서버에 저장할까요?\n기존 번역 캐시는 무효화됩니다.`
+          )
+        ) {
+          return;
+        }
+
+        glossarySaveButton.disabled = true;
+        chatStatus(
+          glossaryStatus,
+          "저장 중…"
+        );
+
+        try {
+          const result =
+            await adminJsonRequest(
+              GLOSSARY_API,
+              "POST",
+              {
+                action: "replace_all",
+                rows: cleaned,
+              }
+            );
+
+          glossaryRevision.textContent =
+            `Glossary revision: ${result.glossary_revision}`;
+
+          chatStatus(
+            glossaryStatus,
+            `저장 완료 · ${result.count}개 · 기존 번역 캐시 무효화 완료`
+          );
+        } catch (error) {
+          chatStatus(
+            glossaryStatus,
+            error.message,
+            true
+          );
+        } finally {
+          glossarySaveButton.disabled = false;
+        }
+      }
+    );
+
+    (async () => {
+      const valid =
+        await S967AdminAuth.validate({
+          url:
+            "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/admin-session",
+        });
+
+      if (!valid) {
+        gateMessage.textContent =
+          "관리자 로그인이 필요하거나 세션이 만료되었습니다.";
+        return;
+      }
+
+      gate.classList.add("hidden");
+      app.classList.remove("hidden");
+
+      const results =
+        await Promise.allSettled([
+          loadReports(),
+          loadGlossary(),
+        ]);
+
+      if (
+        results[0].status ===
+        "rejected"
+      ) {
+        chatStatus(
+          reportStatus,
+          results[0].reason?.message ||
+            "신고함을 불러오지 못했습니다.",
+          true
+        );
+      }
+
+      if (
+        results[1].status ===
+        "rejected"
+      ) {
+        chatStatus(
+          glossaryStatus,
+          results[1].reason?.message ||
+            "용어집을 불러오지 못했습니다.",
+          true
+        );
+      }
+    })();
+
 </script>
 <script type="module">
 
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2.111.0";
 
     const SUPABASE_URL="https://dpmjwsnqkuzetyvfcmfr.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY="sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
