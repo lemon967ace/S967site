@@ -3298,91 +3298,65 @@ async function chatRoomAdminApiRequest(
   return result;
 }
 
-function getStaffAccountDisplayName(account) {
-  const email =
-    String(
-      account?.email ?? ""
-    ).trim();
+function getAccountDisplayName(account) {
+  /*
+    Backend-provided account_id is the actual login ID.
 
-  const suffix =
-    "@s967.org";
+    display_name is the chat nickname.
 
+    Never use user_id here:
+    user_id is the internal Supabase UUID and must not be shown
+    as an account ID in the Staff management UI.
+  */
   const accountId =
-    email.toLowerCase()
-      .endsWith(
-        suffix
-      )
-      ? email.slice(
-          0,
-          -suffix.length
-        )
-      : email;
+    String(
+      account?.account_id ??
+      account?.staff_id ??
+      ""
+    ).trim();
 
   const nickname =
     String(
-      account?.display_name ?? ""
+      account?.display_name ??
+      ""
     ).trim();
 
-  const fallbackId =
-    accountId ||
-    String(
-      account?.user_id ?? ""
-    ).trim();
-
-  if (
-    !nickname ||
-    nickname.toLowerCase() ===
-      fallbackId.toLowerCase()
-  ) {
-    return fallbackId;
+  /*
+    If the backend cannot resolve account_id for an old/broken account,
+    show the nickname only rather than leaking the internal UUID.
+  */
+  if (!accountId) {
+    return nickname;
   }
 
-  return `${fallbackId} (${nickname})`;
+  /*
+    Login IDs are case-insensitive in the current account system.
+    Therefore "REX" and "rex" are treated as the same ID/name and
+    the duplicate nickname is omitted.
+  */
+  if (
+    !nickname ||
+    accountId.toLowerCase() ===
+      nickname.toLowerCase()
+  ) {
+    return accountId;
+  }
+
+  return `${accountId} (${nickname})`;
+}
+
+
+function getStaffAccountDisplayName(account) {
+  return getAccountDisplayName(
+    account
+  );
 }
 
 
 function getChatOnlyAccountDisplayName(account) {
-  const email =
-    String(
-      account?.email ?? ""
-    ).trim();
-
-  const suffix =
-    "@s967.org";
-
-  const accountId =
-    email.toLowerCase()
-      .endsWith(
-        suffix
-      )
-      ? email.slice(
-          0,
-          -suffix.length
-        )
-      : email;
-
-  const nickname =
-    String(
-      account?.display_name ?? ""
-    ).trim();
-
-  const fallbackId =
-    accountId ||
-    String(
-      account?.chat_id ??
-      account?.user_id ??
-      ""
-    ).trim();
-
-  if (
-    !nickname ||
-    nickname.toLowerCase() ===
-      fallbackId.toLowerCase()
-  ) {
-    return fallbackId;
-  }
-
-  return `${fallbackId} (${nickname})`;
+  return getAccountDisplayName(
+    account
+  );
 }
 
 
