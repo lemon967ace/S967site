@@ -674,6 +674,78 @@
       margin-top: 14px;
     }
 
+    .passkey-login-button {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .passkey-panel {
+      margin-top: 14px;
+    }
+
+    .passkey-panel-description {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
+    .passkey-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .passkey-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-hover);
+    }
+
+    .passkey-item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .passkey-item-name {
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .passkey-item-date {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .passkey-item button {
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+    }
+
+    .passkey-register-box {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .passkey-register-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .passkey-register-actions button {
+      flex: 1 1 180px;
+    }
+
 </style>
 </head>
 
@@ -909,6 +981,14 @@
 
       </form>
 
+      <button
+        id="passkeyLoginButton"
+        class="secondary-button passkey-login-button"
+        type="button"
+      >
+        Login with passkey
+      </button>
+
       <div
         class="share-divider"
         id="shareDivider"
@@ -1118,6 +1198,16 @@
 
         <div class="account-actions">
           <button
+            id="passkeyOpenButton"
+            class="secondary-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="passkeyPanel"
+          >
+            Passkeys
+          </button>
+
+          <button
             id="deleteAccountOpenButton"
             class="secondary-button danger-button"
             type="button"
@@ -1137,6 +1227,79 @@
         </div>
 
       </div>
+
+      <section
+        id="passkeyPanel"
+        class="panel passkey-panel hidden"
+      >
+        <h2
+          id="passkeyTitle"
+          class="panel-title"
+        >
+          Passkeys
+        </h2>
+
+        <p
+          id="passkeyDescription"
+          class="passkey-panel-description"
+        ></p>
+
+        <div
+          id="passkeyList"
+          class="passkey-list"
+        ></div>
+
+        <div
+          id="passkeyRegisterBox"
+          class="passkey-register-box"
+        >
+          <label
+            id="passkeyPasswordLabel"
+            class="label"
+            for="passkeyPassword"
+          >
+            Password
+          </label>
+
+          <input
+            id="passkeyPassword"
+            type="password"
+            maxlength="100"
+            autocomplete="current-password"
+          >
+
+          <div class="passkey-register-actions">
+            <button
+              id="passkeyPrepareButton"
+              type="button"
+            >
+              Verify password
+            </button>
+
+            <button
+              id="passkeyCreateButton"
+              class="hidden"
+              type="button"
+            >
+              Register passkey
+            </button>
+
+            <button
+              id="passkeyCloseButton"
+              class="secondary-button"
+              type="button"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="passkeyStatus"
+          class="status"
+        ></div>
+      </section>
+
 
       <section
         id="deleteAccountPanel"
@@ -1297,7 +1460,11 @@
 
 
   <script src="/map/map-new-flow.js"></script>
-  <script>
+  <script type="module">
+    import {
+      createClient
+    } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+
     /*
       ==========================================================
       CONFIG
@@ -1345,6 +1512,37 @@
 
     const MAP_SHARE_STATUS_URL =
       `${FUNCTIONS_BASE_URL}/map-share-status`;
+
+    const MAP_PASSKEY_LOGIN_URL =
+      `${FUNCTIONS_BASE_URL}/map-passkey-login`;
+
+    const MAP_PASSKEY_SETUP_URL =
+      `${FUNCTIONS_BASE_URL}/map-passkey-setup`;
+
+    const MAP_PASSKEY_MANAGE_URL =
+      `${FUNCTIONS_BASE_URL}/map-passkey-manage`;
+
+    const SUPABASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+
+    const mapPasskeySupabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+            experimental: {
+              passkey: true,
+            },
+          },
+        }
+      );
 
     const MAX_MAPS = 5;
 
@@ -2293,6 +2491,140 @@
     };
 
 
+    const PASSKEY_TEXT = {
+      en: {
+        login: "Login with passkey",
+        title: "Passkeys",
+        open: "Passkeys",
+        description: "Register up to 2 passkeys for this Map Editor account. Your password remains available as a fallback.",
+        password: "Password",
+        verify: "Verify password",
+        verified: "Password verified",
+        register: "Register passkey",
+        close: "Close",
+        none: "No passkeys are registered.",
+        count: (count, max) => `${count} / ${max} registered`,
+        preparing: "Verifying your account…",
+        ready: "Verification complete. Press “Register passkey” to continue with your device.",
+        registering: "Approve the passkey prompt on your device.",
+        registered: "Passkey registered.",
+        deleted: "Passkey deleted.",
+        delete: "Delete",
+        deleteConfirm: "Delete this passkey?",
+        loading: "Loading passkeys…",
+        loginWorking: "Waiting for passkey authentication…",
+        loginFailed: "Passkey login failed.",
+        notLinked: "This passkey is not linked to a Map Editor account.",
+        setupFailed: "Could not prepare passkey registration.",
+        listFailed: "Could not load passkeys.",
+        deleteFailed: "Could not delete the passkey.",
+        wrongPassword: "Incorrect password.",
+        limit: "You have reached the 2-passkey limit.",
+        cancelled: "Passkey authentication was cancelled or not allowed by the device.",
+      },
+
+      ko: {
+        login: "패스키로 로그인",
+        title: "패스키",
+        open: "패스키",
+        description: "이 Map Editor 계정에 패스키를 최대 2개까지 등록할 수 있습니다. 비밀번호 로그인은 예비 수단으로 계속 사용할 수 있습니다.",
+        password: "비밀번호",
+        verify: "비밀번호 확인",
+        verified: "비밀번호 확인 완료",
+        register: "패스키 등록",
+        close: "닫기",
+        none: "등록된 패스키가 없습니다.",
+        count: (count, max) => `${count} / ${max} 등록됨`,
+        preparing: "계정을 확인하는 중…",
+        ready: "확인이 완료되었습니다. 아래 ‘패스키 등록’ 버튼을 직접 눌러 계속하세요.",
+        registering: "기기에서 패스키 인증을 승인해 주세요.",
+        registered: "패스키를 등록했습니다.",
+        deleted: "패스키를 삭제했습니다.",
+        delete: "삭제",
+        deleteConfirm: "이 패스키를 삭제할까요?",
+        loading: "패스키 목록을 불러오는 중…",
+        loginWorking: "패스키 인증을 기다리는 중…",
+        loginFailed: "패스키 로그인에 실패했습니다.",
+        notLinked: "이 패스키는 Map Editor 계정에 연결되어 있지 않습니다.",
+        setupFailed: "패스키 등록을 준비하지 못했습니다.",
+        listFailed: "패스키 목록을 불러오지 못했습니다.",
+        deleteFailed: "패스키를 삭제하지 못했습니다.",
+        wrongPassword: "비밀번호가 올바르지 않습니다.",
+        limit: "패스키 2개가 모두 등록되어 있습니다.",
+        cancelled: "패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다.",
+      },
+
+      ja: {
+        login: "パスキーでログイン",
+        title: "パスキー",
+        open: "パスキー",
+        description: "このMap Editorアカウントにはパスキーを最大2個まで登録できます。パスワードログインは予備手段として引き続き利用できます。",
+        password: "パスワード",
+        verify: "パスワード確認",
+        verified: "確認済み",
+        register: "パスキーを登録",
+        close: "閉じる",
+        none: "登録されたパスキーはありません。",
+        count: (count, max) => `${count} / ${max} 登録済み`,
+        preparing: "アカウントを確認しています…",
+        ready: "確認が完了しました。「パスキーを登録」を直接押して続行してください。",
+        registering: "端末でパスキー認証を承認してください。",
+        registered: "パスキーを登録しました。",
+        deleted: "パスキーを削除しました。",
+        delete: "削除",
+        deleteConfirm: "このパスキーを削除しますか？",
+        loading: "パスキーを読み込んでいます…",
+        loginWorking: "パスキー認証を待っています…",
+        loginFailed: "パスキーでログインできませんでした。",
+        notLinked: "このパスキーはMap Editorアカウントに連携されていません。",
+        setupFailed: "パスキー登録を準備できませんでした。",
+        listFailed: "パスキー一覧を読み込めませんでした。",
+        deleteFailed: "パスキーを削除できませんでした。",
+        wrongPassword: "パスワードが正しくありません。",
+        limit: "パスキーは2個まで登録できます。",
+        cancelled: "パスキー認証がキャンセルされたか、端末で許可されませんでした。",
+      },
+
+      ru: {
+        login: "Войти с ключом доступа",
+        title: "Ключи доступа",
+        open: "Ключи доступа",
+        description: "Для этой учётной записи Map Editor можно зарегистрировать до 2 ключей доступа. Пароль остаётся резервным способом входа.",
+        password: "Пароль",
+        verify: "Проверить пароль",
+        verified: "Пароль подтверждён",
+        register: "Зарегистрировать ключ",
+        close: "Закрыть",
+        none: "Ключи доступа не зарегистрированы.",
+        count: (count, max) => `${count} / ${max} зарегистрировано`,
+        preparing: "Проверка учётной записи…",
+        ready: "Проверка завершена. Нажмите «Зарегистрировать ключ», чтобы продолжить.",
+        registering: "Подтвердите ключ доступа на устройстве.",
+        registered: "Ключ доступа зарегистрирован.",
+        deleted: "Ключ доступа удалён.",
+        delete: "Удалить",
+        deleteConfirm: "Удалить этот ключ доступа?",
+        loading: "Загрузка ключей доступа…",
+        loginWorking: "Ожидание подтверждения ключа доступа…",
+        loginFailed: "Не удалось войти с ключом доступа.",
+        notLinked: "Этот ключ доступа не связан с учётной записью Map Editor.",
+        setupFailed: "Не удалось подготовить регистрацию ключа доступа.",
+        listFailed: "Не удалось загрузить ключи доступа.",
+        deleteFailed: "Не удалось удалить ключ доступа.",
+        wrongPassword: "Неверный пароль.",
+        limit: "Достигнут лимит в 2 ключа доступа.",
+        cancelled: "Аутентификация ключом доступа отменена или не разрешена устройством.",
+      },
+    };
+
+    function passkeyText() {
+      return (
+        PASSKEY_TEXT[language] ??
+        PASSKEY_TEXT.en
+      );
+    }
+
+
     let language =
       typeof getCurrentLanguage ===
         "function"
@@ -2348,6 +2680,66 @@
     const loginStatus =
       document.getElementById(
         "loginStatus"
+      );
+
+    const passkeyLoginButton =
+      document.getElementById(
+        "passkeyLoginButton"
+      );
+
+    const passkeyOpenButton =
+      document.getElementById(
+        "passkeyOpenButton"
+      );
+
+    const passkeyPanel =
+      document.getElementById(
+        "passkeyPanel"
+      );
+
+    const passkeyTitle =
+      document.getElementById(
+        "passkeyTitle"
+      );
+
+    const passkeyDescription =
+      document.getElementById(
+        "passkeyDescription"
+      );
+
+    const passkeyList =
+      document.getElementById(
+        "passkeyList"
+      );
+
+    const passkeyPasswordLabel =
+      document.getElementById(
+        "passkeyPasswordLabel"
+      );
+
+    const passkeyPassword =
+      document.getElementById(
+        "passkeyPassword"
+      );
+
+    const passkeyPrepareButton =
+      document.getElementById(
+        "passkeyPrepareButton"
+      );
+
+    const passkeyCreateButton =
+      document.getElementById(
+        "passkeyCreateButton"
+      );
+
+    const passkeyCloseButton =
+      document.getElementById(
+        "passkeyCloseButton"
+      );
+
+    const passkeyStatus =
+      document.getElementById(
+        "passkeyStatus"
       );
 
 
@@ -2547,6 +2939,12 @@
 
     let maps = [];
 
+    let passkeyRegistrationReady =
+      false;
+
+    let passkeyCount = 0;
+    let passkeyMax = 2;
+
     let mapTemplates = [];
     let mapTemplatesState = "idle";
 
@@ -2688,6 +3086,35 @@
 
       loginButton.textContent =
         text.loginButton;
+
+      const pkText =
+        passkeyText();
+
+      passkeyLoginButton.textContent =
+        pkText.login;
+
+      passkeyOpenButton.textContent =
+        pkText.open;
+
+      passkeyTitle.textContent =
+        pkText.title;
+
+      passkeyDescription.textContent =
+        pkText.description;
+
+      passkeyPasswordLabel.textContent =
+        pkText.password;
+
+      if (!passkeyRegistrationReady) {
+        passkeyPrepareButton.textContent =
+          pkText.verify;
+      }
+
+      passkeyCreateButton.textContent =
+        pkText.register;
+
+      passkeyCloseButton.textContent =
+        pkText.close;
 
       document.getElementById(
         "newUserNotice"
@@ -2871,6 +3298,14 @@
 
       accountArea.classList.add(
         "hidden"
+      );
+
+      passkeyPanel.classList.add(
+        "hidden"
+      );
+      passkeyOpenButton.setAttribute(
+        "aria-expanded",
+        "false"
       );
 
       deleteAccountPanel.classList.add(
@@ -4368,6 +4803,928 @@
 
     /*
       ==========================================================
+      PASSKEY
+      ==========================================================
+    */
+
+    function resetPasskeyRegistration({
+      signOut = false,
+    } = {}) {
+      passkeyRegistrationReady =
+        false;
+
+      passkeyPassword.value =
+        "";
+
+      passkeyPassword.disabled =
+        false;
+
+      passkeyPrepareButton.disabled =
+        false;
+
+      passkeyPrepareButton.textContent =
+        passkeyText().verify;
+
+      passkeyCreateButton.disabled =
+        false;
+
+      passkeyCreateButton.classList.add(
+        "hidden"
+      );
+
+      if (signOut) {
+        mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+      }
+    }
+
+
+    function formatPasskeyDate(value) {
+      if (!value) {
+        return "";
+      }
+
+      const date =
+        new Date(value);
+
+      if (
+        Number.isNaN(
+          date.getTime()
+        )
+      ) {
+        return "";
+      }
+
+      try {
+        return new Intl.DateTimeFormat(
+          language,
+          {
+            dateStyle: "medium",
+          }
+        ).format(date);
+      } catch {
+        return date
+          .toISOString()
+          .slice(0, 10);
+      }
+    }
+
+
+    function renderPasskeys(
+      items,
+      maxPasskeys
+    ) {
+      const pkText =
+        passkeyText();
+
+      const passkeys =
+        Array.isArray(items)
+          ? items
+          : [];
+
+      passkeyCount =
+        passkeys.length;
+
+      passkeyMax =
+        Number(
+          maxPasskeys
+        ) || 2;
+
+      passkeyList.innerHTML =
+        "";
+
+      const count =
+        document.createElement(
+          "div"
+        );
+
+      count.className =
+        "passkey-panel-description";
+
+      count.textContent =
+        pkText.count(
+          passkeyCount,
+          passkeyMax
+        );
+
+      passkeyList.appendChild(
+        count
+      );
+
+      if (
+        passkeys.length === 0
+      ) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "map-empty";
+
+        empty.textContent =
+          pkText.none;
+
+        passkeyList.appendChild(
+          empty
+        );
+      } else {
+        for (
+          const passkey
+          of passkeys
+        ) {
+          const item =
+            document.createElement(
+              "div"
+            );
+
+          item.className =
+            "passkey-item";
+
+          const info =
+            document.createElement(
+              "div"
+            );
+
+          info.className =
+            "passkey-item-info";
+
+          const name =
+            document.createElement(
+              "div"
+            );
+
+          name.className =
+            "passkey-item-name";
+
+          name.textContent =
+            passkey
+              .friendly_name ||
+            "Passkey";
+
+          info.appendChild(
+            name
+          );
+
+          const dateText =
+            formatPasskeyDate(
+              passkey.created_at
+            );
+
+          if (dateText) {
+            const date =
+              document.createElement(
+                "div"
+              );
+
+            date.className =
+              "passkey-item-date";
+
+            date.textContent =
+              dateText;
+
+            info.appendChild(
+              date
+            );
+          }
+
+          const deleteButton =
+            document.createElement(
+              "button"
+            );
+
+          deleteButton.type =
+            "button";
+
+          deleteButton.className =
+            "secondary-button danger-button";
+
+          deleteButton.textContent =
+            pkText.delete;
+
+          deleteButton.addEventListener(
+            "click",
+            async () => {
+              if (
+                !window.confirm(
+                  passkeyText()
+                    .deleteConfirm
+                )
+              ) {
+                return;
+              }
+
+              deleteButton.disabled =
+                true;
+
+              try {
+                const response =
+                  await fetch(
+                    MAP_PASSKEY_MANAGE_URL,
+                    {
+                      method:
+                        "POST",
+                      headers: {
+                        "Content-Type":
+                          "application/json",
+                        ...authorizationHeaders(),
+                      },
+                      body:
+                        JSON.stringify({
+                          action:
+                            "delete",
+                          passkey_id:
+                            passkey.id,
+                        }),
+                    }
+                  );
+
+                const result =
+                  await response
+                    .json()
+                    .catch(
+                      () => ({})
+                    );
+
+                if (
+                  isSessionError(
+                    response,
+                    result
+                  )
+                ) {
+                  expireLogin();
+                  return;
+                }
+
+                if (
+                  !response.ok ||
+                  result.ok !== true
+                ) {
+                  throw new Error(
+                    result.error ||
+                    passkeyText()
+                      .deleteFailed
+                  );
+                }
+
+                setStatus(
+                  passkeyStatus,
+                  passkeyText()
+                    .deleted,
+                  "success"
+                );
+
+                await loadPasskeys();
+              } catch (error) {
+                setStatus(
+                  passkeyStatus,
+                  error?.message ||
+                    passkeyText()
+                      .deleteFailed,
+                  "error"
+                );
+              } finally {
+                deleteButton.disabled =
+                  false;
+              }
+            }
+          );
+
+          item.append(
+            info,
+            deleteButton
+          );
+
+          passkeyList.appendChild(
+            item
+          );
+        }
+      }
+
+      const limitReached =
+        passkeyCount >=
+        passkeyMax;
+
+      passkeyPassword.disabled =
+        limitReached;
+
+      passkeyPrepareButton.disabled =
+        limitReached;
+
+      if (limitReached) {
+        passkeyCreateButton.classList.add(
+          "hidden"
+        );
+      }
+    }
+
+
+    async function loadPasskeys() {
+      setStatus(
+        passkeyStatus,
+        passkeyText().loading
+      );
+
+      const response =
+        await fetch(
+          MAP_PASSKEY_MANAGE_URL,
+          {
+            method: "GET",
+            headers:
+              authorizationHeaders(),
+          }
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({})
+          );
+
+      if (
+        isSessionError(
+          response,
+          result
+        )
+      ) {
+        expireLogin();
+        return false;
+      }
+
+      if (
+        !response.ok ||
+        result.ok !== true
+      ) {
+        throw new Error(
+          result.error ||
+          passkeyText()
+            .listFailed
+        );
+      }
+
+      renderPasskeys(
+        result.passkeys,
+        result.maxPasskeys
+      );
+
+      if (
+        (
+          result.passkeys ??
+          []
+        ).length >=
+        (
+          result.maxPasskeys ??
+          2
+        )
+      ) {
+        setStatus(
+          passkeyStatus,
+          passkeyText().limit
+        );
+      } else {
+        setStatus(
+          passkeyStatus,
+          ""
+        );
+      }
+
+      return true;
+    }
+
+
+    async function preparePasskeyRegistration() {
+      const password =
+        passkeyPassword.value;
+
+      if (!password) {
+        setStatus(
+          passkeyStatus,
+          passkeyText()
+            .wrongPassword,
+          "error"
+        );
+
+        passkeyPassword.focus();
+        return;
+      }
+
+      passkeyPrepareButton.disabled =
+        true;
+
+      passkeyPassword.disabled =
+        true;
+
+      setStatus(
+        passkeyStatus,
+        passkeyText()
+          .preparing
+      );
+
+      try {
+        const response =
+          await fetch(
+            MAP_PASSKEY_SETUP_URL,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+                ...authorizationHeaders(),
+              },
+              body:
+                JSON.stringify({
+                  password,
+                }),
+            }
+          );
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (
+          isSessionError(
+            response,
+            result
+          )
+        ) {
+          expireLogin();
+          return;
+        }
+
+        if (
+          response.status ===
+            401 &&
+          result.error ===
+            "INVALID_PASSWORD"
+        ) {
+          throw new Error(
+            passkeyText()
+              .wrongPassword
+          );
+        }
+
+        if (
+          result.error ===
+          "PASSKEY_LIMIT_REACHED"
+        ) {
+          throw new Error(
+            passkeyText()
+              .limit
+          );
+        }
+
+        if (
+          !response.ok ||
+          !result.tokenHash
+        ) {
+          throw new Error(
+            result.error ||
+            passkeyText()
+              .setupFailed
+          );
+        }
+
+        const {
+          data: verifyData,
+          error: verifyError,
+        } =
+          await mapPasskeySupabase
+            .auth
+            .verifyOtp({
+              token_hash:
+                result.tokenHash,
+              type:
+                result.verificationType ||
+                "magiclink",
+            });
+
+        if (verifyError) {
+          throw verifyError;
+        }
+
+        if (
+          !verifyData?.session ||
+          !verifyData?.user
+        ) {
+          throw new Error(
+            "PASSKEY_AUTH_SESSION_MISSING"
+          );
+        }
+
+        passkeyRegistrationReady =
+          true;
+
+        passkeyPassword.value =
+          "";
+
+        passkeyPrepareButton.textContent =
+          passkeyText()
+            .verified;
+
+        passkeyCreateButton.classList.remove(
+          "hidden"
+        );
+
+        setStatus(
+          passkeyStatus,
+          passkeyText()
+            .ready,
+          "success"
+        );
+      } catch (error) {
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        resetPasskeyRegistration();
+
+        try {
+          await loadPasskeys();
+        } catch {}
+
+        setStatus(
+          passkeyStatus,
+          error?.message ||
+            passkeyText()
+              .setupFailed,
+          "error"
+        );
+      }
+    }
+
+
+    async function completePasskeyRegistration() {
+      if (
+        !passkeyRegistrationReady
+      ) {
+        return;
+      }
+
+      /*
+        Important for iOS browsers:
+        this function is called directly from the user's second button
+        press. There is no password prompt or network preparation before
+        registerPasskey() begins.
+      */
+      passkeyCreateButton.disabled =
+        true;
+
+      setStatus(
+        passkeyStatus,
+        passkeyText()
+          .registering
+      );
+
+      try {
+        const {
+          error,
+        } =
+          await mapPasskeySupabase
+            .auth
+            .registerPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        resetPasskeyRegistration();
+
+        await loadPasskeys();
+
+        setStatus(
+          passkeyStatus,
+          passkeyText()
+            .registered,
+          "success"
+        );
+      } catch (error) {
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        resetPasskeyRegistration();
+
+        const message =
+          error?.name ===
+            "NotAllowedError"
+            ? passkeyText()
+                .cancelled
+            : (
+                error?.message ||
+                passkeyText()
+                  .setupFailed
+              );
+
+        try {
+          await loadPasskeys();
+        } catch {}
+
+        setStatus(
+          passkeyStatus,
+          message,
+          "error"
+        );
+      }
+    }
+
+
+    async function loginWithPasskey() {
+      passkeyLoginButton.disabled =
+        true;
+
+      loginButton.disabled =
+        true;
+
+      setStatus(
+        loginStatus,
+        passkeyText()
+          .loginWorking
+      );
+
+      try {
+        const {
+          data,
+          error,
+        } =
+          await mapPasskeySupabase
+            .auth
+            .signInWithPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        const accessToken =
+          data?.session
+            ?.access_token;
+
+        if (!accessToken) {
+          throw new Error(
+            passkeyText()
+              .loginFailed
+          );
+        }
+
+        const response =
+          await fetch(
+            MAP_PASSKEY_LOGIN_URL,
+            {
+              method: "POST",
+              headers: {
+                Authorization:
+                  `Bearer ${accessToken}`,
+                apikey:
+                  SUPABASE_PUBLISHABLE_KEY,
+                "Content-Type":
+                  "application/json",
+              },
+              body:
+                JSON.stringify({}),
+            }
+          );
+
+        const result =
+          await response
+            .json()
+            .catch(
+              () => ({})
+            );
+
+        if (
+          result.error ===
+          "MAP_ACCOUNT_NOT_LINKED"
+        ) {
+          throw new Error(
+            passkeyText()
+              .notLinked
+          );
+        }
+
+        if (
+          !response.ok ||
+          !result.ok ||
+          !result.session
+            ?.token
+        ) {
+          throw new Error(
+            result.error ||
+            passkeyText()
+              .loginFailed
+          );
+        }
+
+        saveSession(
+          result.session,
+          result.user
+            ?.username ??
+            ""
+        );
+
+        currentUser = {
+          id:
+            result.user
+              ?.username ??
+            "",
+        };
+
+        maps =
+          Array.isArray(
+            result.maps
+          )
+            ? result.maps
+            : [];
+
+        pendingId =
+          "";
+
+        loginForm.reset();
+
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        showAccount();
+
+        await loadShareStates();
+
+        setStatus(
+          loginStatus,
+          ""
+        );
+      } catch (error) {
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        const message =
+          error?.name ===
+            "NotAllowedError"
+            ? passkeyText()
+                .cancelled
+            : (
+                error?.message ||
+                passkeyText()
+                  .loginFailed
+              );
+
+        setStatus(
+          loginStatus,
+          message,
+          "error"
+        );
+      } finally {
+        passkeyLoginButton.disabled =
+          false;
+
+        loginButton.disabled =
+          false;
+      }
+    }
+
+
+    passkeyLoginButton.addEventListener(
+      "click",
+      loginWithPasskey
+    );
+
+
+    passkeyOpenButton.addEventListener(
+      "click",
+      async () => {
+        const opening =
+          passkeyPanel
+            .classList
+            .contains(
+              "hidden"
+            );
+
+        resetPasskeyRegistration({
+          signOut: true,
+        });
+
+        setStatus(
+          passkeyStatus,
+          ""
+        );
+
+        if (!opening) {
+          passkeyPanel.classList.add(
+            "hidden"
+          );
+
+          passkeyOpenButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+          return;
+        }
+
+        passkeyPanel.classList.remove(
+          "hidden"
+        );
+
+        passkeyOpenButton.setAttribute(
+          "aria-expanded",
+          "true"
+        );
+
+        try {
+          await loadPasskeys();
+        } catch (error) {
+          setStatus(
+            passkeyStatus,
+            error?.message ||
+              passkeyText()
+                .listFailed,
+            "error"
+          );
+        }
+
+        requestAnimationFrame(
+          () => {
+            passkeyPanel.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        );
+      }
+    );
+
+
+    passkeyPrepareButton.addEventListener(
+      "click",
+      preparePasskeyRegistration
+    );
+
+
+    passkeyPassword.addEventListener(
+      "keydown",
+      (event) => {
+        if (
+          event.key ===
+            "Enter" &&
+          !event.isComposing &&
+          !passkeyPrepareButton
+            .disabled
+        ) {
+          event.preventDefault();
+
+          preparePasskeyRegistration();
+        }
+      }
+    );
+
+
+    passkeyCreateButton.addEventListener(
+      "click",
+      completePasskeyRegistration
+    );
+
+
+    passkeyCloseButton.addEventListener(
+      "click",
+      () => {
+        resetPasskeyRegistration({
+          signOut: true,
+        });
+
+        passkeyPanel.classList.add(
+          "hidden"
+        );
+
+        passkeyOpenButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+        setStatus(
+          passkeyStatus,
+          ""
+        );
+      }
+    );
+
+
+    /*
+      ==========================================================
       ACCOUNT DELETE
       ==========================================================
     */
@@ -4580,6 +5937,13 @@
 
           clearSession();
 
+          await mapPasskeySupabase
+            .auth
+            .signOut()
+            .catch(() => {});
+
+          resetPasskeyRegistration();
+
           localStorage.removeItem(
             ACCOUNT_ID_KEY
           );
@@ -4643,8 +6007,24 @@
 
     logoutButton.addEventListener(
       "click",
-      () => {
+      async () => {
         clearSession();
+
+        await mapPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        resetPasskeyRegistration();
+
+        passkeyPanel.classList.add(
+          "hidden"
+        );
+
+        passkeyOpenButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
         localStorage.removeItem(
           ACCOUNT_ID_KEY
         );
@@ -5121,6 +6501,11 @@
 
     async function initialize() {
       setStaticText();
+
+      await mapPasskeySupabase
+        .auth
+        .signOut()
+        .catch(() => {});
 
       const token =
         getSessionToken();
