@@ -3298,20 +3298,117 @@ async function chatRoomAdminApiRequest(
   return result;
 }
 
+function getStaffAccountDisplayName(account) {
+  const email =
+    String(
+      account?.email ?? ""
+    ).trim();
+
+  const suffix =
+    "@s967.org";
+
+  const accountId =
+    email.toLowerCase()
+      .endsWith(
+        suffix
+      )
+      ? email.slice(
+          0,
+          -suffix.length
+        )
+      : email;
+
+  const nickname =
+    String(
+      account?.display_name ?? ""
+    ).trim();
+
+  const fallbackId =
+    accountId ||
+    String(
+      account?.user_id ?? ""
+    ).trim();
+
+  if (
+    !nickname ||
+    nickname.toLowerCase() ===
+      fallbackId.toLowerCase()
+  ) {
+    return fallbackId;
+  }
+
+  return `${fallbackId} (${nickname})`;
+}
+
+
+function getChatOnlyAccountDisplayName(account) {
+  const email =
+    String(
+      account?.email ?? ""
+    ).trim();
+
+  const suffix =
+    "@s967.org";
+
+  const accountId =
+    email.toLowerCase()
+      .endsWith(
+        suffix
+      )
+      ? email.slice(
+          0,
+          -suffix.length
+        )
+      : email;
+
+  const nickname =
+    String(
+      account?.display_name ?? ""
+    ).trim();
+
+  const fallbackId =
+    accountId ||
+    String(
+      account?.chat_id ??
+      account?.user_id ??
+      ""
+    ).trim();
+
+  if (
+    !nickname ||
+    nickname.toLowerCase() ===
+      fallbackId.toLowerCase()
+  ) {
+    return fallbackId;
+  }
+
+  return `${fallbackId} (${nickname})`;
+}
+
+
 function openPermissionDialog(
   account,
   currentPermission
 ) {
+  const displayName =
+    currentPermission === "staff"
+      ? getStaffAccountDisplayName(
+          account
+        )
+      : getChatOnlyAccountDisplayName(
+          account
+        );
+
   permissionAccount = {
     user_id:
       account.user_id,
     display_name:
-      account.display_name,
+      displayName,
     currentPermission,
   };
 
   accountPermissionName.textContent =
-    account.display_name;
+    displayName;
 
   chooseStaffPermission.classList.toggle(
     "is-current",
@@ -3485,17 +3582,13 @@ accountPermissionDialog
     name.className =
       "manage-name";
 
+    const staffDisplayName =
+      getStaffAccountDisplayName(
+        account
+      );
+
     name.textContent =
-      account.display_name;
-
-    const email =
-      document.createElement("div");
-
-    email.className =
-      "manage-note";
-
-    email.textContent =
-      account.email || "";
+      staffDisplayName;
 
     const state =
       document.createElement("div");
@@ -3509,7 +3602,6 @@ accountPermissionDialog
         : "Disabled";
 
     content.appendChild(name);
-    content.appendChild(email);
     content.appendChild(state);
 
     const actions =
@@ -3537,7 +3629,7 @@ accountPermissionDialog
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${account.display_name}:`
+            `Enter a new temporary password for ${staffDisplayName}:`
           );
 
         if (password === null) {
@@ -3621,7 +3713,7 @@ accountPermissionDialog
 
         const confirmed =
           confirm(
-            `${verb} Staff "${account.display_name}"?`
+            `${verb} Staff "${staffDisplayName}"?`
           );
 
         if (!confirmed) {
@@ -3702,7 +3794,7 @@ accountPermissionDialog
       async () => {
         const confirmed =
           confirm(
-            `Delete Staff "${account.display_name}"?\n\nThis cannot be undone.`
+            `Delete Staff "${staffDisplayName}"?\n\nThis cannot be undone.`
           );
 
         if (!confirmed) {
@@ -3809,8 +3901,14 @@ function renderChatOnlyAccounts(accounts) {
       document.createElement("div");
 
     name.className = "manage-name";
+
+    const chatOnlyDisplayName =
+      getChatOnlyAccountDisplayName(
+        account
+      );
+
     name.textContent =
-      account.display_name;
+      chatOnlyDisplayName;
 
     const state =
       document.createElement("div");
@@ -3846,7 +3944,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const password =
           prompt(
-            `Enter a new temporary password for ${account.display_name}:`
+            `Enter a new temporary password for ${chatOnlyDisplayName}:`
           );
 
         if (password === null) {
@@ -3919,7 +4017,7 @@ function renderChatOnlyAccounts(accounts) {
 
         if (
           !confirm(
-            `${verb} chat-only account "${account.display_name}"?`
+            `${verb} chat-only account "${chatOnlyDisplayName}"?`
           )
         ) {
           return;
@@ -3986,7 +4084,7 @@ function renderChatOnlyAccounts(accounts) {
       async () => {
         const confirmed =
           confirm(
-            `Delete chat-only account "${account.display_name}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
+            `Delete chat-only account "${chatOnlyDisplayName}"?\n\nThis deletes the login account. Existing chat messages remain as history.`
           );
 
         if (!confirmed) {
