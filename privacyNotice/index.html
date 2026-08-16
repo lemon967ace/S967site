@@ -536,6 +536,9 @@
        <p class="subtle">
         비밀번호 원문과 세션 토큰 원문은 사이트 데이터베이스에 평문으로 저장하지 않습니다.
        </p>
+       <p>
+        패스키를 등록하거나 패스키로 로그인하는 경우, 인증에 필요한 패스키 자격증명 식별자·공개키 등 관련 인증정보와 기기·인증수단에서 제공하는 필요한 기술정보가 Supabase Auth를 통해 처리될 수 있습니다. 지문·얼굴 등 생체정보 자체와 패스키의 개인키는 사이트가 수집하거나 저장하지 않으며, 이용자의 기기·브라우저·운영체제 또는 이용자가 선택한 패스키 제공자에서 관리됩니다.
+       </p>
        <h3>
         2) 채팅
        </h3>
@@ -906,6 +909,9 @@
         </strong>
         리전을 사용합니다.
        </p>
+       <p>
+        패스키 기능을 사용하는 경우 패스키 인증에 필요한 자격증명 식별자·공개키 등 관련 인증정보가 Supabase Auth를 통해 처리될 수 있습니다.
+       </p>
        <h3>
         Google LLC / Firebase Cloud Messaging
        </h3>
@@ -1135,6 +1141,9 @@
        <p>
         로그인·인증 상태, 언어·테마 설정 및 서비스 이용에 필요한 설정정보를 브라우저 저장공간에 저장할 수 있습니다. IsoMap Editor는 저장되지 않은 편집 내용을 복구하기 위해 IndexedDB에 자동복구 스냅샷을 저장할 수 있으며, 이 데이터는 이용자의 기기에 저장됩니다.
        </p>
+       <p>
+        패스키를 사용하는 경우 패스키의 개인키 및 기기 잠금 해제에 사용되는 지문·얼굴 등 생체정보는 사이트의 브라우저 저장공간에 저장되지 않으며, 이용자의 기기·브라우저·운영체제 또는 이용자가 선택한 패스키 제공자가 관리합니다.
+       </p>
       </section>
       <section class="section">
        <h2>
@@ -1248,6 +1257,9 @@
        </p>
        <p class="subtle">
         Plain-text passwords and raw session tokens are not stored in the Site database.
+       </p>
+       <p>
+        If a user registers or signs in with a passkey, passkey-related authentication information required for authentication, such as the credential identifier and public key, and necessary technical information provided by the device or authenticator may be processed through Supabase Auth. The Site does not collect or store biometric data itself, such as fingerprints or facial data, or the passkey private key; these are managed by the user's device, browser, operating system, or chosen passkey provider.
        </p>
        <h3>
         2) Chat
@@ -1622,6 +1634,9 @@
         </strong>
         region.
        </p>
+       <p>
+        When passkeys are used, passkey-related authentication information required for authentication, such as credential identifiers and public keys, may be processed through Supabase Auth.
+       </p>
        <h3>
         Google LLC / Firebase Cloud Messaging
        </h3>
@@ -1851,6 +1866,9 @@
        <p>
         The Site may store login/authentication state, language/theme settings, and other settings needed for service use in browser storage. IsoMap Editor may store recovery snapshots for unsaved edits in IndexedDB on the user’s device.
        </p>
+       <p>
+        When passkeys are used, the passkey private key and biometric information used to unlock the device, such as fingerprints or facial data, are not stored in the Site's browser storage and are managed by the user's device, browser, operating system, or chosen passkey provider.
+       </p>
       </section>
       <section class="section">
        <h2>
@@ -1950,6 +1968,9 @@
        </p>
        <p class="subtle">
         平文パスワードおよび生のセッショントークンはDBに平文保存しません。
+       </p>
+       <p>
+        パスキーを登録またはパスキーでログインする場合、認証に必要な資格情報識別子・公開鍵等のパスキー関連認証情報、および端末・認証器から提供される必要な技術情報がSupabase Authを通じて処理される場合があります。指紋・顔等の生体情報そのものやパスキーの秘密鍵を本サイトが収集・保存することはなく、利用者の端末・ブラウザ・OSまたは利用者が選択したパスキー提供者によって管理されます。
        </p>
        <h3>
         2) チャット
@@ -2309,6 +2330,9 @@
         </strong>
         リージョンを使用します。
        </p>
+       <p>
+        パスキー機能を利用する場合、認証に必要な資格情報識別子・公開鍵等のパスキー関連認証情報がSupabase Authを通じて処理される場合があります。
+       </p>
        <h3>
         Google LLC / Firebase Cloud Messaging
        </h3>
@@ -2432,6 +2456,9 @@
        <p>
         ログイン・認証状態、言語・テーマ等の設定をブラウザストレージに保存する場合があります。IsoMap Editorは未保存編集の復旧スナップショットを利用者端末のIndexedDBに保存する場合があります。
        </p>
+       <p>
+        パスキーを利用する場合、パスキーの秘密鍵および端末のロック解除に使用される指紋・顔等の生体情報は本サイトのブラウザストレージには保存されず、利用者の端末・ブラウザ・OSまたは利用者が選択したパスキー提供者によって管理されます。
+       </p>
       </section>
       <section class="section">
        <h2>
@@ -2531,6 +2558,9 @@
        </p>
        <p class="subtle">
         Пароли и исходные токены сессии в открытом виде в базе не хранятся.
+       </p>
+       <p>
+        При регистрации ключа доступа (passkey) или входе с его помощью через Supabase Auth могут обрабатываться необходимые для аутентификации сведения, включая идентификатор учётных данных, открытый ключ и необходимые технические данные, предоставляемые устройством или аутентификатором. Сам Сайт не собирает и не хранит биометрические данные, например отпечатки пальцев или данные лица, а также закрытый ключ passkey; ими управляет устройство, браузер, операционная система пользователя или выбранный им поставщик passkey.
        </p>
        <h3>
         2) Чат
@@ -2890,6 +2920,9 @@
         </strong>
         .
        </p>
+       <p>
+        При использовании passkey через Supabase Auth могут обрабатываться необходимые для аутентификации сведения, включая идентификаторы учётных данных и открытые ключи.
+       </p>
        <h3>
         Google LLC / Firebase Cloud Messaging
        </h3>
@@ -3012,6 +3045,9 @@
        </h2>
        <p>
         В браузере могут сохраняться состояние входа, язык, тема и другие настройки. IsoMap Editor может сохранять снимки восстановления несохранённых изменений в IndexedDB на устройстве пользователя.
+       </p>
+       <p>
+        При использовании passkey закрытый ключ и биометрические данные, применяемые для разблокировки устройства, например отпечатки пальцев или данные лица, не сохраняются в браузерном хранилище Сайта; ими управляет устройство, браузер, операционная система пользователя или выбранный им поставщик passkey.
        </p>
       </section>
       <section class="section">
