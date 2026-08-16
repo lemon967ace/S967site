@@ -1176,6 +1176,13 @@
 
           <button id="refreshButton" type="button">↻</button>
 
+          <button
+            id="logoutButton"
+            type="button"
+            title="Logout"
+            aria-label="Logout"
+          >🚪</button>
+
           <a
             id="backButton"
             href="/"
@@ -1327,6 +1334,7 @@
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
     const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
     const ADMIN_LOGIN_API = `${FUNCTIONS_BASE}/admin-login`;
+    const ADMIN_LOGOUT_API = `${FUNCTIONS_BASE}/admin-logout`;
     const API = {
       list: `${FUNCTIONS_BASE}/staff-chat-list`,
       send: `${FUNCTIONS_BASE}/staff-chat-send`,
@@ -1405,7 +1413,7 @@
     let searchNavigationKey = "";
     let searchBefore = "";
 
-    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
+    const gate=$("gate"),gateMessage=$("gateMessage"),chatLogin=$("chatLogin"),chatId=$("chatId"),chatPassword=$("chatPassword"),chatLoginButton=$("chatLoginButton"),app=$("app"),roomsHost=$("rooms"),roomsTitle=$("roomsTitle"),roomRefreshButton=$("roomRefreshButton"),chatTitle=$("chatTitle"),actorLabel=$("actor"),memberPasswordButton=$("memberPasswordButton"),searchToggleButton=$("searchToggleButton"),searchPanel=$("searchPanel"),notifyButton=$("notifyButton"),refreshButton=$("refreshButton"),logoutButton=$("logoutButton"),backButton=$("backButton"),searchText=$("searchText"),searchDate=$("searchDate"),searchButton=$("searchButton"),clearSearchButton=$("clearSearchButton"),searchTextLabel=$("searchTextLabel"),searchDateLabel=$("searchDateLabel"),olderButton=$("olderButton"),messagesHost=$("messages"),replying=$("replying"),replyingText=$("replyingText"),cancelReplyButton=$("cancelReplyButton"),fileList=$("fileList"),fileButton=$("fileButton"),fileInput=$("fileInput"),messageInput=$("messageInput"),sendButton=$("sendButton"),statusHost=$("status"),createRoomButton=$("createRoomButton"),roomMembersButton=$("roomMembersButton"),createRoomDialog=$("createRoomDialog"),createRoomTitle=$("createRoomTitle"),newRoomName=$("newRoomName"),createRoomStatus=$("createRoomStatus"),cancelCreateRoomButton=$("cancelCreateRoomButton"),confirmCreateRoomButton=$("confirmCreateRoomButton"),roomMembersDialog=$("roomMembersDialog"),roomMembersTitle=$("roomMembersTitle"),roomMembersNote=$("roomMembersNote"),roomMemberList=$("roomMemberList"),inviteSection=$("inviteSection"),inviteTitle=$("inviteTitle"),inviteList=$("inviteList"),roomManageStatus=$("roomManageStatus"),leaveRoomButton=$("leaveRoomButton"),deleteRoomButton=$("deleteRoomButton"),closeRoomMembersButton=$("closeRoomMembersButton"),nicknameButton=$("nicknameButton"),nicknameDialog=$("nicknameDialog"),nicknameTitle=$("nicknameTitle"),nicknameInput=$("nicknameInput"),nicknameStatus=$("nicknameStatus"),cancelNicknameButton=$("cancelNicknameButton"),saveNicknameButton=$("saveNicknameButton");
 
     const chatPasskeyLoginButton =
       $("chatPasskeyLoginButton");
@@ -1667,7 +1675,7 @@
           wrong:"현재 비밀번호가 올바르지 않습니다.",
           working:"패스키 인증을 기다리는 중…",
           denied:"이 패스키는 Staff 또는 Member 계정에 연결되어 있지 않습니다.",
-          cancelled:"패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다."
+          cancelled:"패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다.",logout:"로그아웃",loggingOut:"로그아웃 중…"
         },
         en:{
           login:"Login with passkey",
@@ -1689,7 +1697,7 @@
           wrong:"The current password is incorrect.",
           working:"Waiting for passkey authentication…",
           denied:"This passkey is not linked to a Staff or Member account.",
-          cancelled:"Passkey authentication was cancelled or not allowed by the device."
+          cancelled:"Passkey authentication was cancelled or not allowed by the device.",logout:"Logout",loggingOut:"Signing out…"
         },
         ja:{
           login:"パスキーでログイン",
@@ -1711,7 +1719,7 @@
           wrong:"現在のパスワードが正しくありません。",
           working:"パスキー認証を待っています…",
           denied:"このパスキーはStaffまたはMemberアカウントに連携されていません。",
-          cancelled:"パスキー認証がキャンセルされたか、端末で許可されませんでした。"
+          cancelled:"パスキー認証がキャンセルされたか、端末で許可されませんでした。",logout:"ログアウト",loggingOut:"ログアウト中…"
         },
         ru:{
           login:"Войти с ключом доступа",
@@ -1733,7 +1741,7 @@
           wrong:"Текущий пароль неверен.",
           working:"Ожидание подтверждения ключа доступа…",
           denied:"Этот ключ доступа не связан с учётной записью Staff или Member.",
-          cancelled:"Аутентификация ключом доступа отменена или не разрешена устройством."
+          cancelled:"Аутентификация ключом доступа отменена или не разрешена устройством.",logout:"Выйти",loggingOut:"Выход…"
         }
       };
       return all[language]??all.en;
@@ -1751,6 +1759,8 @@
       }
       passkeyDialogRegister.textContent=t.register;
       passkeyDialogClose.textContent=t.close;
+      logoutButton.title=t.logout;
+      logoutButton.setAttribute("aria-label",t.logout);
     }
 
     function setText(){
@@ -3010,6 +3020,51 @@
       }
     }
 
+    async function doChatLogout(){
+      const t=chatPasskeyText();
+      logoutButton.disabled=true;
+      setStatus(t.loggingOut);
+
+      try{
+        /*
+          Chat can be entered through either:
+          1) the custom Admin session, or
+          2) a normal Supabase Auth Staff/Member session.
+
+          Clear both so an old session of the other type cannot remain
+          silently active after the visible account logs out.
+        */
+        if(globalThis.S967AdminAuth?.getToken?.()){
+          try{
+            await globalThis.S967AdminAuth.logout({
+              url:ADMIN_LOGOUT_API
+            });
+          }catch(error){
+            console.warn("Admin chat logout request failed:",error);
+            globalThis.S967AdminAuth?.clearToken?.();
+          }
+        }
+
+        try{
+          await supabase.auth.signOut({
+            scope:"local"
+          });
+        }catch(error){
+          console.warn("Supabase chat logout failed:",error);
+        }
+      }finally{
+        stopRealtime();
+
+        /*
+          Reload after clearing authentication so every room/message/member
+          state is rebuilt from an unauthenticated page instead of leaving
+          stale private data in the current DOM.
+        */
+        location.reload();
+      }
+    }
+
+
     async function doChatLogin(){
       const id=chatId.value.trim();
       const password=chatPassword.value;
@@ -3104,6 +3159,8 @@
     chatLoginButton.onclick=doChatLogin;
     chatPasskeyLoginButton.onclick=doChatPasskeyLogin;
     chatPassword.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();doChatLogin();}});
+
+    logoutButton.onclick=doChatLogout;
 
     passkeyButton.onclick=openPasskeyDialog;
     passkeyDialogVerify.onclick=verifyChatPasswordForPasskey;
