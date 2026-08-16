@@ -57,6 +57,23 @@
     const error = new Error(code);
     error.code = code;
     error.status = response.status;
+
+    if (Number.isFinite(Number(result.retryAfterSeconds))) {
+      error.retryAfterSeconds = Number(result.retryAfterSeconds);
+    }
+
+    if (Number.isFinite(Number(result.lockLevel))) {
+      error.lockLevel = Number(result.lockLevel);
+    }
+
+    if (Number.isFinite(Number(result.failedAttempts))) {
+      error.failedAttempts = Number(result.failedAttempts);
+    }
+
+    if (Number.isFinite(Number(result.attemptsUntilLock))) {
+      error.attemptsUntilLock = Number(result.attemptsUntilLock);
+    }
+
     return error;
   }
 
