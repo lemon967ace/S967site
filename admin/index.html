@@ -11725,10 +11725,15 @@ window.addEventListener(
         "adminPasskeyCloseButton"
       );
 
+    let passkeyStage =
+      "대기";
+
     function setPasskeyStatus(
       message = "",
       error = false
     ) {
+      if (!passkeyStatus) return;
+
       passkeyStatus.textContent =
         message;
 
@@ -11736,14 +11741,74 @@ window.addEventListener(
         "error",
         error
       );
+
+      /*
+        iPhone/iPad Safari에서도 개발자 콘솔 없이
+        현재 진행 단계를 확인할 수 있도록 화면에 직접 표시한다.
+      */
+      passkeyStatus.style.whiteSpace =
+        "pre-wrap";
+
+      passkeyStatus.style.overflowWrap =
+        "anywhere";
+    }
+
+    function setPasskeyStage(
+      stage,
+      message = ""
+    ) {
+      passkeyStage =
+        stage || "알 수 없음";
+
+      setPasskeyStatus(
+        `[${passkeyStage}]${message ? `\n${message}` : ""}`
+      );
+    }
+
+    function errorParts(error) {
+      const parts = [];
+      const seen = new Set();
+
+      let current = error;
+      let depth = 0;
+
+      while (
+        current &&
+        depth < 4 &&
+        !seen.has(current)
+      ) {
+        seen.add(current);
+
+        for (const value of [
+          current?.name,
+          current?.code,
+          current?.message,
+        ]) {
+          const text =
+            String(value ?? "").trim();
+
+          if (
+            text &&
+            !parts.includes(text)
+          ) {
+            parts.push(text);
+          }
+        }
+
+        current =
+          current?.cause ??
+          current?.originalError ??
+          null;
+
+        depth += 1;
+      }
+
+      return parts;
     }
 
     function errorCode(error) {
-      return String(
-        error?.code ??
-        error?.message ??
-        ""
-      );
+      return errorParts(error)
+        .join(" / ");
     }
 
     function friendlyError(error) {
@@ -11755,7 +11820,7 @@ window.addEventListener(
         ) ||
         /cancel/i.test(code)
       ) {
-        return "패스키 인증이 취소되었습니다.";
+        return "패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다.";
       }
 
       if (
@@ -11803,6 +11868,22 @@ window.addEventListener(
 
       if (
         code.includes(
+          "webauthn_challenge_expired"
+        )
+      ) {
+        return "패스키 인증 요청 시간이 만료되었습니다. 다시 시도하세요.";
+      }
+
+      if (
+        code.includes(
+          "webauthn_verification_failed"
+        )
+      ) {
+        return "패스키 검증에 실패했습니다.";
+      }
+
+      if (
+        code.includes(
           "email_not_confirmed"
         ) ||
         code.includes(
@@ -11814,6 +11895,84 @@ window.addEventListener(
 
       return code ||
         "패스키 작업에 실패했습니다.";
+    }
+
+    function passkeyDiagnosticText(
+      error,
+      extra = {}
+    ) {
+      const details =
+        errorParts(error);
+
+      const lines = [
+        `실패 단계: ${passkeyStage}`,
+        `Origin: ${location.origin}`,
+        `HTTPS/Secure Context: ${globalThis.isSecureContext ? "예" : "아니오"}`,
+        `WebAuthn API: ${globalThis.PublicKeyCredential ? "사용 가능" : "사용 불가"}`,
+      ];
+
+      if (
+        "sessionExists" in extra
+      ) {
+        lines.push(
+          `Supabase Auth 세션: ${extra.sessionExists ? "있음" : "없음"}`
+        );
+      }
+
+      if (
+        extra.userPresent !==
+        undefined
+      ) {
+        lines.push(
+          `Supabase Auth 사용자: ${extra.userPresent ? "확인됨" : "없음"}`
+        );
+      }
+
+      if (details.length) {
+        lines.push(
+          "",
+          "오류 상세:",
+          ...details.map(
+            (value, index) =>
+              `${index + 1}. ${value}`
+          )
+        );
+      }
+
+      return lines.join("\n");
+    }
+
+    function showPasskeyFailure(
+      error,
+      extra = {}
+    ) {
+      /*
+        토큰, 비밀번호, UID 등의 민감정보는 표시하지 않는다.
+        오류 이름/코드/메시지와 실행 단계만 화면에 표시한다.
+      */
+      const friendly =
+        friendlyError(error);
+
+      const diagnostic =
+        passkeyDiagnosticText(
+          error,
+          extra
+        );
+
+      console.error(
+        "Admin passkey failure",
+        {
+          stage: passkeyStage,
+          error,
+          cause: error?.cause,
+          extra,
+        }
+      );
+
+      setPasskeyStatus(
+        `${friendly}\n\n${diagnostic}`,
+        true
+      );
     }
 
     async function readJson(response) {
@@ -12133,9 +12292,16 @@ window.addEventListener(
       passkeyRegisterButton.disabled =
         true;
 
+      let sessionExists =
+        false;
+
+      let userPresent =
+        false;
+
       try {
-        setPasskeyStatus(
-          "관리자 확인 중…"
+        setPasskeyStage(
+          "1/6 관리자 확인",
+          "기존 관리자 세션과 비밀번호를 확인하고 있습니다…"
         );
 
         const setup =
@@ -12154,15 +12320,19 @@ window.addEventListener(
             }
           );
 
-        setPasskeyStatus(
-          "패스키 등록 준비 중…"
+        if (!setup?.tokenHash) {
+          throw new Error(
+            "PASSKEY_SETUP_TOKEN_MISSING"
+          );
+        }
+
+        setPasskeyStage(
+          "2/6 Auth 세션 생성",
+          "관리자 전용 Supabase Auth 세션을 만들고 있습니다…"
         );
 
-        /*
-          Exchange the server-generated one-time token for an in-memory
-          Supabase Auth session belonging only to the fixed Admin Auth user.
-        */
         const {
+          data: verifyData,
           error: verifyError,
         } =
           await adminPasskeySupabase
@@ -12179,11 +12349,65 @@ window.addEventListener(
           throw verifyError;
         }
 
-        setPasskeyStatus(
-          "Face ID, Touch ID, Windows Hello 또는 보안키로 등록을 완료하세요."
+        sessionExists =
+          Boolean(
+            verifyData?.session
+          );
+
+        userPresent =
+          Boolean(
+            verifyData?.user
+          );
+
+        /*
+          iOS Safari에서 패스키 팝업 이후 실패하는 경우
+          registerPasskey() 직전에 실제 세션이 존재했는지를
+          화면 진단에 남기기 위해 서버 검증 가능한 getUser()도 확인한다.
+        */
+        setPasskeyStage(
+          "3/6 Auth 사용자 확인",
+          "패스키를 등록할 관리자 Auth 사용자를 확인하고 있습니다…"
         );
 
         const {
+          data: userData,
+          error: userError,
+        } =
+          await adminPasskeySupabase
+            .auth
+            .getUser();
+
+        if (userError) {
+          throw userError;
+        }
+
+        userPresent =
+          Boolean(
+            userData?.user
+          );
+
+        if (
+          !sessionExists ||
+          !userPresent
+        ) {
+          const sessionError =
+            new Error(
+              "ADMIN_PASSKEY_AUTH_SESSION_MISSING"
+            );
+
+          sessionError.code =
+            "ADMIN_PASSKEY_AUTH_SESSION_MISSING";
+
+          throw sessionError;
+        }
+
+        setPasskeyStage(
+          "4/6 기기 인증",
+          "Face ID, Touch ID, Windows Hello 또는 보안키로 패스키 등록을 승인하세요."
+        );
+
+        const {
+          data: registerData,
           error: registerError,
         } =
           await adminPasskeySupabase
@@ -12194,6 +12418,20 @@ window.addEventListener(
           throw registerError;
         }
 
+        setPasskeyStage(
+          "5/6 등록 확인",
+          "Supabase에 등록된 패스키를 확인하고 있습니다…"
+        );
+
+        /*
+          registerPasskey()가 정상 반환했다는 사실도 콘솔에는 남기되,
+          credential 자체는 화면에 출력하지 않는다.
+        */
+        console.log(
+          "Admin passkey register result received",
+          Boolean(registerData)
+        );
+
         await adminPasskeySupabase
           .auth
           .signOut()
@@ -12201,8 +12439,11 @@ window.addEventListener(
 
         await loadPasskeys();
 
+        passkeyStage =
+          "6/6 완료";
+
         setPasskeyStatus(
-          "관리자 패스키를 등록했습니다."
+          "[6/6 완료]\n관리자 패스키를 등록했습니다."
         );
       } catch (error) {
         await adminPasskeySupabase
@@ -12210,9 +12451,12 @@ window.addEventListener(
           .signOut()
           .catch(() => {});
 
-        setPasskeyStatus(
-          friendlyError(error),
-          true
+        showPasskeyFailure(
+          error,
+          {
+            sessionExists,
+            userPresent,
+          }
         );
 
         try {
@@ -12231,8 +12475,197 @@ window.addEventListener(
       }
     }
 
+
     async function loginWithPasskey() {
       passkeyLoginButton.disabled =
+        true;
+
+      const loginStatus =
+        document.getElementById(
+          "loginStatus"
+        );
+
+      let sessionExists =
+        false;
+
+      let userPresent =
+        false;
+
+      if (loginStatus) {
+        loginStatus.style.whiteSpace =
+          "pre-wrap";
+
+        loginStatus.style.overflowWrap =
+          "anywhere";
+
+        loginStatus.textContent =
+          "[1/4 기기 인증]\n패스키를 선택하고 Face ID, Touch ID, Windows Hello 또는 보안키로 승인하세요.";
+
+        loginStatus.classList.remove(
+          "error"
+        );
+      }
+
+      passkeyStage =
+        "1/4 기기 인증";
+
+      try {
+        const {
+          data,
+          error,
+        } =
+          await adminPasskeySupabase
+            .auth
+            .signInWithPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        sessionExists =
+          Boolean(
+            data?.session
+          );
+
+        userPresent =
+          Boolean(
+            data?.user ??
+            data?.session?.user
+          );
+
+        const accessToken =
+          data?.session?.access_token;
+
+        if (!accessToken) {
+          throw new Error(
+            "PASSKEY_SESSION_MISSING"
+          );
+        }
+
+        passkeyStage =
+          "2/4 관리자 확인";
+
+        if (loginStatus) {
+          loginStatus.textContent =
+            "[2/4 관리자 확인]\n패스키로 확인된 계정이 관리자 계정인지 서버에서 검증하고 있습니다…";
+        }
+
+        /*
+          Passkey authentication proves the Supabase Auth identity only.
+          The server must still compare that identity with
+          ADMIN_PASSKEY_USER_ID before issuing the existing Admin session.
+        */
+        const response =
+          await fetch(
+            ADMIN_PASSKEY_LOGIN_API_URL,
+            {
+              method: "POST",
+              headers: {
+                Authorization:
+                  `Bearer ${accessToken}`,
+              },
+            }
+          );
+
+        const result =
+          await readJson(response);
+
+        if (
+          !response.ok ||
+          !result.sessionToken
+        ) {
+          const exchangeError =
+            new Error(
+              result.error ||
+              `HTTP_${response.status}`
+            );
+
+          exchangeError.code =
+            result.error ||
+            `HTTP_${response.status}`;
+
+          throw exchangeError;
+        }
+
+        passkeyStage =
+          "3/4 Admin 세션 생성";
+
+        if (loginStatus) {
+          loginStatus.textContent =
+            "[3/4 Admin 세션 생성]\n기존 S967 관리자 세션으로 전환하고 있습니다…";
+        }
+
+        globalThis.S967AdminAuth
+          .setToken(
+            result.sessionToken
+          );
+
+        /*
+          S967 Admin APIs continue to use the custom Admin session.
+          The temporary Supabase Auth session is no longer needed.
+        */
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        passkeyStage =
+          "4/4 완료";
+
+        if (loginStatus) {
+          loginStatus.textContent =
+            "[4/4 완료]\n패스키 로그인이 완료되었습니다.";
+        }
+
+        globalThis.enterAdminAfterLogin?.();
+      } catch (error) {
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        globalThis.S967AdminAuth
+          ?.clearToken?.();
+
+        const friendly =
+          friendlyError(error);
+
+        const diagnostic =
+          passkeyDiagnosticText(
+            error,
+            {
+              sessionExists,
+              userPresent,
+            }
+          );
+
+        console.error(
+          "Admin passkey login failure",
+          {
+            stage: passkeyStage,
+            error,
+            cause: error?.cause,
+            sessionExists,
+            userPresent,
+          }
+        );
+
+        if (loginStatus) {
+          loginStatus.textContent =
+            `${friendly}\n\n${diagnostic}`;
+
+          loginStatus.classList.add(
+            "error"
+          );
+        }
+      } finally {
+        passkeyLoginButton.disabled =
+          false;
+      }
+    }
+
+
+    passkeyLoginButton.disabled =
         true;
 
       const loginStatus =
