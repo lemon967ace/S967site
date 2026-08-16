@@ -67,11 +67,15 @@ export function preferredFontSizeForZoom(zoom) {
 }
 
 export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText }) {
+  if (zoom < 0.4) return { mode: "hidden" };
   const availableWidth = bounds.width * zoom * HORIZONTAL_MARGIN_RATIO;
   const availableHeight = bounds.height * zoom * VERTICAL_MARGIN_RATIO;
   const preferred = preferredFontSizeForZoom(zoom);
   for (let fontSize = preferred; fontSize >= MINIMUM_FONT_PIXEL_SIZE; fontSize--) {
-    const coordinate = `(${building.x}, ${building.y})`;
+    const coordinate =
+  zoom >= 0.8
+    ? `(${building.x}, ${building.y})`
+    : "";
     const coordinateSize = measureText(coordinate, fontSize);
     const lineHeight = measureText("가", fontSize).height;
     if (coordinateSize.height + lineHeight <= availableHeight) {
