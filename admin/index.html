@@ -9597,6 +9597,66 @@ function renderOnlyIp(ipHash) {
 
     window.enterAdminAfterLogin = enterAdminAfterLogin;
 
+    function formatAdminLockDuration(seconds) {
+      const value =
+        Math.max(
+          1,
+          Math.ceil(Number(seconds) || 0)
+        );
+
+      if (value >= 3600) {
+        const hours =
+          Math.ceil(value / 3600);
+
+        return `${hours}시간`;
+      }
+
+      const minutes =
+        Math.max(
+          1,
+          Math.ceil(value / 60)
+        );
+
+      return `${minutes}분`;
+    }
+
+    function adminLoginErrorMessage(error) {
+      if (
+        error?.code === "RATE_LIMITED" ||
+        error?.message === "RATE_LIMITED"
+      ) {
+        return `로그인 시도가 너무 많습니다. ${formatAdminLockDuration(
+          error?.retryAfterSeconds
+        )} 후 다시 시도하세요.`;
+      }
+
+      if (
+        error?.code === "INVALID_CREDENTIALS" &&
+        Number.isFinite(
+          Number(error?.attemptsUntilLock)
+        )
+      ) {
+        const remaining =
+          Number(error.attemptsUntilLock);
+
+        return remaining > 0
+          ? `관리자 비밀번호가 올바르지 않습니다. 차단까지 ${remaining}회 남았습니다.`
+          : "관리자 비밀번호가 올바르지 않습니다.";
+      }
+
+      if (
+        error?.code === "ORIGIN_NOT_ALLOWED"
+      ) {
+        return "허용되지 않은 출처의 관리자 로그인 요청입니다.";
+      }
+
+      return (
+        error?.message ||
+        "Login failed."
+      );
+    }
+
+
     loginButton.addEventListener(
       "click",
       async () => {
@@ -9632,8 +9692,9 @@ try {
 
           setStatus(
             loginStatus,
-            error.message ||
-            "Login failed.",
+            adminLoginErrorMessage(
+              error
+            ),
             true
           );
         } finally {
@@ -12746,6 +12807,8 @@ window.addEventListener(
               headers: {
                 Authorization:
                   `Bearer ${accessToken}`,
+                apikey:
+                  SUPABASE_PUBLISHABLE_KEY,
               },
             }
           );
