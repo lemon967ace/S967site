@@ -672,6 +672,106 @@
       display: none !important;
     }
 
+
+
+    /* ========================================================
+       ADMIN PASSKEY
+       ======================================================== */
+
+    .admin-passkey-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .admin-passkey-divider::before,
+    .admin-passkey-divider::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--border);
+    }
+
+    .admin-passkey-login-button {
+      width: 100%;
+    }
+
+    .admin-passkey-dialog {
+      width: min(520px, calc(100vw - 28px));
+      max-height: min(720px, calc(100dvh - 40px));
+      overflow: auto;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-passkey-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    .admin-passkey-dialog-inner {
+      padding: 20px;
+    }
+
+    .admin-passkey-dialog h2 {
+      margin: 0;
+    }
+
+    .admin-passkey-dialog-note {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .admin-passkey-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .admin-passkey-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface-hover);
+    }
+
+    .admin-passkey-item-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .admin-passkey-item-name {
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-passkey-item-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .admin-passkey-dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
 </style>
   <link rel="preconnect" href="https://dpmjwsnqkuzetyvfcmfr.supabase.co" crossorigin>
 </head>
@@ -732,6 +832,18 @@
         id="loginStatus"
         class="status"
       ></div>
+
+      <div class="admin-passkey-divider">
+        또는
+      </div>
+
+      <button
+        id="passkeyLoginButton"
+        class="admin-passkey-login-button"
+        type="button"
+      >
+        패스키로 로그인
+      </button>
     </section>
 
     <div
@@ -740,6 +852,7 @@
 >
   <div class="admin-tabs">
     <button id="logoutButton" type="button" class="admin-tab">로그아웃</button>
+    <button id="passkeyManageButton" type="button" class="admin-tab">패스키</button>
     <button
       type="button"
       class="admin-tab is-active"
@@ -2046,6 +2159,45 @@
     </div>
   </dialog>
 
+    <dialog
+      id="adminPasskeyDialog"
+      class="admin-passkey-dialog"
+    >
+      <div class="admin-passkey-dialog-inner">
+        <h2>관리자 패스키</h2>
+
+        <p class="admin-passkey-dialog-note">
+          최대 2개까지 등록할 수 있습니다. 새 패스키를 등록할 때는 관리자 비밀번호를 다시 확인합니다.
+        </p>
+
+        <div
+          id="adminPasskeyList"
+          class="admin-passkey-list"
+        ></div>
+
+        <div
+          id="adminPasskeyStatus"
+          class="status"
+        ></div>
+
+        <div class="admin-passkey-dialog-actions">
+          <button
+            id="adminPasskeyRegisterButton"
+            type="button"
+          >
+            새 패스키 등록
+          </button>
+
+          <button
+            id="adminPasskeyCloseButton"
+            type="button"
+          >
+            닫기
+          </button>
+        </div>
+      </div>
+    </dialog>
+
     <a class="back" href="/">
       ← Back to Home
     </a>
@@ -3298,65 +3450,91 @@ async function chatRoomAdminApiRequest(
   return result;
 }
 
-function getAccountDisplayName(account) {
-  /*
-    Backend-provided account_id is the actual login ID.
-
-    display_name is the chat nickname.
-
-    Never use user_id here:
-    user_id is the internal Supabase UUID and must not be shown
-    as an account ID in the Staff management UI.
-  */
-  const accountId =
+function getStaffAccountDisplayName(account) {
+  const email =
     String(
-      account?.account_id ??
-      account?.staff_id ??
-      ""
+      account?.email ?? ""
     ).trim();
+
+  const suffix =
+    "@s967.org";
+
+  const accountId =
+    email.toLowerCase()
+      .endsWith(
+        suffix
+      )
+      ? email.slice(
+          0,
+          -suffix.length
+        )
+      : email;
 
   const nickname =
     String(
-      account?.display_name ??
-      ""
+      account?.display_name ?? ""
     ).trim();
 
-  /*
-    If the backend cannot resolve account_id for an old/broken account,
-    show the nickname only rather than leaking the internal UUID.
-  */
-  if (!accountId) {
-    return nickname;
-  }
+  const fallbackId =
+    accountId ||
+    String(
+      account?.user_id ?? ""
+    ).trim();
 
-  /*
-    Login IDs are case-insensitive in the current account system.
-    Therefore "REX" and "rex" are treated as the same ID/name and
-    the duplicate nickname is omitted.
-  */
   if (
     !nickname ||
-    accountId.toLowerCase() ===
-      nickname.toLowerCase()
+    nickname.toLowerCase() ===
+      fallbackId.toLowerCase()
   ) {
-    return accountId;
+    return fallbackId;
   }
 
-  return `${accountId} (${nickname})`;
-}
-
-
-function getStaffAccountDisplayName(account) {
-  return getAccountDisplayName(
-    account
-  );
+  return `${fallbackId} (${nickname})`;
 }
 
 
 function getChatOnlyAccountDisplayName(account) {
-  return getAccountDisplayName(
-    account
-  );
+  const email =
+    String(
+      account?.email ?? ""
+    ).trim();
+
+  const suffix =
+    "@s967.org";
+
+  const accountId =
+    email.toLowerCase()
+      .endsWith(
+        suffix
+      )
+      ? email.slice(
+          0,
+          -suffix.length
+        )
+      : email;
+
+  const nickname =
+    String(
+      account?.display_name ?? ""
+    ).trim();
+
+  const fallbackId =
+    accountId ||
+    String(
+      account?.chat_id ??
+      account?.user_id ??
+      ""
+    ).trim();
+
+  if (
+    !nickname ||
+    nickname.toLowerCase() ===
+      fallbackId.toLowerCase()
+  ) {
+    return fallbackId;
+  }
+
+  return `${fallbackId} (${nickname})`;
 }
 
 
@@ -9384,6 +9562,19 @@ function renderOnlyIp(ipHash) {
     }
 
 
+    function enterAdminAfterLogin() {
+      adminSecretInput.value = "";
+      loginPanel.classList.add("hidden");
+      adminArea.classList.remove("hidden");
+      setStatus(loginStatus, "");
+
+      // 로그인 성공 화면을 먼저 보여주고 현재 탭 데이터는 비동기로 불러온다.
+      loadAdminSectionData("uploads", { force: true });
+      startAdminChatUnreadPolling();
+    }
+
+    window.enterAdminAfterLogin = enterAdminAfterLogin;
+
     loginButton.addEventListener(
       "click",
       async () => {
@@ -9413,14 +9604,7 @@ function renderOnlyIp(ipHash) {
 try {
   await S967AdminAuth.login(value, { url: ADMIN_LOGIN_API_URL });
 
-  adminSecretInput.value = "";
-  loginPanel.classList.add("hidden");
-  adminArea.classList.remove("hidden");
-  setStatus(loginStatus, "");
-
-  // 로그인 성공 화면을 먼저 보여주고 현재 탭 데이터는 비동기로 불러온다.
-  loadAdminSectionData("uploads", { force: true });
-  startAdminChatUnreadPolling();
+  enterAdminAfterLogin();
         } catch (error) {
           S967AdminAuth.clearToken();
 
@@ -11464,6 +11648,755 @@ window.addEventListener(
     })();
   
 </script>
+  <script type="module">
+    import {
+      createClient
+    } from "https://esm.sh/@supabase/supabase-js@2.111.0";
+
+    const SUPABASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+
+    const ADMIN_PASSKEY_LOGIN_API_URL =
+      `${SUPABASE_URL}/functions/v1/admin-passkey-login`;
+
+    const ADMIN_PASSKEY_SETUP_API_URL =
+      `${SUPABASE_URL}/functions/v1/admin-passkey-setup`;
+
+    const ADMIN_PASSKEY_MANAGE_API_URL =
+      `${SUPABASE_URL}/functions/v1/admin-passkey-manage`;
+
+    /*
+      This client deliberately does not persist Supabase Auth sessions.
+      Admin still uses the existing s967-admin-session-token system.
+      This also prevents the temporary Admin Auth session from replacing a
+      Staff/Chat Supabase session stored by another S967 page.
+    */
+    const adminPasskeySupabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+            experimental: {
+              passkey: true,
+            },
+          },
+        }
+      );
+
+    const passkeyLoginButton =
+      document.getElementById(
+        "passkeyLoginButton"
+      );
+
+    const passkeyManageButton =
+      document.getElementById(
+        "passkeyManageButton"
+      );
+
+    const passkeyDialog =
+      document.getElementById(
+        "adminPasskeyDialog"
+      );
+
+    const passkeyList =
+      document.getElementById(
+        "adminPasskeyList"
+      );
+
+    const passkeyStatus =
+      document.getElementById(
+        "adminPasskeyStatus"
+      );
+
+    const passkeyRegisterButton =
+      document.getElementById(
+        "adminPasskeyRegisterButton"
+      );
+
+    const passkeyCloseButton =
+      document.getElementById(
+        "adminPasskeyCloseButton"
+      );
+
+    function setPasskeyStatus(
+      message = "",
+      error = false
+    ) {
+      passkeyStatus.textContent =
+        message;
+
+      passkeyStatus.classList.toggle(
+        "error",
+        error
+      );
+    }
+
+    function errorCode(error) {
+      return String(
+        error?.code ??
+        error?.message ??
+        ""
+      );
+    }
+
+    function friendlyError(error) {
+      const code = errorCode(error);
+
+      if (
+        code.includes(
+          "NotAllowedError"
+        ) ||
+        /cancel/i.test(code)
+      ) {
+        return "패스키 인증이 취소되었습니다.";
+      }
+
+      if (
+        code.includes(
+          "PASSKEY_LIMIT_REACHED"
+        ) ||
+        code.includes(
+          "too_many_passkeys"
+        )
+      ) {
+        return "관리자 패스키는 최대 2개까지 등록할 수 있습니다.";
+      }
+
+      if (
+        code.includes(
+          "INVALID_CREDENTIALS"
+        )
+      ) {
+        return "관리자 비밀번호가 올바르지 않습니다.";
+      }
+
+      if (
+        code.includes(
+          "ADMIN_ACCESS_DENIED"
+        )
+      ) {
+        return "이 패스키는 관리자 계정의 패스키가 아닙니다.";
+      }
+
+      if (
+        code.includes(
+          "passkey_disabled"
+        )
+      ) {
+        return "Supabase Passkey 기능이 활성화되어 있지 않습니다.";
+      }
+
+      if (
+        code.includes(
+          "webauthn_credential_exists"
+        )
+      ) {
+        return "이 패스키는 이미 등록되어 있습니다.";
+      }
+
+      if (
+        code.includes(
+          "email_not_confirmed"
+        ) ||
+        code.includes(
+          "ADMIN_PASSKEY_USER_EMAIL_NOT_CONFIRMED"
+        )
+      ) {
+        return "관리자 패스키용 Auth 계정이 Confirmed 상태가 아닙니다.";
+      }
+
+      return code ||
+        "패스키 작업에 실패했습니다.";
+    }
+
+    async function readJson(response) {
+      return response.json().catch(
+        () => ({})
+      );
+    }
+
+    async function customAdminRequest(
+      url,
+      options = {}
+    ) {
+      const token =
+        globalThis.S967AdminAuth
+          ?.getToken?.() || "";
+
+      if (!token) {
+        const error =
+          new Error("UNAUTHORIZED");
+
+        error.code =
+          "UNAUTHORIZED";
+
+        throw error;
+      }
+
+      const headers =
+        new Headers(
+          options.headers ?? {}
+        );
+
+      headers.set(
+        "Authorization",
+        `Bearer ${token}`
+      );
+
+      const response =
+        await fetch(
+          url,
+          {
+            ...options,
+            headers,
+          }
+        );
+
+      const result =
+        await readJson(response);
+
+      if (!response.ok) {
+        const error =
+          new Error(
+            result.error ||
+            `HTTP_${response.status}`
+          );
+
+        error.code =
+          result.error ||
+          `HTTP_${response.status}`;
+
+        error.status =
+          response.status;
+
+        if (
+          globalThis.S967AdminAuth
+            ?.handleAuthError?.(
+              error
+            )
+        ) {
+          globalThis.showLogin?.();
+        }
+
+        throw error;
+      }
+
+      return result;
+    }
+
+    function formatPasskeyDate(value) {
+      if (!value) return "";
+
+      const date = new Date(value);
+
+      if (
+        !Number.isFinite(
+          date.getTime()
+        )
+      ) {
+        return "";
+      }
+
+      try {
+        return new Intl.DateTimeFormat(
+          "ko-KR",
+          {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        ).format(date);
+      } catch {
+        return date.toLocaleString();
+      }
+    }
+
+    async function loadPasskeys() {
+      setPasskeyStatus(
+        "불러오는 중…"
+      );
+
+      const result =
+        await customAdminRequest(
+          ADMIN_PASSKEY_MANAGE_API_URL
+        );
+
+      const passkeys =
+        Array.isArray(
+          result.passkeys
+        )
+          ? result.passkeys
+          : [];
+
+      const maxPasskeys =
+        Number(
+          result.maxPasskeys
+        ) || 2;
+
+      passkeyList.replaceChildren();
+
+      if (!passkeys.length) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "small";
+
+        empty.textContent =
+          "등록된 관리자 패스키가 없습니다.";
+
+        passkeyList.appendChild(
+          empty
+        );
+      }
+
+      for (
+        const passkey of passkeys
+      ) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "admin-passkey-item";
+
+        const main =
+          document.createElement(
+            "div"
+          );
+
+        main.className =
+          "admin-passkey-item-main";
+
+        const name =
+          document.createElement(
+            "div"
+          );
+
+        name.className =
+          "admin-passkey-item-name";
+
+        name.textContent =
+          passkey.friendly_name ||
+          "Passkey";
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+        meta.className =
+          "admin-passkey-item-meta";
+
+        const created =
+          formatPasskeyDate(
+            passkey.created_at
+          );
+
+        const lastUsed =
+          formatPasskeyDate(
+            passkey.last_used_at
+          );
+
+        meta.textContent = [
+          created
+            ? `등록 ${created}`
+            : "",
+          lastUsed
+            ? `마지막 사용 ${lastUsed}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" · ");
+
+        main.append(
+          name,
+          meta
+        );
+
+        const deleteButton =
+          document.createElement(
+            "button"
+          );
+
+        deleteButton.type =
+          "button";
+
+        deleteButton.classList.add(
+          "danger"
+        );
+
+        deleteButton.textContent =
+          "삭제";
+
+        deleteButton.onclick =
+          async () => {
+            if (
+              !confirm(
+                `관리자 패스키 “${name.textContent}”을 삭제할까요?`
+              )
+            ) {
+              return;
+            }
+
+            deleteButton.disabled =
+              true;
+
+            try {
+              setPasskeyStatus(
+                "삭제 중…"
+              );
+
+              await customAdminRequest(
+                ADMIN_PASSKEY_MANAGE_API_URL,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type":
+                      "application/json",
+                  },
+                  body:
+                    JSON.stringify({
+                      action:
+                        "delete",
+                      passkey_id:
+                        passkey.id,
+                    }),
+                }
+              );
+
+              await loadPasskeys();
+
+              setPasskeyStatus(
+                "패스키를 삭제했습니다."
+              );
+            } catch (error) {
+              setPasskeyStatus(
+                friendlyError(error),
+                true
+              );
+
+              deleteButton.disabled =
+                false;
+            }
+          };
+
+        row.append(
+          main,
+          deleteButton
+        );
+
+        passkeyList.appendChild(
+          row
+        );
+      }
+
+      passkeyRegisterButton.disabled =
+        passkeys.length >=
+        maxPasskeys;
+
+      setPasskeyStatus(
+        `등록된 패스키 ${passkeys.length} / ${maxPasskeys}`
+      );
+    }
+
+    async function registerPasskey() {
+      const password = prompt(
+        "새 관리자 패스키를 등록하려면 관리자 비밀번호를 다시 입력하세요."
+      );
+
+      if (password === null) {
+        return;
+      }
+
+      if (!password) {
+        setPasskeyStatus(
+          "관리자 비밀번호를 입력하세요.",
+          true
+        );
+
+        return;
+      }
+
+      passkeyRegisterButton.disabled =
+        true;
+
+      try {
+        setPasskeyStatus(
+          "관리자 확인 중…"
+        );
+
+        const setup =
+          await customAdminRequest(
+            ADMIN_PASSKEY_SETUP_API_URL,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body:
+                JSON.stringify({
+                  password,
+                }),
+            }
+          );
+
+        setPasskeyStatus(
+          "패스키 등록 준비 중…"
+        );
+
+        /*
+          Exchange the server-generated one-time token for an in-memory
+          Supabase Auth session belonging only to the fixed Admin Auth user.
+        */
+        const {
+          error: verifyError,
+        } =
+          await adminPasskeySupabase
+            .auth
+            .verifyOtp({
+              token_hash:
+                setup.tokenHash,
+              type:
+                setup.verificationType ||
+                "magiclink",
+            });
+
+        if (verifyError) {
+          throw verifyError;
+        }
+
+        setPasskeyStatus(
+          "Face ID, Touch ID, Windows Hello 또는 보안키로 등록을 완료하세요."
+        );
+
+        const {
+          error: registerError,
+        } =
+          await adminPasskeySupabase
+            .auth
+            .registerPasskey();
+
+        if (registerError) {
+          throw registerError;
+        }
+
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        await loadPasskeys();
+
+        setPasskeyStatus(
+          "관리자 패스키를 등록했습니다."
+        );
+      } catch (error) {
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        setPasskeyStatus(
+          friendlyError(error),
+          true
+        );
+
+        try {
+          const result =
+            await customAdminRequest(
+              ADMIN_PASSKEY_MANAGE_API_URL
+            );
+
+          passkeyRegisterButton.disabled =
+            (result.passkeys?.length ?? 0) >=
+            (result.maxPasskeys ?? 2);
+        } catch {
+          passkeyRegisterButton.disabled =
+            false;
+        }
+      }
+    }
+
+    async function loginWithPasskey() {
+      passkeyLoginButton.disabled =
+        true;
+
+      const loginStatus =
+        document.getElementById(
+          "loginStatus"
+        );
+
+      if (loginStatus) {
+        loginStatus.textContent =
+          "패스키 확인 중…";
+
+        loginStatus.classList.remove(
+          "error"
+        );
+      }
+
+      try {
+        const {
+          data,
+          error,
+        } =
+          await adminPasskeySupabase
+            .auth
+            .signInWithPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        const accessToken =
+          data?.session?.access_token;
+
+        if (!accessToken) {
+          throw new Error(
+            "PASSKEY_SESSION_MISSING"
+          );
+        }
+
+        /*
+          Passkey authentication proves the Supabase Auth identity only.
+          The server must still compare that identity with
+          ADMIN_PASSKEY_USER_ID before issuing the existing Admin session.
+        */
+        const response =
+          await fetch(
+            ADMIN_PASSKEY_LOGIN_API_URL,
+            {
+              method: "POST",
+              headers: {
+                Authorization:
+                  `Bearer ${accessToken}`,
+              },
+            }
+          );
+
+        const result =
+          await readJson(response);
+
+        if (
+          !response.ok ||
+          !result.sessionToken
+        ) {
+          const exchangeError =
+            new Error(
+              result.error ||
+              `HTTP_${response.status}`
+            );
+
+          exchangeError.code =
+            result.error ||
+            `HTTP_${response.status}`;
+
+          throw exchangeError;
+        }
+
+        globalThis.S967AdminAuth
+          .setToken(
+            result.sessionToken
+          );
+
+        /*
+          S967 Admin APIs continue to use the custom Admin session.
+          The temporary Supabase Auth session is no longer needed.
+        */
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        globalThis.enterAdminAfterLogin?.();
+      } catch (error) {
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        globalThis.S967AdminAuth
+          ?.clearToken?.();
+
+        if (loginStatus) {
+          loginStatus.textContent =
+            friendlyError(error);
+
+          loginStatus.classList.add(
+            "error"
+          );
+        }
+      } finally {
+        passkeyLoginButton.disabled =
+          false;
+      }
+    }
+
+    passkeyLoginButton
+      ?.addEventListener(
+        "click",
+        loginWithPasskey
+      );
+
+    passkeyManageButton
+      ?.addEventListener(
+        "click",
+        async () => {
+          if (!passkeyDialog) return;
+
+          if (
+            typeof passkeyDialog
+              .showModal ===
+            "function"
+          ) {
+            passkeyDialog.showModal();
+          } else {
+            passkeyDialog.setAttribute(
+              "open",
+              ""
+            );
+          }
+
+          try {
+            await loadPasskeys();
+          } catch (error) {
+            setPasskeyStatus(
+              friendlyError(error),
+              true
+            );
+          }
+        }
+      );
+
+    passkeyRegisterButton
+      ?.addEventListener(
+        "click",
+        registerPasskey
+      );
+
+    passkeyCloseButton
+      ?.addEventListener(
+        "click",
+        () => {
+          passkeyDialog?.close?.();
+        }
+      );
+  </script>
+
   <script src="/admin/admin-coloring.js"></script>
 </body>
 </html>
