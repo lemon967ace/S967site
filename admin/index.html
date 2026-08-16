@@ -2175,6 +2175,20 @@
           class="admin-passkey-list"
         ></div>
 
+        <label
+          for="adminPasskeyPassword"
+          class="small"
+          style="display:grid;gap:6px;margin-top:14px;"
+        >
+          <span>관리자 비밀번호</span>
+          <input
+            id="adminPasskeyPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="관리자 비밀번호"
+          >
+        </label>
+
         <div
           id="adminPasskeyStatus"
           class="status"
@@ -2185,7 +2199,15 @@
             id="adminPasskeyRegisterButton"
             type="button"
           >
-            새 패스키 등록
+            관리자 확인
+          </button>
+
+          <button
+            id="adminPasskeyCreateButton"
+            type="button"
+            class="hidden"
+          >
+            Face ID / 패스키 등록
           </button>
 
           <button
@@ -11715,15 +11737,34 @@ window.addEventListener(
         "adminPasskeyStatus"
       );
 
+    const passkeyPasswordInput =
+      document.getElementById(
+        "adminPasskeyPassword"
+      );
+
     const passkeyRegisterButton =
       document.getElementById(
         "adminPasskeyRegisterButton"
+      );
+
+    const passkeyCreateButton =
+      document.getElementById(
+        "adminPasskeyCreateButton"
       );
 
     const passkeyCloseButton =
       document.getElementById(
         "adminPasskeyCloseButton"
       );
+
+    let passkeyRegistrationReady =
+      false;
+
+    let passkeyRegistrationSessionExists =
+      false;
+
+    let passkeyRegistrationUserPresent =
+      false;
 
     let passkeyStage =
       "대기";
@@ -12271,14 +12312,53 @@ window.addEventListener(
       );
     }
 
-    async function registerPasskey() {
-      const password = prompt(
-        "새 관리자 패스키를 등록하려면 관리자 비밀번호를 다시 입력하세요."
-      );
+    function resetPasskeyRegistrationUi({
+      signOut = false,
+    } = {}) {
+      passkeyRegistrationReady =
+        false;
 
-      if (password === null) {
-        return;
+      passkeyRegistrationSessionExists =
+        false;
+
+      passkeyRegistrationUserPresent =
+        false;
+
+      if (passkeyPasswordInput) {
+        passkeyPasswordInput.value =
+          "";
+
+        passkeyPasswordInput.disabled =
+          false;
       }
+
+      if (passkeyRegisterButton) {
+        passkeyRegisterButton.textContent =
+          "관리자 확인";
+      }
+
+      if (passkeyCreateButton) {
+        passkeyCreateButton.classList.add(
+          "hidden"
+        );
+
+        passkeyCreateButton.disabled =
+          false;
+      }
+
+      if (signOut) {
+        adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+      }
+    }
+
+
+    async function preparePasskeyRegistration() {
+      const password =
+        passkeyPasswordInput?.value ??
+        "";
 
       if (!password) {
         setPasskeyStatus(
@@ -12286,21 +12366,28 @@ window.addEventListener(
           true
         );
 
+        passkeyPasswordInput?.focus();
         return;
       }
 
       passkeyRegisterButton.disabled =
         true;
 
-      let sessionExists =
+      passkeyPasswordInput.disabled =
+        true;
+
+      passkeyRegistrationReady =
         false;
 
-      let userPresent =
+      passkeyRegistrationSessionExists =
+        false;
+
+      passkeyRegistrationUserPresent =
         false;
 
       try {
         setPasskeyStage(
-          "1/6 관리자 확인",
+          "1/4 관리자 확인",
           "기존 관리자 세션과 비밀번호를 확인하고 있습니다…"
         );
 
@@ -12327,7 +12414,7 @@ window.addEventListener(
         }
 
         setPasskeyStage(
-          "2/6 Auth 세션 생성",
+          "2/4 Auth 세션 생성",
           "관리자 전용 Supabase Auth 세션을 만들고 있습니다…"
         );
 
@@ -12349,23 +12436,18 @@ window.addEventListener(
           throw verifyError;
         }
 
-        sessionExists =
+        passkeyRegistrationSessionExists =
           Boolean(
             verifyData?.session
           );
 
-        userPresent =
+        passkeyRegistrationUserPresent =
           Boolean(
             verifyData?.user
           );
 
-        /*
-          iOS Safari에서 패스키 팝업 이후 실패하는 경우
-          registerPasskey() 직전에 실제 세션이 존재했는지를
-          화면 진단에 남기기 위해 서버 검증 가능한 getUser()도 확인한다.
-        */
         setPasskeyStage(
-          "3/6 Auth 사용자 확인",
+          "3/4 Auth 사용자 확인",
           "패스키를 등록할 관리자 Auth 사용자를 확인하고 있습니다…"
         );
 
@@ -12381,14 +12463,14 @@ window.addEventListener(
           throw userError;
         }
 
-        userPresent =
+        passkeyRegistrationUserPresent =
           Boolean(
             userData?.user
           );
 
         if (
-          !sessionExists ||
-          !userPresent
+          !passkeyRegistrationSessionExists ||
+          !passkeyRegistrationUserPresent
         ) {
           const sessionError =
             new Error(
@@ -12401,9 +12483,102 @@ window.addEventListener(
           throw sessionError;
         }
 
-        setPasskeyStage(
-          "4/6 기기 인증",
-          "Face ID, Touch ID, Windows Hello 또는 보안키로 패스키 등록을 승인하세요."
+        /*
+          iPhone/iPad의 Chrome/Safari에서는 비밀번호 prompt를 닫은 뒤
+          여러 비동기 작업을 거쳐 WebAuthn을 바로 호출하면
+          "The document is not focused"가 발생할 수 있다.
+
+          따라서 여기서는 WebAuthn을 호출하지 않는다.
+          Auth 세션만 준비하고, 사용자가 아래의 별도 버튼을 직접
+          터치했을 때 registerPasskey()를 즉시 시작한다.
+        */
+        passkeyRegistrationReady =
+          true;
+
+        passkeyPasswordInput.value =
+          "";
+
+        passkeyRegisterButton.textContent =
+          "관리자 확인 완료";
+
+        passkeyCreateButton.classList.remove(
+          "hidden"
+        );
+
+        passkeyStage =
+          "4/4 기기 인증 대기";
+
+        setPasskeyStatus(
+          "[4/4 기기 인증 대기]\n관리자 확인이 완료되었습니다.\n아래 ‘Face ID / 패스키 등록’ 버튼을 직접 눌러 등록을 계속하세요."
+        );
+      } catch (error) {
+        await adminPasskeySupabase
+          .auth
+          .signOut()
+          .catch(() => {});
+
+        showPasskeyFailure(
+          error,
+          {
+            sessionExists:
+              passkeyRegistrationSessionExists,
+            userPresent:
+              passkeyRegistrationUserPresent,
+          }
+        );
+
+        resetPasskeyRegistrationUi();
+
+        try {
+          const result =
+            await customAdminRequest(
+              ADMIN_PASSKEY_MANAGE_API_URL
+            );
+
+          passkeyRegisterButton.disabled =
+            (result.passkeys?.length ?? 0) >=
+            (result.maxPasskeys ?? 2);
+        } catch {
+          passkeyRegisterButton.disabled =
+            false;
+        }
+
+        return;
+      }
+
+      /*
+        준비가 끝난 뒤에는 이 버튼을 다시 누르지 않도록 비활성화한다.
+        실제 WebAuthn은 두 번째 버튼의 직접 클릭에서 시작한다.
+      */
+      passkeyRegisterButton.disabled =
+        true;
+    }
+
+
+    async function completePasskeyRegistration() {
+      if (!passkeyRegistrationReady) {
+        setPasskeyStatus(
+          "먼저 관리자 비밀번호를 확인하세요.",
+          true
+        );
+
+        return;
+      }
+
+      passkeyCreateButton.disabled =
+        true;
+
+      try {
+        /*
+          이 함수는 사용자의 실제 버튼 터치 이벤트에서 바로 호출된다.
+          prompt(), fetch(), verifyOtp() 같은 선행 UI/네트워크 작업 없이
+          곧바로 WebAuthn ceremony를 시작한다.
+        */
+        passkeyStage =
+          "5/6 기기 인증";
+
+        setPasskeyStatus(
+          "[5/6 기기 인증]\nFace ID, Touch ID, Windows Hello 또는 기기의 패스키 확인을 승인하세요."
         );
 
         const {
@@ -12418,15 +12593,13 @@ window.addEventListener(
           throw registerError;
         }
 
-        setPasskeyStage(
-          "5/6 등록 확인",
-          "Supabase에 등록된 패스키를 확인하고 있습니다…"
+        passkeyStage =
+          "6/6 등록 확인";
+
+        setPasskeyStatus(
+          "[6/6 등록 확인]\nSupabase에 등록된 패스키를 확인하고 있습니다…"
         );
 
-        /*
-          registerPasskey()가 정상 반환했다는 사실도 콘솔에는 남기되,
-          credential 자체는 화면에 출력하지 않는다.
-        */
         console.log(
           "Admin passkey register result received",
           Boolean(registerData)
@@ -12437,15 +12610,21 @@ window.addEventListener(
           .signOut()
           .catch(() => {});
 
+        resetPasskeyRegistrationUi();
+
         await loadPasskeys();
 
         passkeyStage =
-          "6/6 완료";
+          "완료";
 
         setPasskeyStatus(
-          "[6/6 완료]\n관리자 패스키를 등록했습니다."
+          "[완료]\n관리자 패스키를 등록했습니다."
         );
       } catch (error) {
+        /*
+          실패 시 임시 Supabase Auth 세션은 폐기한다.
+          다시 등록하려면 관리자 확인부터 새로 진행한다.
+        */
         await adminPasskeySupabase
           .auth
           .signOut()
@@ -12454,10 +12633,14 @@ window.addEventListener(
         showPasskeyFailure(
           error,
           {
-            sessionExists,
-            userPresent,
+            sessionExists:
+              passkeyRegistrationSessionExists,
+            userPresent:
+              passkeyRegistrationUserPresent,
           }
         );
+
+        resetPasskeyRegistrationUi();
 
         try {
           const result =
@@ -12689,6 +12872,10 @@ window.addEventListener(
             );
           }
 
+          resetPasskeyRegistrationUi({
+            signOut: true,
+          });
+
           try {
             await loadPasskeys();
           } catch (error) {
@@ -12703,13 +12890,38 @@ window.addEventListener(
     passkeyRegisterButton
       ?.addEventListener(
         "click",
-        registerPasskey
+        preparePasskeyRegistration
+      );
+
+    passkeyCreateButton
+      ?.addEventListener(
+        "click",
+        completePasskeyRegistration
+      );
+
+    passkeyPasswordInput
+      ?.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key === "Enter" &&
+            !event.isComposing &&
+            !passkeyRegisterButton.disabled
+          ) {
+            event.preventDefault();
+            preparePasskeyRegistration();
+          }
+        }
       );
 
     passkeyCloseButton
       ?.addEventListener(
         "click",
         () => {
+          resetPasskeyRegistrationUi({
+            signOut: true,
+          });
+
           passkeyDialog?.close?.();
         }
       );
