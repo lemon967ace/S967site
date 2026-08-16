@@ -1023,7 +1023,97 @@
       }
     }
 
-  </style>
+  
+    /* =========================================================
+       MOBILE TOP TOOLBAR HORIZONTAL SCROLL v12
+       - action icons scroll horizontally on narrow screens
+       - language/theme controls stay outside the scroll strip so
+         their dropdown menus are not clipped by overflow
+       ========================================================= */
+
+    .bar-actions-scroll {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      min-width: 0;
+      flex: 0 1 auto;
+    }
+
+    .bar-actions-scroll > button,
+    .bar-actions-scroll > a {
+      box-sizing: border-box !important;
+      width: auto !important;
+      min-width: 42px !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      padding: 6px 10px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      background: var(--surface-hover) !important;
+      color: var(--text) !important;
+      text-decoration: none !important;
+      font: inherit;
+      line-height: 1 !important;
+      flex: 0 0 auto;
+    }
+
+    .bar-actions-scroll > button:hover,
+    .bar-actions-scroll > a:hover {
+      border-color: var(--border-hover) !important;
+    }
+
+    @media (max-width: 760px) {
+      .bar .actor {
+        flex: 0 1 auto !important;
+        max-width: 34% !important;
+      }
+
+      .bar-actions {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        overflow: visible !important;
+      }
+
+      .bar-actions-scroll {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        padding-bottom: 1px;
+      }
+
+      .bar-actions-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      .bar-actions-scroll > button,
+      .bar-actions-scroll > a {
+        min-width: 40px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 5px 9px !important;
+      }
+
+      #chatSettingsToolbarSlot {
+        flex: 0 0 auto !important;
+        min-width: auto !important;
+        overflow: visible !important;
+      }
+    }
+
+</style>
 </head>
 <body>
   <div id="chatSettingsPickers" class="chat-settings-pickers login-position">
@@ -1136,59 +1226,61 @@
         <span id="actor" class="actor"></span>
 
         <div class="bar-actions">
-          <a
-            id="memberPasswordButton"
-            class="hidden"
-            href="/chat/password/"
-            title="Change password"
-          >🔑</a>
+          <div class="bar-actions-scroll">
+            <a
+              id="memberPasswordButton"
+              class="hidden"
+              href="/chat/password/"
+              title="Change password"
+            >🔑</a>
 
-          <button
-            id="nicknameButton"
-            class="hidden"
-            type="button"
-            title="Change nickname"
-          >✎</button>
+            <button
+              id="nicknameButton"
+              class="hidden"
+              type="button"
+              title="Change nickname"
+            >✎</button>
 
-          <button
-            id="passkeyButton"
-            class="hidden"
-            type="button"
-            title="Passkeys"
-          >🔐</button>
+            <button
+              id="passkeyButton"
+              class="hidden"
+              type="button"
+              title="Passkeys"
+            >🔐</button>
 
-          <button
-            id="roomMembersButton"
-            type="button"
-            title="Room members"
-          >👥</button>
+            <button
+              id="roomMembersButton"
+              type="button"
+              title="Room members"
+            >👥</button>
 
-          <button
-            id="searchToggleButton"
-            type="button"
-            title="Search"
-            aria-expanded="false"
-          >🔎</button>
+            <button
+              id="searchToggleButton"
+              type="button"
+              title="Search"
+              aria-expanded="false"
+            >🔎</button>
 
-          <button id="notifyButton" type="button">🔔</button>
+            <button id="notifyButton" type="button">🔔</button>
+
+            <button id="refreshButton" type="button">↻</button>
+
+            <button
+              id="logoutButton"
+              type="button"
+              title="Logout"
+              aria-label="Logout"
+            >🚪</button>
+
+            <a
+              id="backButton"
+              href="/"
+              title="Back"
+              aria-label="Back"
+            >↩</a>
+          </div>
 
           <span id="chatSettingsToolbarSlot"></span>
-
-          <button id="refreshButton" type="button">↻</button>
-
-          <button
-            id="logoutButton"
-            type="button"
-            title="Logout"
-            aria-label="Logout"
-          >🚪</button>
-
-          <a
-            id="backButton"
-            href="/"
-            title="Back"
-            aria-label="Back"
-          >↩</a>
         </div>
       </header>
 
