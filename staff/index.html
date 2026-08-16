@@ -783,6 +783,18 @@
       </div>
 
       <div
+        class="row"
+        style="margin-top:10px"
+      >
+        <button
+          id="passkeyLoginButton"
+          type="button"
+        >
+          Login with passkey
+        </button>
+      </div>
+
+      <div
         id="loginStatus"
         class="status"
       ></div>
@@ -867,6 +879,55 @@
 
         <div
           id="passwordStatus"
+          class="status"
+        ></div>
+      </section>
+
+
+      <section class="panel">
+        <h2 id="passkeyTitle">Passkeys</h2>
+
+        <p
+          id="passkeyLead"
+          class="small"
+        >
+          Register and manage passkeys for this Staff account.
+        </p>
+
+        <div
+          id="passkeyList"
+          style="display:grid;gap:8px;margin-top:12px"
+        ></div>
+
+        <div
+          class="row"
+          style="margin-top:14px"
+        >
+          <input
+            id="passkeyCurrentPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Current password"
+          >
+
+          <button
+            id="passkeyVerifyButton"
+            type="button"
+          >
+            Verify password
+          </button>
+
+          <button
+            id="passkeyRegisterButton"
+            type="button"
+            class="hidden"
+          >
+            Register passkey
+          </button>
+        </div>
+
+        <div
+          id="passkeyStatus"
           class="status"
         ></div>
       </section>
@@ -1498,7 +1559,14 @@ let wkLoaded = false;
     const supabase =
       createClient(
         SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            experimental: {
+              passkey: true
+            }
+          }
+        }
       );
 
 const loadingPanel =
@@ -1534,6 +1602,46 @@ const staffIdInput =
     const loginStatus =
       document.getElementById(
         "loginStatus"
+      );
+
+    const passkeyLoginButton =
+      document.getElementById(
+        "passkeyLoginButton"
+      );
+
+    const passkeyTitle =
+      document.getElementById(
+        "passkeyTitle"
+      );
+
+    const passkeyLead =
+      document.getElementById(
+        "passkeyLead"
+      );
+
+    const passkeyList =
+      document.getElementById(
+        "passkeyList"
+      );
+
+    const passkeyCurrentPassword =
+      document.getElementById(
+        "passkeyCurrentPassword"
+      );
+
+    const passkeyVerifyButton =
+      document.getElementById(
+        "passkeyVerifyButton"
+      );
+
+    const passkeyRegisterButton =
+      document.getElementById(
+        "passkeyRegisterButton"
+      );
+
+    const passkeyStatus =
+      document.getElementById(
+        "passkeyStatus"
       );
 
     const logoutButton =
@@ -5438,6 +5546,19 @@ async function loadWkApplications() {
 
   loadImages();
   startChatUnreadPolling();
+
+  resetStaffPasskeyRegistration();
+  applyStaffPasskeyText();
+
+  loadStaffPasskeys()
+    .catch(
+      (error) => {
+        console.warn(
+          "Passkey list failed:",
+          error
+        );
+      }
+    );
 }
 
     function showLoading() {
@@ -5454,6 +5575,529 @@ async function loadWkApplications() {
   );
 }
     
+    function staffPasskeyText() {
+      const lang =
+        typeof getCurrentLanguage === "function"
+          ? getCurrentLanguage()
+          : "en";
+
+      const all = {
+        ko: {
+          login: "패스키로 로그인",
+          title: "패스키",
+          lead: "이 Staff 계정의 패스키를 등록하고 관리합니다.",
+          current: "현재 비밀번호",
+          verify: "비밀번호 확인",
+          verified: "확인 완료",
+          register: "패스키 등록",
+          none: "등록된 패스키가 없습니다.",
+          delete: "삭제",
+          deleteConfirm: "이 패스키를 삭제할까요?",
+          loading: "패스키를 불러오는 중…",
+          ready: "확인이 완료되었습니다. ‘패스키 등록’을 직접 눌러 계속하세요.",
+          registering: "기기에서 패스키 등록을 승인해 주세요.",
+          registered: "패스키를 등록했습니다.",
+          deleted: "패스키를 삭제했습니다.",
+          wrong: "현재 비밀번호가 올바르지 않습니다.",
+          failed: "패스키 작업에 실패했습니다.",
+          loginWorking: "패스키 인증을 기다리는 중…",
+          denied: "이 패스키는 활성 Staff 계정이 아닙니다.",
+          cancelled: "패스키 인증이 취소되었거나 기기에서 허용되지 않았습니다."
+        },
+        en: {
+          login: "Login with passkey",
+          title: "Passkeys",
+          lead: "Register and manage passkeys for this Staff account.",
+          current: "Current password",
+          verify: "Verify password",
+          verified: "Verified",
+          register: "Register passkey",
+          none: "No passkeys are registered.",
+          delete: "Delete",
+          deleteConfirm: "Delete this passkey?",
+          loading: "Loading passkeys…",
+          ready: "Verification complete. Press “Register passkey” to continue.",
+          registering: "Approve passkey registration on your device.",
+          registered: "Passkey registered.",
+          deleted: "Passkey deleted.",
+          wrong: "The current password is incorrect.",
+          failed: "Passkey operation failed.",
+          loginWorking: "Waiting for passkey authentication…",
+          denied: "This passkey is not an active Staff account.",
+          cancelled: "Passkey authentication was cancelled or not allowed by the device."
+        },
+        ja: {
+          login: "パスキーでログイン",
+          title: "パスキー",
+          lead: "このStaffアカウントのパスキーを登録・管理します。",
+          current: "現在のパスワード",
+          verify: "パスワード確認",
+          verified: "確認済み",
+          register: "パスキーを登録",
+          none: "登録されたパスキーはありません。",
+          delete: "削除",
+          deleteConfirm: "このパスキーを削除しますか？",
+          loading: "パスキーを読み込んでいます…",
+          ready: "確認が完了しました。「パスキーを登録」を直接押してください。",
+          registering: "端末でパスキー登録を承認してください。",
+          registered: "パスキーを登録しました。",
+          deleted: "パスキーを削除しました。",
+          wrong: "現在のパスワードが正しくありません。",
+          failed: "パスキー操作に失敗しました。",
+          loginWorking: "パスキー認証を待っています…",
+          denied: "このパスキーは有効なStaffアカウントではありません。",
+          cancelled: "パスキー認証がキャンセルされたか、端末で許可されませんでした。"
+        },
+        ru: {
+          login: "Войти с ключом доступа",
+          title: "Ключи доступа",
+          lead: "Регистрация и управление ключами доступа этой учётной записи Staff.",
+          current: "Текущий пароль",
+          verify: "Проверить пароль",
+          verified: "Подтверждено",
+          register: "Зарегистрировать ключ",
+          none: "Ключи доступа не зарегистрированы.",
+          delete: "Удалить",
+          deleteConfirm: "Удалить этот ключ доступа?",
+          loading: "Загрузка ключей доступа…",
+          ready: "Проверка завершена. Нажмите «Зарегистрировать ключ».",
+          registering: "Подтвердите регистрацию ключа на устройстве.",
+          registered: "Ключ доступа зарегистрирован.",
+          deleted: "Ключ доступа удалён.",
+          wrong: "Текущий пароль неверен.",
+          failed: "Операция с ключом доступа не выполнена.",
+          loginWorking: "Ожидание подтверждения ключа доступа…",
+          denied: "Этот ключ доступа не принадлежит активной учётной записи Staff.",
+          cancelled: "Аутентификация ключом доступа отменена или не разрешена устройством."
+        }
+      };
+
+      return all[lang] || all.en;
+    }
+
+
+    function applyStaffPasskeyText() {
+      const t = staffPasskeyText();
+
+      passkeyLoginButton.textContent =
+        t.login;
+
+      passkeyTitle.textContent =
+        t.title;
+
+      passkeyLead.textContent =
+        t.lead;
+
+      passkeyCurrentPassword.placeholder =
+        t.current;
+
+      if (
+        passkeyRegisterButton.classList.contains(
+          "hidden"
+        )
+      ) {
+        passkeyVerifyButton.textContent =
+          t.verify;
+      }
+
+      passkeyRegisterButton.textContent =
+        t.register;
+    }
+
+
+    function resetStaffPasskeyRegistration() {
+      passkeyCurrentPassword.value =
+        "";
+
+      passkeyCurrentPassword.disabled =
+        false;
+
+      passkeyVerifyButton.disabled =
+        false;
+
+      passkeyVerifyButton.textContent =
+        staffPasskeyText().verify;
+
+      passkeyRegisterButton.disabled =
+        false;
+
+      passkeyRegisterButton.classList.add(
+        "hidden"
+      );
+    }
+
+
+    async function loadStaffPasskeys() {
+      const t = staffPasskeyText();
+
+      setStatus(
+        passkeyStatus,
+        t.loading
+      );
+
+      const {
+        data,
+        error
+      } =
+        await supabase.auth
+          .passkey
+          .list();
+
+      if (error) {
+        throw error;
+      }
+
+      const items =
+        Array.isArray(data)
+          ? data
+          : [];
+
+      passkeyList.replaceChildren();
+
+      if (!items.length) {
+        const empty =
+          document.createElement(
+            "div"
+          );
+
+        empty.className =
+          "small";
+
+        empty.textContent =
+          t.none;
+
+        passkeyList.appendChild(
+          empty
+        );
+      }
+
+      for (const item of items) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "row";
+
+        row.style.padding =
+          "9px 10px";
+
+        row.style.border =
+          "1px solid var(--border)";
+
+        row.style.borderRadius =
+          "10px";
+
+        const info =
+          document.createElement(
+            "div"
+          );
+
+        info.style.flex =
+          "1";
+
+        info.textContent =
+          item.friendly_name ||
+          "Passkey";
+
+        const remove =
+          document.createElement(
+            "button"
+          );
+
+        remove.type =
+          "button";
+
+        remove.textContent =
+          t.delete;
+
+        remove.addEventListener(
+          "click",
+          async () => {
+            if (
+              !confirm(
+                staffPasskeyText()
+                  .deleteConfirm
+              )
+            ) {
+              return;
+            }
+
+            remove.disabled =
+              true;
+
+            try {
+              const {
+                error:
+                  deleteError
+              } =
+                await supabase.auth
+                  .passkey
+                  .delete({
+                    passkeyId:
+                      item.id
+                  });
+
+              if (deleteError) {
+                throw deleteError;
+              }
+
+              await loadStaffPasskeys();
+
+              setStatus(
+                passkeyStatus,
+                staffPasskeyText()
+                  .deleted
+              );
+            } catch (error) {
+              console.error(error);
+
+              setStatus(
+                passkeyStatus,
+                error?.message ||
+                  staffPasskeyText()
+                    .failed,
+                true
+              );
+            } finally {
+              remove.disabled =
+                false;
+            }
+          }
+        );
+
+        row.append(
+          info,
+          remove
+        );
+
+        passkeyList.appendChild(
+          row
+        );
+      }
+
+      clearStatus(
+        passkeyStatus
+      );
+    }
+
+
+    async function staffPasskeyLogin() {
+      const t = staffPasskeyText();
+
+      passkeyLoginButton.disabled =
+        true;
+
+      loginButton.disabled =
+        true;
+
+      setStatus(
+        loginStatus,
+        t.loginWorking
+      );
+
+      try {
+        const {
+          data,
+          error
+        } =
+          await supabase.auth
+            .signInWithPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        const user =
+          data?.user;
+
+        const account =
+          await verifyStaff(
+            user
+          );
+
+        if (!account) {
+          await supabase.auth
+            .signOut({
+              scope: "local"
+            });
+
+          throw new Error(
+            t.denied
+          );
+        }
+
+        clearStatus(
+          loginStatus
+        );
+
+        showStaff(
+          account,
+          user
+        );
+
+        await loadStaffPasskeys();
+      } catch (error) {
+        console.error(error);
+
+        const message =
+          error?.name ===
+            "NotAllowedError"
+            ? t.cancelled
+            : (
+                error?.message ||
+                t.failed
+              );
+
+        setStatus(
+          loginStatus,
+          message,
+          true
+        );
+      } finally {
+        passkeyLoginButton.disabled =
+          false;
+
+        loginButton.disabled =
+          false;
+      }
+    }
+
+
+    async function verifyStaffPasswordForPasskey() {
+      const t = staffPasskeyText();
+      const password =
+        passkeyCurrentPassword.value;
+
+      if (!password) {
+        setStatus(
+          passkeyStatus,
+          t.wrong,
+          true
+        );
+
+        return;
+      }
+
+      passkeyVerifyButton.disabled =
+        true;
+
+      passkeyCurrentPassword.disabled =
+        true;
+
+      try {
+        const {
+          data: {
+            session
+          }
+        } =
+          await supabase.auth
+            .getSession();
+
+        const email =
+          session?.user?.email;
+
+        if (!email) {
+          throw new Error(
+            "NO_AUTH_SESSION"
+          );
+        }
+
+        const {
+          error
+        } =
+          await supabase.auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+        if (error) {
+          throw error;
+        }
+
+        passkeyCurrentPassword.value =
+          "";
+
+        passkeyVerifyButton.textContent =
+          t.verified;
+
+        passkeyRegisterButton.classList.remove(
+          "hidden"
+        );
+
+        setStatus(
+          passkeyStatus,
+          t.ready
+        );
+      } catch (error) {
+        console.error(error);
+
+        resetStaffPasskeyRegistration();
+
+        setStatus(
+          passkeyStatus,
+          t.wrong,
+          true
+        );
+      }
+    }
+
+
+    async function registerStaffPasskey() {
+      const t = staffPasskeyText();
+
+      passkeyRegisterButton.disabled =
+        true;
+
+      setStatus(
+        passkeyStatus,
+        t.registering
+      );
+
+      try {
+        const {
+          error
+        } =
+          await supabase.auth
+            .registerPasskey();
+
+        if (error) {
+          throw error;
+        }
+
+        resetStaffPasskeyRegistration();
+
+        await loadStaffPasskeys();
+
+        setStatus(
+          passkeyStatus,
+          t.registered
+        );
+      } catch (error) {
+        console.error(error);
+
+        resetStaffPasskeyRegistration();
+
+        const message =
+          error?.name ===
+            "NotAllowedError"
+            ? t.cancelled
+            : (
+                error?.message ||
+                t.failed
+              );
+
+        setStatus(
+          passkeyStatus,
+          message,
+          true
+        );
+      }
+    }
+
+
     async function verifyStaff(
       user
     ) {
@@ -5691,6 +6335,40 @@ const internalEmail =
     );
 
 
+    passkeyLoginButton
+      .addEventListener(
+        "click",
+        staffPasskeyLogin
+      );
+
+    passkeyVerifyButton
+      .addEventListener(
+        "click",
+        verifyStaffPasswordForPasskey
+      );
+
+    passkeyRegisterButton
+      .addEventListener(
+        "click",
+        registerStaffPasskey
+      );
+
+    passkeyCurrentPassword
+      .addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key === "Enter" &&
+            !event.isComposing &&
+            !passkeyVerifyButton.disabled
+          ) {
+            event.preventDefault();
+            verifyStaffPasswordForPasskey();
+          }
+        }
+      );
+
+
     logoutButton.addEventListener(
       "click",
       async () => {
@@ -5817,6 +6495,24 @@ setTranslatedStatus(
         }
       );
 
+
+    window.addEventListener(
+      "s967languagechange",
+      () => {
+        applyStaffPasskeyText();
+
+        if (
+          !staffArea.classList.contains(
+            "hidden"
+          )
+        ) {
+          loadStaffPasskeys()
+            .catch(() => {});
+        }
+      }
+    );
+
+    applyStaffPasskeyText();
 
     applyStaffInquiryLanguage();
 
