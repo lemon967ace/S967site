@@ -86,7 +86,10 @@ export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText 
     const coordinate = `(${building.x}, ${building.y})`;
     const coordinateSize = measureText(coordinate, fontSize);
     const lineHeight = measureText("가", fontSize).height;
-    if (coordinateSize.height + lineHeight <= availableHeight) {
+    if (
+  zoom > 0.8 &&
+  coordinateSize.height + lineHeight <= availableHeight
+) {
       const name = truncateToFit(building.name, fontSize, availableWidth, lineHeight, measureText);
       const detail = `${name.text}\n${coordinate}`;
       if (name.text && fits(detail, fontSize, availableWidth, availableHeight, measureText)) return { mode: "detail", text: detail, fontPixelSize: fontSize, wasTruncated: name.wasTruncated };
