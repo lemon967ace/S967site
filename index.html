@@ -182,7 +182,8 @@
 
     .staff-link,
     .map-link,
-    .chat-link {
+    .chat-link,
+    .survey-link {
       width:
         var(
           --corner-control-size,
@@ -224,7 +225,8 @@
 
     .staff-link:hover,
     .map-link:hover,
-    .chat-link:hover {
+    .chat-link:hover,
+    .survey-link:hover {
       border-color:
         var(--border-hover);
     }
@@ -2484,6 +2486,17 @@
       🏰
     </a>
 
+    <a
+      class="survey-link"
+      id="surveyLink"
+      href="/survey/"
+      aria-label="Special Survey"
+      title="Special Survey"
+      hidden
+    >
+      📋
+    </a>
+
   </div>
 
 
@@ -2932,6 +2945,90 @@
       }
     );
 
+  </script>
+
+
+  <!-- =======================================================
+       SPECIAL SURVEY LINK
+       활성 특수설문이 있을 때만 좌측 상단에 📋 표시
+       ======================================================= -->
+
+  <script>
+    (() => {
+      const surveyLink =
+        document.getElementById(
+          "surveyLink"
+        );
+
+      if (!surveyLink) {
+        return;
+      }
+
+      const SURVEY_API =
+        "https://dpmjwsnqkuzetyvfcmfr.supabase.co/functions/v1/special-survey-public";
+
+      const SUPABASE_KEY =
+        "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+
+      async function updateSurveyLink() {
+        try {
+          const response =
+            await fetch(
+              SURVEY_API,
+              {
+                cache: "no-store",
+                headers: {
+                  apikey:
+                    SUPABASE_KEY,
+                },
+              }
+            );
+
+          if (!response.ok) {
+            throw new Error(
+              "SURVEY_CHECK_FAILED"
+            );
+          }
+
+          const result =
+            await response.json();
+
+          const surveys =
+            Array.isArray(
+              result?.surveys
+            )
+              ? result.surveys
+              : [];
+
+          surveyLink.hidden =
+            surveys.length === 0;
+        } catch (error) {
+          console.error(
+            "Special survey check failed:",
+            error
+          );
+
+          surveyLink.hidden =
+            true;
+        }
+      }
+
+      updateSurveyLink();
+
+      window.addEventListener(
+        "pageshow",
+        updateSurveyLink
+      );
+
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (!document.hidden) {
+            updateSurveyLink();
+          }
+        }
+      );
+    })();
   </script>
 
 
