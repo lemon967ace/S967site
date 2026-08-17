@@ -2198,21 +2198,27 @@
       <textarea id="specialSurveyDescJa" placeholder="日本語"></textarea><textarea id="specialSurveyDescRu" placeholder="Русский"></textarea>
     </div>
 
-    <h3>응답 정책</h3>
+    <h3>응답 방식</h3>
     <div class="group-buy-form-row">
       <select id="specialSurveyIdentity">
+        <option value="nickname" selected>게임 닉네임 · 동일 닉네임 재제출 시 기존 응답 수정</option>
         <option value="anonymous">익명</option>
-        <option value="nickname">게임 닉네임 입력</option>
-        <option value="account">로그인한 S967 계정</option>
       </select>
-      <select id="specialSurveyDuplicate">
-        <option value="one_per_browser">브라우저당 1회</option>
-        <option value="one_per_identity">응답자당 1회</option>
-        <option value="allow_multiple">복수 응답 허용</option>
-      </select>
+
+      <div id="specialSurveyDuplicateWrap">
+        <select id="specialSurveyDuplicate">
+          <option value="one_per_browser">익명 · 브라우저당 1회</option>
+          <option value="allow_multiple">익명 · 복수 응답 허용</option>
+        </select>
+      </div>
+
       <input id="specialSurveyStarts" type="datetime-local">
       <input id="specialSurveyEnds" type="datetime-local">
     </div>
+
+    <p class="small">
+      닉네임 방식은 WK와 같이 같은 설문에서 완전히 동일한 닉네임으로 다시 제출하면 새 응답을 만들지 않고 기존 응답을 수정합니다.
+    </p>
 
     <div class="row" style="margin-top:18px">
       <h3 style="margin:0;">질문</h3>
