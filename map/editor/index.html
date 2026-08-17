@@ -5978,49 +5978,9 @@
         );
     }
 
-    function screenPointToScene(
-      screenX,
-      screenY,
-      viewportState
-    ) {
-      return {
-        x:
-          viewportState.sceneCenterX +
-          (
-            screenX -
-            viewportState.width / 2
-          ) /
-            viewportState.zoom,
-        y:
-          viewportState.sceneCenterY +
-          (
-            screenY -
-            viewportState.height / 2
-          ) /
-            viewportState.zoom,
-      };
-    }
-
-    async function nextAnimationFrames(
-      count = 2
-    ) {
-      for (
-        let index = 0;
-        index < count;
-        index += 1
-      ) {
-        await new Promise(
-          resolve =>
-            requestAnimationFrame(
-              resolve
-            )
-        );
-      }
-    }
-
     async function downloadMapImageRegion(
       selection,
-      selectionLayerRect
+      clientSelection
     ) {
       const labels =
         mapImageExportText();
@@ -6037,258 +5997,78 @@
         return;
       }
 
-      const sourceCanvas =
-        mapRenderer?.canvas;
-
-      const viewportState =
-        mapRenderer?.getState?.();
-
       if (
-        !sourceCanvas ||
-        !viewportState
+        !mapRenderer
+          ?.clientToScene ||
+        !mapRenderer
+          ?.renderSceneRegionToBlob
       ) {
         window.alert(
           labels.failed
         );
         return;
       }
-
-      const sourceRect =
-        sourceCanvas
-          .getBoundingClientRect();
-
-      const layerRect =
-        selectionLayerRect;
-
-      if (
-        !layerRect ||
-        sourceRect.width <= 0 ||
-        sourceRect.height <= 0
-      ) {
-        window.alert(
-          labels.failed
-        );
-        return;
-      }
-
-      /*
-        Convert the user's rectangle from the CURRENT viewport
-        into scene coordinates. The export is then rendered from
-        those scene coordinates at zoom=3, independently of the
-        zoom level that was visible when the user selected it.
-      */
-      const canvasLeft =
-        selection.left +
-        layerRect.left -
-        sourceRect.left;
-
-      const canvasTop =
-        selection.top +
-        layerRect.top -
-        sourceRect.top;
-
-      const canvasRight =
-        canvasLeft +
-        selection.width;
-
-      const canvasBottom =
-        canvasTop +
-        selection.height;
-
-      const sceneA =
-        screenPointToScene(
-          canvasLeft,
-          canvasTop,
-          viewportState
-        );
-
-      const sceneB =
-        screenPointToScene(
-          canvasRight,
-          canvasBottom,
-          viewportState
-        );
-
-      const sceneLeft =
-        Math.min(
-          sceneA.x,
-          sceneB.x
-        );
-
-      const sceneRight =
-        Math.max(
-          sceneA.x,
-          sceneB.x
-        );
-
-      const sceneTop =
-        Math.min(
-          sceneA.y,
-          sceneB.y
-        );
-
-      const sceneBottom =
-        Math.max(
-          sceneA.y,
-          sceneB.y
-        );
-
-      const sceneWidth =
-        Math.max(
-          1,
-          sceneRight -
-          sceneLeft
-        );
-
-      const sceneHeight =
-        Math.max(
-          1,
-          sceneBottom -
-          sceneTop
-        );
-
-      /*
-        At zoom=3, one scene pixel occupies three output pixels.
-        Therefore buildings, grid and label-layout decisions are
-        the same ones the renderer uses at 300% zoom.
-      */
-      const outputWidth =
-        Math.ceil(
-          sceneWidth *
-          MAP_IMAGE_EXPORT_ZOOM
-        );
-
-      const outputHeight =
-        Math.ceil(
-          sceneHeight *
-          MAP_IMAGE_EXPORT_ZOOM
-        );
-
-      if (
-        outputWidth >
-          MAP_IMAGE_EXPORT_MAX_WIDTH ||
-        outputHeight >
-          MAP_IMAGE_EXPORT_MAX_HEIGHT
-      ) {
-        window.alert(
-          labels.tooLarge
-        );
-        return;
-      }
-
-      const exportHost =
-        document.createElement(
-          "div"
-        );
-
-      Object.assign(
-        exportHost.style,
-        {
-          position:
-            "fixed",
-          left:
-            "-100000px",
-          top:
-            "-100000px",
-          width:
-            `${outputWidth}px`,
-          height:
-            `${outputHeight}px`,
-          overflow:
-            "hidden",
-          pointerEvents:
-            "none",
-          visibility:
-            "hidden",
-        }
-      );
-
-      document.body.append(
-        exportHost
-      );
-
-      let exportRenderer =
-        null;
 
       try {
         /*
-          A SECOND renderer is used so the user's visible map,
-          current zoom, selection and document view are not changed.
-          DPR is forced to 1 because outputWidth/outputHeight are
-          already the requested final PNG pixel dimensions.
+          Convert the exact rectangle the user dragged on the LIVE
+          map canvas to scene coordinates. No overlay/canvas offset
+          guessing is involved.
         */
-        exportRenderer =
-          createMapRenderer({
-            host:
-              exportHost,
-            engine:
-              PNSMapEngine,
-            buildingFilter,
-            editableFixed:
-              false,
-            editorHost:
-              null,
-            devicePixelRatioOverride:
-              1,
-          });
+        const a =
+          mapRenderer
+            .clientToScene(
+              clientSelection.left,
+              clientSelection.top
+            );
 
-        exportRenderer
-          .setSceneViewport({
-            sceneCenterX:
-              (
-                sceneLeft +
-                sceneRight
-              ) /
-              2,
-            sceneCenterY:
-              (
-                sceneTop +
-                sceneBottom
-              ) /
-              2,
-            zoom:
-              MAP_IMAGE_EXPORT_ZOOM,
-          });
+        const b =
+          mapRenderer
+            .clientToScene(
+              clientSelection.right,
+              clientSelection.bottom
+            );
 
-        /*
-          Keep search/duplicate map markings when they are present,
-          but omit interactive hover/selection/previews.
-        */
-        exportRenderer
-          .setHighlightedBuildingIds?.(
-            mapRenderer
-              .getHighlightedBuildingIds?.() ??
-              []
+        const sceneLeft =
+          Math.min(
+            a.sceneX,
+            b.sceneX
           );
 
-        exportRenderer
-          .setDuplicateHighlightedBuildingIds?.(
-            mapRenderer
-              .getDuplicateHighlightedBuildingIds?.() ??
-              []
+        const sceneRight =
+          Math.max(
+            a.sceneX,
+            b.sceneX
           );
 
-        await nextAnimationFrames(
-          3
-        );
-
-        const exportCanvas =
-          exportRenderer.canvas;
-
-        const blob =
-          await new Promise(
-            resolve =>
-              exportCanvas.toBlob(
-                resolve,
-                "image/png"
-              )
+        const sceneTop =
+          Math.min(
+            a.sceneY,
+            b.sceneY
           );
 
-        if (!blob) {
-          throw new Error(
-            "PNG_BLOB_FAILED"
+        const sceneBottom =
+          Math.max(
+            a.sceneY,
+            b.sceneY
           );
-        }
+
+        const result =
+          await mapRenderer
+            .renderSceneRegionToBlob({
+              sceneLeft,
+              sceneTop,
+              sceneRight,
+              sceneBottom,
+              zoom:
+                MAP_IMAGE_EXPORT_ZOOM,
+              maxWidth:
+                MAP_IMAGE_EXPORT_MAX_WIDTH,
+              maxHeight:
+                MAP_IMAGE_EXPORT_MAX_HEIGHT,
+              mimeType:
+                "image/png",
+            });
 
         const safeTitle =
           String(
@@ -6317,7 +6097,7 @@
 
         const url =
           URL.createObjectURL(
-            blob
+            result.blob
           );
 
         link.href =
@@ -6346,14 +6126,19 @@
           error
         );
 
+        if (
+          error?.code ===
+            "EXPORT_TOO_LARGE"
+        ) {
+          window.alert(
+            labels.tooLarge
+          );
+          return;
+        }
+
         window.alert(
           labels.failed
         );
-      } finally {
-        exportRenderer
-          ?.destroy?.();
-
-        exportHost.remove();
       }
     }
 
@@ -6373,10 +6158,18 @@
         mapImageExportPointerId =
           event.pointerId;
 
-        mapImageExportStart =
+        const localPoint =
           imageExportPoint(
             event
           );
+
+        mapImageExportStart = {
+          ...localPoint,
+          clientX:
+            event.clientX,
+          clientY:
+            event.clientY,
+        };
 
         mapImageExportLayer
           .setPointerCapture?.(
@@ -6433,28 +6226,45 @@
 
         event.preventDefault();
 
+        const endPoint =
+          imageExportPoint(
+            event
+          );
+
         const selection =
           imageExportSelectionRect(
             mapImageExportStart,
-            imageExportPoint(
-              event
-            )
+            endPoint
           );
 
-        /*
-          Capture the overlay rectangle before hiding it.
-          Once the overlay is display:none, getBoundingClientRect()
-          becomes zero-sized and the crop origin would be wrong.
-        */
-        const selectionLayerRect =
-          mapImageExportLayer
-            .getBoundingClientRect();
+        const clientSelection = {
+          left:
+            Math.min(
+              mapImageExportStart.clientX,
+              event.clientX
+            ),
+          top:
+            Math.min(
+              mapImageExportStart.clientY,
+              event.clientY
+            ),
+          right:
+            Math.max(
+              mapImageExportStart.clientX,
+              event.clientX
+            ),
+          bottom:
+            Math.max(
+              mapImageExportStart.clientY,
+              event.clientY
+            ),
+        };
 
         cancelMapImageExport();
 
         await downloadMapImageRegion(
           selection,
-          selectionLayerRect
+          clientSelection
         );
       }
     );
