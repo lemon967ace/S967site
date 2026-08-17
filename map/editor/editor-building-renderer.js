@@ -2,7 +2,6 @@ import { diamondVertices } from "./editor-coordinates.js";
 import { calculateOccupiedCells } from "./editor-occupancy.js";
 
 export const MINIMUM_FONT_PIXEL_SIZE = 10;
-export const MAXIMUM_FONT_PIXEL_SIZE = 48;
 const HORIZONTAL_MARGIN_RATIO = 0.84;
 const VERTICAL_MARGIN_RATIO = 0.78;
 const ELLIPSIS = "…";
@@ -31,16 +30,9 @@ export function buildingRenderGeometry(building) {
 export function orderBuildingsForDraw(buildings, selectedBuildingId = null) {
   const normal = [], selected = [];
   buildings.forEach((building, documentIndex) => {
-    const entry = {
-      building,
-      documentIndex,
-      priority: Number.isInteger(building.priority) ? building.priority : 0,
-    };
+    const entry = { building, documentIndex };
     (building.id === selectedBuildingId ? selected : normal).push(entry);
   });
-  const sort = (a, b) => a.priority - b.priority || a.documentIndex - b.documentIndex;
-  normal.sort(sort);
-  selected.sort(sort);
   return [...normal, ...selected].map(entry => entry.building);
 }
 
@@ -63,19 +55,35 @@ export function hitTestBuildings(sceneX, sceneY, geometries, selectedBuildingId 
 }
 
 export function preferredFontSizeForZoom(zoom) {
-  return Math.max(MINIMUM_FONT_PIXEL_SIZE, Math.min(MAXIMUM_FONT_PIXEL_SIZE, Math.round(10 + 4.5 * zoom)));
+  const numericZoom =
+    Math.max(
+      0,
+      Number(zoom) || 0
+    );
+
+  /*
+    Keep the 100% label size close to the previous value (~15px),
+    but continue scaling proportionally all the way to 400%.
+
+    100% -> 15 px
+    200% -> 30 px
+    300% -> 45 px
+    400% -> 60 px
+  */
+  return Math.max(
+    MINIMUM_FONT_PIXEL_SIZE,
+    Math.round(
+      15 * numericZoom
+    )
+  );
 }
 
 export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText }) {
-  if (zoom < 0.4) return { mode: "hidden" };
   const availableWidth = bounds.width * zoom * HORIZONTAL_MARGIN_RATIO;
   const availableHeight = bounds.height * zoom * VERTICAL_MARGIN_RATIO;
   const preferred = preferredFontSizeForZoom(zoom);
   for (let fontSize = preferred; fontSize >= MINIMUM_FONT_PIXEL_SIZE; fontSize--) {
-    const coordinate =
-  zoom >= 0.8
-    ? `(${building.x}, ${building.y})`
-    : "";
+    const coordinate = `(${building.x}, ${building.y})`;
     const coordinateSize = measureText(coordinate, fontSize);
     const lineHeight = measureText("가", fontSize).height;
     if (coordinateSize.height + lineHeight <= availableHeight) {
