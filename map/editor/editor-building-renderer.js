@@ -2,7 +2,7 @@ import { diamondVertices } from "./editor-coordinates.js";
 import { calculateOccupiedCells } from "./editor-occupancy.js";
 
 export const MINIMUM_FONT_PIXEL_SIZE = 10;
-export const MAXIMUM_FONT_PIXEL_SIZE = 24;
+export const MAXIMUM_FONT_PIXEL_SIZE = 48;
 const HORIZONTAL_MARGIN_RATIO = 0.84;
 const VERTICAL_MARGIN_RATIO = 0.78;
 const ELLIPSIS = "…";
