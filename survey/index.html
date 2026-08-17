@@ -20,6 +20,10 @@
     src="/theme.js"
     defer
   ></script>
+  <script
+    src="/language.js"
+    defer
+  ></script>
 
   <style>
     * {
@@ -93,15 +97,38 @@
       color: #c33;
     }
 
-    .lang {
+    /* LANGUAGE / THEME */
+    .top-pickers {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1100;
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 12px;
+      align-items: flex-end;
+      gap: 8px;
     }
 
-    .lang button.is-active {
-      font-weight: 800;
+    .top-pickers .language-picker,
+    .top-pickers .theme-picker {
+      position: relative;
+      top: auto;
+      right: auto;
+      bottom: auto;
+      left: auto;
+    }
+
+    .top-pickers .language-menu,
+    .top-pickers .theme-menu {
+      top: auto;
+      bottom: calc(100% + 8px);
+      right: 0;
+    }
+
+    @media (max-width: 480px) {
+      .top-pickers {
+        right: 14px;
+        bottom: max(14px, env(safe-area-inset-bottom));
+      }
     }
 
     button,
@@ -215,33 +242,75 @@
 </head>
 
 <body>
-  <div class="theme-picker" data-theme-picker>
-    <button
-      class="theme-button"
-      type="button"
-      data-theme-button
-      aria-label="Theme"
-      aria-haspopup="true"
-      aria-expanded="false"
-    >◐</button>
+  <div class="top-pickers">
+    <div
+      class="language-picker"
+      data-language-picker
+    >
+      <button
+        class="language-button"
+        type="button"
+        data-language-button
+        aria-label="Language"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        🌐
+      </button>
+
+      <div
+        class="language-menu"
+        data-language-menu
+        role="menu"
+      >
+        <button type="button" data-language-choice="ko" role="menuitemradio">
+          한국어
+        </button>
+        <button type="button" data-language-choice="en" role="menuitemradio">
+          English
+        </button>
+        <button type="button" data-language-choice="ja" role="menuitemradio">
+          日本語
+        </button>
+        <button type="button" data-language-choice="ru" role="menuitemradio">
+          Русский
+        </button>
+      </div>
+    </div>
 
     <div
-      class="theme-menu"
-      data-theme-menu
-      role="menu"
+      class="theme-picker"
+      data-theme-picker
     >
-      <button type="button" data-theme-choice="system" role="menuitemradio">
-        <span class="theme-choice-icon">◐</span>
-        <span>System</span>
+      <button
+        class="theme-button"
+        type="button"
+        data-theme-button
+        aria-label="Theme"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        ◐
       </button>
-      <button type="button" data-theme-choice="light" role="menuitemradio">
-        <span class="theme-choice-icon">☀</span>
-        <span>Light</span>
-      </button>
-      <button type="button" data-theme-choice="dark" role="menuitemradio">
-        <span class="theme-choice-icon">☾</span>
-        <span>Dark</span>
-      </button>
+
+      <div
+        class="theme-menu"
+        data-theme-menu
+        role="menu"
+      >
+        <button type="button" data-theme-choice="system" role="menuitemradio">
+          <span class="theme-choice-icon">◐</span>
+          <span data-i18n="themeSystem">System</span>
+        </button>
+        <button type="button" data-theme-choice="light" role="menuitemradio">
+          <span class="theme-choice-icon">☀</span>
+          <span data-i18n="themeLight">Light</span>
+        </button>
+        <button type="button" data-theme-choice="dark" role="menuitemradio">
+          <span class="theme-choice-icon">☾</span>
+          <span data-i18n="themeDark">Dark</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -261,11 +330,6 @@
       >
         현재 진행 중인 설문을 확인하세요.
       </div>
-
-      <div
-        id="languageButtons"
-        class="lang"
-      ></div>
 
       <div
         id="topActions"
@@ -375,9 +439,6 @@
 
     const pageDescription =
       $("pageDescription");
-
-    const languageButtons =
-      $("languageButtons");
 
     const topActions =
       $("topActions");
@@ -583,13 +644,6 @@
       },
     };
 
-    const LANGUAGE_NAMES = {
-      ko: "한국어",
-      en: "English",
-      ja: "日本語",
-      ru: "Русский",
-    };
-
     let survey =
       null;
 
@@ -600,48 +654,24 @@
       "ko";
 
     function preferredLanguage() {
-      const stored =
-        localStorage.getItem(
-          "s967-language",
-        );
+      const current =
+        typeof getCurrentLanguage === "function"
+          ? getCurrentLanguage()
+          : (
+              localStorage.getItem("s967_language") ||
+              document.documentElement.lang ||
+              navigator.language ||
+              "ko"
+            );
 
-      if (
-        UI[stored]
-      ) {
-        return stored;
-      }
+      const normalized =
+        String(current)
+          .toLowerCase()
+          .split("-")[0];
 
-      const browser =
-        String(
-          navigator.language ??
-          "",
-        ).toLowerCase();
-
-      if (
-        browser.startsWith(
-          "ja",
-        )
-      ) {
-        return "ja";
-      }
-
-      if (
-        browser.startsWith(
-          "ru",
-        )
-      ) {
-        return "ru";
-      }
-
-      if (
-        browser.startsWith(
-          "en",
-        )
-      ) {
-        return "en";
-      }
-
-      return "ko";
+      return UI[normalized]
+        ? normalized
+        : "ko";
     }
 
     function textFor(
@@ -723,10 +753,6 @@
         .classList
         .add("hidden");
 
-      languageButtons
-        .classList
-        .add("hidden");
-
       topActions
         .classList
         .add("hidden");
@@ -739,78 +765,7 @@
         .remove("error");
     }
 
-    function renderLanguages() {
-      languageButtons
-        .replaceChildren();
 
-      const enabled =
-        survey
-          ?.enabled_languages ??
-        [
-          survey
-            ?.default_language ??
-          "ko",
-        ];
-
-      if (
-        enabled.length <=
-        1
-      ) {
-        languageButtons
-          .classList
-          .add("hidden");
-
-        return;
-      }
-
-      languageButtons
-        .classList
-        .remove("hidden");
-
-      for (
-        const code
-        of enabled
-      ) {
-        const button =
-          document.createElement(
-            "button",
-          );
-
-        button.type =
-          "button";
-
-        button.textContent =
-          LANGUAGE_NAMES[
-            code
-          ] ??
-          code;
-
-        button
-          .classList
-          .toggle(
-            "is-active",
-            code === lang,
-          );
-
-        button.onclick =
-          () => {
-            lang =
-              code;
-
-            localStorage.setItem(
-              "s967-language",
-              code,
-            );
-
-            renderSurvey();
-          };
-
-        languageButtons
-          .append(
-            button,
-          );
-      }
-    }
 
     function renderList() {
       clearView();
@@ -827,22 +782,6 @@
 
       pageDescription.textContent =
         ui.intro;
-
-      languageButtons.replaceChildren();
-      languageButtons.classList.remove("hidden");
-
-      for (const code of ["ko","en","ja","ru"]) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = LANGUAGE_NAMES[code];
-        button.classList.toggle("is-active", code === lang);
-        button.onclick = () => {
-          lang = code;
-          localStorage.setItem("s967-language", code);
-          renderList();
-        };
-        languageButtons.append(button);
-      }
 
       if (
         !surveys.length
@@ -961,8 +900,6 @@
 
       submitButton.textContent =
         ui.submit;
-
-      renderLanguages();
 
       questionsHost
         .replaceChildren();
@@ -1599,6 +1536,54 @@
 
       return result;
     }
+
+    function syncLanguageFromGlobalPicker() {
+      const next =
+        preferredLanguage();
+
+      if (survey) {
+        const enabled =
+          survey.enabled_languages ??
+          [survey.default_language ?? "ko"];
+
+        lang = enabled.includes(next)
+          ? next
+          : (survey.default_language ?? "ko");
+
+        renderSurvey();
+        return;
+      }
+
+      lang = next;
+      renderList();
+    }
+
+    window.addEventListener(
+      "s967languagechange",
+      syncLanguageFromGlobalPicker,
+    );
+
+    window.addEventListener(
+      "languagechange",
+      syncLanguageFromGlobalPicker,
+    );
+
+    const languageObserver =
+      new MutationObserver(() => {
+        const next = preferredLanguage();
+
+        if (next !== lang) {
+          syncLanguageFromGlobalPicker();
+        }
+      });
+
+    languageObserver.observe(
+      document.documentElement,
+      {
+        attributes: true,
+        attributeFilter: ["lang"],
+      },
+    );
 
     async function bootstrap() {
       const query =
