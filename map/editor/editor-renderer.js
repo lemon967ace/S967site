@@ -108,6 +108,10 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   let highlightedBuildingIds = new Set();
   let duplicateHighlightedBuildingIds = new Set();
   let exportingImage = false;
+
+  let imageExportSelection = null;
+  let imageExportDrawing = null;
+
   const interaction = new BuildingInteractionState();
   let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
@@ -134,6 +138,257 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     frame = requestAnimationFrame(() => { frame = 0; draw(); });
   }
 
+  function normalizedGridSelection(
+    startCell,
+    endCell
+  ) {
+    if (
+      !startCell ||
+      !endCell
+    ) {
+      return null;
+    }
+
+    return {
+      minX:
+        Math.min(
+          startCell[0],
+          endCell[0]
+        ),
+      maxX:
+        Math.max(
+          startCell[0],
+          endCell[0]
+        ),
+      minY:
+        Math.min(
+          startCell[1],
+          endCell[1]
+        ),
+      maxY:
+        Math.max(
+          startCell[1],
+          endCell[1]
+        ),
+    };
+  }
+
+  function gridSelectionSceneBounds(
+    selection
+  ) {
+    if (!selection) {
+      return null;
+    }
+
+    /*
+      Use the real diamond geometry of the four extreme cells.
+      The resulting axis-aligned scene rectangle is guaranteed to
+      contain the complete selected map range.
+    */
+    const cornerCells = [
+      [
+        selection.minX,
+        selection.minY,
+      ],
+      [
+        selection.maxX,
+        selection.minY,
+      ],
+      [
+        selection.maxX,
+        selection.maxY,
+      ],
+      [
+        selection.minX,
+        selection.maxY,
+      ],
+    ];
+
+    const vertices =
+      cornerCells.flatMap(
+        cell =>
+          diamondVertices(
+            ...cell
+          )
+      );
+
+    return {
+      left:
+        Math.min(
+          ...vertices.map(
+            point =>
+              point[0]
+          )
+        ),
+      right:
+        Math.max(
+          ...vertices.map(
+            point =>
+              point[0]
+          )
+        ),
+      top:
+        Math.min(
+          ...vertices.map(
+            point =>
+              point[1]
+          )
+        ),
+      bottom:
+        Math.max(
+          ...vertices.map(
+            point =>
+              point[1]
+          )
+        ),
+    };
+  }
+
+  function convexHull(
+    points
+  ) {
+    const unique =
+      [
+        ...new Map(
+          points.map(
+            point => [
+              `${point[0]},${point[1]}`,
+              point,
+            ]
+          )
+        ).values(),
+      ];
+
+    if (
+      unique.length <= 2
+    ) {
+      return unique;
+    }
+
+    const sorted =
+      unique.sort(
+        (a, b) =>
+          a[0] - b[0] ||
+          a[1] - b[1]
+      );
+
+    const cross =
+      (o, a, b) =>
+        (
+          a[0] - o[0]
+        ) *
+          (
+            b[1] - o[1]
+          ) -
+        (
+          a[1] - o[1]
+        ) *
+          (
+            b[0] - o[0]
+          );
+
+    const lower = [];
+
+    for (
+      const point
+      of sorted
+    ) {
+      while (
+        lower.length >= 2 &&
+        cross(
+          lower[
+            lower.length - 2
+          ],
+          lower[
+            lower.length - 1
+          ],
+          point
+        ) <= 0
+      ) {
+        lower.pop();
+      }
+
+      lower.push(
+        point
+      );
+    }
+
+    const upper = [];
+
+    for (
+      let index =
+        sorted.length - 1;
+      index >= 0;
+      index -= 1
+    ) {
+      const point =
+        sorted[index];
+
+      while (
+        upper.length >= 2 &&
+        cross(
+          upper[
+            upper.length - 2
+          ],
+          upper[
+            upper.length - 1
+          ],
+          point
+        ) <= 0
+      ) {
+        upper.pop();
+      }
+
+      upper.push(
+        point
+      );
+    }
+
+    lower.pop();
+    upper.pop();
+
+    return [
+      ...lower,
+      ...upper,
+    ];
+  }
+
+  function gridSelectionSceneHull(
+    selection
+  ) {
+    if (!selection) {
+      return [];
+    }
+
+    const cornerCells = [
+      [
+        selection.minX,
+        selection.minY,
+      ],
+      [
+        selection.maxX,
+        selection.minY,
+      ],
+      [
+        selection.maxX,
+        selection.maxY,
+      ],
+      [
+        selection.minX,
+        selection.maxY,
+      ],
+    ];
+
+    return convexHull(
+      cornerCells.flatMap(
+        cell =>
+          diamondVertices(
+            ...cell
+          )
+      )
+    );
+  }
+
   function draw() {
     const dpr = state.devicePixelRatio;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -154,6 +409,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     drawPreview();
     drawBulkDeletePreview();
     drawRangeErasePreview();
+    drawImageExportSelectionPreview();
   }
 
   function drawRanges() {
@@ -410,6 +666,82 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       context.strokeStyle = "rgb(255,100,100)"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke();
     }
   }
+
+  function drawImageExportSelectionPreview() {
+    if (
+      exportingImage ||
+      !imageExportSelection?.active ||
+      !imageExportSelection.startCell
+    ) {
+      return;
+    }
+
+    const endCell =
+      imageExportSelection.hoverCell ??
+      imageExportSelection.startCell;
+
+    const selection =
+      normalizedGridSelection(
+        imageExportSelection.startCell,
+        endCell
+      );
+
+    const hull =
+      gridSelectionSceneHull(
+        selection
+      );
+
+    if (
+      hull.length < 3
+    ) {
+      return;
+    }
+
+    context.save();
+
+    context.beginPath();
+
+    hull.forEach(
+      (
+        point,
+        index
+      ) => {
+        const screen =
+          sceneToScreen(
+            ...point,
+            state
+          );
+
+        if (index === 0) {
+          context.moveTo(
+            ...screen
+          );
+        } else {
+          context.lineTo(
+            ...screen
+          );
+        }
+      }
+    );
+
+    context.closePath();
+
+    context.fillStyle =
+      "rgba(124,58,237,.16)";
+    context.fill();
+
+    context.strokeStyle =
+      "#7C3AED";
+    context.lineWidth =
+      Math.max(
+        2,
+        2.4 * state.zoom
+      );
+    context.stroke();
+
+    context.restore();
+  }
+
 
   function addGridLine(axis, boundary) {
     const [start, end] = gridLineSceneEndpoints(axis, boundary);
@@ -978,6 +1310,44 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       !touch &&
       !mousePan &&
       event.button === 0 &&
+      imageExportSelection?.active
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        if (
+          !imageExportSelection.startCell
+        ) {
+          imageExportSelection.startCell =
+            [...cell];
+
+          imageExportSelection.hoverCell =
+            [...cell];
+        } else {
+          imageExportSelection.hoverCell =
+            [...cell];
+        }
+
+        imageExportDrawing =
+          event.pointerId;
+
+        canvas.setPointerCapture(
+          event.pointerId
+        );
+
+        event.preventDefault();
+        invalidate();
+      }
+
+      return;
+    }
+
+
+    if (
+      !touch &&
+      !mousePan &&
+      event.button === 0 &&
       bulkDeleteController?.getState().mode ===
         "bulkDelete"
     ) {
@@ -1214,6 +1584,24 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     }
 
     if (
+      imageExportDrawing ===
+        event.pointerId &&
+      imageExportSelection?.active
+    ) {
+      const cell =
+        eventCell(event);
+
+      if (cell) {
+        imageExportSelection.hoverCell =
+          [...cell];
+      }
+
+      invalidate();
+      return;
+    }
+
+
+    if (
       bulkDrawing ===
       event.pointerId
     ) {
@@ -1365,6 +1753,94 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       }
     }
 
+    if (
+      imageExportDrawing ===
+        event.pointerId &&
+      imageExportSelection?.active
+    ) {
+      const cell =
+        eventCell(event);
+
+      imageExportDrawing =
+        null;
+
+      if (
+        canvas.hasPointerCapture(
+          event.pointerId
+        )
+      ) {
+        canvas.releasePointerCapture(
+          event.pointerId
+        );
+      }
+
+      if (
+        cell &&
+        imageExportSelection.startCell
+      ) {
+        imageExportSelection.hoverCell =
+          [...cell];
+
+        const sameAsStart =
+          cell[0] ===
+            imageExportSelection
+              .startCell[0] &&
+          cell[1] ===
+            imageExportSelection
+              .startCell[1];
+
+        /*
+          Exactly like ordinary map range creation:
+          first click selects the start cell;
+          second click selects the end cell.
+        */
+        if (!sameAsStart) {
+          const selection =
+            normalizedGridSelection(
+              imageExportSelection
+                .startCell,
+              cell
+            );
+
+          const sceneBounds =
+            gridSelectionSceneBounds(
+              selection
+            );
+
+          const onComplete =
+            imageExportSelection
+              .onComplete;
+
+          imageExportSelection =
+            null;
+
+          canvas.style.cursor =
+            spacePressed
+              ? "grab"
+              : "default";
+
+          invalidate();
+
+          try {
+            onComplete?.({
+              ...selection,
+              sceneBounds,
+            });
+          } catch (error) {
+            console.error(
+              "Image export selection callback failed.",
+              error
+            );
+          }
+
+          return;
+        }
+      }
+
+      invalidate();
+      return;
+    }
+
     if (bulkDrawing === event.pointerId) {
       const cell = eventCell(event); if (cell) bulkDeleteController.update(cell);
       const summary = bulkDeleteController.summary(); bulkDrawing = null;
@@ -1464,6 +1940,16 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       }
     }
 
+    if (imageExportDrawing === event.pointerId) {
+      imageExportDrawing = null;
+      if (imageExportSelection?.active) {
+        imageExportSelection.hoverCell =
+          imageExportSelection.startCell
+            ? [...imageExportSelection.startCell]
+            : null;
+      }
+      invalidate();
+    }
     if (bulkDrawing === event.pointerId) { bulkDrawing = null; bulkDeleteController?.cancel(); onBulkDeleteStateChange(bulkDeleteController?.getState()); }
     if (eraseDrawing === event.pointerId) { eraseDrawing = null; rangeEraseController?.cancel(); onRangeEraseStateChange(rangeEraseController?.getState()); }
     if (rangeDrawing === event.pointerId) { rangeDrawing = null; rangeController?.cancel(); onRangeStateChange(rangeController?.getState()); }
@@ -1513,6 +1999,86 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   return {
     canvas,
     getState: () => ({ ...state }),
+    startImageExportSelection({
+      onComplete = null,
+    } = {}) {
+      imageExportDrawing =
+        null;
+
+      imageExportSelection = {
+        active:
+          true,
+        startCell:
+          null,
+        hoverCell:
+          null,
+        onComplete:
+          typeof onComplete ===
+            "function"
+            ? onComplete
+            : null,
+      };
+
+      canvas.style.cursor =
+        "crosshair";
+
+      invalidate();
+
+      return true;
+    },
+    cancelImageExportSelection() {
+      const wasActive =
+        Boolean(
+          imageExportSelection?.active
+        );
+
+      imageExportDrawing =
+        null;
+      imageExportSelection =
+        null;
+
+      canvas.style.cursor =
+        spacePressed
+          ? "grab"
+          : "default";
+
+      invalidate();
+
+      return wasActive;
+    },
+    getImageExportSelectionState() {
+      if (!imageExportSelection) {
+        return {
+          active:
+            false,
+          startCell:
+            null,
+          hoverCell:
+            null,
+        };
+      }
+
+      return {
+        active:
+          Boolean(
+            imageExportSelection.active
+          ),
+        startCell:
+          imageExportSelection.startCell
+            ? [
+                ...imageExportSelection
+                  .startCell,
+              ]
+            : null,
+        hoverCell:
+          imageExportSelection.hoverCell
+            ? [
+                ...imageExportSelection
+                  .hoverCell,
+              ]
+            : null,
+      };
+    },
     clientToScene(clientX, clientY) {
       const rect =
         canvas.getBoundingClientRect();
