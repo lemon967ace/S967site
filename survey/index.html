@@ -1546,9 +1546,7 @@
           survey.enabled_languages ??
           [survey.default_language ?? "ko"];
 
-        lang = enabled.includes(next)
-          ? next
-          : (survey.default_language ?? "ko");
+        lang = next;
 
         renderSurvey();
         return;
@@ -1660,16 +1658,7 @@
             preferredLanguage();
 
           lang =
-            (
-              survey
-                .enabled_languages ??
-              []
-            ).includes(
-              preferred,
-            )
-              ? preferred
-              : survey
-                  .default_language;
+            preferred;
 
           renderSurvey();
 
