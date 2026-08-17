@@ -3532,6 +3532,9 @@
     let buildingSearchHighlightedIds =
       new Set();
 
+    let duplicateBuildingHighlightedIds =
+      new Set();
+
     function userBuildingsForNameCheck() {
       return PNSMapEngine
         .getDocument()
@@ -3596,6 +3599,33 @@
 
       mapRenderer
         ?.setHighlightedBuildingIds?.(
+          []
+        );
+    }
+
+    function applyDuplicateBuildingHighlight(
+      buildings
+    ) {
+      duplicateBuildingHighlightedIds =
+        new Set(
+          buildings.map(
+            building =>
+              building.id
+          )
+        );
+
+      mapRenderer
+        ?.setDuplicateHighlightedBuildingIds?.(
+          duplicateBuildingHighlightedIds
+        );
+    }
+
+    function clearDuplicateBuildingHighlight() {
+      duplicateBuildingHighlightedIds =
+        new Set();
+
+      mapRenderer
+        ?.setDuplicateHighlightedBuildingIds?.(
           []
         );
     }
@@ -3720,30 +3750,51 @@
         );
       }
 
-      const duplicates =
+      const duplicateEntries =
         [...counts.entries()]
           .filter(
             ([name, count]) =>
               count > 1 &&
               !OUTPOST_DUPLICATE_EXEMPT_NAMES
                 .has(name)
-          )
-          .map(
-            ([name, count]) =>
-              `${name} × ${count}`
           );
 
-      const matchingBuildings =
+      const duplicates =
+        duplicateEntries.map(
+          ([name, count]) =>
+            `${name} × ${count}`
+        );
+
+      /*
+        Name-list check itself does not use the normal yellow
+        search highlight. Only duplicate buildings are marked,
+        using the dedicated red duplicate highlight.
+      */
+      const duplicateNames =
+        new Set(
+          duplicateEntries.map(
+            ([name]) =>
+              name
+          )
+        );
+
+      const duplicateBuildings =
         buildings.filter(
           building =>
-            requestedNames.includes(
+            duplicateNames.has(
               building.name
             )
         );
 
-      applyBuildingSearchHighlight(
-        matchingBuildings
-      );
+      if (
+        duplicateBuildings.length
+      ) {
+        applyDuplicateBuildingHighlight(
+          duplicateBuildings
+        );
+      } else {
+        clearDuplicateBuildingHighlight();
+      }
 
       const messages = [];
 
@@ -5199,6 +5250,10 @@
 
       mapRenderer.setHighlightedBuildingIds?.(
         buildingSearchHighlightedIds
+      );
+
+      mapRenderer.setDuplicateHighlightedBuildingIds?.(
+        duplicateBuildingHighlightedIds
       );
 
       minimap = createMinimap({ host: minimapHost, renderer: mapRenderer, getDocument: () => PNSMapEngine.getDocument() });
