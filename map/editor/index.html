@@ -3979,59 +3979,64 @@
       shortcut.textContent =
         searchLabels.shortcut;
 
-      const listHeading =
-        document.createElement(
-          "h4"
-        );
-
-      listHeading.textContent =
-        searchLabels.listTitle;
-
-      listHeading.style.cssText =
-        "margin:.8rem 0 .35rem";
-
-      const listInput =
-        document.createElement(
-          "textarea"
-        );
-
-      listInput.placeholder =
-        searchLabels.listPlaceholder;
-
-      listInput.spellcheck =
-        false;
-
-      listInput.style.cssText =
-        "width:100%;min-height:7rem;resize:vertical";
-
-      const listCheckButton =
-        document.createElement(
-          "button"
-        );
-
-      listCheckButton.type =
-        "button";
-
-      listCheckButton.textContent =
-        searchLabels.listCheck;
-
-      listCheckButton.style.cssText =
-        "margin-top:.4rem";
-
-      listCheckButton.onclick =
-        () =>
-          checkBuildingNameList(
-            listInput.value
-          );
-
       searchSection.append(
         searchHeading,
         searchRow,
-        shortcut,
-        listHeading,
-        listInput,
-        listCheckButton
+        shortcut
       );
+
+      if (!readOnly) {
+        const listHeading =
+          document.createElement(
+            "h4"
+          );
+
+        listHeading.textContent =
+          searchLabels.listTitle;
+
+        listHeading.style.cssText =
+          "margin:.8rem 0 .35rem";
+
+        const listInput =
+          document.createElement(
+            "textarea"
+          );
+
+        listInput.placeholder =
+          searchLabels.listPlaceholder;
+
+        listInput.spellcheck =
+          false;
+
+        listInput.style.cssText =
+          "width:100%;min-height:7rem;resize:vertical";
+
+        const listCheckButton =
+          document.createElement(
+            "button"
+          );
+
+        listCheckButton.type =
+          "button";
+
+        listCheckButton.textContent =
+          searchLabels.listCheck;
+
+        listCheckButton.style.cssText =
+          "margin-top:.4rem";
+
+        listCheckButton.onclick =
+          () =>
+            checkBuildingNameList(
+              listInput.value
+            );
+
+        searchSection.append(
+          listHeading,
+          listInput,
+          listCheckButton
+        );
+      }
 
       targetHost.append(
         searchSection
@@ -5756,74 +5761,81 @@
       const baseBottom = 14;
       const gap = 8;
 
+      /*
+        The building filter/search panel and the shared zoom controls
+        both live near the bottom edge. On narrow viewports their
+        rectangles can overlap horizontally.
+
+        Start from the normal position, then move only the filter
+        panel upward when the two controls would collide.
+        Language/theme menus are deliberately NOT part of this
+        collision calculation.
+      */
       sharedFilterPanel.style.setProperty(
         "--shared-filter-bottom",
         `${baseBottom}px`
       );
 
       if (
-        !topPickers ||
-        getComputedStyle(topPickers).display === "none"
+        !sharedZoomPanel
       ) {
         return;
       }
 
-      /*
-        실제 화면 좌표로 충돌을 검사한다.
-        기존 코드는 picker 자체 높이만 더했기 때문에
-        모바일 브라우저의 visual viewport 변화나
-        위로 펼쳐지는 언어/테마 메뉴까지 반영하지 못했다.
-      */
-      const filterRect =
-        sharedFilterPanel.getBoundingClientRect();
-
-      const obstacles = [
-        topPickers,
-        ...topPickers.querySelectorAll(
-          ".language-menu, .theme-menu"
-        ),
-      ]
-        .filter(element => {
-          const style = getComputedStyle(element);
-          const rect = element.getBoundingClientRect();
-
-          return (
-            style.display !== "none" &&
-            style.visibility !== "hidden" &&
-            rect.width > 0 &&
-            rect.height > 0
-          );
-        })
-        .map(element =>
-          element.getBoundingClientRect()
+      const zoomStyle =
+        getComputedStyle(
+          sharedZoomPanel
         );
 
-      let requiredBottom = baseBottom;
+      const zoomRect =
+        sharedZoomPanel
+          .getBoundingClientRect();
 
-      for (const obstacleRect of obstacles) {
-        const horizontalOverlap =
-          filterRect.left <
-            obstacleRect.right + gap &&
-          filterRect.right >
-            obstacleRect.left - gap;
+      if (
+        zoomStyle.display === "none" ||
+        zoomStyle.visibility === "hidden" ||
+        zoomRect.width <= 0 ||
+        zoomRect.height <= 0
+      ) {
+        return;
+      }
 
-        if (!horizontalOverlap) {
-          continue;
-        }
+      const filterRect =
+        sharedFilterPanel
+          .getBoundingClientRect();
 
-        const viewportHeight =
-          window.visualViewport?.height ??
-          window.innerHeight;
+      const horizontalOverlap =
+        filterRect.left <
+          zoomRect.right + gap &&
+        filterRect.right >
+          zoomRect.left - gap;
 
-        requiredBottom = Math.max(
-          requiredBottom,
+      const verticalOverlap =
+        filterRect.top <
+          zoomRect.bottom + gap &&
+        filterRect.bottom >
+          zoomRect.top - gap;
+
+      if (
+        !horizontalOverlap ||
+        !verticalOverlap
+      ) {
+        return;
+      }
+
+      const viewportHeight =
+        window.visualViewport?.height ??
+        window.innerHeight;
+
+      const requiredBottom =
+        Math.max(
+          baseBottom,
           Math.ceil(
             viewportHeight -
-            obstacleRect.top +
+            zoomRect.top +
             gap
           )
         );
-      }
 
       sharedFilterPanel.style.setProperty(
         "--shared-filter-bottom",
@@ -5857,27 +5869,6 @@
       { passive: true }
     );
 
-    if (topPickers && "MutationObserver" in window) {
-      const sharedPickerObserver =
-        new MutationObserver(
-          scheduleSharedLayout
-        );
-
-      sharedPickerObserver.observe(
-        topPickers,
-        {
-          attributes: true,
-          subtree: true,
-          attributeFilter: [
-            "class",
-            "style",
-            "aria-expanded",
-            "hidden",
-          ],
-        }
-      );
-    }
-
     sharedUiToggle?.addEventListener(
       "click",
       () => {
@@ -5910,9 +5901,9 @@
         );
       }
 
-      if (topPickers) {
+      if (sharedZoomPanel) {
         sharedControlsObserver.observe(
-          topPickers
+          sharedZoomPanel
         );
       }
     }
