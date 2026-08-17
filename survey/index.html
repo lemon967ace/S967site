@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+  <meta
+    name="robots"
+    content="noindex,nofollow"
+  >
+  <title>S967 Special Survey</title>
+
+  <link
+    rel="stylesheet"
+    href="/theme.css"
+  >
+  <script
+    src="/theme.js"
+    defer
+  ></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: var(--text);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans KR",
+        sans-serif;
+    }
+
+    .shell {
+      width:
+        min(
+          760px,
+          calc(100% - 24px)
+        );
+      margin: 0 auto;
+      padding: 38px 0 80px;
+    }
+
+    .card {
+      margin-top: 16px;
+      padding: 22px;
+      border:
+        1px solid
+        var(--border);
+      border-radius: 18px;
+      background:
+        var(--surface);
+      box-shadow:
+        var(--shadow);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size:
+        clamp(
+          1.8rem,
+          6vw,
+          2.8rem
+        );
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .status {
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+
+    .status.error {
+      color: #c33;
+    }
+
+    .lang {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .lang button.is-active {
+      font-weight: 800;
+    }
+
+    button,
+    .button-link,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button,
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 15px;
+      border:
+        1px solid
+        var(--border);
+      border-radius: 10px;
+      background:
+        var(--surface-hover);
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button.primary,
+    .button-link.primary {
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border:
+        1px solid
+        var(--border);
+      border-radius: 10px;
+      background:
+        var(--surface-strong);
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .survey-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .survey-card {
+      padding: 16px;
+      border:
+        1px solid
+        var(--border);
+      border-radius: 14px;
+      background:
+        var(--surface-strong);
+    }
+
+    .survey-card h2 {
+      margin-bottom: 6px;
+      font-size: 1.12rem;
+    }
+
+    .survey-card .actions {
+      margin-top: 12px;
+    }
+
+    .question {
+      margin-top: 18px;
+    }
+
+    .required::after {
+      content: " *";
+      color: #d44;
+    }
+
+    .choice {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      margin: 8px 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 22px;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="card">
+      <div class="muted">
+        S967 · Special Survey
+      </div>
+
+      <h1 id="pageTitle">
+        특수설문
+      </h1>
+
+      <div
+        id="pageDescription"
+        class="muted"
+      >
+        현재 진행 중인 설문을 확인하세요.
+      </div>
+
+      <div
+        id="languageButtons"
+        class="lang hidden"
+      ></div>
+
+      <div
+        id="topActions"
+        class="top-actions hidden"
+      >
+        <a
+          id="backToList"
+          class="button-link"
+          href="/survey/"
+        >
+          ← 설문 목록
+        </a>
+      </div>
+
+      <div
+        id="availability"
+        class="status"
+      >
+        불러오는 중…
+      </div>
+    </section>
+
+    <section
+      id="surveyListPanel"
+      class="card hidden"
+    >
+      <div
+        id="surveyList"
+        class="survey-list"
+      ></div>
+    </section>
+
+    <form
+      id="surveyForm"
+      class="card hidden"
+    >
+      <div
+        id="identityBox"
+        class="question hidden"
+      >
+        <h2 id="identityTitle">
+          응답자
+        </h2>
+
+        <input
+          id="nicknameInput"
+          class="hidden"
+          type="text"
+          maxlength="100"
+          autocomplete="nickname"
+        >
+
+        <div
+          id="accountState"
+          class="muted hidden"
+        ></div>
+      </div>
+
+      <div id="questions"></div>
+
+      <div class="actions">
+        <button
+          id="submitButton"
+          class="primary"
+          type="submit"
+        >
+          제출
+        </button>
+      </div>
+
+      <div
+        id="submitStatus"
+        class="status"
+      ></div>
+    </form>
+  </main>
+
+  <script type="module">
+    import {
+      createClient,
+    } from
+      "https://esm.sh/@supabase/supabase-js@2.111.0";
+
+    const SUPABASE_URL =
+      "https://dpmjwsnqkuzetyvfcmfr.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_S-CDrk7cLi3zQl8LvHZl5w_6wFtiom9";
+
+    const API =
+      `${SUPABASE_URL}/functions/v1/special-survey-public`;
+
+    const supabase =
+      createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
+
+    const $ =
+      (id) =>
+        document.getElementById(
+          id,
+        );
+
+    const pageTitle =
+      $("pageTitle");
+
+    const pageDescription =
+      $("pageDescription");
+
+    const languageButtons =
+      $("languageButtons");
+
+    const topActions =
+      $("topActions");
+
+    const backToList =
+      $("backToList");
+
+    const availability =
+      $("availability");
+
+    const surveyListPanel =
+      $("surveyListPanel");
+
+    const surveyList =
+      $("surveyList");
+
+    const form =
+      $("surveyForm");
+
+    const questionsHost =
+      $("questions");
+
+    const identityBox =
+      $("identityBox");
+
+    const identityTitle =
+      $("identityTitle");
+
+    const nicknameInput =
+      $("nicknameInput");
+
+    const accountState =
+      $("accountState");
+
+    const submitButton =
+      $("submitButton");
+
+    const submitStatus =
+      $("submitStatus");
+
+    const UI = {
+      ko: {
+        title: "특수설문",
+        intro:
+          "현재 진행 중인 설문을 확인하세요.",
+        loading:
+          "불러오는 중…",
+        none:
+          "현재 진행 중인 특수설문이 없습니다.",
+        open:
+          "응답하기",
+        list:
+          "설문 목록",
+        nickname:
+          "게임 닉네임",
+        account:
+          "로그인한 계정으로 응답합니다.",
+        accountMissing:
+          "로그인된 S967 계정이 필요합니다.",
+        submit:
+          "제출",
+        sending:
+          "제출 중…",
+        done:
+          "응답을 제출했습니다.",
+        already:
+          "이미 이 설문에 응답했습니다.",
+        required:
+          "필수 질문에 응답해 주세요.",
+        yes:
+          "예",
+        no:
+          "아니오",
+        failed:
+          "제출하지 못했습니다.",
+        loadFailed:
+          "설문을 불러오지 못했습니다.",
+      },
+
+      en: {
+        title:
+          "Special Surveys",
+        intro:
+          "Choose an active survey.",
+        loading:
+          "Loading…",
+        none:
+          "There are no active special surveys.",
+        open:
+          "Respond",
+        list:
+          "Survey list",
+        nickname:
+          "Game nickname",
+        account:
+          "You will respond using your signed-in account.",
+        accountMissing:
+          "A signed-in S967 account is required.",
+        submit:
+          "Submit",
+        sending:
+          "Submitting…",
+        done:
+          "Response submitted.",
+        already:
+          "You have already responded to this survey.",
+        required:
+          "Please answer the required questions.",
+        yes:
+          "Yes",
+        no:
+          "No",
+        failed:
+          "Could not submit.",
+        loadFailed:
+          "Could not load the survey.",
+      },
+
+      ja: {
+        title:
+          "特別アンケート",
+        intro:
+          "実施中のアンケートを選択してください。",
+        loading:
+          "読み込み中…",
+        none:
+          "現在実施中の特別アンケートはありません。",
+        open:
+          "回答する",
+        list:
+          "アンケート一覧",
+        nickname:
+          "ゲーム内ニックネーム",
+        account:
+          "ログイン中のアカウントで回答します。",
+        accountMissing:
+          "S967アカウントへのログインが必要です。",
+        submit:
+          "送信",
+        sending:
+          "送信中…",
+        done:
+          "回答を送信しました。",
+        already:
+          "このアンケートにはすでに回答済みです。",
+        required:
+          "必須項目に回答してください。",
+        yes:
+          "はい",
+        no:
+          "いいえ",
+        failed:
+          "送信できませんでした。",
+        loadFailed:
+          "アンケートを読み込めませんでした。",
+      },
+
+      ru: {
+        title:
+          "Специальные опросы",
+        intro:
+          "Выберите активный опрос.",
+        loading:
+          "Загрузка…",
+        none:
+          "Сейчас нет активных специальных опросов.",
+        open:
+          "Ответить",
+        list:
+          "Список опросов",
+        nickname:
+          "Игровой ник",
+        account:
+          "Ответ будет отправлен от имени текущей учётной записи.",
+        accountMissing:
+          "Необходимо войти в учётную запись S967.",
+        submit:
+          "Отправить",
+        sending:
+          "Отправка…",
+        done:
+          "Ответ отправлен.",
+        already:
+          "Вы уже отвечали на этот опрос.",
+        required:
+          "Ответьте на обязательные вопросы.",
+        yes:
+          "Да",
+        no:
+          "Нет",
+        failed:
+          "Не удалось отправить.",
+        loadFailed:
+          "Не удалось загрузить опрос.",
+      },
+    };
+
+    const LANGUAGE_NAMES = {
+      ko: "한국어",
+      en: "English",
+      ja: "日本語",
+      ru: "Русский",
+    };
+
+    let survey =
+      null;
+
+    let surveys =
+      [];
+
+    let lang =
+      "ko";
+
+    function preferredLanguage() {
+      const stored =
+        localStorage.getItem(
+          "s967-language",
+        );
+
+      if (
+        UI[stored]
+      ) {
+        return stored;
+      }
+
+      const browser =
+        String(
+          navigator.language ??
+          "",
+        ).toLowerCase();
+
+      if (
+        browser.startsWith(
+          "ja",
+        )
+      ) {
+        return "ja";
+      }
+
+      if (
+        browser.startsWith(
+          "ru",
+        )
+      ) {
+        return "ru";
+      }
+
+      if (
+        browser.startsWith(
+          "en",
+        )
+      ) {
+        return "en";
+      }
+
+      return "ko";
+    }
+
+    function textFor(
+      object,
+      surveyLike =
+        survey,
+    ) {
+      return String(
+        object?.[lang] ||
+        object?.[
+          surveyLike
+            ?.default_language
+        ] ||
+        Object.values(
+          object ?? {},
+        )[0] ||
+        "",
+      );
+    }
+
+    function clientKey() {
+      const key =
+        "s967-special-survey-client-key";
+
+      let value =
+        localStorage.getItem(
+          key,
+        );
+
+      if (!value) {
+        value =
+          crypto.randomUUID();
+
+        localStorage.setItem(
+          key,
+          value,
+        );
+      }
+
+      return value;
+    }
+
+    async function authToken() {
+      const mapToken =
+        sessionStorage.getItem(
+          "s967-map-session-token",
+        );
+
+      if (mapToken) {
+        return mapToken;
+      }
+
+      const {
+        data,
+      } =
+        await supabase.auth
+          .getSession();
+
+      return (
+        data?.session
+          ?.access_token ??
+        ""
+      );
+    }
+
+    function clearView() {
+      availability
+        .classList
+        .remove("error");
+
+      availability.textContent =
+        "";
+
+      surveyListPanel
+        .classList
+        .add("hidden");
+
+      form
+        .classList
+        .add("hidden");
+
+      languageButtons
+        .classList
+        .add("hidden");
+
+      topActions
+        .classList
+        .add("hidden");
+
+      submitStatus.textContent =
+        "";
+
+      submitStatus
+        .classList
+        .remove("error");
+    }
+
+    function renderLanguages() {
+      languageButtons
+        .replaceChildren();
+
+      const enabled =
+        survey
+          ?.enabled_languages ??
+        [
+          survey
+            ?.default_language ??
+          "ko",
+        ];
+
+      if (
+        enabled.length <=
+        1
+      ) {
+        languageButtons
+          .classList
+          .add("hidden");
+
+        return;
+      }
+
+      languageButtons
+        .classList
+        .remove("hidden");
+
+      for (
+        const code
+        of enabled
+      ) {
+        const button =
+          document.createElement(
+            "button",
+          );
+
+        button.type =
+          "button";
+
+        button.textContent =
+          LANGUAGE_NAMES[
+            code
+          ] ??
+          code;
+
+        button
+          .classList
+          .toggle(
+            "is-active",
+            code === lang,
+          );
+
+        button.onclick =
+          () => {
+            lang =
+              code;
+
+            renderSurvey();
+          };
+
+        languageButtons
+          .append(
+            button,
+          );
+      }
+    }
+
+    function renderList() {
+      clearView();
+
+      lang =
+        preferredLanguage();
+
+      const ui =
+        UI[lang] ??
+        UI.ko;
+
+      pageTitle.textContent =
+        ui.title;
+
+      pageDescription.textContent =
+        ui.intro;
+
+      if (
+        !surveys.length
+      ) {
+        availability.textContent =
+          ui.none;
+
+        return;
+      }
+
+      surveyList
+        .replaceChildren();
+
+      for (
+        const item
+        of surveys
+      ) {
+        const card =
+          document.createElement(
+            "article",
+          );
+
+        card.className =
+          "survey-card";
+
+        const title =
+          document.createElement(
+            "h2",
+          );
+
+        title.textContent =
+          textFor(
+            item.title,
+            item,
+          );
+
+        const description =
+          document.createElement(
+            "div",
+          );
+
+        description.className =
+          "muted";
+
+        description.textContent =
+          textFor(
+            item.description,
+            item,
+          );
+
+        const actions =
+          document.createElement(
+            "div",
+          );
+
+        actions.className =
+          "actions";
+
+        const link =
+          document.createElement(
+            "a",
+          );
+
+        link.className =
+          "button-link primary";
+
+        link.href =
+          `/survey/?s=${encodeURIComponent(
+            item.slug,
+          )}`;
+
+        link.textContent =
+          ui.open;
+
+        actions.append(link);
+
+        card.append(
+          title,
+          description,
+          actions,
+        );
+
+        surveyList
+          .append(card);
+      }
+
+      surveyListPanel
+        .classList
+        .remove("hidden");
+    }
+
+    function renderSurvey() {
+      clearView();
+
+      const ui =
+        UI[lang] ??
+        UI.ko;
+
+      pageTitle.textContent =
+        textFor(
+          survey.title,
+        ) ||
+        "S967 Special Survey";
+
+      pageDescription.textContent =
+        textFor(
+          survey.description,
+        );
+
+      backToList.textContent =
+        `← ${ui.list}`;
+
+      topActions
+        .classList
+        .remove("hidden");
+
+      submitButton.textContent =
+        ui.submit;
+
+      renderLanguages();
+
+      questionsHost
+        .replaceChildren();
+
+      identityBox
+        .classList
+        .toggle(
+          "hidden",
+          survey.identity_mode ===
+            "anonymous",
+        );
+
+      nicknameInput
+        .classList
+        .add("hidden");
+
+      accountState
+        .classList
+        .add("hidden");
+
+      if (
+        survey.identity_mode ===
+        "nickname"
+      ) {
+        identityTitle.textContent =
+          ui.nickname;
+
+        nicknameInput.placeholder =
+          ui.nickname;
+
+        nicknameInput
+          .classList
+          .remove("hidden");
+      } else if (
+        survey.identity_mode ===
+        "account"
+      ) {
+        identityTitle.textContent =
+          ui.account;
+
+        accountState.textContent =
+          ui.account;
+
+        accountState
+          .classList
+          .remove("hidden");
+      }
+
+      for (
+        const question
+        of survey.questions ??
+          []
+      ) {
+        const wrap =
+          document.createElement(
+            "section",
+          );
+
+        wrap.className =
+          "question";
+
+        const heading =
+          document.createElement(
+            "h2",
+          );
+
+        heading.textContent =
+          textFor(
+            question.label,
+          );
+
+        if (
+          question.required
+        ) {
+          heading
+            .classList
+            .add(
+              "required",
+            );
+        }
+
+        wrap.append(
+          heading,
+        );
+
+        let input;
+
+        if (
+          question.type ===
+          "short_text"
+        ) {
+          input =
+            document.createElement(
+              "input",
+            );
+
+          input.type =
+            "text";
+
+          input.maxLength =
+            500;
+        } else if (
+          question.type ===
+          "long_text"
+        ) {
+          input =
+            document.createElement(
+              "textarea",
+            );
+
+          input.maxLength =
+            10000;
+        } else if (
+          question.type ===
+          "number"
+        ) {
+          input =
+            document.createElement(
+              "input",
+            );
+
+          input.type =
+            "number";
+
+          if (
+            question.min !=
+            null
+          ) {
+            input.min =
+              question.min;
+          }
+
+          if (
+            question.max !=
+            null
+          ) {
+            input.max =
+              question.max;
+          }
+        } else if (
+          question.type ===
+          "yes_no"
+        ) {
+          input =
+            document.createElement(
+              "div",
+            );
+
+          for (
+            const [
+              value,
+              label,
+            ]
+            of [
+              [
+                "true",
+                ui.yes,
+              ],
+              [
+                "false",
+                ui.no,
+              ],
+            ]
+          ) {
+            const choice =
+              document.createElement(
+                "label",
+              );
+
+            choice.className =
+              "choice";
+
+            const radio =
+              document.createElement(
+                "input",
+              );
+
+            radio.type =
+              "radio";
+
+            radio.name =
+              question.id;
+
+            radio.value =
+              value;
+
+            choice.append(
+              radio,
+              document.createTextNode(
+                label,
+              ),
+            );
+
+            input.append(
+              choice,
+            );
+          }
+        } else {
+          input =
+            document.createElement(
+              "div",
+            );
+
+          for (
+            const option
+            of question.options ??
+              []
+          ) {
+            const choice =
+              document.createElement(
+                "label",
+              );
+
+            choice.className =
+              "choice";
+
+            const control =
+              document.createElement(
+                "input",
+              );
+
+            control.type =
+              question.type ===
+                "single_choice"
+                ? "radio"
+                : "checkbox";
+
+            control.name =
+              question.id;
+
+            control.value =
+              option.id;
+
+            choice.append(
+              control,
+              document.createTextNode(
+                textFor(
+                  option.label,
+                ),
+              ),
+            );
+
+            input.append(
+              choice,
+            );
+          }
+        }
+
+        input.dataset.qid =
+          question.id;
+
+        input.dataset.qtype =
+          question.type;
+
+        wrap.append(
+          input,
+        );
+
+        questionsHost
+          .append(
+            wrap,
+          );
+      }
+
+      form
+        .classList
+        .remove("hidden");
+    }
+
+    function answers() {
+      const result =
+        {};
+
+      for (
+        const question
+        of survey.questions ??
+          []
+      ) {
+        if (
+          question.type ===
+            "single_choice" ||
+          question.type ===
+            "yes_no"
+        ) {
+          const element =
+            form.querySelector(
+              `input[name="${CSS.escape(
+                question.id,
+              )}"]:checked`,
+            );
+
+          if (element) {
+            result[
+              question.id
+            ] =
+              question.type ===
+                "yes_no"
+                ? element.value ===
+                    "true"
+                : element.value;
+          }
+        } else if (
+          question.type ===
+          "multiple_choice"
+        ) {
+          result[
+            question.id
+          ] =
+            [
+              ...form
+                .querySelectorAll(
+                  `input[name="${CSS.escape(
+                    question.id,
+                  )}"]:checked`,
+                ),
+            ].map(
+              (element) =>
+                element.value,
+            );
+        } else {
+          const element =
+            form.querySelector(
+              `[data-qid="${CSS.escape(
+                question.id,
+              )}"]`,
+            );
+
+          if (
+            element?.value !==
+            ""
+          ) {
+            result[
+              question.id
+            ] =
+              question.type ===
+                "number"
+                ? Number(
+                    element.value,
+                  )
+                : element.value;
+          }
+        }
+
+        const value =
+          result[
+            question.id
+          ];
+
+        const empty =
+          value == null ||
+          value === "" ||
+          (
+            Array.isArray(
+              value,
+            ) &&
+            value.length ===
+              0
+          );
+
+        if (
+          question.required &&
+          empty
+        ) {
+          throw new Error(
+            "REQUIRED",
+          );
+        }
+      }
+
+      return result;
+    }
+
+    form.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const ui =
+          UI[lang] ??
+          UI.ko;
+
+        submitStatus
+          .classList
+          .remove(
+            "error",
+          );
+
+        let payload;
+
+        try {
+          payload = {
+            survey_id:
+              survey.id,
+            client_key:
+              clientKey(),
+            answers:
+              answers(),
+            nickname:
+              nicknameInput
+                .value
+                .trim(),
+          };
+        } catch {
+          submitStatus.textContent =
+            ui.required;
+
+          submitStatus
+            .classList
+            .add(
+              "error",
+            );
+
+          return;
+        }
+
+        const headers = {
+          "Content-Type":
+            "application/json",
+          apikey:
+            SUPABASE_KEY,
+        };
+
+        if (
+          survey.identity_mode ===
+          "account"
+        ) {
+          const token =
+            await authToken();
+
+          if (!token) {
+            submitStatus.textContent =
+              ui.accountMissing;
+
+            submitStatus
+              .classList
+              .add(
+                "error",
+              );
+
+            return;
+          }
+
+          headers.Authorization =
+            `Bearer ${token}`;
+        }
+
+        submitButton.disabled =
+          true;
+
+        submitStatus.textContent =
+          ui.sending;
+
+        try {
+          const response =
+            await fetch(
+              API,
+              {
+                method:
+                  "POST",
+                headers,
+                body:
+                  JSON.stringify(
+                    payload,
+                  ),
+              },
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(
+                () => ({}),
+              );
+
+          if (
+            !response.ok
+          ) {
+            throw Object.assign(
+              new Error(
+                result.error ||
+                `HTTP_${response.status}`,
+              ),
+              {
+                code:
+                  result.error,
+              },
+            );
+          }
+
+          form
+            .querySelectorAll(
+              "input,textarea,button",
+            )
+            .forEach(
+              (element) => {
+                element.disabled =
+                  true;
+              },
+            );
+
+          submitStatus.textContent =
+            ui.done;
+        } catch (
+          error
+        ) {
+          if (
+            error.code ===
+            "ALREADY_RESPONDED"
+          ) {
+            submitStatus.textContent =
+              ui.already;
+          } else if (
+            error.code ===
+            "ACCOUNT_LOGIN_REQUIRED"
+          ) {
+            submitStatus.textContent =
+              ui.accountMissing;
+          } else {
+            submitStatus.textContent =
+              ui.failed;
+          }
+
+          submitStatus
+            .classList
+            .add(
+              "error",
+            );
+        } finally {
+          if (
+            !form.querySelector(
+              "input:disabled,textarea:disabled",
+            )
+          ) {
+            submitButton.disabled =
+              false;
+          }
+        }
+      },
+    );
+
+    async function fetchJson(
+      url,
+    ) {
+      const response =
+        await fetch(
+          url,
+          {
+            headers: {
+              apikey:
+                SUPABASE_KEY,
+            },
+          },
+        );
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => ({}),
+          );
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          result.error ||
+          `HTTP_${response.status}`,
+        );
+      }
+
+      return result;
+    }
+
+    async function bootstrap() {
+      const query =
+        new URLSearchParams(
+          location.search,
+        );
+
+      const slug =
+        String(
+          query.get("s") ??
+          "",
+        ).trim();
+
+      const id =
+        String(
+          query.get("id") ??
+          "",
+        ).trim();
+
+      try {
+        if (
+          slug ||
+          id
+        ) {
+          const parameter =
+            slug
+              ? `s=${encodeURIComponent(
+                  slug,
+                )}`
+              : `id=${encodeURIComponent(
+                  id,
+                )}`;
+
+          const result =
+            await fetchJson(
+              `${API}?${parameter}`,
+            );
+
+          survey =
+            result.survey ??
+            null;
+
+          if (!survey) {
+            const ui =
+              UI[
+                preferredLanguage()
+              ] ??
+              UI.ko;
+
+            clearView();
+
+            pageTitle.textContent =
+              ui.title;
+
+            pageDescription.textContent =
+              ui.intro;
+
+            topActions
+              .classList
+              .remove(
+                "hidden",
+              );
+
+            backToList.textContent =
+              `← ${ui.list}`;
+
+            availability.textContent =
+              ui.none;
+
+            return;
+          }
+
+          const preferred =
+            preferredLanguage();
+
+          lang =
+            (
+              survey
+                .enabled_languages ??
+              []
+            ).includes(
+              preferred,
+            )
+              ? preferred
+              : survey
+                  .default_language;
+
+          renderSurvey();
+
+          return;
+        }
+
+        const result =
+          await fetchJson(
+            API,
+          );
+
+        surveys =
+          result.surveys ??
+          [];
+
+        renderList();
+      } catch (
+        error
+      ) {
+        const ui =
+          UI[
+            preferredLanguage()
+          ] ??
+          UI.ko;
+
+        clearView();
+
+        pageTitle.textContent =
+          ui.title;
+
+        pageDescription.textContent =
+          ui.intro;
+
+        availability.textContent =
+          ui.loadFailed;
+
+        availability
+          .classList
+          .add(
+            "error",
+          );
+
+        console.error(
+          error,
+        );
+      }
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
