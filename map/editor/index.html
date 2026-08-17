@@ -1908,7 +1908,7 @@
     const BUILDING_SEARCH_TEXT = {
       en: {
         title: "Building search",
-        placeholder: "Exact building name",
+        placeholder: "Building name (partial match)",
         search: "Search",
         clear: "Clear highlight",
         shortcut: "Space: building search",
@@ -1924,7 +1924,7 @@
       },
       ko: {
         title: "건물 검색",
-        placeholder: "건물 이름 정확히 입력",
+        placeholder: "건물 이름 일부만 입력해도 검색",
         search: "검색",
         clear: "강조 해제",
         shortcut: "Space: 건물 검색",
@@ -1940,7 +1940,7 @@
       },
       ja: {
         title: "建物検索",
-        placeholder: "建物名を完全一致で入力",
+        placeholder: "建物名の一部でも検索できます",
         search: "検索",
         clear: "強調解除",
         shortcut: "Space: 建物検索",
@@ -1956,7 +1956,7 @@
       },
       ru: {
         title: "Поиск здания",
-        placeholder: "Введите точное название здания",
+        placeholder: "Введите часть названия здания",
         search: "Найти",
         clear: "Снять выделение",
         shortcut: "Space: поиск здания",
@@ -3540,14 +3540,27 @@
 
     function exactBuildingNameMatches(name) {
       /*
-        Exact comparison on purpose:
-        - case-sensitive
-        - whitespace-sensitive
+        Search behavior:
+        - partial/contains match
+        - case-insensitive
+        - the user's entered spaces are still treated as characters
+
+        Example:
+        "하늘" -> "하늘sky" matches
+        "SKY" -> "하늘sky" matches
       */
+      const needle =
+        String(name ?? "")
+          .toLocaleLowerCase();
+
       return userBuildingsForNameCheck()
         .filter(
           building =>
-            building.name === name
+            String(
+              building.name ?? ""
+            )
+              .toLocaleLowerCase()
+              .includes(needle)
         );
     }
 
