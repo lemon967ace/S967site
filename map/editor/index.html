@@ -490,50 +490,6 @@
     }
 
 
-    .map-image-export-layer{
-      position:absolute;
-      inset:0;
-      z-index:1400;
-      display:none;
-      cursor:crosshair;
-      touch-action:none;
-      user-select:none;
-      -webkit-user-select:none;
-    }
-
-    .map-image-export-layer.active{
-      display:block;
-    }
-
-    .map-image-export-box{
-      position:absolute;
-      display:none;
-      border:2px solid #fff;
-      outline:1px solid rgba(0,0,0,.92);
-      background:rgba(255,255,255,.08);
-      pointer-events:none;
-    }
-
-    .map-image-export-hint{
-      position:absolute;
-      top:12px;
-      left:50%;
-      transform:translateX(-50%);
-      max-width:min(560px,calc(100% - 24px));
-      padding:8px 11px;
-      border:1px solid color-mix(in srgb,var(--border) 55%,transparent);
-      border-radius:10px;
-      background:color-mix(in srgb,var(--surface) 86%,transparent);
-      color:var(--text);
-      box-shadow:var(--shadow);
-      font-size:.8rem;
-      font-weight:700;
-      text-align:center;
-      pointer-events:none;
-      backdrop-filter:blur(4px);
-      -webkit-backdrop-filter:blur(4px);
-    }
-
     .shared-map-title,.shared-filter-panel,.shared-zoom-panel{display:none;}
     body.shared-view .editor-header,body.shared-view .editor-toolbar,body.shared-view .editor-statusbar,body.shared-view .editor-sidebar{display:none!important;}
     body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
@@ -1106,23 +1062,7 @@
       >
         UI
       </button>
-
-      <div
-        id="mapImageExportLayer"
-        class="map-image-export-layer"
-        aria-hidden="true"
-      >
-        <div
-          id="mapImageExportHint"
-          class="map-image-export-hint"
-        ></div>
-        <div
-          id="mapImageExportBox"
-          class="map-image-export-box"
-        ></div>
-      </div>
-
-    </main>
+</main>
 
 
     <aside
@@ -2472,9 +2412,6 @@
     const sharedFitMapButton = document.getElementById("sharedFitMapButton");
     const sharedExportMapImageButton = document.getElementById("sharedExportMapImageButton");
     const exportMapImageButton = document.getElementById("exportMapImageButton");
-    const mapImageExportLayer = document.getElementById("mapImageExportLayer");
-    const mapImageExportHint = document.getElementById("mapImageExportHint");
-    const mapImageExportBox = document.getElementById("mapImageExportBox");
 
     const fitMapButton =
       document.getElementById(
@@ -5797,269 +5734,88 @@
     */
 
     const MAP_IMAGE_EXPORT_ZOOM = 3;
-    const MAP_IMAGE_EXPORT_MAX_WIDTH = 4096;
-    const MAP_IMAGE_EXPORT_MAX_HEIGHT = 4096;
-    const MAP_IMAGE_EXPORT_MIN_SELECTION = 12;
+    const MAP_IMAGE_EXPORT_MAX_WIDTH = 8192;
+    const MAP_IMAGE_EXPORT_MAX_HEIGHT = 8192;
 
-    let mapImageExportActive = false;
-    let mapImageExportPointerId = null;
-    let mapImageExportStart = null;
+    let mapImageExportBusy =
+      false;
 
     function mapImageExportText() {
       return {
         ko: {
           button: "PNG",
-          buttonTitle: "맵 일부를 PNG 이미지로 저장",
-          hint: "저장할 범위를 드래그하세요. 선택 영역을 실제 300% 줌 기준으로 다시 렌더링합니다. 최대 4096×4096 px입니다. Esc: 취소",
-          tooSmall: "선택 범위가 너무 작습니다.",
-          tooLarge: "선택 범위가 너무 큽니다. 출력 이미지는 최대 4096×4096 px까지 가능합니다.",
+          buttonTitle: "맵 일부를 300% 고해상도 PNG로 저장",
+          hint: "범위 만들기와 같은 방식으로 시작 셀과 끝 셀을 차례로 선택하세요. 실제 300% 줌으로 렌더링하며 최대 8192×8192 px입니다. Esc: 취소",
+          tooLarge: "선택 범위가 너무 큽니다. 출력 이미지는 최대 8192×8192 px까지 가능합니다.",
           failed: "이미지를 만들지 못했습니다.",
         },
         en: {
           button: "PNG",
-          buttonTitle: "Save part of the map as a PNG image",
-          hint: "Drag the area to save. The selected area is re-rendered at a true 300% zoom, up to 4096×4096 px. Esc: cancel",
-          tooSmall: "The selected area is too small.",
-          tooLarge: "The selected area is too large. The maximum output size is 4096×4096 px.",
+          buttonTitle: "Save part of the map as a high-resolution 300% PNG",
+          hint: "Select the start and end cells exactly like creating a map range. It is re-rendered at a true 300% zoom, up to 8192×8192 px. Esc: cancel",
+          tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
           failed: "Could not create the image.",
         },
         ja: {
           button: "PNG",
-          buttonTitle: "マップの一部をPNG画像として保存",
-          hint: "保存範囲をドラッグしてください。選択範囲を実際の300%ズームで再描画します。最大4096×4096 pxです。Esc: キャンセル",
-          tooSmall: "選択範囲が小さすぎます。",
-          tooLarge: "選択範囲が大きすぎます。出力画像は最大4096×4096 pxです。",
+          buttonTitle: "マップの一部を300%高解像度PNGとして保存",
+          hint: "マップ範囲作成と同じように開始セルと終了セルを順に選択してください。実際の300%ズームで再描画し、最大8192×8192 pxです。Esc: キャンセル",
+          tooLarge: "選択範囲が大きすぎます。出力画像は最大8192×8192 pxです。",
           failed: "画像を作成できませんでした。",
         },
         ru: {
           button: "PNG",
-          buttonTitle: "Сохранить часть карты как PNG",
-          hint: "Выделите область перетаскиванием. Выбранная область повторно отрисовывается при реальном масштабе 300%, максимум 4096×4096 px. Esc: отмена",
-          tooSmall: "Выбранная область слишком мала.",
-          tooLarge: "Выбранная область слишком велика. Максимальный размер изображения — 4096×4096 px.",
+          buttonTitle: "Сохранить часть карты как PNG высокого разрешения при 300%",
+          hint: "Выберите начальную и конечную клетки так же, как при создании диапазона карты. Повторная отрисовка выполняется при 300%, максимум 8192×8192 px. Esc: отмена",
+          tooLarge: "Выбранная область слишком велика. Максимальный размер изображения — 8192×8192 px.",
           failed: "Не удалось создать изображение.",
         },
       }[language] ?? {
         button: "PNG",
-        buttonTitle: "Save part of the map as a PNG image",
-        hint: "Drag the area to save. The selected area is re-rendered at a true 300% zoom, up to 4096×4096 px. Esc: cancel",
-        tooSmall: "The selected area is too small.",
-        tooLarge: "The selected area is too large. The maximum output size is 4096×4096 px.",
+        buttonTitle: "Save part of the map as a high-resolution 300% PNG",
+        hint: "Select the start and end cells exactly like creating a map range. It is re-rendered at a true 300% zoom, up to 8192×8192 px. Esc: cancel",
+        tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
         failed: "Could not create the image.",
       };
     }
 
-    function imageExportPoint(event) {
-      const rect =
-        mapImageExportLayer
-          .getBoundingClientRect();
-
-      return {
-        x: Math.max(
-          0,
-          Math.min(
-            rect.width,
-            event.clientX -
-              rect.left
-          )
-        ),
-        y: Math.max(
-          0,
-          Math.min(
-            rect.height,
-            event.clientY -
-              rect.top
-          )
-        ),
-      };
-    }
-
-    function imageExportSelectionRect(a, b) {
-      const left =
-        Math.min(a.x, b.x);
-      const top =
-        Math.min(a.y, b.y);
-      const width =
-        Math.abs(
-          b.x - a.x
-        );
-      const height =
-        Math.abs(
-          b.y - a.y
-        );
-
-      return {
-        left,
-        top,
-        width,
-        height,
-      };
-    }
-
-    function renderImageExportSelection(rect) {
-      if (!mapImageExportBox) {
-        return;
-      }
-
-      mapImageExportBox.style.display =
-        rect.width > 0 &&
-        rect.height > 0
-          ? "block"
-          : "none";
-
-      mapImageExportBox.style.left =
-        `${rect.left}px`;
-      mapImageExportBox.style.top =
-        `${rect.top}px`;
-      mapImageExportBox.style.width =
-        `${rect.width}px`;
-      mapImageExportBox.style.height =
-        `${rect.height}px`;
-    }
-
-    function cancelMapImageExport() {
-      mapImageExportActive =
-        false;
-      mapImageExportPointerId =
-        null;
-      mapImageExportStart =
-        null;
-
-      mapImageExportLayer
-        ?.classList.remove(
-          "active"
-        );
-
-      mapImageExportLayer
-        ?.setAttribute(
-          "aria-hidden",
-          "true"
-        );
-
-      if (mapImageExportBox) {
-        mapImageExportBox.style.display =
-          "none";
-      }
-    }
-
-    function beginMapImageExport() {
-      if (
-        !mapRenderer?.canvas ||
-        !mapImageExportLayer
-      ) {
-        return;
-      }
-
-      const labels =
-        mapImageExportText();
-
-      mapImageExportActive =
-        true;
-      mapImageExportPointerId =
-        null;
-      mapImageExportStart =
-        null;
-
-      mapImageExportHint.textContent =
-        labels.hint;
-
-      mapImageExportBox.style.display =
-        "none";
-
-      mapImageExportLayer
-        .classList.add(
-          "active"
-        );
-
-      mapImageExportLayer
-        .setAttribute(
-          "aria-hidden",
-          "false"
-        );
-    }
-
-    async function downloadMapImageRegion(
-      selection,
-      clientSelection
+    async function downloadSelectedMapRange(
+      selection
     ) {
+      if (
+        mapImageExportBusy ||
+        !selection?.sceneBounds
+      ) {
+        return;
+      }
+
       const labels =
         mapImageExportText();
 
-      if (
-        selection.width <
-          MAP_IMAGE_EXPORT_MIN_SELECTION ||
-        selection.height <
-          MAP_IMAGE_EXPORT_MIN_SELECTION
-      ) {
-        window.alert(
-          labels.tooSmall
-        );
-        return;
-      }
-
-      if (
-        !mapRenderer
-          ?.clientToScene ||
-        !mapRenderer
-          ?.renderSceneRegionToBlob
-      ) {
-        window.alert(
-          labels.failed
-        );
-        return;
-      }
+      mapImageExportBusy =
+        true;
 
       try {
+        const bounds =
+          selection.sceneBounds;
+
         /*
-          Convert the exact rectangle the user dragged on the LIVE
-          map canvas to scene coordinates. No overlay/canvas offset
-          guessing is involved.
+          The selected map-cell range is first converted to the
+          exact scene-space bounds of its diamond geometry.
+          The exported PNG is the ordinary axis-aligned rectangle
+          that fully contains that selected range.
         */
-        const a =
-          mapRenderer
-            .clientToScene(
-              clientSelection.left,
-              clientSelection.top
-            );
-
-        const b =
-          mapRenderer
-            .clientToScene(
-              clientSelection.right,
-              clientSelection.bottom
-            );
-
-        const sceneLeft =
-          Math.min(
-            a.sceneX,
-            b.sceneX
-          );
-
-        const sceneRight =
-          Math.max(
-            a.sceneX,
-            b.sceneX
-          );
-
-        const sceneTop =
-          Math.min(
-            a.sceneY,
-            b.sceneY
-          );
-
-        const sceneBottom =
-          Math.max(
-            a.sceneY,
-            b.sceneY
-          );
-
         const result =
           await mapRenderer
             .renderSceneRegionToBlob({
-              sceneLeft,
-              sceneTop,
-              sceneRight,
-              sceneBottom,
+              sceneLeft:
+                bounds.left,
+              sceneTop:
+                bounds.top,
+              sceneRight:
+                bounds.right,
+              sceneBottom:
+                bounds.bottom,
               zoom:
                 MAP_IMAGE_EXPORT_ZOOM,
               maxWidth:
@@ -6104,7 +5860,7 @@
           url;
 
         link.download =
-          `${safeTitle}-300pct-region.png`;
+          `${safeTitle}-${selection.minX}-${selection.minY}-${selection.maxX}-${selection.maxY}-300pct.png`;
 
         document.body.append(
           link
@@ -6133,157 +5889,57 @@
           window.alert(
             labels.tooLarge
           );
-          return;
+        } else {
+          window.alert(
+            labels.failed
+          );
         }
-
-        window.alert(
-          labels.failed
-        );
+      } finally {
+        mapImageExportBusy =
+          false;
       }
     }
 
-    mapImageExportLayer?.addEventListener(
-      "pointerdown",
-      event => {
-        if (
-          !mapImageExportActive ||
-          mapImageExportPointerId !==
-            null
-        ) {
-          return;
-        }
+    function beginMapImageExport() {
+      if (
+        mapImageExportBusy ||
+        !mapRenderer
+          ?.startImageExportSelection
+      ) {
+        return;
+      }
 
-        event.preventDefault();
+      const labels =
+        mapImageExportText();
 
-        mapImageExportPointerId =
-          event.pointerId;
+      window.alert(
+        labels.hint
+      );
 
-        const localPoint =
-          imageExportPoint(
-            event
-          );
-
-        mapImageExportStart = {
-          ...localPoint,
-          clientX:
-            event.clientX,
-          clientY:
-            event.clientY,
-        };
-
-        mapImageExportLayer
-          .setPointerCapture?.(
-            event.pointerId
-          );
-
-        renderImageExportSelection({
-          left:
-            mapImageExportStart.x,
-          top:
-            mapImageExportStart.y,
-          width: 0,
-          height: 0,
+      mapRenderer
+        .startImageExportSelection({
+          onComplete:
+            selection =>
+              downloadSelectedMapRange(
+                selection
+              ),
         });
-      }
-    );
-
-    mapImageExportLayer?.addEventListener(
-      "pointermove",
-      event => {
-        if (
-          !mapImageExportActive ||
-          event.pointerId !==
-            mapImageExportPointerId ||
-          !mapImageExportStart
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-
-        renderImageExportSelection(
-          imageExportSelectionRect(
-            mapImageExportStart,
-            imageExportPoint(
-              event
-            )
-          )
-        );
-      }
-    );
-
-    mapImageExportLayer?.addEventListener(
-      "pointerup",
-      async event => {
-        if (
-          !mapImageExportActive ||
-          event.pointerId !==
-            mapImageExportPointerId ||
-          !mapImageExportStart
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-
-        const endPoint =
-          imageExportPoint(
-            event
-          );
-
-        const selection =
-          imageExportSelectionRect(
-            mapImageExportStart,
-            endPoint
-          );
-
-        const clientSelection = {
-          left:
-            Math.min(
-              mapImageExportStart.clientX,
-              event.clientX
-            ),
-          top:
-            Math.min(
-              mapImageExportStart.clientY,
-              event.clientY
-            ),
-          right:
-            Math.max(
-              mapImageExportStart.clientX,
-              event.clientX
-            ),
-          bottom:
-            Math.max(
-              mapImageExportStart.clientY,
-              event.clientY
-            ),
-        };
-
-        cancelMapImageExport();
-
-        await downloadMapImageRegion(
-          selection,
-          clientSelection
-        );
-      }
-    );
-
-    mapImageExportLayer?.addEventListener(
-      "pointercancel",
-      cancelMapImageExport
-    );
+    }
 
     window.addEventListener(
       "keydown",
       event => {
         if (
-          mapImageExportActive &&
           event.key ===
-            "Escape"
+            "Escape" &&
+          mapRenderer
+            ?.getImageExportSelectionState?.()
+            .active
         ) {
           event.preventDefault();
-          cancelMapImageExport();
+
+          mapRenderer
+            .cancelImageExportSelection?.();
         }
       },
       true
