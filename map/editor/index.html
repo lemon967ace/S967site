@@ -489,6 +489,51 @@
       white-space: nowrap;
     }
 
+
+    .map-image-export-layer{
+      position:absolute;
+      inset:0;
+      z-index:1400;
+      display:none;
+      cursor:crosshair;
+      touch-action:none;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .map-image-export-layer.active{
+      display:block;
+    }
+
+    .map-image-export-box{
+      position:absolute;
+      display:none;
+      border:2px solid #fff;
+      outline:1px solid rgba(0,0,0,.92);
+      background:rgba(255,255,255,.08);
+      pointer-events:none;
+    }
+
+    .map-image-export-hint{
+      position:absolute;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%);
+      max-width:min(560px,calc(100% - 24px));
+      padding:8px 11px;
+      border:1px solid color-mix(in srgb,var(--border) 55%,transparent);
+      border-radius:10px;
+      background:color-mix(in srgb,var(--surface) 86%,transparent);
+      color:var(--text);
+      box-shadow:var(--shadow);
+      font-size:.8rem;
+      font-weight:700;
+      text-align:center;
+      pointer-events:none;
+      backdrop-filter:blur(4px);
+      -webkit-backdrop-filter:blur(4px);
+    }
+
     .shared-map-title,.shared-filter-panel,.shared-zoom-panel{display:none;}
     body.shared-view .editor-header,body.shared-view .editor-toolbar,body.shared-view .editor-statusbar,body.shared-view .editor-sidebar{display:none!important;}
     body.shared-view .editor-shell{position:fixed;inset:0;display:block;padding:0;overflow:hidden;}
@@ -962,6 +1007,17 @@
       Fit
     </button>
 
+    <div class="tool-separator"></div>
+
+    <button
+      id="exportMapImageButton"
+      class="tool-button"
+      type="button"
+      disabled
+    >
+      PNG
+    </button>
+
   </div>
 
 
@@ -1037,6 +1093,7 @@
         </label>
         <button id="sharedZoomInButton" type="button" aria-label="Zoom in">+</button>
         <button id="sharedFitMapButton" type="button">Fit</button>
+        <button id="sharedExportMapImageButton" type="button">PNG</button>
       </div>
 
       <button
@@ -1049,6 +1106,21 @@
       >
         UI
       </button>
+
+      <div
+        id="mapImageExportLayer"
+        class="map-image-export-layer"
+        aria-hidden="true"
+      >
+        <div
+          id="mapImageExportHint"
+          class="map-image-export-hint"
+        ></div>
+        <div
+          id="mapImageExportBox"
+          class="map-image-export-box"
+        ></div>
+      </div>
 
     </main>
 
@@ -2398,6 +2470,11 @@
     const sharedZoomOutButton = document.getElementById("sharedZoomOutButton");
     const sharedZoomInButton = document.getElementById("sharedZoomInButton");
     const sharedFitMapButton = document.getElementById("sharedFitMapButton");
+    const sharedExportMapImageButton = document.getElementById("sharedExportMapImageButton");
+    const exportMapImageButton = document.getElementById("exportMapImageButton");
+    const mapImageExportLayer = document.getElementById("mapImageExportLayer");
+    const mapImageExportHint = document.getElementById("mapImageExportHint");
+    const mapImageExportBox = document.getElementById("mapImageExportBox");
 
     const fitMapButton =
       document.getElementById(
@@ -4780,6 +4857,8 @@
       if (sharedZoomOutButton) sharedZoomOutButton.disabled = !engineReady;
       if (sharedZoomInButton) sharedZoomInButton.disabled = !engineReady;
       if (sharedFitMapButton) sharedFitMapButton.disabled = !engineReady;
+      if (exportMapImageButton) exportMapImageButton.disabled = !enabled || !engineReady;
+      if (sharedExportMapImageButton) sharedExportMapImageButton.disabled = !engineReady;
 
       saveButton.disabled =
         !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
@@ -4911,6 +4990,17 @@
       const filterLabels = FILTER_TEXT[language] ?? FILTER_TEXT.en;
       if (sharedFiltersTitle) sharedFiltersTitle.textContent = filterLabels.title;
       if (sharedFitMapButton) sharedFitMapButton.textContent = text.fitMap ?? "Fit";
+
+      const imageExportLabels = mapImageExportText();
+      if (exportMapImageButton) {
+        exportMapImageButton.textContent = imageExportLabels.button;
+        exportMapImageButton.title = imageExportLabels.buttonTitle;
+      }
+      if (sharedExportMapImageButton) {
+        sharedExportMapImageButton.textContent = imageExportLabels.button;
+        sharedExportMapImageButton.title = imageExportLabels.buttonTitle;
+      }
+
       if (sharedMapTitle && editorMode === "shared") sharedMapTitle.textContent = mapTitleInput.value || text.untitled;
       if (readOnly && buildingFilter) renderBuildingFilters(sharedFiltersHost, { replace: true });
 
@@ -5698,6 +5788,558 @@
 
       return true;
     }
+
+
+    /*
+      ==========================================================
+      PNG REGION EXPORT
+      ==========================================================
+    */
+
+    const MAP_IMAGE_EXPORT_SCALE = 2;
+    const MAP_IMAGE_EXPORT_MAX_WIDTH = 4096;
+    const MAP_IMAGE_EXPORT_MAX_HEIGHT = 4096;
+    const MAP_IMAGE_EXPORT_MIN_SELECTION = 12;
+
+    let mapImageExportActive = false;
+    let mapImageExportPointerId = null;
+    let mapImageExportStart = null;
+
+    function mapImageExportText() {
+      return {
+        ko: {
+          button: "PNG",
+          buttonTitle: "맵 일부를 PNG 이미지로 저장",
+          hint: "저장할 범위를 드래그하세요. 출력은 2× 크기이며 최대 4096×4096 px입니다. Esc: 취소",
+          tooSmall: "선택 범위가 너무 작습니다.",
+          tooLarge: "선택 범위가 너무 큽니다. 출력 이미지는 최대 4096×4096 px까지 가능합니다.",
+          failed: "이미지를 만들지 못했습니다.",
+        },
+        en: {
+          button: "PNG",
+          buttonTitle: "Save part of the map as a PNG image",
+          hint: "Drag the area to save. Output is 2×, up to 4096×4096 px. Esc: cancel",
+          tooSmall: "The selected area is too small.",
+          tooLarge: "The selected area is too large. The maximum output size is 4096×4096 px.",
+          failed: "Could not create the image.",
+        },
+        ja: {
+          button: "PNG",
+          buttonTitle: "マップの一部をPNG画像として保存",
+          hint: "保存範囲をドラッグしてください。出力は2×、最大4096×4096 pxです。Esc: キャンセル",
+          tooSmall: "選択範囲が小さすぎます。",
+          tooLarge: "選択範囲が大きすぎます。出力画像は最大4096×4096 pxです。",
+          failed: "画像を作成できませんでした。",
+        },
+        ru: {
+          button: "PNG",
+          buttonTitle: "Сохранить часть карты как PNG",
+          hint: "Выделите область перетаскиванием. Вывод 2×, максимум 4096×4096 px. Esc: отмена",
+          tooSmall: "Выбранная область слишком мала.",
+          tooLarge: "Выбранная область слишком велика. Максимальный размер изображения — 4096×4096 px.",
+          failed: "Не удалось создать изображение.",
+        },
+      }[language] ?? {
+        button: "PNG",
+        buttonTitle: "Save part of the map as a PNG image",
+        hint: "Drag the area to save. Output is 2×, up to 4096×4096 px. Esc: cancel",
+        tooSmall: "The selected area is too small.",
+        tooLarge: "The selected area is too large. The maximum output size is 4096×4096 px.",
+        failed: "Could not create the image.",
+      };
+    }
+
+    function imageExportPoint(event) {
+      const rect =
+        mapImageExportLayer
+          .getBoundingClientRect();
+
+      return {
+        x: Math.max(
+          0,
+          Math.min(
+            rect.width,
+            event.clientX -
+              rect.left
+          )
+        ),
+        y: Math.max(
+          0,
+          Math.min(
+            rect.height,
+            event.clientY -
+              rect.top
+          )
+        ),
+      };
+    }
+
+    function imageExportSelectionRect(a, b) {
+      const left =
+        Math.min(a.x, b.x);
+      const top =
+        Math.min(a.y, b.y);
+      const width =
+        Math.abs(
+          b.x - a.x
+        );
+      const height =
+        Math.abs(
+          b.y - a.y
+        );
+
+      return {
+        left,
+        top,
+        width,
+        height,
+      };
+    }
+
+    function renderImageExportSelection(rect) {
+      if (!mapImageExportBox) {
+        return;
+      }
+
+      mapImageExportBox.style.display =
+        rect.width > 0 &&
+        rect.height > 0
+          ? "block"
+          : "none";
+
+      mapImageExportBox.style.left =
+        `${rect.left}px`;
+      mapImageExportBox.style.top =
+        `${rect.top}px`;
+      mapImageExportBox.style.width =
+        `${rect.width}px`;
+      mapImageExportBox.style.height =
+        `${rect.height}px`;
+    }
+
+    function cancelMapImageExport() {
+      mapImageExportActive =
+        false;
+      mapImageExportPointerId =
+        null;
+      mapImageExportStart =
+        null;
+
+      mapImageExportLayer
+        ?.classList.remove(
+          "active"
+        );
+
+      mapImageExportLayer
+        ?.setAttribute(
+          "aria-hidden",
+          "true"
+        );
+
+      if (mapImageExportBox) {
+        mapImageExportBox.style.display =
+          "none";
+      }
+    }
+
+    function beginMapImageExport() {
+      if (
+        !mapRenderer?.canvas ||
+        !mapImageExportLayer
+      ) {
+        return;
+      }
+
+      const labels =
+        mapImageExportText();
+
+      mapImageExportActive =
+        true;
+      mapImageExportPointerId =
+        null;
+      mapImageExportStart =
+        null;
+
+      mapImageExportHint.textContent =
+        labels.hint;
+
+      mapImageExportBox.style.display =
+        "none";
+
+      mapImageExportLayer
+        .classList.add(
+          "active"
+        );
+
+      mapImageExportLayer
+        .setAttribute(
+          "aria-hidden",
+          "false"
+        );
+    }
+
+    async function downloadMapImageRegion(
+      selection
+    ) {
+      const labels =
+        mapImageExportText();
+
+      if (
+        selection.width <
+          MAP_IMAGE_EXPORT_MIN_SELECTION ||
+        selection.height <
+          MAP_IMAGE_EXPORT_MIN_SELECTION
+      ) {
+        window.alert(
+          labels.tooSmall
+        );
+        return;
+      }
+
+      const outputWidth =
+        Math.round(
+          selection.width *
+          MAP_IMAGE_EXPORT_SCALE
+        );
+
+      const outputHeight =
+        Math.round(
+          selection.height *
+          MAP_IMAGE_EXPORT_SCALE
+        );
+
+      if (
+        outputWidth >
+          MAP_IMAGE_EXPORT_MAX_WIDTH ||
+        outputHeight >
+          MAP_IMAGE_EXPORT_MAX_HEIGHT
+      ) {
+        window.alert(
+          labels.tooLarge
+        );
+        return;
+      }
+
+      const sourceCanvas =
+        mapRenderer?.canvas;
+
+      if (!sourceCanvas) {
+        window.alert(
+          labels.failed
+        );
+        return;
+      }
+
+      const sourceRect =
+        sourceCanvas
+          .getBoundingClientRect();
+
+      if (
+        sourceRect.width <= 0 ||
+        sourceRect.height <= 0
+      ) {
+        window.alert(
+          labels.failed
+        );
+        return;
+      }
+
+      const layerRect =
+        mapImageExportLayer
+          .getBoundingClientRect();
+
+      const cssLeft =
+        selection.left +
+        layerRect.left -
+        sourceRect.left;
+
+      const cssTop =
+        selection.top +
+        layerRect.top -
+        sourceRect.top;
+
+      const sourceScaleX =
+        sourceCanvas.width /
+        sourceRect.width;
+
+      const sourceScaleY =
+        sourceCanvas.height /
+        sourceRect.height;
+
+      const sourceX =
+        Math.max(
+          0,
+          Math.round(
+            cssLeft *
+            sourceScaleX
+          )
+        );
+
+      const sourceY =
+        Math.max(
+          0,
+          Math.round(
+            cssTop *
+            sourceScaleY
+          )
+        );
+
+      const sourceWidth =
+        Math.min(
+          sourceCanvas.width -
+            sourceX,
+          Math.max(
+            1,
+            Math.round(
+              selection.width *
+              sourceScaleX
+            )
+          )
+        );
+
+      const sourceHeight =
+        Math.min(
+          sourceCanvas.height -
+            sourceY,
+          Math.max(
+            1,
+            Math.round(
+              selection.height *
+              sourceScaleY
+            )
+          )
+        );
+
+      const exportCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+      exportCanvas.width =
+        outputWidth;
+      exportCanvas.height =
+        outputHeight;
+
+      const exportContext =
+        exportCanvas.getContext(
+          "2d",
+          {
+            alpha: false,
+          }
+        );
+
+      if (!exportContext) {
+        window.alert(
+          labels.failed
+        );
+        return;
+      }
+
+      exportContext.imageSmoothingEnabled =
+        true;
+      exportContext.imageSmoothingQuality =
+        "high";
+
+      exportContext.drawImage(
+        sourceCanvas,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        outputWidth,
+        outputHeight
+      );
+
+      const blob =
+        await new Promise(
+          resolve =>
+            exportCanvas.toBlob(
+              resolve,
+              "image/png"
+            )
+        );
+
+      if (!blob) {
+        window.alert(
+          labels.failed
+        );
+        return;
+      }
+
+      const safeTitle =
+        String(
+          mapTitleInput.value ||
+          "map"
+        )
+          .trim()
+          .replace(
+            /[\\/:*?"<>|]+/g,
+            "_"
+          )
+          .replace(
+            /\s+/g,
+            " "
+          )
+          .slice(
+            0,
+            80
+          ) ||
+        "map";
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      link.href =
+        url;
+      link.download =
+        `${safeTitle}-region.png`;
+
+      document.body.append(
+        link
+      );
+      link.click();
+      link.remove();
+
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(
+            url
+          ),
+        1000
+      );
+    }
+
+    mapImageExportLayer?.addEventListener(
+      "pointerdown",
+      event => {
+        if (
+          !mapImageExportActive ||
+          mapImageExportPointerId !==
+            null
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        mapImageExportPointerId =
+          event.pointerId;
+
+        mapImageExportStart =
+          imageExportPoint(
+            event
+          );
+
+        mapImageExportLayer
+          .setPointerCapture?.(
+            event.pointerId
+          );
+
+        renderImageExportSelection({
+          left:
+            mapImageExportStart.x,
+          top:
+            mapImageExportStart.y,
+          width: 0,
+          height: 0,
+        });
+      }
+    );
+
+    mapImageExportLayer?.addEventListener(
+      "pointermove",
+      event => {
+        if (
+          !mapImageExportActive ||
+          event.pointerId !==
+            mapImageExportPointerId ||
+          !mapImageExportStart
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        renderImageExportSelection(
+          imageExportSelectionRect(
+            mapImageExportStart,
+            imageExportPoint(
+              event
+            )
+          )
+        );
+      }
+    );
+
+    mapImageExportLayer?.addEventListener(
+      "pointerup",
+      async event => {
+        if (
+          !mapImageExportActive ||
+          event.pointerId !==
+            mapImageExportPointerId ||
+          !mapImageExportStart
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        const selection =
+          imageExportSelectionRect(
+            mapImageExportStart,
+            imageExportPoint(
+              event
+            )
+          );
+
+        cancelMapImageExport();
+
+        await downloadMapImageRegion(
+          selection
+        );
+      }
+    );
+
+    mapImageExportLayer?.addEventListener(
+      "pointercancel",
+      cancelMapImageExport
+    );
+
+    window.addEventListener(
+      "keydown",
+      event => {
+        if (
+          mapImageExportActive &&
+          event.key ===
+            "Escape"
+        ) {
+          event.preventDefault();
+          cancelMapImageExport();
+        }
+      },
+      true
+    );
+
+    exportMapImageButton?.addEventListener(
+      "click",
+      beginMapImageExport
+    );
+
+    sharedExportMapImageButton?.addEventListener(
+      "click",
+      beginMapImageExport
+    );
+
 
     /*
       ==========================================================
