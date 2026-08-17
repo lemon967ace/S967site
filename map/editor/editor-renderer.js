@@ -469,9 +469,26 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
           )
         );
 
+        const explicitTheme =
+          document.documentElement.dataset.theme;
+
+        const darkTheme =
+          explicitTheme === "dark" ||
+          (
+            (
+              !explicitTheme ||
+              explicitTheme === "system"
+            ) &&
+            matchMedia(
+              "(prefers-color-scheme: dark)"
+            ).matches
+          );
+
         strokeGeometry(
           geometry,
-          "#FFE600",
+          darkTheme
+            ? "#FFFFFF"
+            : "#000000",
           Math.max(
             2.5,
             4.5 * state.zoom
