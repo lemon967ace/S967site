@@ -107,6 +107,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   let frame = 0, destroyed = false, panning = null, clickCandidate = null, rangeDrawing = null, bulkDrawing = null, eraseDrawing = null, spacePressed = false;
   let highlightedBuildingIds = new Set();
   let duplicateHighlightedBuildingIds = new Set();
+  let exportingImage = false;
   const interaction = new BuildingInteractionState();
   let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
@@ -125,7 +126,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   canvas.setAttribute("aria-label", "PNS map viewport");
   Object.assign(canvas.style, { width: "100%", height: "100%", display: "block", cursor: "default" });
   host.append(canvas);
-  const context = canvas.getContext("2d", { alpha: false });
+  let context = canvas.getContext("2d", { alpha: false });
   if (!context) throw new Error("Canvas 2D is unavailable.");
 
   function invalidate() {
@@ -268,6 +269,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       }
 
       if (
+        !exportingImage &&
         range.id === selectedId
       ) {
         traceCell(cell);
@@ -366,13 +368,14 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       traceCell(cell); context.fillStyle = withAlpha(range.color, range.kind === "blocked" ? 0.42 : 0.22); context.fill();
       context.save(); context.setLineDash([Math.max(3, 5 * state.zoom), Math.max(2, 3 * state.zoom)]); context.strokeStyle = range.kind === "blocked" ? "#b91c1c" : range.color; context.lineWidth = Math.max(1.5, 2.4 * state.zoom); context.stroke(); context.restore();
       if (range.kind === "blocked") { const vertices = diamondVertices(...cell), a = sceneToScreen(...vertices[3], state), b = sceneToScreen(...vertices[1], state); context.beginPath(); context.moveTo(...a); context.lineTo(...b); context.strokeStyle = "#b91c1c"; context.lineWidth = Math.max(1.5, 2 * state.zoom); context.stroke(); }
-      if (range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
+      if (!exportingImage && range.id === selectedId) { traceCell(cell); context.strokeStyle = "#7C3AED"; context.lineWidth = Math.max(2, 2.2 * state.zoom); context.stroke(); }
     }
   }
 
   function traceCell(cell) { context.beginPath(); diamondVertices(...cell).forEach((point, index) => { const screen = sceneToScreen(...point, state); index ? context.lineTo(...screen) : context.moveTo(...screen); }); context.closePath(); }
 
   function drawPreview() {
+    if (exportingImage) return;
     const preview = controller?.getState().preview;
     if (!preview) return;
     const geometry = buildingRenderGeometry({ id: "preview", name: "", affiliation: "", locked: false, ...preview });
@@ -389,6 +392,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   }
 
   function drawBulkDeletePreview() {
+    if (exportingImage) return;
     const bulkState = bulkDeleteController?.getState();
     if (!bulkState?.previewCells.length) return;
     for (const cell of bulkState.previewCells) {
@@ -398,6 +402,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   }
 
   function drawRangeErasePreview() {
+    if (exportingImage) return;
     const eraseState = rangeEraseController?.getState();
     if (!eraseState?.previewCells.length) return;
     for (const cell of eraseState.previewCells) {
@@ -496,8 +501,10 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
         );
       }
 
-      if (building.id === interaction.hoveredBuildingId && building.id !== interaction.selectedBuildingId) strokeGeometry(geometry, "rgba(80, 175, 255, 0.95)", Math.max(1.5, 2 * state.zoom));
-      if (building.id === interaction.selectedBuildingId) strokeGeometry(geometry, "#FFD54F", Math.max(2, 5 * state.zoom));
+      if (!exportingImage) {
+        if (building.id === interaction.hoveredBuildingId && building.id !== interaction.selectedBuildingId) strokeGeometry(geometry, "rgba(80, 175, 255, 0.95)", Math.max(1.5, 2 * state.zoom));
+        if (building.id === interaction.selectedBuildingId) strokeGeometry(geometry, "#FFD54F", Math.max(2, 5 * state.zoom));
+      }
     }
     for (const building of ordered) { const appearance = building.fixed ? { visible: true, labelAlpha: 1 } : (buildingFilter?.appearance(building, interaction.selectedBuildingId) ?? { visible: true, labelAlpha: 1 }); if (appearance.visible) { context.save(); context.globalAlpha = appearance.labelAlpha; drawBuildingLabel(byId.get(building.id)); context.restore(); } }
   }
@@ -1506,6 +1513,198 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   return {
     canvas,
     getState: () => ({ ...state }),
+    clientToScene(clientX, clientY) {
+      const rect =
+        canvas.getBoundingClientRect();
+
+      const x =
+        Number(clientX) -
+        rect.left;
+
+      const y =
+        Number(clientY) -
+        rect.top;
+
+      const [sceneX, sceneY] =
+        screenToScene(
+          x,
+          y,
+          state
+        );
+
+      return {
+        sceneX,
+        sceneY,
+      };
+    },
+    async renderSceneRegionToBlob({
+      sceneLeft,
+      sceneTop,
+      sceneRight,
+      sceneBottom,
+      zoom = 3,
+      maxWidth = 4096,
+      maxHeight = 4096,
+      mimeType = "image/png",
+    }) {
+      const left =
+        Number(sceneLeft);
+      const top =
+        Number(sceneTop);
+      const right =
+        Number(sceneRight);
+      const bottom =
+        Number(sceneBottom);
+      const requestedZoom =
+        clampZoom(
+          Number(zoom)
+        );
+
+      if (
+        !Number.isFinite(left) ||
+        !Number.isFinite(top) ||
+        !Number.isFinite(right) ||
+        !Number.isFinite(bottom) ||
+        !(right > left) ||
+        !(bottom > top)
+      ) {
+        throw new TypeError(
+          "Invalid export scene region."
+        );
+      }
+
+      const width =
+        Math.ceil(
+          (right - left) *
+          requestedZoom
+        );
+
+      const height =
+        Math.ceil(
+          (bottom - top) *
+          requestedZoom
+        );
+
+      if (
+        width < 1 ||
+        height < 1
+      ) {
+        throw new RangeError(
+          "Export region is empty."
+        );
+      }
+
+      if (
+        width >
+          maxWidth ||
+        height >
+          maxHeight
+      ) {
+        const error =
+          new RangeError(
+            "EXPORT_TOO_LARGE"
+          );
+
+        error.code =
+          "EXPORT_TOO_LARGE";
+        error.width =
+          width;
+        error.height =
+          height;
+
+        throw error;
+      }
+
+      const exportCanvas =
+        document.createElement(
+          "canvas"
+        );
+
+      exportCanvas.width =
+        width;
+      exportCanvas.height =
+        height;
+
+      const exportContext =
+        exportCanvas.getContext(
+          "2d",
+          {
+            alpha: false,
+          }
+        );
+
+      if (!exportContext) {
+        throw new Error(
+          "Canvas 2D is unavailable."
+        );
+      }
+
+      const previousState =
+        state;
+      const previousContext =
+        context;
+      const previousExportingImage =
+        exportingImage;
+
+      try {
+        /*
+          This is the key part:
+          use the SAME draw() implementation as the live map, but
+          give it an export viewport whose real map zoom is 300%.
+          Nothing is copied/upscaled from the visible canvas.
+        */
+        state = {
+          ...state,
+          sceneCenterX:
+            (left + right) / 2,
+          sceneCenterY:
+            (top + bottom) / 2,
+          zoom:
+            requestedZoom,
+          width,
+          height,
+          devicePixelRatio:
+            1,
+        };
+
+        context =
+          exportContext;
+        exportingImage =
+          true;
+
+        draw();
+      } finally {
+        state =
+          previousState;
+        context =
+          previousContext;
+        exportingImage =
+          previousExportingImage;
+      }
+
+      const blob =
+        await new Promise(
+          resolve =>
+            exportCanvas.toBlob(
+              resolve,
+              mimeType
+            )
+        );
+
+      if (!blob) {
+        throw new Error(
+          "PNG_BLOB_FAILED"
+        );
+      }
+
+      return {
+        blob,
+        width,
+        height,
+        zoom:
+          requestedZoom,
+      };
+    },
     setSceneViewport({
       sceneCenterX,
       sceneCenterY,
