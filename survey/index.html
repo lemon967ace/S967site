@@ -215,6 +215,36 @@
 </head>
 
 <body>
+  <div class="theme-picker" data-theme-picker>
+    <button
+      class="theme-button"
+      type="button"
+      data-theme-button
+      aria-label="Theme"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >◐</button>
+
+    <div
+      class="theme-menu"
+      data-theme-menu
+      role="menu"
+    >
+      <button type="button" data-theme-choice="system" role="menuitemradio">
+        <span class="theme-choice-icon">◐</span>
+        <span>System</span>
+      </button>
+      <button type="button" data-theme-choice="light" role="menuitemradio">
+        <span class="theme-choice-icon">☀</span>
+        <span>Light</span>
+      </button>
+      <button type="button" data-theme-choice="dark" role="menuitemradio">
+        <span class="theme-choice-icon">☾</span>
+        <span>Dark</span>
+      </button>
+    </div>
+  </div>
+
   <main class="shell">
     <section class="card">
       <div class="muted">
@@ -234,7 +264,7 @@
 
       <div
         id="languageButtons"
-        class="lang hidden"
+        class="lang"
       ></div>
 
       <div
@@ -413,6 +443,8 @@
           "제출 중…",
         done:
           "응답을 제출했습니다.",
+        updated:
+          "기존 응답을 수정했습니다.",
         already:
           "이미 이 설문에 응답했습니다.",
         required:
@@ -452,6 +484,8 @@
           "Submitting…",
         done:
           "Response submitted.",
+        updated:
+          "Your previous response was updated.",
         already:
           "You have already responded to this survey.",
         required:
@@ -491,6 +525,8 @@
           "送信中…",
         done:
           "回答を送信しました。",
+        updated:
+          "以前の回答を更新しました。",
         already:
           "このアンケートにはすでに回答済みです。",
         required:
@@ -530,6 +566,8 @@
           "Отправка…",
         done:
           "Ответ отправлен.",
+        updated:
+          "Предыдущий ответ обновлён.",
         already:
           "Вы уже отвечали на этот опрос.",
         required:
@@ -759,6 +797,11 @@
             lang =
               code;
 
+            localStorage.setItem(
+              "s967-language",
+              code,
+            );
+
             renderSurvey();
           };
 
@@ -784,6 +827,22 @@
 
       pageDescription.textContent =
         ui.intro;
+
+      languageButtons.replaceChildren();
+      languageButtons.classList.remove("hidden");
+
+      for (const code of ["ko","en","ja","ru"]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = LANGUAGE_NAMES[code];
+        button.classList.toggle("is-active", code === lang);
+        button.onclick = () => {
+          lang = code;
+          localStorage.setItem("s967-language", code);
+          renderList();
+        };
+        languageButtons.append(button);
+      }
 
       if (
         !surveys.length
@@ -1045,6 +1104,44 @@
           }
         } else if (
           question.type ===
+          "confirmation"
+        ) {
+          input =
+            document.createElement(
+              "label",
+            );
+
+          input.className =
+            "choice";
+
+          const checkbox =
+            document.createElement(
+              "input",
+            );
+
+          checkbox.type =
+            "checkbox";
+
+          checkbox.name =
+            question.id;
+
+          checkbox.value =
+            "true";
+
+          input.append(
+            checkbox,
+            document.createTextNode(
+              textFor(
+                question.label,
+              ),
+            ),
+          );
+
+          // The label itself is rendered by the checkbox, so remove
+          // the heading to avoid duplicated confirmation text.
+          heading.remove();
+        } else if (
+          question.type ===
           "yes_no"
         ) {
           input =
@@ -1184,6 +1281,23 @@
       ) {
         if (
           question.type ===
+          "confirmation"
+        ) {
+          const element =
+            form.querySelector(
+              `input[name="${CSS.escape(
+                question.id,
+              )}"]`,
+            );
+
+          result[
+            question.id
+          ] =
+            Boolean(
+              element?.checked,
+            );
+        } else if (
+          question.type ===
             "single_choice" ||
           question.type ===
             "yes_no"
@@ -1264,8 +1378,15 @@
           );
 
         if (
-          question.required &&
-          empty
+          (
+            question.type ===
+              "confirmation" &&
+            value !== true
+          ) ||
+          (
+            question.required &&
+            empty
+          )
         ) {
           throw new Error(
             "REQUIRED",
@@ -1405,7 +1526,9 @@
             );
 
           submitStatus.textContent =
-            ui.done;
+            result.updated
+              ? ui.updated
+              : ui.done;
         } catch (
           error
         ) {
