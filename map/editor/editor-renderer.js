@@ -100,7 +100,7 @@ export function viewportCenterGrid(state) {
   return nearestValidGridCoordinate(x, y);
 }
 
-export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, requestBuildingAffiliation = () => null, resolveBuildingName = () => null, notifyInvalidPlacement = () => {}, notifyRangePresetError = error => globalThis.alert?.(error?.message ?? String(error)), confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
+export function createMapRenderer({ host, engine, controller = null, rangeController = null, bulkDeleteController = null, rangeEraseController = null, buildingFilter = null, editableFixed = false, requestBuildingName = () => null, requestBuildingAffiliation = () => null, resolveBuildingName = () => null, notifyInvalidPlacement = () => {}, notifyRangePresetError = error => globalThis.alert?.(error?.message ?? String(error)), confirmBulkDelete = () => true, notifyBulkDeleteEmpty = () => {}, confirmRangeErase = () => true, notifyRangeEraseEmpty = () => {}, editorHost = globalThis.S967EditorHost, devicePixelRatioOverride = null, onSelectionChange = () => {}, onRangeSelectionChange = () => {}, onRangeStateChange = () => {}, onBulkDeleteStateChange = () => {}, onRangeEraseStateChange = () => {}, onViewportChange = () => {}, onDocumentChange = () => {} }) {
   if (!(host instanceof HTMLElement)) throw new TypeError("A map canvas host is required.");
   const documentView = engine.getView();
   let state = createViewportState(documentView);
@@ -548,7 +548,22 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
   function resize() {
     const rect = host.getBoundingClientRect();
-    const dpr = Math.max(1, globalThis.devicePixelRatio || 1);
+    const requestedDpr =
+      Number(
+        devicePixelRatioOverride
+      );
+
+    const dpr =
+      Number.isFinite(
+        requestedDpr
+      ) &&
+      requestedDpr > 0
+        ? requestedDpr
+        : Math.max(
+            1,
+            globalThis.devicePixelRatio ||
+              1
+          );
     state = resizeViewport(state, rect.width, rect.height, dpr);
     canvas.width = Math.max(1, Math.round(rect.width * dpr));
     canvas.height = Math.max(1, Math.round(rect.height * dpr));
@@ -1491,6 +1506,58 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   return {
     canvas,
     getState: () => ({ ...state }),
+    setSceneViewport({
+      sceneCenterX,
+      sceneCenterY,
+      zoom,
+    }) {
+      const nextSceneCenterX =
+        Number(sceneCenterX);
+
+      const nextSceneCenterY =
+        Number(sceneCenterY);
+
+      const nextZoom =
+        Number(zoom);
+
+      if (
+        !Number.isFinite(
+          nextSceneCenterX
+        ) ||
+        !Number.isFinite(
+          nextSceneCenterY
+        ) ||
+        !Number.isFinite(
+          nextZoom
+        )
+      ) {
+        throw new TypeError(
+          "Invalid scene viewport."
+        );
+      }
+
+      state = {
+        ...state,
+        sceneCenterX:
+          nextSceneCenterX,
+        sceneCenterY:
+          nextSceneCenterY,
+        zoom:
+          clampZoom(
+            nextZoom
+          ),
+      };
+
+      onViewportChange({
+        ...state,
+      });
+
+      invalidate();
+
+      return {
+        ...state,
+      };
+    },
     centerAtGrid(x, y) { const [sceneCenterX, sceneCenterY] = gridToScene(...nearestValidGridCoordinate(x, y)); state = { ...state, sceneCenterX, sceneCenterY }; syncNavigation(); return { ...state }; },
     setZoom(requestedZoom) {
       state = zoomViewportAt(state, requestedZoom, state.width / 2, state.height / 2);
