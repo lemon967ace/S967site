@@ -5184,6 +5184,10 @@
         onDocumentChange: document => minimap?.setDocument(document),
       });
 
+      mapRenderer.setHighlightedBuildingIds?.(
+        buildingSearchHighlightedIds
+      );
+
       minimap = createMinimap({ host: minimapHost, renderer: mapRenderer, getDocument: () => PNSMapEngine.getDocument() });
       minimap.setViewport(mapRenderer.getState());
       minimapPanel.hidden = false;
@@ -5340,12 +5344,6 @@
         text.loading,
         text.loadingMap
       );
-
-      mapRenderer
-        .setHighlightedBuildingIds?.(
-          buildingSearchHighlightedIds
-        );
-
 
       try {
         const response =
