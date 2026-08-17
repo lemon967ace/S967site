@@ -78,45 +78,125 @@ export function preferredFontSizeForZoom(zoom) {
   );
 }
 
-export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText }) {
-  const availableWidth = bounds.width * zoom * HORIZONTAL_MARGIN_RATIO;
-  const availableHeight = bounds.height * zoom * VERTICAL_MARGIN_RATIO;
-  const preferred = preferredFontSizeForZoom(zoom);
-  for (let fontSize = preferred; fontSize >= MINIMUM_FONT_PIXEL_SIZE; fontSize--) {
-    const coordinate = `(${building.x}, ${building.y})`;
-    const coordinateSize = measureText(coordinate, fontSize);
-    const lineHeight = measureText("가", fontSize).height;
+export function chooseBuildingLabelLayout({
+  building,
+  bounds,
+  zoom,
+  measureText
+}) {
+  const availableWidth =
+    bounds.width *
+    zoom *
+    HORIZONTAL_MARGIN_RATIO;
+
+  const availableHeight =
+    bounds.height *
+    zoom *
+    VERTICAL_MARGIN_RATIO;
+
+  const preferred =
+    preferredFontSizeForZoom(zoom);
+
+  for (
+    let fontSize = preferred;
+    fontSize >= MINIMUM_FONT_PIXEL_SIZE;
+    fontSize--
+  ) {
+    const coordinate =
+      `(${building.x}, ${building.y})`;
+
+    const coordinateSize =
+      measureText(
+        coordinate,
+        fontSize
+      );
+
+    const lineHeight =
+      measureText(
+        "가",
+        fontSize
+      ).height;
+
+    /*
+      99% 초과에서만
+      이름 + 좌표 표시
+    */
     if (
-  zoom > 0.99 &&
-  coordinateSize.height + lineHeight <= availableHeight
-) {
-      const name = truncateToFit(building.name, fontSize, availableWidth, lineHeight, measureText);
-      const detail = `${name.text}\n${coordinate}`;
-      if (name.text && fits(detail, fontSize, availableWidth, availableHeight, measureText)) return { mode: "detail", text: detail, fontPixelSize: fontSize, wasTruncated: name.wasTruncated };
+      zoom > 0.99 &&
+      coordinateSize.height +
+        lineHeight <=
+        availableHeight
+    ) {
+      const name =
+        truncateToFit(
+          building.name,
+          fontSize,
+          availableWidth,
+          lineHeight,
+          measureText
+        );
+
+      const detail =
+        `${name.text}\n${coordinate}`;
+
+      if (
+        name.text &&
+        fits(
+          detail,
+          fontSize,
+          availableWidth,
+          availableHeight,
+          measureText
+        )
+      ) {
+        return {
+          mode: "detail",
+          text: detail,
+          fontPixelSize:
+            fontSize,
+          wasTruncated:
+            name.wasTruncated,
+        };
+      }
     }
-   const nameOnlyFontSize =
-  Math.round(
-    fontSize * 1.4
-  );
 
-const name =
-  truncateToFit(
-    building.name,
-    nameOnlyFontSize,
-    availableWidth,
-    availableHeight,
-    measureText
-  );
+    /*
+      좌표가 없을 때는
+      이름을 1.4배 크게
+    */
+    const nameOnlyFontSize =
+      Math.round(
+        fontSize * 1.4
+      );
 
-if (name.text) {
+    const name =
+      truncateToFit(
+        building.name,
+        nameOnlyFontSize,
+        availableWidth,
+        availableHeight,
+        measureText
+      );
+
+    if (name.text) {
+      return {
+        mode: "name_only",
+        text: name.text,
+        fontPixelSize:
+          nameOnlyFontSize,
+        wasTruncated:
+          name.wasTruncated,
+      };
+    }
+  }
+
   return {
-    mode: "name_only",
-    text: name.text,
-    fontPixelSize: nameOnlyFontSize,
-    wasTruncated: name.wasTruncated,
+    mode: "hidden",
+    text: "",
+    fontPixelSize:
+      MINIMUM_FONT_PIXEL_SIZE,
+    wasTruncated: false,
   };
-}
-  return { mode: "hidden", text: "", fontPixelSize: MINIMUM_FONT_PIXEL_SIZE, wasTruncated: false };
 }
 
 export function labelSceneCenter(geometry) {
