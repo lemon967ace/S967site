@@ -106,6 +106,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   let state = createViewportState(documentView);
   let frame = 0, destroyed = false, panning = null, clickCandidate = null, rangeDrawing = null, bulkDrawing = null, eraseDrawing = null, spacePressed = false;
   let highlightedBuildingIds = new Set();
+  let duplicateHighlightedBuildingIds = new Set();
   const interaction = new BuildingInteractionState();
   let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
@@ -426,14 +427,38 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       const geometry = byId.get(building.id);
 
       if (
+        duplicateHighlightedBuildingIds.has(
+          building.id
+        )
+      ) {
+        /*
+          Duplicate-name highlight:
+          strong dark outer stroke + red inner stroke.
+        */
+        strokeGeometry(
+          geometry,
+          "rgba(0,0,0,0.95)",
+          Math.max(
+            4.5,
+            9 * state.zoom
+          )
+        );
+
+        strokeGeometry(
+          geometry,
+          "#FF2B2B",
+          Math.max(
+            3,
+            5.5 * state.zoom
+          )
+        );
+      } else if (
         highlightedBuildingIds.has(
           building.id
         )
       ) {
         /*
-          Search/list highlight:
-          dark outer stroke + bright inner stroke so it remains visible
-          on every building color and at low zoom.
+          Normal building-search highlight.
         */
         strokeGeometry(
           geometry,
@@ -1496,6 +1521,20 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       invalidate();
       return new Set(
         highlightedBuildingIds
+      );
+    },
+    getDuplicateHighlightedBuildingIds: () =>
+      new Set(
+        duplicateHighlightedBuildingIds
+      ),
+    setDuplicateHighlightedBuildingIds(ids = []) {
+      duplicateHighlightedBuildingIds =
+        new Set(
+          ids ?? []
+        );
+      invalidate();
+      return new Set(
+        duplicateHighlightedBuildingIds
       );
     },
     getSelectedBuilding: () => [...engine.getDocument().fixedBuildings, ...engine.getDocument().buildings].find(building => building.id === interaction.selectedBuildingId) ?? null,
