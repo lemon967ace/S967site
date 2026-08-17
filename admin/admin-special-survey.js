@@ -15,6 +15,7 @@
     titleInputs={ko:$("specialSurveyTitleKo"),en:$("specialSurveyTitleEn"),ja:$("specialSurveyTitleJa"),ru:$("specialSurveyTitleRu")},
     descInputs={ko:$("specialSurveyDescKo"),en:$("specialSurveyDescEn"),ja:$("specialSurveyDescJa"),ru:$("specialSurveyDescRu")},
     identity=$("specialSurveyIdentity"), duplicate=$("specialSurveyDuplicate"),
+    duplicateWrap=$("specialSurveyDuplicateWrap"),
     starts=$("specialSurveyStarts"), ends=$("specialSurveyEnds"),
     questionsHost=$("specialSurveyQuestions"), addQuestion=$("specialSurveyAddQuestion"),
     saveButton=$("specialSurveySave"), cancelButton=$("specialSurveyCancel"),
@@ -55,6 +56,7 @@
       const buttons=[];
       if(s.status==="draft")buttons.push(["편집",()=>editSurvey(s)],["공개",()=>act("open",s)],["삭제",()=>act("delete",s)]);
       if(s.status==="open")buttons.push(["종료",()=>act("close",s)]);
+      if(s.status==="closed")buttons.push(["삭제",()=>act("delete",s)]);
       buttons.push(["결과",()=>showResults(s)],["복제",()=>act("duplicate",s)]);
       for(const [label,fn] of buttons){const b=document.createElement("button");b.type="button";b.textContent=label;b.onclick=fn;row.append(b)}
       card.append(row);listHost.append(card);
@@ -65,15 +67,25 @@
     idInput.value="";slugInput.value="";defaultLang.value="ko";
     [...enabledLangs.options].forEach(o=>o.selected=o.value==="ko");
     Object.values(titleInputs).forEach(x=>x.value="");Object.values(descInputs).forEach(x=>x.value="");
-    identity.value="anonymous";duplicate.value="one_per_browser";starts.value="";ends.value="";
+    identity.value="nickname";duplicate.value="one_per_browser";starts.value="";ends.value="";
+    refreshResponsePolicyUi();
     questionsHost.replaceChildren();addQuestionRow();
+  }
+
+  function refreshResponsePolicyUi(){
+    const nicknameMode=identity.value==="nickname";
+    if(duplicateWrap)duplicateWrap.classList.toggle("hidden",nicknameMode);
+    if(nicknameMode)duplicate.value="one_per_identity";
+    else if(duplicate.value==="one_per_identity")duplicate.value="one_per_browser";
   }
   function openNew(){resetEditor();editorTitle.textContent="새 특수설문";editor.classList.remove("hidden");results.classList.add("hidden");slugInput.focus()}
   function editSurvey(s){
     resetEditor();idInput.value=s.id;slugInput.value=s.slug;defaultLang.value=s.default_language;
     [...enabledLangs.options].forEach(o=>o.selected=(s.enabled_languages||[]).includes(o.value));
     for(const l of ["ko","en","ja","ru"]){titleInputs[l].value=s.title?.[l]||"";descInputs[l].value=s.description?.[l]||""}
-    identity.value=s.identity_mode;duplicate.value=s.duplicate_policy;
+    identity.value=s.identity_mode==="account"?"nickname":s.identity_mode;
+    duplicate.value=s.duplicate_policy;
+    refreshResponsePolicyUi();
     starts.value=toLocalInput(s.starts_at);ends.value=toLocalInput(s.ends_at);
     questionsHost.replaceChildren();for(const q of s.questions||[])addQuestionRow(q);
     editorTitle.textContent="특수설문 편집";editor.classList.remove("hidden");results.classList.add("hidden");
@@ -90,6 +102,7 @@
           <option value="short_text">한 줄 입력</option><option value="long_text">긴 글 입력</option>
           <option value="single_choice">단일 선택</option><option value="multiple_choice">복수 선택</option>
           <option value="number">숫자</option><option value="yes_no">예/아니오</option>
+          <option value="confirmation">확인 체크박스 (항상 필수)</option>
         </select>
         <label><input data-f="required" type="checkbox"> 필수</label>
         <button data-action="up" type="button">↑</button><button data-action="down" type="button">↓</button>
@@ -104,7 +117,8 @@
         <input data-f="min" type="number" placeholder="최솟값"><input data-f="max" type="number" placeholder="최댓값">
       </div>`;
     box.querySelector('[data-f="type"]').value=q.type||"short_text";
-    box.querySelector('[data-f="required"]').checked=q.required===true;
+    box.querySelector('[data-f="required"]').checked=q.type==="confirmation"||q.required===true;
+    box.querySelector('[data-f="required"]').disabled=q.type==="confirmation";
     for(const l of ["ko","en","ja","ru"])box.querySelector(`[data-label="${l}"]`).value=q.label?.[l]||"";
     if(q.min!=null)box.querySelector('[data-f="min"]').value=q.min;if(q.max!=null)box.querySelector('[data-f="max"]').value=q.max;
     const optionsHost=box.querySelector("[data-options]");
@@ -122,7 +136,17 @@
     }
     const add=document.createElement("button");add.type="button";add.dataset.addOption="1";add.textContent="+ 선택지";add.onclick=()=>addOption();optionsHost.append(add);
     for(const o of q.options||[])addOption(o);
-    box.querySelector('[data-f="type"]').onchange=refreshType;
+    box.querySelector('[data-f="type"]').onchange=()=>{
+      const type=box.querySelector('[data-f="type"]').value;
+      const required=box.querySelector('[data-f="required"]');
+      if(type==="confirmation"){
+        required.checked=true;
+        required.disabled=true;
+      }else{
+        required.disabled=false;
+      }
+      refreshType();
+    };
     box.querySelector('[data-action="remove"]').onclick=()=>box.remove();
     box.querySelector('[data-action="up"]').onclick=()=>box.previousElementSibling&&questionsHost.insertBefore(box,box.previousElementSibling);
     box.querySelector('[data-action="down"]').onclick=()=>box.nextElementSibling&&questionsHost.insertBefore(box.nextElementSibling,box);
@@ -133,7 +157,7 @@
     const langs=[...enabledLangs.selectedOptions].map(o=>o.value);
     const qs=[...questionsHost.children].map(box=>{
       const type=box.querySelector('[data-f="type"]').value;
-      const q={id:box.dataset.qid,type,required:box.querySelector('[data-f="required"]').checked,label:{}};
+      const q={id:box.dataset.qid,type,required:type==="confirmation"||box.querySelector('[data-f="required"]').checked,label:{}};
       for(const l of ["ko","en","ja","ru"]){const v=box.querySelector(`[data-label="${l}"]`).value.trim();if(v)q.label[l]=v}
       if(type==="single_choice"||type==="multiple_choice"){
         q.options=[...box.querySelectorAll("[data-oid]")].map(row=>{const o={id:row.dataset.oid,label:{}};for(const l of ["ko","en","ja","ru"]){const v=row.querySelector(`[data-ol="${l}"]`).value.trim();if(v)o.label[l]=v}return o})
@@ -144,7 +168,8 @@
     return {
       slug:slugInput.value.trim(),default_language:defaultLang.value,enabled_languages:langs,
       title:translations(titleInputs),description:translations(descInputs),identity_mode:identity.value,
-      duplicate_policy:duplicate.value,starts_at:starts.value?new Date(starts.value).toISOString():null,
+      duplicate_policy:identity.value==="nickname"?"one_per_identity":duplicate.value,
+      starts_at:starts.value?new Date(starts.value).toISOString():null,
       ends_at:ends.value?new Date(ends.value).toISOString():null,questions:qs
     };
   }
@@ -172,6 +197,7 @@
   function answerText(q,v){
     if(v==null)return "";
     if(q.type==="yes_no")return v?"Yes":"No";
+    if(q.type==="confirmation")return v?"확인":"미확인";
     if(q.type==="single_choice"){const o=(q.options||[]).find(x=>x.id===v);return o?t(o.label,resultSurvey.default_language,resultSurvey.default_language):String(v)}
     if(q.type==="multiple_choice")return (Array.isArray(v)?v:[]).map(id=>{const o=(q.options||[]).find(x=>x.id===id);return o?t(o.label,resultSurvey.default_language,resultSurvey.default_language):id}).join(", ");
     return String(v);
@@ -181,21 +207,22 @@
     if(!resultRows.length){resultsHost.innerHTML='<div class="small">응답이 없습니다.</div>';return}
     const wrap=document.createElement("div");wrap.style.overflowX="auto";const table=document.createElement("table");table.style.minWidth="900px";
     const qs=resultSurvey.questions||[];
-    table.innerHTML=`<thead><tr><th>시각</th><th>응답자</th>${qs.map(q=>`<th>${esc(t(q.label,resultSurvey.default_language,resultSurvey.default_language))}</th>`).join("")}</tr></thead>`;
+    table.innerHTML=`<thead><tr><th>최초 제출</th><th>마지막 수정</th><th>응답자</th>${qs.map(q=>`<th>${esc(t(q.label,resultSurvey.default_language,resultSurvey.default_language))}</th>`).join("")}</tr></thead>`;
     const tb=document.createElement("tbody");
-    for(const r of resultRows){const tr=document.createElement("tr");tr.innerHTML=`<td>${esc(localDate(r.created_at))}</td><td>${esc(r.respondent_label||r.respondent_kind||"익명")}</td>${qs.map(q=>`<td>${esc(answerText(q,r.answers?.[q.id]))}</td>`).join("")}`;tb.append(tr)}
+    for(const r of resultRows){const tr=document.createElement("tr");tr.innerHTML=`<td>${esc(localDate(r.created_at))}</td><td>${esc(localDate(r.updated_at||r.created_at))}</td><td>${esc(r.respondent_label||r.respondent_kind||"익명")}</td>${qs.map(q=>`<td>${esc(answerText(q,r.answers?.[q.id]))}</td>`).join("")}`;tb.append(tr)}
     table.append(tb);wrap.append(table);resultsHost.append(wrap);
   }
   function csvCell(v){const s=String(v??"");return `"${s.replaceAll('"','""')}"`}
   function exportCsv(){
     if(!resultSurvey)return;const qs=resultSurvey.questions||[];
-    const rows=[["created_at","respondent",...qs.map(q=>t(q.label,resultSurvey.default_language,resultSurvey.default_language))]];
-    for(const r of resultRows)rows.push([r.created_at,r.respondent_label||r.respondent_kind||"anonymous",...qs.map(q=>answerText(q,r.answers?.[q.id]))]);
+    const rows=[["created_at","updated_at","respondent",...qs.map(q=>t(q.label,resultSurvey.default_language,resultSurvey.default_language))]];
+    for(const r of resultRows)rows.push([r.created_at,r.updated_at||r.created_at,r.respondent_label||r.respondent_kind||"anonymous",...qs.map(q=>answerText(q,r.answers?.[q.id]))]);
     const csv="\uFEFF"+rows.map(row=>row.map(csvCell).join(",")).join("\r\n");
     const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download=`special-survey-${resultSurvey.slug}.csv`;a.click();URL.revokeObjectURL(a.href);
   }
 
   $("specialSurveyNew").onclick=openNew;addQuestion.onclick=()=>addQuestionRow();saveButton.onclick=save;
+  identity.onchange=refreshResponsePolicyUi;
   cancelButton.onclick=()=>editor.classList.add("hidden");closeResults.onclick=()=>results.classList.add("hidden");exportButton.onclick=exportCsv;
   tab.addEventListener("click",()=>load().catch(e=>setStatus(e.message,true)));
 })();
