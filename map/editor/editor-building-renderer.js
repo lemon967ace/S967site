@@ -87,16 +87,35 @@ export function chooseBuildingLabelLayout({ building, bounds, zoom, measureText 
     const coordinateSize = measureText(coordinate, fontSize);
     const lineHeight = measureText("가", fontSize).height;
     if (
-  zoom > 0.8 &&
+  zoom > 0.99 &&
   coordinateSize.height + lineHeight <= availableHeight
 ) {
       const name = truncateToFit(building.name, fontSize, availableWidth, lineHeight, measureText);
       const detail = `${name.text}\n${coordinate}`;
       if (name.text && fits(detail, fontSize, availableWidth, availableHeight, measureText)) return { mode: "detail", text: detail, fontPixelSize: fontSize, wasTruncated: name.wasTruncated };
     }
-    const name = truncateToFit(building.name, fontSize, availableWidth, availableHeight, measureText);
-    if (name.text) return { mode: "name_only", text: name.text, fontPixelSize: fontSize, wasTruncated: name.wasTruncated };
-  }
+   const nameOnlyFontSize =
+  Math.round(
+    fontSize * 1.4
+  );
+
+const name =
+  truncateToFit(
+    building.name,
+    nameOnlyFontSize,
+    availableWidth,
+    availableHeight,
+    measureText
+  );
+
+if (name.text) {
+  return {
+    mode: "name_only",
+    text: name.text,
+    fontPixelSize: nameOnlyFontSize,
+    wasTruncated: name.wasTruncated,
+  };
+}
   return { mode: "hidden", text: "", fontPixelSize: MINIMUM_FONT_PIXEL_SIZE, wasTruncated: false };
 }
 
