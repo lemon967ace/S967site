@@ -105,6 +105,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   const documentView = engine.getView();
   let state = createViewportState(documentView);
   let frame = 0, destroyed = false, panning = null, clickCandidate = null, rangeDrawing = null, bulkDrawing = null, eraseDrawing = null, spacePressed = false;
+  let highlightedBuildingIds = new Set();
   const interaction = new BuildingInteractionState();
   let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
@@ -423,6 +424,36 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     for (const building of ordered) { const appearance = building.fixed ? { visible: true, bodyAlpha: 1 } : (buildingFilter?.appearance(building, interaction.selectedBuildingId) ?? { visible: true, bodyAlpha: 1 }); if (appearance.visible) { context.save(); context.globalAlpha = appearance.bodyAlpha; drawBuildingBody(byId.get(building.id), building.fixed ? fixedBuildingTypes.get(building.typeId) : buildingTypes.get(building.typeId), building.fixed); context.restore(); } }
     for (const building of ordered) {
       const geometry = byId.get(building.id);
+
+      if (
+        highlightedBuildingIds.has(
+          building.id
+        )
+      ) {
+        /*
+          Search/list highlight:
+          dark outer stroke + bright inner stroke so it remains visible
+          on every building color and at low zoom.
+        */
+        strokeGeometry(
+          geometry,
+          "rgba(0,0,0,0.95)",
+          Math.max(
+            4,
+            8 * state.zoom
+          )
+        );
+
+        strokeGeometry(
+          geometry,
+          "#FFE600",
+          Math.max(
+            2.5,
+            4.5 * state.zoom
+          )
+        );
+      }
+
       if (building.id === interaction.hoveredBuildingId && building.id !== interaction.selectedBuildingId) strokeGeometry(geometry, "rgba(80, 175, 255, 0.95)", Math.max(1.5, 2 * state.zoom));
       if (building.id === interaction.selectedBuildingId) strokeGeometry(geometry, "#FFD54F", Math.max(2, 5 * state.zoom));
     }
@@ -1456,6 +1487,17 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     },
     getSelectedBuildingId: () => interaction.selectedBuildingId,
     getHoveredBuildingId: () => interaction.hoveredBuildingId,
+    getHighlightedBuildingIds: () => new Set(highlightedBuildingIds),
+    setHighlightedBuildingIds(ids = []) {
+      highlightedBuildingIds =
+        new Set(
+          ids ?? []
+        );
+      invalidate();
+      return new Set(
+        highlightedBuildingIds
+      );
+    },
     getSelectedBuilding: () => [...engine.getDocument().fixedBuildings, ...engine.getDocument().buildings].find(building => building.id === interaction.selectedBuildingId) ?? null,
     selectBuilding(id) { refreshDocument(); const building = [...mapDocument.fixedBuildings, ...mapDocument.buildings].find(item => item.id === id) ?? null; controller?.selectBuilding(building && (!building.fixed || editableFixed) ? building.id : null); if (interaction.select(building?.id)) { onSelectionChange(building); invalidate(); } return building; },
     clearSelection() { if (interaction.clearSelection()) { onSelectionChange(null); invalidate(); } },
