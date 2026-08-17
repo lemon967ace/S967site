@@ -10,7 +10,7 @@ import {
   sceneToGridContinuous,
   visibleGridBoundaryRanges,
 } from "./editor-coordinates.js";
-import { visibleRangeCells } from "./editor-range.js";
+import { rectangleCells, visibleRangeCells } from "./editor-range.js";
 import {
   BuildingInteractionState,
   buildingRenderGeometry,
@@ -138,7 +138,7 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     frame = requestAnimationFrame(() => { frame = 0; draw(); });
   }
 
-  function normalizedGridSelection(
+  function imageExportRangeCells(
     startCell,
     endCell
   ) {
@@ -146,66 +146,35 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       !startCell ||
       !endCell
     ) {
-      return null;
+      return [];
     }
 
-    return {
-      minX:
-        Math.min(
-          startCell[0],
-          endCell[0]
-        ),
-      maxX:
-        Math.max(
-          startCell[0],
-          endCell[0]
-        ),
-      minY:
-        Math.min(
-          startCell[1],
-          endCell[1]
-        ),
-      maxY:
-        Math.max(
-          startCell[1],
-          endCell[1]
-        ),
-    };
+    /*
+      IMPORTANT:
+      Use the EXACT same rectangleCells() function as ordinary
+      map-range creation. This is not an X/Y min/max rectangle.
+      rectangleCells() works in the map's rotated u/v coordinates.
+    */
+    return rectangleCells(
+      startCell,
+      endCell
+    );
   }
 
-  function gridSelectionSceneBounds(
-    selection
+  function imageExportSceneBounds(
+    cells
   ) {
-    if (!selection) {
+    if (!cells?.length) {
       return null;
     }
 
     /*
-      Use the real diamond geometry of the four extreme cells.
-      The resulting axis-aligned scene rectangle is guaranteed to
-      contain the complete selected map range.
+      Convert the completed ordinary range shape (parallelogram on
+      the isometric map) into the smallest axis-aligned scene
+      rectangle that fully contains every selected diamond.
     */
-    const cornerCells = [
-      [
-        selection.minX,
-        selection.minY,
-      ],
-      [
-        selection.maxX,
-        selection.minY,
-      ],
-      [
-        selection.maxX,
-        selection.maxY,
-      ],
-      [
-        selection.minX,
-        selection.maxY,
-      ],
-    ];
-
     const vertices =
-      cornerCells.flatMap(
+      cells.flatMap(
         cell =>
           diamondVertices(
             ...cell
@@ -216,178 +185,30 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       left:
         Math.min(
           ...vertices.map(
-            point =>
-              point[0]
+            point => point[0]
           )
         ),
       right:
         Math.max(
           ...vertices.map(
-            point =>
-              point[0]
+            point => point[0]
           )
         ),
       top:
         Math.min(
           ...vertices.map(
-            point =>
-              point[1]
+            point => point[1]
           )
         ),
       bottom:
         Math.max(
           ...vertices.map(
-            point =>
-              point[1]
+            point => point[1]
           )
         ),
     };
   }
 
-  function convexHull(
-    points
-  ) {
-    const unique =
-      [
-        ...new Map(
-          points.map(
-            point => [
-              `${point[0]},${point[1]}`,
-              point,
-            ]
-          )
-        ).values(),
-      ];
-
-    if (
-      unique.length <= 2
-    ) {
-      return unique;
-    }
-
-    const sorted =
-      unique.sort(
-        (a, b) =>
-          a[0] - b[0] ||
-          a[1] - b[1]
-      );
-
-    const cross =
-      (o, a, b) =>
-        (
-          a[0] - o[0]
-        ) *
-          (
-            b[1] - o[1]
-          ) -
-        (
-          a[1] - o[1]
-        ) *
-          (
-            b[0] - o[0]
-          );
-
-    const lower = [];
-
-    for (
-      const point
-      of sorted
-    ) {
-      while (
-        lower.length >= 2 &&
-        cross(
-          lower[
-            lower.length - 2
-          ],
-          lower[
-            lower.length - 1
-          ],
-          point
-        ) <= 0
-      ) {
-        lower.pop();
-      }
-
-      lower.push(
-        point
-      );
-    }
-
-    const upper = [];
-
-    for (
-      let index =
-        sorted.length - 1;
-      index >= 0;
-      index -= 1
-    ) {
-      const point =
-        sorted[index];
-
-      while (
-        upper.length >= 2 &&
-        cross(
-          upper[
-            upper.length - 2
-          ],
-          upper[
-            upper.length - 1
-          ],
-          point
-        ) <= 0
-      ) {
-        upper.pop();
-      }
-
-      upper.push(
-        point
-      );
-    }
-
-    lower.pop();
-    upper.pop();
-
-    return [
-      ...lower,
-      ...upper,
-    ];
-  }
-
-  function gridSelectionSceneHull(
-    selection
-  ) {
-    if (!selection) {
-      return [];
-    }
-
-    const cornerCells = [
-      [
-        selection.minX,
-        selection.minY,
-      ],
-      [
-        selection.maxX,
-        selection.minY,
-      ],
-      [
-        selection.maxX,
-        selection.maxY,
-      ],
-      [
-        selection.minX,
-        selection.maxY,
-      ],
-    ];
-
-    return convexHull(
-      cornerCells.flatMap(
-        cell =>
-          diamondVertices(
-            ...cell
-          )
-      )
-    );
-  }
 
   function draw() {
     const dpr = state.devicePixelRatio;
@@ -680,68 +501,34 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
       imageExportSelection.hoverCell ??
       imageExportSelection.startCell;
 
-    const selection =
-      normalizedGridSelection(
+    const previewCells =
+      imageExportRangeCells(
         imageExportSelection.startCell,
         endCell
       );
 
-    const hull =
-      gridSelectionSceneHull(
-        selection
-      );
-
-    if (
-      hull.length < 3
+    /*
+      Draw the same previewCells shape that normal range creation
+      produces. In isometric view this is the familiar parallelogram.
+    */
+    for (
+      const cell
+      of previewCells
     ) {
-      return;
-    }
-
-    context.save();
-
-    context.beginPath();
-
-    hull.forEach(
-      (
-        point,
-        index
-      ) => {
-        const screen =
-          sceneToScreen(
-            ...point,
-            state
-          );
-
-        if (index === 0) {
-          context.moveTo(
-            ...screen
-          );
-        } else {
-          context.lineTo(
-            ...screen
-          );
-        }
-      }
-    );
-
-    context.closePath();
-
-    context.fillStyle =
-      "rgba(124,58,237,.16)";
-    context.fill();
-
-    context.strokeStyle =
-      "#7C3AED";
-    context.lineWidth =
-      Math.max(
-        2,
-        2.4 * state.zoom
+      traceCell(
+        cell
       );
-    context.stroke();
 
-    context.restore();
+      context.fillStyle =
+        "rgba(124,58,237,.22)";
+      context.fill();
+
+      context.strokeStyle =
+        "#7C3AED";
+      context.lineWidth = 2;
+      context.stroke();
+    }
   }
-
 
   function addGridLine(axis, boundary) {
     const [start, end] = gridLineSceneEndpoints(axis, boundary);
@@ -923,7 +710,28 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     const rect = canvas.getBoundingClientRect();
     const [sceneX, sceneY] = screenToScene(event.clientX - rect.left, event.clientY - rect.top, state);
     const cell = sceneToGrid(sceneX, sceneY);
-    if (cell) { editorHost?.setCursor?.(...cell); controller?.updatePreview(...cell); rangeController?.hover(cell); } else editorHost?.clearCursor?.();
+    if (cell) {
+      editorHost?.setCursor?.(...cell);
+      controller?.updatePreview(...cell);
+      rangeController?.hover(cell);
+
+      /*
+        PNG 영역 선택도 일반 범위 생성과 똑같이
+        마우스 버튼을 누르고 있지 않아도 현재 hover 셀을 따라간다.
+      */
+      if (
+        imageExportSelection?.active &&
+        imageExportSelection.startCell
+      ) {
+        imageExportSelection.hoverCell =
+          [...cell];
+
+        invalidate();
+      }
+    } else {
+      editorHost?.clearCursor?.();
+    }
+
     if (!panning && event.pointerType !== "touch") updateHoverAt(sceneX, sceneY);
   }
 
@@ -1324,9 +1132,6 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
           imageExportSelection.hoverCell =
             [...cell];
-        } else {
-          imageExportSelection.hoverCell =
-            [...cell];
         }
 
         imageExportDrawing =
@@ -1584,24 +1389,6 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     }
 
     if (
-      imageExportDrawing ===
-        event.pointerId &&
-      imageExportSelection?.active
-    ) {
-      const cell =
-        eventCell(event);
-
-      if (cell) {
-        imageExportSelection.hoverCell =
-          [...cell];
-      }
-
-      invalidate();
-      return;
-    }
-
-
-    if (
       bulkDrawing ===
       event.pointerId
     ) {
@@ -1795,16 +1582,24 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
           second click selects the end cell.
         */
         if (!sameAsStart) {
-          const selection =
-            normalizedGridSelection(
-              imageExportSelection
+          const startCell =
+            [
+              ...imageExportSelection
                 .startCell,
-              cell
+            ];
+
+          const endCell =
+            [...cell];
+
+          const cells =
+            imageExportRangeCells(
+              startCell,
+              endCell
             );
 
           const sceneBounds =
-            gridSelectionSceneBounds(
-              selection
+            imageExportSceneBounds(
+              cells
             );
 
           const onComplete =
@@ -1823,7 +1618,13 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
 
           try {
             onComplete?.({
-              ...selection,
+              startCell,
+              endCell,
+              cells:
+                cells.map(
+                  value =>
+                    [...value]
+                ),
               sceneBounds,
             });
           } catch (error) {
