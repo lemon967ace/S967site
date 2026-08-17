@@ -5745,35 +5745,35 @@
         ko: {
           button: "PNG",
           buttonTitle: "맵 일부를 300% 고해상도 PNG로 저장",
-          hint: "범위 만들기와 같은 방식으로 시작 셀과 끝 셀을 차례로 선택하세요. 실제 300% 줌으로 렌더링하며 최대 8192×8192 px입니다. Esc: 취소",
+          hint: "일반 범위 만들기와 동일하게 첫 셀을 클릭하고, 마우스로 범위를 미리 본 뒤 끝 셀을 클릭합니다. 실제 300% 줌, 최대 8192×8192 px.",
           tooLarge: "선택 범위가 너무 큽니다. 출력 이미지는 최대 8192×8192 px까지 가능합니다.",
           failed: "이미지를 만들지 못했습니다.",
         },
         en: {
           button: "PNG",
           buttonTitle: "Save part of the map as a high-resolution 300% PNG",
-          hint: "Select the start and end cells exactly like creating a map range. It is re-rendered at a true 300% zoom, up to 8192×8192 px. Esc: cancel",
+          hint: "Exactly like creating a normal map range: click the first cell, preview by moving the mouse, then click the end cell. True 300% render, up to 8192×8192 px.",
           tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
           failed: "Could not create the image.",
         },
         ja: {
           button: "PNG",
           buttonTitle: "マップの一部を300%高解像度PNGとして保存",
-          hint: "マップ範囲作成と同じように開始セルと終了セルを順に選択してください。実際の300%ズームで再描画し、最大8192×8192 pxです。Esc: キャンセル",
+          hint: "通常の範囲作成と同じです。最初のセルをクリックし、マウス移動で範囲を確認してから終了セルをクリックします。実際の300%ズーム、最大8192×8192 pxです。",
           tooLarge: "選択範囲が大きすぎます。出力画像は最大8192×8192 pxです。",
           failed: "画像を作成できませんでした。",
         },
         ru: {
           button: "PNG",
           buttonTitle: "Сохранить часть карты как PNG высокого разрешения при 300%",
-          hint: "Выберите начальную и конечную клетки так же, как при создании диапазона карты. Повторная отрисовка выполняется при 300%, максимум 8192×8192 px. Esc: отмена",
+          hint: "Точно как обычный диапазон карты: щёлкните первую клетку, просмотрите область движением мыши и щёлкните конечную клетку. Реальный масштаб 300%, максимум 8192×8192 px.",
           tooLarge: "Выбранная область слишком велика. Максимальный размер изображения — 8192×8192 px.",
           failed: "Не удалось создать изображение.",
         },
       }[language] ?? {
         button: "PNG",
         buttonTitle: "Save part of the map as a high-resolution 300% PNG",
-        hint: "Select the start and end cells exactly like creating a map range. It is re-rendered at a true 300% zoom, up to 8192×8192 px. Esc: cancel",
+        hint: "Exactly like creating a normal map range: click the first cell, preview by moving the mouse, then click the end cell. True 300% render, up to 8192×8192 px.",
         tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
         failed: "Could not create the image.",
       };
@@ -5800,10 +5800,10 @@
           selection.sceneBounds;
 
         /*
-          The selected map-cell range is first converted to the
-          exact scene-space bounds of its diamond geometry.
-          The exported PNG is the ordinary axis-aligned rectangle
-          that fully contains that selected range.
+          The selection cells come from the exact same rectangleCells()
+          logic used by normal map-range creation. The exported PNG
+          is the smallest axis-aligned scene rectangle that fully
+          contains that isometric range shape.
         */
         const result =
           await mapRenderer
@@ -5860,7 +5860,7 @@
           url;
 
         link.download =
-          `${safeTitle}_map.png`;
+          `${safeTitle}-300pct.png`;
 
         document.body.append(
           link
@@ -5909,12 +5909,11 @@
         return;
       }
 
-      const labels =
-        mapImageExportText();
-
-      window.alert(
-        labels.hint
-      );
+      /*
+        Enter PNG range-selection mode directly.
+        No modal prompt: interaction now mirrors ordinary map-range creation.
+      */
+      cancelAreaModes();
 
       mapRenderer
         .startImageExportSelection({
