@@ -112,6 +112,12 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
   let imageExportSelection = null;
   let imageExportDrawing = null;
 
+  /*
+    Building-label color is a view preference, not map document data.
+    It therefore does not dirty/save the map itself.
+  */
+  let buildingLabelColor = "#ffffff";
+
   const interaction = new BuildingInteractionState();
   let mapDocument, buildingTypes, fixedBuildingTypes, buildingGeometries;
   function refreshDocument() {
@@ -662,7 +668,14 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     const [x, y] = sceneToScreen(...labelSceneCenter(geometry), state);
     const lines = layout.text.split("\n"), lineHeight = layout.fontPixelSize * 1.2;
     context.save(); context.font = `700 ${layout.fontPixelSize}px sans-serif`; context.textAlign = "center"; context.textBaseline = "middle";
-    context.fillStyle = "#ffffff"; context.shadowColor = "rgba(0,0,0,0.82)"; context.shadowBlur = 2; context.shadowOffsetX = 0.8; context.shadowOffsetY = 0.8;
+    context.fillStyle = buildingLabelColor;
+    context.shadowColor =
+      buildingLabelColor === "#000000"
+        ? "rgba(255,255,255,0.86)"
+        : "rgba(0,0,0,0.82)";
+    context.shadowBlur = 2;
+    context.shadowOffsetX = 0.8;
+    context.shadowOffsetY = 0.8;
     lines.forEach((line, index) => context.fillText(line, x, y + (index - (lines.length - 1) / 2) * lineHeight)); context.restore();
   }
 
@@ -2191,6 +2204,25 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     clearSelection() { if (interaction.clearSelection()) { onSelectionChange(null); invalidate(); } },
     refresh() { refreshDocument(); controller?.normalizeSelection(); rangeController?.normalizeSelection(); const requestedId = controller?.getState().selectedBuildingId ?? interaction.selectedBuildingId; const candidates = editableFixed ? [...mapDocument.fixedBuildings, ...mapDocument.buildings] : mapDocument.buildings; const selected = candidates.find(item => item.id === requestedId) ?? null; interaction.select(selected?.id); onSelectionChange(selected); onRangeSelectionChange(rangeController?.getSelectedRange() ?? null); invalidate(); },
     invalidate,
+    getBuildingLabelColor() {
+      return buildingLabelColor;
+    },
+    setBuildingLabelColor(value) {
+      const normalized =
+        String(value).toLowerCase() ===
+          "#000000" ||
+        String(value).toLowerCase() ===
+          "black"
+          ? "#000000"
+          : "#ffffff";
+
+      if (normalized !== buildingLabelColor) {
+        buildingLabelColor = normalized;
+        invalidate();
+      }
+
+      return buildingLabelColor;
+    },
     destroy() {
       destroyed = true; if (frame) cancelAnimationFrame(frame);
       resizeObserver.disconnect(); themeObserver.disconnect(); media.removeEventListener?.("change", invalidate);
