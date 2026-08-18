@@ -700,6 +700,37 @@
       bottom: calc(100% + 8px);
     }
 
+    .map-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 56px;
+      z-index: 3000;
+      max-width: min(92vw, 560px);
+      padding: 10px 14px;
+      border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      font-size: 0.84rem;
+      font-weight: 750;
+      line-height: 1.35;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, 8px);
+      transition:
+        opacity .16s ease,
+        transform .16s ease;
+    }
+
+    .map-toast.visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     /*
       ==========================================================
       RESPONSIVE
@@ -1300,6 +1331,14 @@
     </div>
 
   </div>
+
+
+  <div
+    id="mapToast"
+    class="map-toast"
+    role="status"
+    aria-live="polite"
+  ></div>
 
 
   <!--
@@ -2524,6 +2563,11 @@
         "documentStatus"
       );
 
+    const mapToast =
+      document.getElementById(
+        "mapToast"
+      );
+
     const editorOverlay =
       document.getElementById(
         "editorOverlay"
@@ -2555,6 +2599,46 @@
       HELPERS
       ==========================================================
     */
+
+    let mapToastTimer =
+      null;
+
+    function showMapToast(
+      message,
+      duration = 3200
+    ) {
+      if (!mapToast) {
+        return;
+      }
+
+      if (mapToastTimer) {
+        clearTimeout(
+          mapToastTimer
+        );
+        mapToastTimer =
+          null;
+      }
+
+      mapToast.textContent =
+        message;
+
+      mapToast.classList.add(
+        "visible"
+      );
+
+      mapToastTimer =
+        setTimeout(
+          () => {
+            mapToast.classList.remove(
+              "visible"
+            );
+            mapToastTimer =
+              null;
+          },
+          duration
+        );
+    }
+
 
     function getSessionToken() {
       return (
@@ -6090,9 +6174,42 @@
 
       /*
         Enter PNG range-selection mode directly.
-        No modal prompt: interaction now mirrors ordinary map-range creation.
+        On touch devices the interaction is drag-to-select.
+        With a mouse it remains first-point / second-point selection.
       */
       cancelAreaModes();
+
+      const touchSelection =
+        navigator.maxTouchPoints > 0 ||
+        globalThis.matchMedia?.(
+          "(pointer: coarse)"
+        )?.matches;
+
+      const pngSelectionHint =
+        touchSelection
+          ? (
+              {
+                ko: "맵 위에서 드래그해서 PNG로 저장할 범위를 선택하세요.",
+                en: "Drag on the map to select the area to save as PNG.",
+                ja: "マップ上をドラッグしてPNGで保存する範囲を選択してください。",
+                ru: "Проведите пальцем по карте, чтобы выбрать область для сохранения в PNG.",
+              }[language] ??
+              "Drag on the map to select the area to save as PNG."
+            )
+          : (
+              {
+                ko: "첫 번째 지점을 선택한 뒤 두 번째 지점을 선택하세요.",
+                en: "Select the first point, then select the second point.",
+                ja: "最初の地点を選択してから、2つ目の地点を選択してください。",
+                ru: "Выберите первую точку, затем вторую.",
+              }[language] ??
+              "Select the first point, then select the second point."
+            );
+
+      showMapToast(
+        pngSelectionHint,
+        4200
+      );
 
       mapRenderer
         .startImageExportSelection({
