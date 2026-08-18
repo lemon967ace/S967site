@@ -1115,9 +1115,8 @@ export function createMapRenderer({ host, engine, controller = null, rangeContro
     }
 
     if (
-      !touch &&
       !mousePan &&
-      event.button === 0 &&
+      (touch || event.button === 0) &&
       imageExportSelection?.active
     ) {
       const cell =
