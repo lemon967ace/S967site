@@ -470,6 +470,8 @@
 
     .zoom-input-wrap {display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;padding:0 7px;min-height:34px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;}
     .zoom-input {width:52px;min-width:0;padding:4px 2px;border:0;outline:none;background:transparent;color:var(--text);text-align:right;font:inherit;font-variant-numeric:tabular-nums;}
+    .label-color-wrap{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;min-height:34px;padding:0 7px;border:1px solid var(--border);border-radius:9px;background:var(--surface-hover);color:var(--muted);font-size:.78rem;white-space:nowrap;}
+    .label-color-select{min-width:64px;padding:4px 5px;border:0;outline:none;background:transparent;color:var(--text);font:inherit;font-weight:700;cursor:pointer;}
     /* Keep each building-filter option intact; wrap whole options to the next line. */
     #sharedFiltersHost fieldset {
       display: flex;
@@ -974,6 +976,21 @@
       PNG
     </button>
 
+    <label
+      id="buildingLabelColorWrap"
+      class="label-color-wrap"
+    >
+      <span id="buildingLabelColorLabel">Text</span>
+      <select
+        id="buildingLabelColorSelect"
+        class="label-color-select"
+        aria-label="Building text color"
+      >
+        <option value="white">White</option>
+        <option value="black">Black</option>
+      </select>
+    </label>
+
   </div>
 
 
@@ -1050,6 +1067,20 @@
         <button id="sharedZoomInButton" type="button" aria-label="Zoom in">+</button>
         <button id="sharedFitMapButton" type="button">Fit</button>
         <button id="sharedExportMapImageButton" type="button">PNG</button>
+        <label
+          class="label-color-wrap"
+          id="sharedBuildingLabelColorWrap"
+        >
+          <span id="sharedBuildingLabelColorLabel">Text</span>
+          <select
+            id="sharedBuildingLabelColorSelect"
+            class="label-color-select"
+            aria-label="Building text color"
+          >
+            <option value="white">White</option>
+            <option value="black">Black</option>
+          </select>
+        </label>
       </div>
 
       <button
@@ -1357,6 +1388,9 @@
     const NEW_MAP_TEMPLATE_KEY =
       "s967-new-map-template";
 
+    const BUILDING_LABEL_COLOR_KEY =
+      "s967-map-building-label-color";
+
 
     /*
       ==========================================================
@@ -1369,6 +1403,33 @@
       en: "Coloring",
       ja: "塗り絵",
       ru: "Раскраска",
+    };
+
+    const BUILDING_LABEL_COLOR_TEXT = {
+      ko: {
+        label: "글씨",
+        white: "흰색",
+        black: "검정",
+        aria: "건물 글씨 색상",
+      },
+      en: {
+        label: "Text",
+        white: "White",
+        black: "Black",
+        aria: "Building text color",
+      },
+      ja: {
+        label: "文字",
+        white: "白",
+        black: "黒",
+        aria: "建物文字色",
+      },
+      ru: {
+        label: "Текст",
+        white: "Белый",
+        black: "Чёрный",
+        aria: "Цвет текста зданий",
+      },
     };
 
     const FIXED_MAP_TEXT = {
@@ -2413,6 +2474,15 @@
     const sharedExportMapImageButton = document.getElementById("sharedExportMapImageButton");
     const exportMapImageButton = document.getElementById("exportMapImageButton");
 
+    const buildingLabelColorLabel =
+      document.getElementById("buildingLabelColorLabel");
+    const buildingLabelColorSelect =
+      document.getElementById("buildingLabelColorSelect");
+    const sharedBuildingLabelColorLabel =
+      document.getElementById("sharedBuildingLabelColorLabel");
+    const sharedBuildingLabelColorSelect =
+      document.getElementById("sharedBuildingLabelColorSelect");
+
     const fitMapButton =
       document.getElementById(
         "fitMapButton"
@@ -2505,6 +2575,58 @@
       );
     }
 
+
+    function normalizedBuildingLabelColor(
+      value
+    ) {
+      return String(value).toLowerCase() === "black"
+        ? "black"
+        : "white";
+    }
+
+    function currentBuildingLabelColor() {
+      return normalizedBuildingLabelColor(
+        localStorage.getItem(
+          BUILDING_LABEL_COLOR_KEY
+        )
+      );
+    }
+
+    function applyBuildingLabelColor(
+      value,
+      {
+        persist = true,
+      } = {}
+    ) {
+      const normalized =
+        normalizedBuildingLabelColor(
+          value
+        );
+
+      if (persist) {
+        localStorage.setItem(
+          BUILDING_LABEL_COLOR_KEY,
+          normalized
+        );
+      }
+
+      if (buildingLabelColorSelect) {
+        buildingLabelColorSelect.value =
+          normalized;
+      }
+
+      if (sharedBuildingLabelColorSelect) {
+        sharedBuildingLabelColorSelect.value =
+          normalized;
+      }
+
+      mapRenderer
+        ?.setBuildingLabelColor?.(
+          normalized
+        );
+
+      return normalized;
+    }
 
     function setOverlay(
       title,
@@ -4796,6 +4918,8 @@
       if (sharedFitMapButton) sharedFitMapButton.disabled = !engineReady;
       if (exportMapImageButton) exportMapImageButton.disabled = !enabled || !engineReady;
       if (sharedExportMapImageButton) sharedExportMapImageButton.disabled = !engineReady;
+      if (buildingLabelColorSelect) buildingLabelColorSelect.disabled = !engineReady;
+      if (sharedBuildingLabelColorSelect) sharedBuildingLabelColorSelect.disabled = !engineReady;
 
       saveButton.disabled =
         !editable || !engineReady || !dirty || (saveManager?.getState().saving ?? false);
@@ -4871,6 +4995,54 @@
             language
           ] ??
           COLORING_LINK_TEXT.en;
+      }
+
+      const labelColorText =
+        BUILDING_LABEL_COLOR_TEXT[
+          language
+        ] ??
+        BUILDING_LABEL_COLOR_TEXT.en;
+
+      if (buildingLabelColorLabel) {
+        buildingLabelColorLabel.textContent =
+          labelColorText.label;
+      }
+      if (sharedBuildingLabelColorLabel) {
+        sharedBuildingLabelColorLabel.textContent =
+          labelColorText.label;
+      }
+
+      for (
+        const select
+        of [
+          buildingLabelColorSelect,
+          sharedBuildingLabelColorSelect,
+        ]
+      ) {
+        if (!select) continue;
+
+        const whiteOption =
+          select.querySelector(
+            'option[value="white"]'
+          );
+        const blackOption =
+          select.querySelector(
+            'option[value="black"]'
+          );
+
+        if (whiteOption) {
+          whiteOption.textContent =
+            labelColorText.white;
+        }
+        if (blackOption) {
+          blackOption.textContent =
+            labelColorText.black;
+        }
+
+        select.setAttribute(
+          "aria-label",
+          labelColorText.aria
+        );
       }
 
       renderFixedMapSelector();
@@ -5286,6 +5458,13 @@
 
       mapRenderer.setDuplicateHighlightedBuildingIds?.(
         duplicateBuildingHighlightedIds
+      );
+
+      applyBuildingLabelColor(
+        currentBuildingLabelColor(),
+        {
+          persist: false,
+        }
       );
 
       minimap = createMinimap({ host: minimapHost, renderer: mapRenderer, getDocument: () => PNSMapEngine.getDocument() });
@@ -5952,6 +6131,24 @@
     sharedExportMapImageButton?.addEventListener(
       "click",
       beginMapImageExport
+    );
+
+    buildingLabelColorSelect?.addEventListener(
+      "change",
+      () => {
+        applyBuildingLabelColor(
+          buildingLabelColorSelect.value
+        );
+      }
+    );
+
+    sharedBuildingLabelColorSelect?.addEventListener(
+      "change",
+      () => {
+        applyBuildingLabelColor(
+          sharedBuildingLabelColorSelect.value
+        );
+      }
     );
 
 
