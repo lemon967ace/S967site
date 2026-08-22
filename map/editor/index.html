@@ -6007,37 +6007,42 @@
       return {
         ko: {
           button: "PNG",
-          buttonTitle: "맵 일부를 300% 고해상도 PNG로 저장",
-          hint: "일반 범위 만들기와 동일하게 첫 셀을 클릭하고, 마우스로 범위를 미리 본 뒤 끝 셀을 클릭합니다. 실제 300% 줌, 최대 8192×8192 px.",
-          tooLarge: "선택 범위가 너무 큽니다. 출력 이미지는 최대 8192×8192 px까지 가능합니다.",
+          buttonTitle: "맵 일부를 고해상도 PNG로 저장",
+          hint: "일반 범위 만들기와 동일하게 범위를 선택합니다. 가능한 경우 300%로 출력하며, 8192×8192 px를 넘는 큰 범위는 자동으로 해상도를 낮춥니다.",
+          reduced: zoom => `선택 범위가 커서 출력 해상도를 ${zoom}%로 자동 조정했습니다.`,
+          tooLarge: "선택 범위가 너무 커서 이미지를 만들 수 없습니다.",
           failed: "이미지를 만들지 못했습니다.",
         },
         en: {
           button: "PNG",
-          buttonTitle: "Save part of the map as a high-resolution 300% PNG",
-          hint: "Exactly like creating a normal map range: click the first cell, preview by moving the mouse, then click the end cell. True 300% render, up to 8192×8192 px.",
-          tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
+          buttonTitle: "Save part of the map as a high-resolution PNG",
+          hint: "Select the area as usual. The image is rendered at 300% when possible; larger areas are automatically reduced to fit within 8192×8192 px.",
+          reduced: zoom => `The selected area is large, so the output resolution was automatically reduced to ${zoom}%.`,
+          tooLarge: "The selected area is too large to export.",
           failed: "Could not create the image.",
         },
         ja: {
           button: "PNG",
-          buttonTitle: "マップの一部を300%高解像度PNGとして保存",
-          hint: "通常の範囲作成と同じです。最初のセルをクリックし、マウス移動で範囲を確認してから終了セルをクリックします。実際の300%ズーム、最大8192×8192 pxです。",
-          tooLarge: "選択範囲が大きすぎます。出力画像は最大8192×8192 pxです。",
+          buttonTitle: "マップの一部を高解像度PNGとして保存",
+          hint: "通常どおり範囲を選択します。可能な場合は300%で出力し、8192×8192 pxを超える大きな範囲は自動的に解像度を下げます。",
+          reduced: zoom => `選択範囲が大きいため、出力解像度を${zoom}%に自動調整しました。`,
+          tooLarge: "選択範囲が大きすぎて画像を作成できません。",
           failed: "画像を作成できませんでした。",
         },
         ru: {
           button: "PNG",
-          buttonTitle: "Сохранить часть карты как PNG высокого разрешения при 300%",
-          hint: "Точно как обычный диапазон карты: щёлкните первую клетку, просмотрите область движением мыши и щёлкните конечную клетку. Реальный масштаб 300%, максимум 8192×8192 px.",
-          tooLarge: "Выбранная область слишком велика. Максимальный размер изображения — 8192×8192 px.",
+          buttonTitle: "Сохранить часть карты как PNG высокого разрешения",
+          hint: "Выберите область как обычно. По возможности изображение создаётся в масштабе 300%; для больших областей разрешение автоматически уменьшается до 8192×8192 px.",
+          reduced: zoom => `Область слишком большая, поэтому разрешение вывода автоматически уменьшено до ${zoom}%.`,
+          tooLarge: "Выбранная область слишком велика для экспорта.",
           failed: "Не удалось создать изображение.",
         },
       }[language] ?? {
         button: "PNG",
-        buttonTitle: "Save part of the map as a high-resolution 300% PNG",
-        hint: "Exactly like creating a normal map range: click the first cell, preview by moving the mouse, then click the end cell. True 300% render, up to 8192×8192 px.",
-        tooLarge: "The selected area is too large. The maximum output size is 8192×8192 px.",
+        buttonTitle: "Save part of the map as a high-resolution PNG",
+        hint: "Select the area as usual. The image is rendered at 300% when possible; larger areas are automatically reduced to fit within 8192×8192 px.",
+        reduced: zoom => `The selected area is large, so the output resolution was automatically reduced to ${zoom}%.`,
+        tooLarge: "The selected area is too large to export.",
         failed: "Could not create the image.",
       };
     }
@@ -6068,6 +6073,40 @@
           is the smallest axis-aligned scene rectangle that fully
           contains that isometric range shape.
         */
+        const sceneWidth =
+          Math.max(
+            1,
+            bounds.right -
+            bounds.left
+          );
+
+        const sceneHeight =
+          Math.max(
+            1,
+            bounds.bottom -
+            bounds.top
+          );
+
+        /*
+          Keep the preferred 300% render for normal selections.
+          If that would exceed the safe 8192×8192 canvas cap,
+          lower only the export zoom so the whole selected region
+          still fits inside the same pixel limit.
+        */
+        const fitZoom =
+          Math.min(
+            (MAP_IMAGE_EXPORT_MAX_WIDTH - 1) /
+              sceneWidth,
+            (MAP_IMAGE_EXPORT_MAX_HEIGHT - 1) /
+              sceneHeight
+          );
+
+        const exportZoom =
+          Math.min(
+            MAP_IMAGE_EXPORT_ZOOM,
+            fitZoom
+          );
+
         const result =
           await mapRenderer
             .renderSceneRegionToBlob({
@@ -6080,7 +6119,7 @@
               sceneBottom:
                 bounds.bottom,
               zoom:
-                MAP_IMAGE_EXPORT_ZOOM,
+                exportZoom,
               maxWidth:
                 MAP_IMAGE_EXPORT_MAX_WIDTH,
               maxHeight:
@@ -6088,6 +6127,20 @@
               mimeType:
                 "image/png",
             });
+
+        if (
+          result.zoom <
+            MAP_IMAGE_EXPORT_ZOOM
+        ) {
+          showMapToast(
+            labels.reduced(
+              Math.round(
+                result.zoom * 100
+              )
+            ),
+            4200
+          );
+        }
 
         const safeTitle =
           String(
