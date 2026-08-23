@@ -497,6 +497,21 @@ function recomputeLinkedRangeActivity() {
     }
   }
 
+  /*
+    Fixed-map ranges are the absolute top-priority territory layer.
+    Linked special ranges are clipped wherever they overlap any fixed range.
+  */
+  const fixedRangeCells =
+    new Set(
+      document.fixedRanges.flatMap(
+        range =>
+          range.cells.map(
+            cell =>
+              cell.join(",")
+          )
+      )
+    );
+
   function calculateOwnedTerritory(
     activeBuildingIds
   ) {
@@ -506,11 +521,13 @@ function recomputeLinkedRangeActivity() {
       new Map();
 
     /*
-      document.ranges order is installation order.
-      Therefore an earlier installed affiliation claims a contested cell
-      before a later affiliation sees it.
+      document.ranges order is installation / last-move priority order.
+      Therefore an earlier installed or moved affiliation claims a contested
+      cell before a later affiliation sees it. Moving a special structure
+      appends its linked range, so it becomes the newest / lowest-priority one.
 
-      Same-affiliation linked ranges may still overlap each other.
+      Fixed-map ranges always win before this pass, and same-affiliation linked
+      ranges may still overlap each other.
     */
     for (
       const range
@@ -539,6 +556,14 @@ function recomputeLinkedRangeActivity() {
       ) {
         const key =
           cell.join(",");
+        if (
+          fixedRangeCells.has(
+            key
+          )
+        ) {
+          continue;
+        }
+
         const owner =
           ownerByCell.get(
             key
@@ -818,7 +843,8 @@ function linkedRangeCheck(
 }
 
 function upsertLinkedRange(
-  building
+  building,
+  { moveToEnd = false } = {}
 ) {
   const role =
     specialStructureRole(
@@ -889,8 +915,25 @@ function upsertLinkedRange(
           item.id ===
             existing.id
       );
-    document.ranges[index] =
-      next;
+
+    if (moveToEnd) {
+      /*
+        Moving a special structure counts as a fresh installation for
+        cross-affiliation territory priority. Remove its old linked-range
+        position and append the rebuilt range after every older range.
+        Ordinary edits keep the original priority position.
+      */
+      document.ranges.splice(
+        index,
+        1
+      );
+      document.ranges.push(
+        next
+      );
+    } else {
+      document.ranges[index] =
+        next;
+    }
   } else {
     document.ranges.push(next);
   }
@@ -1341,17 +1384,14 @@ export function moveBuilding(
   newY
 ) {
   ensureWritable();
+  requireUserBuilding(
+    buildingId
+  );
 
   const current =
-    requireUserBuilding(
+    occupancy.requireBuilding(
       buildingId
     );
-
-  if (current.locked) {
-    throw new RangeError(
-      "Locked buildings cannot be moved."
-    );
-  }
 
   const rules =
     canPlaceBuilding({
@@ -1386,7 +1426,8 @@ export function moveBuilding(
 
   try {
     upsertLinkedRange(
-      moved
+      moved,
+      { moveToEnd: true }
     );
     recomputeLinkedRangeActivity();
   } catch (error) {
@@ -1488,7 +1529,9 @@ export function restoreBuildings(states) {
 export function editBuilding(buildingId, changes = {}) {
   ensureWritable();
   const current = requireUserBuilding(buildingId);
-
+  if (current.locked && Object.keys(changes).some(key => key !== "locked")) {
+    throw new RangeError("Locked buildings cannot be edited.");
+  }
   const candidate = new Building({
     id: current.id,
     name: changes.name ?? current.name,
@@ -1500,23 +1543,6 @@ export function editBuilding(buildingId, changes = {}) {
     affiliation: changes.affiliation ?? current.affiliation,
     locked: changes.locked ?? current.locked,
   });
-
-  /*
-    A locked user building may be unlocked, and submitting an unchanged
-    form is allowed. Block only real changes to protected fields.
-  */
-  if (
-    current.locked &&
-    (
-      candidate.name !== current.name ||
-      candidate.typeId !== current.typeId ||
-      candidate.width !== current.width ||
-      candidate.height !== current.height ||
-      candidate.affiliation !== current.affiliation
-    )
-  ) {
-    throw new RangeError("Locked buildings cannot be edited.");
-  }
   if (!document.buildingTypes.some(type => type.id === candidate.typeId)) {
     throw new RangeError(`Unknown building type ID: ${candidate.typeId}`);
   }
@@ -1859,7 +1885,7 @@ export function deleteFixedBuildingType(typeId) {
 }
 
 export function canPlaceFixedBuilding({ x, y, width, height, ignoreBuildingId = null }) {
-  ensureTemplateWritable();
+  ensureWritable();
   return occupancy.checkPosition({ x, y, width, height, ignoreBuildingId });
 }
 
@@ -1882,18 +1908,30 @@ export function addFixedBuilding(data) {
 }
 
 export function moveFixedBuilding(buildingId, newX, newY) {
-  ensureTemplateWritable();
+  ensureWritable();
   return editFixedBuilding(buildingId, { x: newX, y: newY });
 }
 
 export function editFixedBuilding(buildingId, changes = {}) {
-  ensureTemplateWritable();
+  ensureWritable();
 
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
 
   const current = document.fixedBuildings[index];
 
+  /*
+    In a normal map, a locked fixed building may only have its lock removed.
+    Once unlocked, it can be renamed, moved, switched to another fixed type,
+    relocked, or deleted. Template mode keeps its administrator editability.
+  */
+  if (
+    documentMode === "map" &&
+    current.locked &&
+    Object.keys(changes).some(key => !["locked"].includes(key))
+  ) {
+    throw new RangeError("Unlock the fixed building before editing it.");
+  }
 
   const typeId = changes.typeId ?? changes.type_id ?? current.typeId;
   const type = requireFixedBuildingType(typeId);
@@ -1908,6 +1946,7 @@ export function editFixedBuilding(buildingId, changes = {}) {
     height: type.height,
     color: changes.color ?? current.color ?? type.color,
     priority: changes.priority ?? current.priority ?? 0,
+    locked: changes.locked ?? current.locked,
   });
 
   const check = occupancy.checkPosition({
@@ -1929,9 +1968,14 @@ export function editFixedBuilding(buildingId, changes = {}) {
 }
 
 export function deleteFixedBuilding(buildingId) {
-  ensureTemplateWritable();
+  ensureWritable();
   const index = document.fixedBuildings.findIndex(item => item.id === buildingId);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${buildingId}`);
+
+  const current = document.fixedBuildings[index];
+  if (documentMode === "map" && current.locked) {
+    throw new RangeError("Unlock the fixed building before deleting it.");
+  }
 
   const [removed] = document.fixedBuildings.splice(index, 1);
   rebuildOccupancy();
@@ -1949,7 +1993,7 @@ export function deleteFixedBuildings(buildingIds) {
 }
 
 export function restoreFixedBuildings(states) {
-  ensureTemplateWritable();
+  ensureWritable();
   const additions = states.map(item => {
     const type = requireFixedBuildingType(item.typeId ?? item.type_id);
     return new FixedBuilding({
@@ -1970,7 +2014,7 @@ export function restoreFixedBuildings(states) {
 }
 
 export function restoreFixedBuildingState(state) {
-  ensureTemplateWritable();
+  ensureWritable();
   const index = document.fixedBuildings.findIndex(item => item.id === state.id);
   if (index < 0) throw new RangeError(`Unknown fixed building ID: ${state.id}`);
 
