@@ -109,11 +109,11 @@ export class Building {
 }
 
 export class FixedBuilding extends Building {
-  constructor({ color = "#EEEEEE", priority = 0, ...data }) {
+  constructor({ color = "#EEEEEE", priority = 0, locked = true, ...data }) {
     super({
       ...data,
       affiliation: "",
-      locked: true,
+      locked: Boolean(locked),
       allowAnySize: true,
     });
     this.color = validateColor(color, "Fixed building color");
@@ -193,7 +193,10 @@ export class MapRange {
         })
       );
 
-    if (!unique.size) {
+    if (
+      !unique.size &&
+      !linked
+    ) {
       throw new RangeError(
         "Range must contain at least one cell."
       );
