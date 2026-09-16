@@ -113,6 +113,7 @@
     <button id="clearBtn">전체 삭제</button>
     <button id="exportBtn">작업 CSV 저장</button>
     <button id="exportRegionsBtn">구역 CSV 저장</button>
+    <button id="exportColoringJsonBtn">색칠놀이 JSON 저장</button>
     <button id="importBtn">CSV 불러오기</button>
     <input id="fileInput" type="file" accept=".csv,text/csv" />
     <span class="hint">
@@ -144,6 +145,7 @@
   const clearBtn = document.getElementById('clearBtn');
   const exportBtn = document.getElementById('exportBtn');
   const exportRegionsBtn = document.getElementById('exportRegionsBtn');
+  const exportColoringJsonBtn = document.getElementById('exportColoringJsonBtn');
   const importBtn = document.getElementById('importBtn');
   const fileInput = document.getElementById('fileInput');
 
@@ -909,6 +911,205 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+
+  function buildColoringAdjacency() {
+    const byRegion = new Map(
+      regions.map(region => [region.id, new Set()])
+    );
+
+    /*
+      두 구역이 "점 하나"만 공유하는 경우는 인접으로 보지 않는다.
+      실제 변(선분)을 공유하는 경우에만 서로 이웃으로 등록한다.
+    */
+    const edgeOwners = new Map();
+
+    function edgeKey(a, b) {
+      const aKey = pointKey(a);
+      const bKey = pointKey(b);
+      return aKey < bKey
+        ? `${aKey}|${bKey}`
+        : `${bKey}|${aKey}`;
+    }
+
+    for (const region of regions) {
+      for (let i = 0; i < region.points.length; i++) {
+        const a = region.points[i];
+        const b = region.points[(i + 1) % region.points.length];
+        const key = edgeKey(a, b);
+
+        if (!edgeOwners.has(key)) {
+          edgeOwners.set(key, []);
+        }
+
+        edgeOwners.get(key).push(region.id);
+      }
+    }
+
+    for (const owners of edgeOwners.values()) {
+      if (owners.length < 2) continue;
+
+      for (let i = 0; i < owners.length; i++) {
+        for (let j = i + 1; j < owners.length; j++) {
+          byRegion.get(owners[i])?.add(owners[j]);
+          byRegion.get(owners[j])?.add(owners[i]);
+        }
+      }
+    }
+
+    const result = {};
+
+    for (const region of regions) {
+      result[region.id] =
+        [...(byRegion.get(region.id) || [])]
+          .sort();
+    }
+
+    return result;
+  }
+
+  function buildColoringViewBox() {
+    const points =
+      regions.flatMap(region => region.points);
+
+    if (!points.length) {
+      return "0 0 1600 1000";
+    }
+
+    const xs = points.map(point => point.x);
+    const ys = points.map(point => point.y);
+
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const maxX = Math.max(...xs);
+    const maxY = Math.max(...ys);
+
+    const padding = 2;
+
+    return [
+      minX - padding,
+      minY - padding,
+      (maxX - minX) + padding * 2,
+      (maxY - minY) + padding * 2,
+    ].join(" ");
+  }
+
+  function exportColoringJson() {
+    const check = validateDrawing(false);
+
+    if (regions.length === 0) {
+      alert('내보낼 닫힌 구역이 없습니다.');
+      return;
+    }
+
+    if (check.dangling > 0 || check.duplicates > 0) {
+      const proceed = confirm(
+        `검증 경고: 열린 끝점 선분 ${check.dangling}개, 중복 선분 ${check.duplicates}개가 있습니다.\n그래도 색칠놀이 JSON을 저장할까요?`
+      );
+
+      if (!proceed) return;
+    }
+
+    const boardIdInput = prompt(
+      '색칠놀이 구역도 ID를 입력하세요.\n기존 구역도와 다른 새 ID를 사용하는 것을 권장합니다.',
+      `csv-board-${new Date().toISOString().slice(0, 10)}`
+    );
+
+    if (boardIdInput === null) return;
+
+    const boardId = boardIdInput.trim();
+
+    if (!boardId) {
+      alert('구역도 ID는 비워둘 수 없습니다.');
+      return;
+    }
+
+    const board = {
+      id: boardId,
+      viewBox: buildColoringViewBox(),
+      unpaintedColor: "#e8e8e8",
+      labelSize: 1.6,
+
+      regions: regions.map(region => {
+        const center =
+          polygonCentroid(region.points);
+
+        return {
+          id: region.id,
+          kind: "polygon",
+          points: region.points
+            .map(point => `${point.x},${point.y}`)
+            .join(" "),
+          center: [
+            center.x,
+            center.y,
+          ],
+          labelPoint: [
+            center.x,
+            center.y,
+          ],
+        };
+      }),
+
+      adjacency:
+        buildColoringAdjacency(),
+
+      overlayLines:
+        lines.map(line => ({
+          x1: line.a.x,
+          y1: line.a.y,
+          x2: line.b.x,
+          y2: line.b.y,
+        })),
+    };
+
+    const json =
+      JSON.stringify(
+        board,
+        null,
+        2
+      );
+
+    const blob =
+      new Blob(
+        [json],
+        {
+          type:
+            'application/json;charset=utf-8'
+        }
+      );
+
+    const url =
+      URL.createObjectURL(
+        blob
+      );
+
+    const a =
+      document.createElement(
+        'a'
+      );
+
+    a.href =
+      url;
+
+    a.download =
+      `${board.id}.json`;
+
+    document.body.appendChild(
+      a
+    );
+
+    a.click();
+    a.remove();
+
+    setTimeout(
+      () =>
+        URL.revokeObjectURL(
+          url
+        ),
+      1000
+    );
+  }
+
   function parseCsv(text) {
     const rows = [];
     let row = [];
@@ -1643,6 +1844,8 @@
   exportBtn.addEventListener('click', exportCsv);
 
   exportRegionsBtn.addEventListener('click', exportRegionsCsv);
+
+  exportColoringJsonBtn.addEventListener('click', exportColoringJson);
 
   importBtn.addEventListener('click', () => {
     fileInput.value = '';
