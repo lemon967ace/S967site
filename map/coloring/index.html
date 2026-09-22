@@ -259,11 +259,7 @@
       text-anchor: middle;
       dominant-baseline: middle;
       font-weight: 700;
-      paint-order: stroke;
-      stroke: rgba(255,255,255,.88);
-      stroke-width: 3px;
-      stroke-linejoin: round;
-      fill: #202020;
+      stroke: none;
     }
 
     .empty-board {
@@ -314,7 +310,7 @@
 
     .palette-row {
       display: grid;
-      grid-template-columns: 34px minmax(0, 1fr) 34px 34px;
+      grid-template-columns: 34px minmax(0, 1fr) 34px;
       gap: 6px;
       align-items: stretch;
     }
@@ -356,17 +352,12 @@
       white-space: nowrap;
     }
 
-    .palette-rename,
     .palette-delete {
       width: 34px;
       min-width: 34px;
       border: 1px solid var(--line);
       border-radius: 7px;
       background: var(--panel);
-      color: var(--text);
-    }
-
-    .palette-delete {
       color: var(--danger);
     }
 
@@ -732,8 +723,6 @@
       palette: "색상",
       colorNamePlaceholder: "색 이름",
       addColor: "색 추가",
-      renameColor: "색 이름 변경",
-      renamePrompt: "새 색 이름을 입력하세요.",
       noColorName: "색 이름을 입력하세요.",
       duplicateColorName: "같은 이름의 색이 이미 있습니다.",
       maxColors: "색은 최대 50개까지 만들 수 있습니다.",
@@ -772,8 +761,6 @@
       palette: "Colors",
       colorNamePlaceholder: "Color name",
       addColor: "Add color",
-      renameColor: "Rename color",
-      renamePrompt: "Enter a new color name.",
       noColorName: "Enter a color name.",
       duplicateColorName: "A color with that name already exists.",
       maxColors: "You can create up to 50 colors.",
@@ -812,8 +799,6 @@
       palette: "色",
       colorNamePlaceholder: "色の名前",
       addColor: "色を追加",
-      renameColor: "色名を変更",
-      renamePrompt: "新しい色の名前を入力してください。",
       noColorName: "色の名前を入力してください。",
       duplicateColorName: "同じ名前の色がすでにあります。",
       maxColors: "色は最大50個まで作成できます。",
@@ -852,8 +837,6 @@
       palette: "Цвета",
       colorNamePlaceholder: "Название цвета",
       addColor: "Добавить цвет",
-      renameColor: "Переименовать цвет",
-      renamePrompt: "Введите новое название цвета.",
       noColorName: "Введите название цвета.",
       duplicateColorName: "Цвет с таким названием уже существует.",
       maxColors: "Можно создать не более 50 цветов.",
@@ -1049,6 +1032,177 @@
       );
 
     return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function readableTextColor(
+    hex
+  ) {
+    const value =
+      String(hex ?? "")
+        .replace("#", "");
+
+    if (
+      !/^[0-9a-fA-F]{6}$/.test(
+        value
+      )
+    ) {
+      return "#111111";
+    }
+
+    const r =
+      parseInt(
+        value.slice(0, 2),
+        16
+      );
+    const g =
+      parseInt(
+        value.slice(2, 4),
+        16
+      );
+    const b =
+      parseInt(
+        value.slice(4, 6),
+        16
+      );
+
+    const luminance =
+      (
+        0.299 * r +
+        0.587 * g +
+        0.114 * b
+      ) / 255;
+
+    return luminance > 0.55
+      ? "#111111"
+      : "#ffffff";
+  }
+
+  function polygonBounds(
+    points
+  ) {
+    const numbers =
+      String(points ?? "")
+        .trim()
+        .split(/[\s,]+/)
+        .map(Number)
+        .filter(Number.isFinite);
+
+    if (
+      numbers.length < 6 ||
+      numbers.length % 2 !== 0
+    ) {
+      return null;
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (
+      let index = 0;
+      index < numbers.length;
+      index += 2
+    ) {
+      const x =
+        numbers[index];
+      const y =
+        numbers[index + 1];
+
+      minX =
+        Math.min(minX, x);
+      minY =
+        Math.min(minY, y);
+      maxX =
+        Math.max(maxX, x);
+      maxY =
+        Math.max(maxY, y);
+    }
+
+    return {
+      width:
+        Math.max(
+          0,
+          maxX - minX
+        ),
+      height:
+        Math.max(
+          0,
+          maxY - minY
+        ),
+    };
+  }
+
+  function adaptiveLabelSize(
+    region,
+    labelText
+  ) {
+    const baseSize =
+      Number(
+        board?.labelSize ??
+        24
+      );
+
+    if (
+      !Number.isFinite(
+        baseSize
+      ) ||
+      baseSize <= 0
+    ) {
+      return 24;
+    }
+
+    if (
+      region?.kind !==
+        "polygon"
+    ) {
+      return baseSize;
+    }
+
+    const bounds =
+      polygonBounds(
+        region.points
+      );
+
+    if (
+      !bounds ||
+      bounds.width <= 0 ||
+      bounds.height <= 0
+    ) {
+      return baseSize;
+    }
+
+    const textLength =
+      Math.max(
+        1,
+        Array.from(
+          String(
+            labelText ?? ""
+          )
+        ).length
+      );
+
+    const widthLimited =
+      bounds.width /
+      Math.max(
+        1,
+        textLength * 0.72
+      );
+
+    const heightLimited =
+      bounds.height * 0.48;
+
+    const minimum =
+      baseSize * 0.25;
+
+    return Math.max(
+      minimum,
+      Math.min(
+        baseSize,
+        widthLimited,
+        heightLimited
+      )
+    );
   }
 
   function setDirty(
@@ -1304,85 +1458,6 @@
         }
       );
 
-      const rename =
-        document.createElement(
-          "button"
-        );
-      rename.type = "button";
-      rename.className =
-        "palette-rename";
-      rename.textContent =
-        "✎";
-      rename.title =
-        t().renameColor;
-      rename.setAttribute(
-        "aria-label",
-        t().renameColor
-      );
-
-      rename.addEventListener(
-        "click",
-        () => {
-          const entered =
-            window.prompt(
-              t().renamePrompt,
-              color.name
-            );
-
-          if (entered === null) {
-            return;
-          }
-
-          const nextName =
-            entered
-              .trim()
-              .slice(0, 40);
-
-          if (!nextName) {
-            window.alert(
-              t().noColorName
-            );
-            return;
-          }
-
-          const normalized =
-            nextName
-              .toLocaleLowerCase();
-
-          const duplicate =
-            state.palette.some(
-              item =>
-                item.id !== color.id &&
-                String(item.name)
-                  .trim()
-                  .toLocaleLowerCase() ===
-                  normalized
-            );
-
-          if (duplicate) {
-            window.alert(
-              t().duplicateColorName
-            );
-            return;
-          }
-
-          if (
-            nextName ===
-              color.name
-          ) {
-            return;
-          }
-
-          color.name =
-            nextName;
-
-          setDirty(true);
-          renderPalette();
-          renderActiveColor();
-          renderBoard();
-        }
-      );
-
       const remove =
         document.createElement(
           "button"
@@ -1457,7 +1532,6 @@
       row.append(
         input,
         name,
-        rename,
         remove
       );
 
@@ -1878,10 +1952,20 @@
           label.setAttribute(
             "font-size",
             String(
-              board.labelSize ??
-                24
+              adaptiveLabelSize(
+                region,
+                color.name
+              )
             )
           );
+
+          label.setAttribute(
+            "fill",
+            readableTextColor(
+              color.value
+            )
+          );
+
           label.textContent =
             color.name;
           group.append(
@@ -2555,11 +2639,8 @@
         if (
           state.palette.some(
             item =>
-              String(item.name)
-                .trim()
-                .toLocaleLowerCase() ===
-              name
-                .toLocaleLowerCase()
+              item.name ===
+                name
           )
         ) {
           window.alert(
