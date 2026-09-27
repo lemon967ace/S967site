@@ -3003,32 +3003,78 @@
           )
           .join("");
 
+        const locked = Boolean(building.locked);
+
         form.innerHTML = `
-          <label>${text.detailName}<input name="name" required value="${escapeAttribute(building.name)}"></label>
-          <label>${text.detailType}<select name="typeId">${typeOptions}</select></label>
-          <label>${text.detailSize}<select name="size"><option value="1"${building.width === 1 ? " selected" : ""}>1×1</option><option value="2"${building.width === 2 ? " selected" : ""}>2×2</option></select></label>
-          <label>${text.detailAffiliation}<input name="affiliation" maxlength="3" value="${escapeAttribute(building.affiliation)}"></label>
-          <label><input name="locked" type="checkbox"${building.locked ? " checked" : ""}> Locked</label>
-          <div><button type="submit">Apply</button> <button type="button" data-action="move">${text.move}</button> <button type="button" data-action="delete">Delete</button></div>`;
+          <label>${text.detailName}<input name="name" required value="${escapeAttribute(building.name)}"${locked ? " disabled" : ""}></label>
+          <label>${text.detailType}<select name="typeId"${locked ? " disabled" : ""}>${typeOptions}</select></label>
+          <label>${text.detailSize}<select name="size"${locked ? " disabled" : ""}><option value="1"${building.width === 1 ? " selected" : ""}>1×1</option><option value="2"${building.width === 2 ? " selected" : ""}>2×2</option></select></label>
+          <label>${text.detailAffiliation}<input name="affiliation" maxlength="3" value="${escapeAttribute(building.affiliation)}"${locked ? " disabled" : ""}></label>
+          <label><input name="locked" type="checkbox"${locked ? " checked" : ""}> Locked</label>
+          <div><button type="submit">Apply</button> <button type="button" data-action="move"${locked ? " disabled" : ""}>${text.move}</button> <button type="button" data-action="delete"${locked ? " disabled" : ""}>Delete</button></div>`;
 
         form.addEventListener("submit", event => {
           event.preventDefault();
+
           try {
             cancelAreaModes();
+
             const data = new FormData(form);
-            const size = Number(data.get("size"));
-            const edited = buildingController.editSelected({
-              name: data.get("name"),
-              typeId: data.get("typeId"),
-              width: size,
-              height: size,
-              affiliation: data.get("affiliation"),
-              locked: data.get("locked") === "on",
-            });
+            const nextLocked =
+              data.get("locked") === "on";
+
+            /*
+              A locked user building may only be unlocked.
+              Do not submit its name/type/size/affiliation while it is locked,
+              because the controller correctly rejects those as edits.
+              After unlocking succeeds, the panel is rendered again and the
+              ordinary edit fields become available.
+            */
+            const changes =
+              building.locked
+                ? {
+                    locked:
+                      nextLocked,
+                  }
+                : (() => {
+                    const size =
+                      Number(
+                        data.get("size")
+                      );
+
+                    return {
+                      name:
+                        data.get("name"),
+                      typeId:
+                        data.get("typeId"),
+                      width:
+                        size,
+                      height:
+                        size,
+                      affiliation:
+                        data.get(
+                          "affiliation"
+                        ),
+                      locked:
+                        nextLocked,
+                    };
+                  })();
+
+            const edited =
+              buildingController
+                .editSelected(
+                  changes
+                );
+
             mapRenderer.refresh();
-            renderSelectionPanel(edited);
+            renderSelectionPanel(
+              edited
+            );
           } catch (error) {
-            window.alert(error.message);
+            window.alert(
+              error?.message ??
+              String(error)
+            );
           }
         });
 
