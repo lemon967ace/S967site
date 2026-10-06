@@ -2546,6 +2546,9 @@ rallySize.addEventListener(
 const WK_PROFILE_KEY =
   "s967-wk-profile-v1";
 
+const S967_PLAYER_NAME_KEY =
+  "s967-player-name";
+
 const WK_PROFILE_WIDGET_POSITION_KEY =
   "s967-wk-profile-widget-position-v1";
 
@@ -2621,6 +2624,16 @@ function saveCurrentProfile() {
       WK_PROFILE_KEY,
       JSON.stringify(profile)
     );
+
+    const sharedPlayerName =
+      String(profile.playerName ?? "").trim();
+
+    if (sharedPlayerName) {
+      localStorage.setItem(
+        S967_PLAYER_NAME_KEY,
+        sharedPlayerName
+      );
+    }
   } catch (error) {
     console.warn(
       "Unable to save WK profile:",
@@ -2634,6 +2647,9 @@ function clearSavedProfile() {
   try {
     localStorage.removeItem(
       WK_PROFILE_KEY
+    );
+    localStorage.removeItem(
+      S967_PLAYER_NAME_KEY
     );
   } catch (error) {
     console.warn(
