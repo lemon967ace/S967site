@@ -885,6 +885,49 @@
       );
 
 
+    const SHARED_PLAYER_NAME_KEY = "s967-player-name";
+
+    function readLocalValue(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+
+    function writeLocalValue(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // Storage is optional; submission must remain available.
+      }
+    }
+
+    function saveSharedPlayerName(value) {
+      if (typeof value !== "string") return;
+      const name = value.trim();
+      if (name) writeLocalValue(SHARED_PLAYER_NAME_KEY, name);
+    }
+
+    function readSharedPlayerName() {
+      const shared = readLocalValue(SHARED_PLAYER_NAME_KEY);
+      if (typeof shared === "string" && shared.trim()) {
+        return shared.trim();
+      }
+
+      try {
+        const profile = JSON.parse(readLocalValue("s967-wk-profile-v1"));
+        const name = profile?.playerName;
+        if (typeof name === "string" && name.trim()) {
+          saveSharedPlayerName(name);
+          return name.trim();
+        }
+      } catch {
+        // Ignore invalid legacy profiles without modifying them.
+      }
+      return "";
+    }
+
     function t(
       key,
       fallback = ""
@@ -1752,6 +1795,8 @@
           );
 
 
+        saveSharedPlayerName(playerName.value);
+
         try {
           const response =
             await fetch(
@@ -1919,6 +1964,8 @@
 
 
     async function initialize() {
+      playerName.value = readSharedPlayerName();
+
       setStaticText();
       renderSchedule();
 
