@@ -653,12 +653,58 @@
     let lang =
       "ko";
 
+    const SHARED_PLAYER_NAME_KEY = "s967-player-name";
+
+    function readLocalValue(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+
+    function writeLocalValue(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // Storage is optional; submission must remain available.
+      }
+    }
+
+    function saveSharedPlayerName(value) {
+      if (typeof value !== "string") return;
+      const name = value.trim();
+      if (name) writeLocalValue(SHARED_PLAYER_NAME_KEY, name);
+    }
+
+    function readSharedPlayerName() {
+      const shared = readLocalValue(SHARED_PLAYER_NAME_KEY);
+      if (typeof shared === "string" && shared.trim()) {
+        return shared.trim();
+      }
+
+      try {
+        const profile = JSON.parse(readLocalValue("s967-wk-profile-v1"));
+        const name = profile?.playerName;
+        if (typeof name === "string" && name.trim()) {
+          saveSharedPlayerName(name);
+          return name.trim();
+        }
+      } catch {
+        // Ignore invalid legacy profiles without modifying them.
+      }
+      return "";
+    }
+
+    let nicknameAutofilled = false;
+    let fallbackClientKey = "";
+
     function preferredLanguage() {
       const current =
         typeof getCurrentLanguage === "function"
           ? getCurrentLanguage()
           : (
-              localStorage.getItem("s967_language") ||
+              readLocalValue("s967_language") ||
               document.documentElement.lang ||
               navigator.language ||
               "ko"
@@ -697,20 +743,16 @@
         "s967-special-survey-client-key";
 
       let value =
-        localStorage.getItem(
-          key,
-        );
+        readLocalValue(key) || fallbackClientKey;
 
       if (!value) {
         value =
           crypto.randomUUID();
 
-        localStorage.setItem(
-          key,
-          value,
-        );
+        writeLocalValue(key, value);
       }
 
+      fallbackClientKey = value;
       return value;
     }
 
@@ -929,6 +971,11 @@
 
         nicknameInput.placeholder =
           ui.nickname;
+
+        if (!nicknameAutofilled) {
+          nicknameInput.value = readSharedPlayerName();
+          nicknameAutofilled = true;
+        }
 
         nicknameInput
           .classList
@@ -1406,6 +1453,10 @@
 
           headers.Authorization =
             `Bearer ${token}`;
+        }
+
+        if (survey.identity_mode === "nickname") {
+          saveSharedPlayerName(payload.nickname);
         }
 
         submitButton.disabled =
