@@ -224,6 +224,15 @@
       text-decoration: none;
     }
 
+    .profile-actions {
+      margin-top: 10px;
+    }
+
+    .profile-actions button {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -599,6 +608,36 @@
         </div>
 
 
+        <div class="field">
+          <label class="choice">
+            <input
+              id="saveProfile"
+              type="checkbox"
+            >
+
+            <span id="saveProfileText">
+              Save my entries on this device for the next application
+            </span>
+          </label>
+
+          <p
+            id="profileStorageNotice"
+            class="small"
+          >
+            These entries are stored only in this browser.
+          </p>
+
+          <div class="profile-actions">
+            <button
+              id="deleteSavedProfile"
+              type="button"
+            >
+              Delete saved profile
+            </button>
+          </div>
+        </div>
+
+
         <div class="submit-row">
           <button
             id="submitButton"
@@ -808,6 +847,18 @@
 numberPlaceholder:
   "Please enter a number",
 
+        saveProfile:
+          "Save my entries on this device for the next application",
+
+        profileStorageNotice:
+          "These entries are stored only in this browser and are not saved as a separate profile on the server.",
+
+        deleteSavedProfile:
+          "Delete saved profile",
+
+        profileDeleted:
+          "The saved profile on this device has been deleted.",
+
         applicationsOpen:
   "Applications are currently open.",
 
@@ -956,6 +1007,18 @@ hours:
 
 numberPlaceholder:
   "숫자를 입력해주세요",
+
+        saveProfile:
+          "다음 신청을 위해 이 기기에 입력값 저장",
+
+        profileStorageNotice:
+          "입력값은 이 브라우저에만 저장되며 별도의 프로필로 서버에 저장되지 않습니다.",
+
+        deleteSavedProfile:
+          "저장된 프로필 삭제",
+
+        profileDeleted:
+          "이 기기에 저장된 프로필을 삭제했습니다.",
 
         applicationsOpen:
   "현재 WK 신청을 받고 있습니다.",
@@ -1106,6 +1169,18 @@ hours:
 numberPlaceholder:
   "数字を入力してください",
 
+        saveProfile:
+          "次回の申請のため、この端末に入力内容を保存する",
+
+        profileStorageNotice:
+          "入力内容はこのブラウザ内にのみ保存され、サーバー上に別のプロフィールとして保存されることはありません。",
+
+        deleteSavedProfile:
+          "保存したプロフィールを削除",
+
+        profileDeleted:
+          "この端末に保存されていたプロフィールを削除しました。",
+
         applicationsOpen:
   "現在WK申請を受け付けています。",
 
@@ -1254,6 +1329,18 @@ hours:
 
 numberPlaceholder:
   "Введите число",
+
+        saveProfile:
+          "Сохранить введённые данные на этом устройстве для следующей заявки",
+
+        profileStorageNotice:
+          "Данные сохраняются только в этом браузере и не хранятся на сервере как отдельный профиль.",
+
+        deleteSavedProfile:
+          "Удалить сохранённый профиль",
+
+        profileDeleted:
+          "Сохранённый профиль на этом устройстве удалён.",
 
         applicationsOpen:
   "Приём заявок WK открыт.",
@@ -1764,6 +1851,16 @@ const participationNotice =
     "participationNotice"
   );
 
+const saveProfile =
+  document.getElementById(
+    "saveProfile"
+  );
+
+const deleteSavedProfile =
+  document.getElementById(
+    "deleteSavedProfile"
+  );
+
     function setStatus(
       message,
       type = ""
@@ -1877,6 +1974,19 @@ troopSize.placeholder =
 
 rallySize.placeholder =
   text.numberPlaceholder;
+
+      document.getElementById(
+        "saveProfileText"
+      ).textContent =
+        text.saveProfile;
+
+      document.getElementById(
+        "profileStorageNotice"
+      ).textContent =
+        text.profileStorageNotice;
+
+      deleteSavedProfile.textContent =
+        text.deleteSavedProfile;
     }
 
 
@@ -2204,6 +2314,196 @@ rallySize.addEventListener(
     }
 
 
+const WK_PROFILE_KEY =
+  "s967-wk-profile-v1";
+
+
+function readSavedProfile() {
+  try {
+    const raw =
+      localStorage.getItem(
+        WK_PROFILE_KEY
+      );
+
+    if (!raw) return null;
+
+    const profile =
+      JSON.parse(raw);
+
+    return (
+      profile &&
+      typeof profile === "object"
+    )
+      ? profile
+      : null;
+  } catch (error) {
+    console.warn(
+      "Unable to read WK profile:",
+      error
+    );
+    return null;
+  }
+}
+
+
+function saveCurrentProfile() {
+  const profile = {
+    playerName:
+      playerName.value,
+
+    tier:
+      tier.value,
+
+    alliance:
+      alliance.value,
+
+    troopType:
+      getCheckedValue(
+        "troop_type"
+      ),
+
+    troopSize:
+      troopSize.value,
+
+    rallySize:
+      rallySize.value,
+
+    realtimeResponse:
+      getCheckedValue(
+        "realtime_response"
+      ),
+
+    captainRole:
+      getCheckedValue(
+        "captain_role"
+      ),
+
+    participationTime:
+      getCheckedValue(
+        "participation_time"
+      ),
+  };
+
+  try {
+    localStorage.setItem(
+      WK_PROFILE_KEY,
+      JSON.stringify(profile)
+    );
+  } catch (error) {
+    console.warn(
+      "Unable to save WK profile:",
+      error
+    );
+  }
+}
+
+
+function clearSavedProfile() {
+  try {
+    localStorage.removeItem(
+      WK_PROFILE_KEY
+    );
+  } catch (error) {
+    console.warn(
+      "Unable to delete WK profile:",
+      error
+    );
+  }
+}
+
+
+function restoreRadioValue(
+  name,
+  value
+) {
+  if (!value) return;
+
+  const input =
+    document.querySelector(
+      `input[name="${name}"][value="${value}"]`
+    );
+
+  if (input) {
+    input.checked = true;
+  }
+}
+
+
+function restoreSavedProfile() {
+  const profile =
+    readSavedProfile();
+
+  if (!profile) return;
+
+  playerName.value =
+    profile.playerName ?? "";
+
+  const savedTier =
+    String(profile.tier ?? "");
+
+  if (
+    [...tier.options].some(
+      option =>
+        option.value === savedTier
+    )
+  ) {
+    tier.value = savedTier;
+  }
+
+  const savedAlliance =
+    String(profile.alliance ?? "");
+
+  if (
+    [...alliance.options].some(
+      option =>
+        option.value === savedAlliance
+    )
+  ) {
+    alliance.value =
+      savedAlliance;
+  }
+
+  troopSize.value =
+    profile.troopSize ?? "";
+
+  rallySize.value =
+    profile.rallySize ?? "";
+
+  formatNumberInput(
+    troopSize
+  );
+
+  formatNumberInput(
+    rallySize
+  );
+
+  restoreRadioValue(
+    "troop_type",
+    profile.troopType
+  );
+
+  restoreRadioValue(
+    "realtime_response",
+    profile.realtimeResponse
+  );
+
+  restoreRadioValue(
+    "captain_role",
+    profile.captainRole
+  );
+
+  restoreRadioValue(
+    "participation_time",
+    profile.participationTime
+  );
+
+  updateParticipationState();
+
+  saveProfile.checked =
+    true;
+}
+
+
 function updateParticipationState() {
   const realtime =
     getCheckedValue(
@@ -2276,6 +2576,20 @@ function updateParticipationState() {
     "hidden"
   );
 } 
+
+
+    deleteSavedProfile.addEventListener(
+      "click",
+      () => {
+        clearSavedProfile();
+        saveProfile.checked = false;
+
+        setStatus(
+          text.profileDeleted,
+          "success"
+        );
+      }
+    );
 
 
     document.addEventListener(
@@ -2512,6 +2826,13 @@ function updateParticipationState() {
           }
 
 
+          if (saveProfile.checked) {
+            saveCurrentProfile();
+          } else {
+            clearSavedProfile();
+          }
+
+
           form.reset();
 
           updateParticipationState();
@@ -2551,6 +2872,7 @@ setTimeout(
    
   try {
     await loadOptions();
+    restoreSavedProfile();
       } catch (error) {
         setStatus(
           error.message ||
