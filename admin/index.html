@@ -1135,6 +1135,7 @@
     data-admin-section="wk"
   >
     <div class="wk-tabs">
+<button type="button" class="wk-tab" data-wk-tab="changes">변경사항</button>
       <button
         type="button"
         class="wk-tab is-active"
@@ -1169,6 +1170,14 @@
     </div>
 
 
+<div class="wk-section" data-wk-section="changes">
+<section class="panel"><h2>신청 변경사항</h2>
+<div class="row"><label>회차 <input id="wkChangesCycle" type="number" min="1" step="1" placeholder="전체 회차" style="min-width:120px"></label><button type="button" id="wkChangesRefresh">조회 / 새로고침</button></div>
+<p class="small">기존 신청에서 실제로 바뀐 항목만 표시합니다. 시각은 한국 시간입니다.</p>
+<p id="wkChangesStatus" role="status"></p>
+<div style="overflow-x:auto;max-width:100%"><table style="min-width:760px;width:100%;border-collapse:collapse"><thead><tr><th>변경 시각</th><th>회차</th><th>플레이어</th><th>변경 항목</th><th>변경 전</th><th>변경 후</th></tr></thead><tbody id="wkChangesRows"></tbody></table></div>
+<div class="row"><button type="button" id="wkChangesPrev">이전</button><span id="wkChangesPage"></span><button type="button" id="wkChangesNext">다음</button></div>
+</section></div>
     <div
       class="wk-section"
       data-wk-section="applications"
@@ -10343,12 +10352,60 @@ addEmailRecipientButton
     }
   );
     
+
+let wkChangesPage = 1, wkChangesRequest = 0;
+const wkChangeLabels = {language:'언어',tier:'티어',alliance:'연맹',troop_type:'병종',troop_size:'병력 규모',rally_size:'집결 규모',realtime_response:'실시간 모니터링',captain_role:'참여 역할',participation_time:'참여 시간',player_name:'플레이어명'};
+const wkChangeValues = {
+ troop_type:{fighter:'용사',shooter:'슈터',rider:'기수',all_strong:'전 병종 강함'},
+ realtime_response:{monitor_available:'실시간 모니터링 가능',monitor_unavailable:'실시간 모니터링 불가'},
+ captain_role:{captain:'리더',sub_captain:'부리더',regular:'일반 참여',negotiable:'협의 가능'},
+ participation_time:{first_half:'전반',second_half:'후반',full:'전체'},
+ language:{ko:'한국어',en:'영어',ja:'일본어',ru:'러시아어'}
+};
+function wkChangeDisplay(field,value) {
+ if(value===null || value===undefined || value==='') return '—';
+ if(typeof value==='object') return value.name || (value.id==null?'—':`ID ${value.id}`);
+ if(['troop_size','rally_size'].includes(field) && Number.isFinite(Number(value))) return Number(value).toLocaleString('ko-KR');
+ return wkChangeValues[field]?.[value] || String(value);
+}
+async function loadWkChanges() {
+ const request=++wkChangesRequest;
+ const status=document.getElementById('wkChangesStatus'), rows=document.getElementById('wkChangesRows');
+ rows.replaceChildren(); status.textContent='불러오는 중…';
+ document.getElementById('wkChangesPrev').disabled=true; document.getElementById('wkChangesNext').disabled=true;
+ try {
+  const cycle=document.getElementById('wkChangesCycle').value;
+  if(cycle && (!Number.isSafeInteger(Number(cycle)) || Number(cycle)<1)) throw new Error('회차는 1 이상의 정수로 입력하세요.');
+  const query=new URLSearchParams({section:'change_logs',change_logs_page:String(wkChangesPage)});
+  if(cycle) query.set('cycle_number',cycle);
+  const result=await wkApiRequest('GET',null,'?'+query);
+  if(request!==wkChangesRequest) return;
+  if(!Array.isArray(result.change_logs) || !result.change_logs_pagination) throw new Error('wk-admin 변경 이력 API 패치가 필요합니다.');
+  for(const log of result.change_logs) {
+   const tr=document.createElement('tr');
+   for(const value of [formatKstDateTime(log.changed_at),log.cycle_number,log.player_name,wkChangeLabels[log.field_name]||log.field_name,wkChangeDisplay(log.field_name,log.old_value),wkChangeDisplay(log.field_name,log.new_value)]) {
+    const td=document.createElement('td'); td.textContent=String(value??'—'); td.style.cssText='padding:10px;border-bottom:1px solid var(--border);overflow-wrap:anywhere;max-width:260px'; tr.append(td);
+   }
+   rows.append(tr);
+  }
+  const pg=result.change_logs_pagination;
+  status.textContent=result.change_logs.length?'총 '+pg.total+'개 변경 항목':'변경 이력이 없습니다.';
+  document.getElementById('wkChangesPage').textContent=wkChangesPage+' 페이지';
+  document.getElementById('wkChangesPrev').disabled=wkChangesPage<=1;
+  document.getElementById('wkChangesNext').disabled=!pg.has_more;
+ } catch(error) { if(request===wkChangesRequest) status.textContent=error.message||'변경 이력 조회에 실패했습니다.'; }
+}
+document.getElementById('wkChangesRefresh').addEventListener('click',()=>{wkChangesPage=1;loadWkChanges();});
+document.getElementById('wkChangesPrev').addEventListener('click',()=>{wkChangesPage=Math.max(1,wkChangesPage-1);loadWkChanges();});
+document.getElementById('wkChangesNext').addEventListener('click',()=>{wkChangesPage++;loadWkChanges();});
+
 wkTabs.forEach((button) => {
   button.addEventListener(
     "click",
     () => {
       const target =
         button.dataset.wkTab;
+      if (target === "changes") { wkChangesPage = 1; loadWkChanges(); }
 
       wkTabs.forEach(
         (item) => {
